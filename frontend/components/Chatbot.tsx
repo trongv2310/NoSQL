@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { bayVaoGio } from "@/lib/cart-motion";
 import { useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, api, loiTuApi } from "@/lib/api";
@@ -317,10 +318,12 @@ export function Chatbot() {
       ]);
       if (r.context) nguCanh.current = r.context;
       if (r.nguon) setNguon(r.nguon);
+      const theTruoc = document.querySelector<HTMLElement>("#chat-container .chat-msg.bot:last-of-type .chat-card");
       setDs((d) => [...d, r.success ? thanhCong(r) : { ...thanhCong(r), loi: { cauHoi: text } }]);
       if (bangGiongNoi || docToRef.current) doc(r.reply);
       if (r.hanhDong) {
         // Đã thêm vào giỏ: cập nhật số lượng giỏ hàng và chuyển khách tới trang thanh toán.
+        await bayVaoGio(theTruoc);
         setCartCount(r.hanhDong.soLuongGio);
         const href = r.hanhDong.href;
         hen.current = setTimeout(() => { dongNeuDienThoai(); router.push(href); }, TRE_CHUYEN_TRANG_MS);

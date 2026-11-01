@@ -113,8 +113,8 @@ export function Header() {
                 </div>
               )}
             </div>
-            <Link href="/Home/ViewCart" className="cart-btn" aria-label="Giỏ hàng" title="Giỏ hàng">
-              <i className="fa-solid fa-cart-shopping" aria-hidden="true" /><span className="cart-count">{cartCount}</span>
+            <Link href="/Home/ViewCart" className="cart-btn" data-cart-target aria-label={`Giỏ hàng, ${cartCount} sản phẩm`} title="Giỏ hàng">
+              <i className="fa-solid fa-cart-shopping" aria-hidden="true" /><span key={cartCount} className="cart-count" aria-hidden="true">{cartCount}</span><span className="visually-hidden" role="status">{cartCount} sản phẩm trong giỏ hàng</span>
             </Link>
           </div>
         </div>

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { bayVaoGio } from "@/lib/cart-motion";
 import { useApp } from "@/components/AppProviders";
 import { ErrorBox, Loading, Page, Stars } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
@@ -34,6 +35,8 @@ export default function ChiTietSanPhamPage() {
   const [mauId, setMauId] = useState<string | null>(null);
   const [sizeId, setSizeId] = useState<string | null>(null);
   const [soLuong, setSoLuong] = useState(1);
+  const anhSanPham = useRef<HTMLImageElement>(null);
+  const nutThem = useRef<HTMLButtonElement>(null);
   const [dangThem, setDangThem] = useState(false);
 
   useEffect(() => {
@@ -72,6 +75,7 @@ export default function ChiTietSanPhamPage() {
     setDangThem(true);
     try {
       const r = await apiPost<{ message: string; cartCount: number }>("/gio-hang", { chiTietId: bienThe.id, quantity: soLuong });
+      if (!muaNgay) await bayVaoGio(anhSanPham.current && anhSanPham.current.getBoundingClientRect().bottom > 0 ? anhSanPham.current : nutThem.current, anh);
       setCartCount(r.cartCount);
       flash("success", r.message);
       if (muaNgay) router.push("/Home/ViewCart");
@@ -92,7 +96,7 @@ export default function ChiTietSanPhamPage() {
         <div className="col-md-5">
           <div className="border rounded bg-white p-3 text-center">
             { }
-            <img src={anh} alt={sp.tenSanPham} className="img-fluid" style={{ maxHeight: 460, objectFit: "contain" }} onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-product.jpg"; }} />
+            <img ref={anhSanPham} src={anh} alt={sp.tenSanPham} className="img-fluid" style={{ maxHeight: 460, objectFit: "contain" }} onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-product.jpg"; }} />
           </div>
         </div>
         <div className="col-md-7">
@@ -132,7 +136,7 @@ export default function ChiTietSanPhamPage() {
           <div className="d-flex flex-wrap gap-2 align-items-center">
             <input type="number" min={1} max={Math.min(100, bienThe?.soLuongTon || 100)} className="form-control" style={{ width: 90 }} value={soLuong}
               onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} aria-label="Số lượng" />
-            <button className="btn btn-primary" disabled={!conHang || dangThem} onClick={() => themVaoGio(false)}><i className="fa-solid fa-cart-plus" /> Thêm vào giỏ</button>
+            <button ref={nutThem} className="btn btn-primary product-add-btn" aria-busy={dangThem} disabled={!conHang || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
             <button className="btn btn-danger" disabled={!conHang || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
           </div>
         </div>
