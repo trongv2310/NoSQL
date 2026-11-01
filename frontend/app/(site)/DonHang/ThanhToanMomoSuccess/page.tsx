@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useApp } from "@/components/AppProviders";
+import { CheckoutSteps } from "@/components/Steps";
 import { ErrorBox, Loading, Page } from "@/components/Ui";
 import { useApi } from "@/lib/hooks";
 
@@ -26,17 +27,18 @@ export default function MomoKetQuaPage() {
   if (loading) return <Page><Loading text="Đang xác thực giao dịch..." /></Page>;
   if (error || !data) return <Page><ErrorBox message={error ?? "Không xác thực được giao dịch"} /></Page>;
   return (
-    <Page className="text-center">
-      <div className="card mx-auto" style={{ maxWidth: 520 }}><div className="card-body py-5">
-        <i className={`fa-solid ${data.isSuccess ? "fa-circle-check text-success" : "fa-circle-xmark text-danger"} fa-4x mb-3`} />
-        <h3>{data.message}</h3>
-        {data.soDonHang && <p className="mb-1">Mã đơn hàng: <strong>#{data.soDonHang}</strong></p>}
-        {data.description && <p className="text-muted">{data.description}</p>}
-        <div className="d-flex gap-2 justify-content-center mt-3">
-          <Link href="/DonHang/Index" className="btn btn-primary">Xem đơn hàng</Link>
-          <Link href="/" className="btn btn-outline-secondary">Về trang chủ</Link>
+    <Page className="ct-wrap">
+      <CheckoutSteps buoc={data.isSuccess ? 3 : 2} />
+      <div className="rs-card">
+        <span className={`rs-icon ${data.isSuccess ? "is-ok" : "is-fail"}`}><i className={`fa-solid ${data.isSuccess ? "fa-check" : "fa-xmark"}`} aria-hidden="true" /></span>
+        <h1>{data.message}</h1>
+        {data.soDonHang && <p className="rs-code">Mã đơn hàng <strong>#{data.soDonHang}</strong></p>}
+        {data.description && <p className="rs-desc">{data.description}</p>}
+        <div className="rs-actions">
+          <Link href="/DonHang/Index" className="od-btn is-solid">Xem đơn hàng <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
+          <Link href="/" className="od-btn is-danger" style={{ borderColor: "var(--line-strong)", color: "var(--ink)" }}>Về trang chủ</Link>
         </div>
-      </div></div>
+      </div>
     </Page>
   );
 }

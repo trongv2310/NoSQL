@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ErrorBox, Empty, Loading, Page, Pagination, ProductCard } from "@/components/Ui";
+import { PageHero, ProductGridSkeleton } from "@/components/PageHero";
+import { ErrorBox, Empty, Page, Pagination, ProductCard } from "@/components/Ui";
 import { useApi } from "@/lib/hooks";
 import type { SanPhamV, Trang } from "@/lib/types";
 
@@ -30,6 +31,7 @@ export function ProductListing() {
   const { data, error, loading } = useApi<ListData>(`/san-pham${query ? `?${query}` : ""}`);
   const [giaTu, setGiaTu] = useState(sp.get("gia_tu") ?? "");
   const [giaDen, setGiaDen] = useState(sp.get("gia_den") ?? "");
+  const [moLoc, setMoLoc] = useState(false);
 
   useEffect(() => {
     // Đồng bộ ô nhập giá khi URL đổi (ví dụ bấm "Xóa bộ lọc").
@@ -50,19 +52,42 @@ export function ProductListing() {
   const boLoc = data?.boLoc;
   const hangDangChon = boLoc?.locHang ?? hangs;
 
+  // Các bộ lọc đang áp dụng, hiện thành chip để gỡ từng cái mà không phải mở lại sidebar.
+  const chips: { nhan: string; go: () => void }[] = [];
+  const loaiId = sp.get("loai");
+  if (loaiId) chips.push({ nhan: boLoc?.dsLoai.find((l) => l.id === loaiId)?.tenLoai ?? loaiId, go: () => dat("loai", null) });
+  if (sp.get("keyword")) chips.push({ nhan: `“${sp.get("keyword")}”`, go: () => dat("keyword", null) });
+  hangDangChon.forEach((id) => chips.push({ nhan: boLoc?.dsHang.find((h) => h.id === id)?.tenHang ?? id, go: () => cap((q) => { q.delete("hangs"); q.delete("hang"); hangDangChon.filter((x) => x !== id).forEach((x) => q.append("hangs", x)); }) }));
+  const khoang = sp.get("khoang");
+  if (khoang) chips.push({ nhan: NHAN_KHOANG[khoang] ?? khoang, go: () => dat("khoang", null) });
+  if (sp.get("gia_tu") || sp.get("gia_den")) chips.push({ nhan: `${sp.get("gia_tu") || "0"} – ${sp.get("gia_den") || "∞"} đ`, go: () => cap((q) => { q.delete("gia_tu"); q.delete("gia_den"); }) });
+  const SAP_XEP = [["moi", "Mới nhất"], ["gia_tang", "Giá tăng"], ["gia_giam", "Giá giảm"], ["ten", "Tên A–Z"]] as const;
+
   return (
-    <Page>
-      <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <div><span className="catalog-kicker">Dụng cụ cho trận đấu của bạn</span><h1 className="page-title mb-0">{data?.tieuDe ?? "Danh sách sản phẩm"}</h1><p className="catalog-count">{data ? `${data.total} sản phẩm · Chọn theo hãng, ngân sách và nhu cầu` : "Đang tìm sản phẩm…"}</p></div>
-        <select className="form-select w-auto" value={sp.get("sap_xep") ?? "moi"} onChange={(e) => dat("sap_xep", e.target.value)} aria-label="Sắp xếp">
-          <option value="moi">Mới nhất</option><option value="gia_tang">Giá tăng dần</option><option value="gia_giam">Giá giảm dần</option><option value="ten">Tên A–Z</option>
-        </select>
+    <>
+      <PageHero compact tone="green" kicker="Dụng cụ cho trận đấu của bạn"
+        crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Sản phẩm", href: "/SanPham/Index" }, ...(data?.tieuDe && data.tieuDe !== "Danh sách sản phẩm" ? [{ nhan: data.tieuDe }] : [])]}
+        title={data?.tieuDe ?? "Danh sách sản phẩm"}
+        sub={data ? `${data.total} sản phẩm · Chọn theo hãng, ngân sách và nhu cầu` : "Đang tìm sản phẩm…"} />
+    <Page className="ls-wrap">
+      <div className="ls-toolbar">
+        <button type="button" className="ls-filter-toggle" aria-expanded={moLoc} onClick={() => setMoLoc((v) => !v)}><i className="fa-solid fa-sliders" aria-hidden="true" /> Bộ lọc{chips.length > 0 && <b>{chips.length}</b>}</button>
+        <div className="catalog-shortcuts" aria-label="Lọc nhanh">
+          {[{ key: "", label: "Tất cả sản phẩm" }, { key: "giam_gia", label: "Đang giảm giá" }, { key: "con_hang", label: "Còn hàng" }].map((m) => <button type="button" key={m.key} aria-pressed={m.key ? sp.get(m.key) === "1" : !sp.get("giam_gia") && !sp.get("con_hang")} onClick={() => cap((q) => { if (!m.key) { q.delete("giam_gia"); q.delete("con_hang"); } else { if (q.has(m.key)) q.delete(m.key); else q.set(m.key, "1"); } })}>{m.label}</button>)}
+        </div>
+        <div className="ls-sort" role="group" aria-label="Sắp xếp">
+          <span>Sắp xếp</span>
+          {SAP_XEP.map(([k, nhan]) => <button type="button" key={k} aria-pressed={(sp.get("sap_xep") ?? "moi") === k} onClick={() => dat("sap_xep", k)}>{nhan}</button>)}
+        </div>
       </div>
-      <div className="catalog-shortcuts" aria-label="Lọc nhanh">
-        {[{ key: "", label: "Tất cả sản phẩm" }, { key: "giam_gia", label: "Đang giảm giá" }, { key: "con_hang", label: "Còn hàng" }].map((m) => <button type="button" key={m.key} aria-pressed={m.key ? sp.get(m.key) === "1" : !sp.get("giam_gia") && !sp.get("con_hang")} onClick={() => cap((q) => { if (!m.key) { q.delete("giam_gia"); q.delete("con_hang"); } else { if (q.has(m.key)) q.delete(m.key); else q.set(m.key, "1"); } })}>{m.label}</button>)}
-      </div>
+      {chips.length > 0 && (
+        <div className="ls-chips" aria-label="Bộ lọc đang áp dụng">
+          {chips.map((c, i) => <button type="button" key={`${c.nhan}-${i}`} onClick={c.go} aria-label={`Bỏ lọc ${c.nhan}`}>{c.nhan} <i className="fa-solid fa-xmark" aria-hidden="true" /></button>)}
+          <Link href="/SanPham/Index" className="ls-chips-clear">Xóa tất cả</Link>
+        </div>
+      )}
       <div className="row g-4">
-        <aside className="col-lg-3">
+        <aside className={`col-lg-3 ls-side${moLoc ? " is-open" : ""}`}>
           <div className="card catalog-filters"><div className="card-body"><div className="catalog-filter-heading"><i className="fa-solid fa-sliders" aria-hidden="true" /> Bộ lọc sản phẩm</div>
             <h6 className="fw-bold">Loại sản phẩm</h6>
             <div className="d-flex flex-column gap-1 mb-3">
@@ -104,16 +129,17 @@ export function ProductListing() {
           </div></div>
         </aside>
         <div className="col-lg-9">
-          {loading && !data ? <Loading /> : error ? <ErrorBox message={error} /> : data && data.items.length === 0 ? (
+          {loading && !data ? <ProductGridSkeleton n={9} /> : error ? <ErrorBox message={error} /> : data && data.items.length === 0 ? (
             <Empty message="Không tìm thấy sản phẩm phù hợp." linkUrl="/SanPham/Index" linkText="Xem tất cả sản phẩm" />
           ) : data && (
             <>
-              <div className="row g-3">{data.items.map((s) => <div key={s.id} className="col-6 col-md-4"><ProductCard sp={s} /></div>)}</div>
+              <div className={`row g-3 ls-grid${loading ? " is-loading" : ""}`}>{data.items.map((s) => <div key={s.id} className="col-6 col-md-4"><ProductCard sp={s} /></div>)}</div>
               <Pagination trang={data} />
             </>
           )}
         </div>
       </div>
     </Page>
+    </>
   );
 }

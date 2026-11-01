@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Fragment } from "react";
 import { vnd, imgUrl } from "@/lib/format";
+import { ghiNhoAnhBam } from "@/lib/morph";
 import type { SanPhamV, Trang } from "@/lib/types";
+import { Shuttle } from "./PageHero";
 
 export function Stars({ value }: { value: number }) {
   return (
@@ -20,25 +22,33 @@ export function Stars({ value }: { value: number }) {
 export function ProductCard({ sp }: { sp: SanPhamV }) {
   const giam = sp.dangGiamGia && sp.giaGoc > sp.giaSauKhuyenMai;
   const pt = giam && sp.giaGoc > 0 ? Math.round((1 - sp.giaSauKhuyenMai / sp.giaGoc) * 100) : 0;
+  const hetHang = sp.tongTonKho === 0;
+  const conIt = sp.tongTonKho !== undefined && sp.tongTonKho > 0 && sp.tongTonKho <= 5;
+  const url = `/Home/ChiTietSanPham/${sp.id}`;
+  // Chỉ đặt tên chuyển tiếp cho ảnh vừa bấm: ảnh bay sang trang chi tiết (xem lib/morph.ts).
+  const nhoAnh = (e: React.MouseEvent<HTMLElement>) => ghiNhoAnhBam(sp.id, e.currentTarget.closest(".product-card")?.querySelector("img") ?? null);
   return (
-    <div className="product-card">
+    <div className="product-card sf-reveal">
       {pt > 0 && <div className="badge-promo">-{pt}%</div>}
-      <Link href={`/Home/ChiTietSanPham/${sp.id}`} className="thumb">
+      {hetHang ? <div className="badge-state is-out">Hết hàng</div> : conIt ? <div className="badge-state is-low">Còn {sp.tongTonKho} sản phẩm</div> : null}
+      <Link href={url} className="thumb" onClick={nhoAnh} aria-label={sp.tenSanPham}>
         { }
         <img src={imgUrl(sp.hinhAnhDaiDien)} alt={sp.tenSanPham} loading="lazy"
           onError={(e) => { const img = e.currentTarget; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
+        <span className="sf-thumb-cta" aria-hidden="true">Xem chi tiết <i className="fa-solid fa-arrow-right" /></span>
       </Link>
       <div className="body">
         <div className="product-brand">{sp.hang?.tenHang ?? "Hãng khác"}</div>
-        <Link href={`/Home/ChiTietSanPham/${sp.id}`} className="product-title" title={sp.tenSanPham}>{sp.tenSanPham}</Link>
-        <span className={`product-availability ${sp.tongTonKho === 0 ? "is-empty" : ""}`}>{sp.tongTonKho === undefined ? "Xem phiên bản sản phẩm" : sp.tongTonKho > 0 ? "Còn hàng" : "Tạm hết hàng"}</span>
+        <Link href={url} className="product-title" title={sp.tenSanPham} onClick={nhoAnh}>{sp.tenSanPham}</Link>
+        {sp.tongTonKho !== undefined && <span className={`product-availability ${hetHang ? "is-empty" : ""}`}>{hetHang ? "Tạm hết hàng" : "Còn hàng"}</span>}
         <div className="product-footer">
           <div>
             <span className="product-price">{vnd(sp.giaSauKhuyenMai)}</span>
-            {giam && <span className="price-small">{vnd(sp.giaGoc)}</span>}
+            {giam ? <span className="price-small">{vnd(sp.giaGoc)}</span> : <span className="price-small is-placeholder" aria-hidden="true">&nbsp;</span>}
           </div>
         </div>
-        <Link className="product-card-cta" href={`/Home/ChiTietSanPham/${sp.id}`}>Xem chi tiết <span aria-hidden="true">↗</span></Link>
+        {giam ? <span className="product-saving"><i className="fa-solid fa-tag" aria-hidden="true" /> Tiết kiệm {vnd(sp.giaGoc - sp.giaSauKhuyenMai)}</span> : <span className="product-saving is-placeholder" aria-hidden="true">&nbsp;</span>}
+        <Link className="product-card-cta" href={url} onClick={nhoAnh}>Xem chi tiết <span aria-hidden="true">↗</span></Link>
       </div>
     </div>
   );
@@ -98,7 +108,7 @@ export function Pagination({ trang }: { trang: Pick<Trang<unknown>, "page" | "pa
 }
 
 export function Loading({ text = "Đang tải..." }: { text?: string }) {
-  return <div className="text-center text-muted py-5"><i className="fa-solid fa-spinner fa-spin" /> {text}</div>;
+  return <div className="sf-loading" role="status"><Shuttle className="sf-loading-shuttle" /><span>{text}</span></div>;
 }
 
 export function ErrorBox({ message }: { message: string }) {

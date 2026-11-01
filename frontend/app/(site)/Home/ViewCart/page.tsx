@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useApp } from "@/components/AppProviders";
+import { PageHero } from "@/components/PageHero";
+import { CheckoutSteps } from "@/components/Steps";
 import { Empty, ErrorBox, Loading, Page } from "@/components/Ui";
 import { apiDelete, api, loiTuApi } from "@/lib/api";
 import { imgUrl, vnd } from "@/lib/format";
@@ -42,13 +44,16 @@ export default function GioHangPage() {
   if (error || !data) return <Page><ErrorBox message={error ?? "Lỗi tải giỏ hàng"} /></Page>;
 
   return (
-    <Page>
-      <h2 className="page-title mb-3">Giỏ hàng</h2>
+    <>
+    <PageHero compact tone="green" kicker="Giỏ hàng" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Giỏ hàng" }]}
+      title={<>Giỏ hàng <em>của bạn</em></>} sub={data.items.length ? `${data.tongSoLuong} sản phẩm đang chờ bạn chốt đơn.` : "Chưa có sản phẩm nào trong giỏ."} />
+    <Page className="ct-wrap">
+      <CheckoutSteps buoc={1} />
       {data.items.length === 0 ? <Empty message="Giỏ hàng của bạn đang trống." linkUrl="/SanPham/Index" linkText="Tiếp tục mua sắm" /> : (
         <div className="row g-4">
           <div className="col-lg-8">
             {data.items.map((it) => (
-              <div key={it.id} className="cart-item">
+              <div key={it.id} className="cart-item sf-reveal">
                 <span className="cart-item-thumb">
                   { }
                   <img src={imgUrl(it.bienThe.hinhAnh)} alt="" />
@@ -70,13 +75,17 @@ export default function GioHangPage() {
           </div>
           <div className="col-lg-4">
             <div className="card cart-summary"><div className="card-body">
+              <h3 className="ct-sum-title">Tóm tắt đơn hàng</h3>
               <div className="d-flex justify-content-between mb-2"><span>Số lượng</span><strong>{data.tongSoLuong}</strong></div>
               <div className="d-flex justify-content-between mb-3"><span>Tổng tiền</span><strong className="text-danger fs-5">{vnd(data.tongTien)}</strong></div>
-              <Link href="/DonHang/Checkout" className="btn btn-primary w-100">Tiến hành thanh toán</Link>
+              <Link href="/DonHang/Checkout" className="btn btn-primary w-100 ct-pay-btn">Tiến hành thanh toán <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
+              <Link href="/SanPham/Index" className="ct-continue"><i className="fa-solid fa-arrow-left" aria-hidden="true" /> Tiếp tục mua sắm</Link>
+              <ul className="ct-assure"><li><i className="fa-solid fa-wallet" aria-hidden="true" /> Thanh toán COD hoặc MoMo</li><li><i className="fa-solid fa-shield-halved" aria-hidden="true" /> Giá đã gồm khuyến mãi đang áp dụng</li></ul>
             </div></div>
           </div>
         </div>
       )}
     </Page>
+    </>
   );
 }

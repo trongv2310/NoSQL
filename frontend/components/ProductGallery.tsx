@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type RefObject } from "react";
+import { TEN_ANH_MORPH } from "@/lib/morph";
 
 const loiAnh = (e: React.SyntheticEvent<HTMLImageElement>) => {
   if (!e.currentTarget.src.endsWith("/images/default-product.jpg")) e.currentTarget.src = "/images/default-product.jpg";
@@ -16,7 +17,7 @@ export function ProductGallery({ images, selected, name, imageRef, onSelect }: {
     <div className="product-detail-gallery">
       <span className="pdp-photo-count">{String(index + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}</span>
       <button type="button" className="pdp-image-open" aria-label={`Phóng to ảnh ${name}`} onClick={() => phongTo.current?.showModal()}>
-        <img key={selected} ref={imageRef} src={selected} alt={name} width={640} height={640} onError={loiAnh} />
+        <img key={selected} ref={imageRef} src={selected} alt={name} width={640} height={640} style={{ viewTransitionName: TEN_ANH_MORPH }} onError={loiAnh} />
         <span className="pdp-zoom-hint"><i className="fa-solid fa-magnifying-glass-plus" aria-hidden="true" /> Xem ảnh lớn</span>
       </button>
       {images.length > 1 && <><button type="button" className="pdp-photo-arrow is-prev" aria-label="Ảnh sản phẩm trước" onClick={() => di(-1)}>‹</button><button type="button" className="pdp-photo-arrow is-next" aria-label="Ảnh sản phẩm tiếp theo" onClick={() => di(1)}>›</button></>}

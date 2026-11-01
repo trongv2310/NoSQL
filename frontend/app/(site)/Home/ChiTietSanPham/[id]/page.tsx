@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { bayVaoGio } from "@/lib/cart-motion";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ProductGallery } from "@/components/ProductGallery";
+import { TEN_ANH_MORPH, anhDaBam } from "@/lib/morph";
 import { InlineReviewForm } from "@/components/InlineReviewForm";
 import { ProductPurchaseInfo } from "@/components/ProductPurchaseInfo";
 import { useApp } from "@/components/AppProviders";
@@ -70,7 +71,20 @@ export default function ChiTietSanPhamPage() {
     return () => window.removeEventListener("hashchange", docHash);
   }, [id]);
 
-  if (loading) return <Page><Loading /></Page>;
+  if (loading) {
+    // Dựng sẵn khung ảnh từ thẻ vừa bấm để ảnh "bay" sang đây (View Transitions) thay vì nháy trắng.
+    const anhTam = anhDaBam(id);
+    return (
+      <Page>
+        {anhTam ? (
+          <div className="row g-4 pdp-layout"><div className="col-lg-5"><div className="pdp-gallery"><div className="product-detail-gallery"><span className="pdp-image-open">
+            { }
+            <img src={anhTam} alt="" width={640} height={640} style={{ viewTransitionName: TEN_ANH_MORPH }} />
+          </span></div></div></div></div>
+        ) : <Loading />}
+      </Page>
+    );
+  }
   if (error || !data) return <Page><ErrorBox message={error ?? "Không tìm thấy sản phẩm."} /></Page>;
   const { sanPham: sp } = data;
   const phanHoi = danhGiaMoi?.sanPhamId === id ? danhGiaMoi : data;
