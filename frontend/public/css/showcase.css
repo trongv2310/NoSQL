@@ -1,0 +1,74 @@
+/* Banner chuyển slide, giữ chiều cao ổn định. */
+.shop-showcase { background: #073d2d; color: #fff; overflow: hidden; }
+.showcase-slide { background: radial-gradient(ellipse at 82% 35%, #286948 0%, #0d4532 42%, #073426 100%); }
+.showcase-shoes { background: radial-gradient(ellipse at 82% 35%, #697030, #294b31 42%, #123c2a); }
+.showcase-apparel { background: radial-gradient(ellipse at 82% 35%, #3c6c73, #194b4b 42%, #093b31); }
+.showcase-slide[hidden] { display: none; }
+.showcase-inner { height: 550px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: center; }
+.showcase-copy { padding: 40px 0; position: relative; z-index: 1; }
+.showcase-eyebrow { display: block; text-transform: uppercase; letter-spacing: .15em; font-size: .7rem; font-weight: 650; color: #c7e1d0; }
+.showcase-copy h2 { font-size: clamp(2.5rem, 4.5vw, 4.3rem); line-height: 1.07; letter-spacing: -.05em; color: #fff; font-weight: 700; margin: 22px 0; min-height: 2.15em; }
+.showcase-copy h2 em { font-style: normal; color: #b2edbb; }
+.showcase-copy p { color: #d0e3d8; font-size: .95rem; line-height: 1.8; max-width: 490px; margin: 0 0 26px; }
+.showcase-links { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; }
+.showcase-primary { padding: 14px 20px; background: #c9efad; color: #163b24; border-radius: 9px; font-weight: 650; font-size: .84rem; display: inline-flex; align-items: center; gap: 22px; transition: background-color .2s, transform .2s; }
+.showcase-primary:hover { background: #e0f7cf; color: #163b24; transform: translateY(-2px); }
+.showcase-secondary { font-size: .82rem; color: #fff; border-bottom: 1px solid #7fa58b; padding: 7px 0; }
+.showcase-secondary:hover { color: #d0f3bd; }
+.showcase-stats { display: flex; gap: 32px; margin: 28px 0 0; }
+.showcase-stats dt { color: #fff; font-size: 1.3rem; font-weight: 600; line-height: 1.1; }
+.showcase-stats dd { color: #b1cbbd; font-size: .68rem; margin: 4px 0 0; }
+.showcase-art { position: relative; height: 100%; min-width: 0; display: flex; justify-content: center; align-items: center; }
+.showcase-art::before { content: ""; position: absolute; width: 420px; height: 420px; border: 1px solid #b5dc9c33; border-radius: 50%; }
+.showcase-number { position: absolute; right: -8px; top: 2px; color: #c4e6ba12; font-size: 13rem; letter-spacing: -.1em; line-height: 1.1; font-weight: 700; user-select: none; }
+.showcase-photo { width: 330px; height: 410px; border-radius: 170px 170px 18px 18px; overflow: hidden; position: relative; background: #2a5c43; border: 6px solid #ffffff12; box-shadow: 0 25px 65px #001f2444; transform: rotate(4deg); }
+.showcase-photo img { width: 100%; height: 100%; object-fit: cover; }
+.showcase-art-label { position: absolute; bottom: 26px; letter-spacing: .22em; color: #b5d1bd; font-size: .57rem; }
+.showcase-controls { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; border-top: 1px solid #ffffff24; }
+.showcase-dots { display: flex; gap: 14px; }
+.showcase-dots button { display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 8px 0; color: #8fb6a0; font-size: .7rem; }
+.showcase-dots i { width: 28px; height: 2px; background: #668d774d; transition: width .35s ease, background-color .35s; }
+.showcase-dots [aria-current="true"] { color: #d5f3c4; }
+.showcase-dots [aria-current="true"] i { background: #c9efad; width: 54px; }
+.showcase-arrows { display: flex; align-items: center; gap: 8px; margin-right: 64px; }
+.showcase-arrows > span { margin-right: 14px; font-size: .68rem; color: #b0cdbb; }
+.showcase-arrows button { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid #74967d; background: transparent; color: #fff; font-size: 1rem; }
+.showcase-arrows button:last-child { font-size: .68rem; }
+.showcase-arrows button:hover:not(:disabled) { background: #ffffff15; }
+.showcase-arrows button:disabled { opacity: .45; }
+.shop-showcase :is(a,button):focus-visible { outline: 2px solid #dbf4bf; outline-offset: 4px; }
+@media (prefers-reduced-motion: no-preference) {
+ .showcase-copy { animation: showcase-copy-in .65s cubic-bezier(.2,.7,.2,1) both; }
+ .showcase-photo { animation: showcase-photo-in .8s cubic-bezier(.2,.7,.2,1) both; }
+ .l-cat img, .shop-category-banner img { transition: transform .6s ease; }
+ .l-cat:hover img, .shop-category-banner:hover img { transform: scale(1.06); }
+}
+@keyframes showcase-copy-in { from { opacity: .2; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes showcase-photo-in { from { opacity: .2; transform: translateX(35px) rotate(9deg) scale(.96); } to { opacity: 1; transform: translateX(0) rotate(4deg) scale(1); } }
+@media (max-width: 991px) {
+ .showcase-inner { gap: 20px; height: 520px; grid-template-columns: 1.1fr 1fr; }
+ .showcase-copy h2 { font-size: 2.7rem; min-height: 3.25em; }
+ .showcase-photo { width: 250px; height: 340px; }
+ .showcase-art::before { width: 310px; height: 310px; }
+}
+@media (max-width: 767px) {
+ .showcase-inner { height: auto; min-height: 770px; grid-template-columns: 1fr; grid-template-rows: auto 300px; gap: 0; }
+ .showcase-copy { padding: 32px 0 16px; }
+ .showcase-copy h2 { font-size: 2.55rem; margin: 16px 0; }
+ .showcase-copy p { font-size: .88rem; margin-bottom: 20px; }
+ .showcase-eyebrow { font-size: .62rem; }
+ .showcase-primary { padding: 12px 16px; font-size: .78rem; gap: 12px; }
+ .showcase-secondary { font-size: .75rem; }
+ .showcase-stats { margin-top: 22px; }
+ .showcase-photo { height: 270px; width: 245px; }
+ .showcase-art::before { width: 280px; height: 280px; }
+ .showcase-number { font-size: 10rem; top: -10px; right: 10px; }
+ .showcase-art-label { display: none; }
+ .showcase-controls { padding-top: 12px; padding-bottom: 12px; }
+ .showcase-dots { gap: 10px; }
+ .showcase-dots i { width: 14px; }
+ .showcase-dots [aria-current="true"] i { width: 28px; }
+ .showcase-arrows > span { display: none; }
+ .showcase-arrows { gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .shop-showcase * { animation: none !important; transition: none !important; } }

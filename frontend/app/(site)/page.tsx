@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { ShopMotion, ShopShowcase } from "@/components/ShopShowcase";
 import { Empty, ErrorBox, Loading, ProductCard } from "@/components/Ui";
 import { useApi } from "@/lib/hooks";
-import { imgUrl, ngay, vnd } from "@/lib/format";
+import { imgUrl, ngay } from "@/lib/format";
 import type { SanPhamV, TinV, TranDauV } from "@/lib/types";
 
 interface LandingData {
@@ -27,8 +28,6 @@ const CAU_HINH_LOAI = [
   { anh: "landing/cat-aoquan.webp", mota: "Thoáng khí, co giãn, thoải mái khi vào trận." },
   { anh: "landing/cat-phukien.webp", mota: "Cầu lông, quấn cán và những món nhỏ nhưng cần thiết." },
 ];
-
-const phanTramGiam = (sp: SanPhamV) => (sp.giaGoc > 0 && sp.giaSauKhuyenMai < sp.giaGoc ? Math.max(1, Math.round((1 - sp.giaSauKhuyenMai / sp.giaGoc) * 100)) : 0);
 
 function TinDong({ t }: { t: TinV }) {
   return (
@@ -60,42 +59,11 @@ export default function LandingPage() {
   return (
     <>
       <link href="/css/landing.css" rel="stylesheet" />
+      <link href="/css/showcase.css" rel="stylesheet" />
       <link href="/css/bangtin.css" rel="stylesheet" />
 
-      <section className="l-hero bg-court" id="lHero">
-        <div className="container l-hero-inner">
-          <div className="l-hero-copy">
-            <span className="l-kicker light">Cửa hàng cầu lông trực tuyến</span>
-            <h1>Chọn đúng dụng cụ,<br /><em>chơi cầu thăng hoa.</em></h1>
-            <p>Vợt, giày, trang phục và phụ kiện chính hãng từ Yonex, Li-Ning, Victor, Mizuno. Lọc theo ngân sách, hãng và ưu đãi để tìm đúng món bạn cần.</p>
-            <div className="l-cta">
-              <Link href="/SanPham/Index" className="btn btn-light btn-lg">Vào xem sản phẩm <i className="fa-solid fa-arrow-right ms-1" /></Link>
-              <Link href="/KhuyenMai/Index" className="btn btn-outline-light btn-lg">Xem khuyến mãi</Link>
-            </div>
-            <dl className="l-stats">
-              <div><dt>{data.thongKe.sanPham}</dt><dd>Sản phẩm</dd></div>
-              <div><dt>{data.thongKe.hang}</dt><dd>Thương hiệu</dd></div>
-              <div><dt>{data.thongKe.uuDai}</dt><dd>Ưu đãi đang chạy</dd></div>
-            </dl>
-          </div>
-          <div className="l-hero-visual">
-            {data.heroSp.map((sp, i) => {
-              const pt = phanTramGiam(sp);
-              return (
-                <Link key={sp.id} href={`/Home/ChiTietSanPham/${sp.id}`} className={`l-hero-card c${i + 1}`}>
-                  {pt > 0 && <span className="badge-promo">-{pt}%</span>}
-                  { }
-                  <img src={imgUrl(sp.hinhAnhDaiDien)} alt={sp.tenSanPham} width={320} height={320} />
-                  <div className="l-hero-card-info"><small>{sp.hang?.tenHang ?? "Hãng khác"}</small><b>{sp.tenSanPham}</b><span>{vnd(sp.giaSauKhuyenMai)}</span></div>
-                </Link>
-              );
-            })}
-            <span className="l-hero-chip chip-a"><i className="fa-solid fa-tags" /> Giảm đến {data.giamToiDa}%</span>
-            <span className="l-hero-chip chip-b"><i className="fa-solid fa-shield-halved" /> {data.thongKe.hang} thương hiệu chính hãng</span>
-          </div>
-        </div>
-      </section>
-
+      <ShopShowcase thongKe={data.thongKe} />
+      <ShopMotion>
       <section className="l-section">
         <div className="container">
           <div className="l-head"><span className="l-kicker">Theo ngân sách</span><h2>Bạn định chi bao nhiêu?</h2><p>Chọn mức giá, chúng tôi lọc sẵn các sản phẩm phù hợp (đã tính khuyến mãi).</p></div>
@@ -233,6 +201,7 @@ export default function LandingPage() {
           <div className="l-cta justify-content-center"><Link href="/SanPham/Index" className="btn btn-light btn-lg">Bắt đầu mua sắm</Link></div>
         </div>
       </section>
+      </ShopMotion>
     </>
   );
 }

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { bayVaoGio } from "@/lib/cart-motion";
+import { RelatedProducts } from "@/components/RelatedProducts";
+import { ProductGallery } from "@/components/ProductGallery";
 import { InlineReviewForm } from "@/components/InlineReviewForm";
 import { ProductPurchaseInfo } from "@/components/ProductPurchaseInfo";
 import { useApp } from "@/components/AppProviders";
@@ -119,30 +121,33 @@ export default function ChiTietSanPhamPage() {
         <Link href="/">Trang chủ</Link> / <Link href="/SanPham/Index">Sản phẩm</Link>
         {sp.loai && <> / <Link href={`/SanPham/Index?loai=${sp.loai.id}`}>{sp.loai.tenLoai}</Link></>} / {sp.tenSanPham}
       </nav>
-      <div className="row g-4 product-detail-layout">
-        <div className="col-lg-6">
-          <div className="product-detail-gallery">
-            { }
-            <img ref={anhSanPham} src={anhHienThi} alt={sp.tenSanPham} className="img-fluid"  onError={(e) => { const img = e.currentTarget; img.onerror = null; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
-          </div>
-          {cacAnh.length > 1 && <div className="product-gallery-thumbs" aria-label="Ảnh sản phẩm">{cacAnh.map((url, i) => <button key={url} type="button" aria-label={`Xem ảnh ${i + 1}`} aria-pressed={url === anhHienThi} onClick={() => setAnhXem({ sanPhamId: id, bienTheId: bienThe?.id, url })}><img src={url} alt="" width={72} height={72} loading="lazy" onError={(e) => { if (!e.currentTarget.src.endsWith("/images/default-product.jpg")) e.currentTarget.src = "/images/default-product.jpg"; }} /></button>)}</div>}
+      <div className="row g-4 product-detail-layout pdp-layout">
+        <div className="col-lg-5">
+          <ProductGallery images={cacAnh} selected={anhHienThi} name={sp.tenSanPham} imageRef={anhSanPham} onSelect={(url) => setAnhXem({ sanPhamId: id, bienTheId: bienThe?.id, url })} />
         </div>
-        <div className="col-lg-6 product-detail-content">
+        <div className="col-lg-7 product-detail-content">
           <div className="product-buy-panel">
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
-          <div className="d-flex align-items-center gap-2 mb-2"><Stars value={phanHoi.soDanhGia ? phanHoi.trungBinhDanhGia : 0} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>
-          {sp.moTa && <div className="product-brief"><p>{sp.moTa}</p><button type="button" onClick={() => { chonTab("mo-ta"); document.getElementById("product-tabs")?.scrollIntoView({ block: "start" }); }}>Đọc mô tả đầy đủ <span aria-hidden="true">↗</span></button></div>}
+          <div className="pdp-meta"><span className={`pdp-stock ${conHang ? "" : "is-empty"}`}><i className={`fa-solid ${conHang ? "fa-circle-check" : "fa-circle-xmark"}`} aria-hidden="true" /> {conHang ? "Còn hàng" : bienThe ? "Hết hàng" : "Chọn phiên bản"}</span><span className="pdp-sku">SKU: {bienThe?.sku ?? "—"}</span></div>
+          <div className="d-flex align-items-center gap-2 mb-2 pdp-rating"><Stars value={phanHoi.soDanhGia ? phanHoi.trungBinhDanhGia : 0} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>
           <div className="mb-3 product-detail-price">
             <span className="h3 text-danger me-2">{vnd(gia)}</span>
             {coGiam && <><span className="text-muted text-decoration-line-through me-2">{vnd(giaGocHienThi)}</span><span className="badge bg-danger">-{Math.round((giaGocHienThi - gia) / giaGocHienThi * 100)}%</span></>}
+            {coGiam && <p className="pdp-promo-caption"><i className="fa-solid fa-tags" aria-hidden="true" /> {sp.khuyenMai?.tenChuongTrinh || "Giá ưu đãi"} · Tiết kiệm {vnd(giaGocHienThi - gia)} / sản phẩm</p>}
           </div>
-
+          {bienThe?.thongSo && <dl className="pdp-quick-specs">{([["doCanBang", "Cân bằng"], ["trongLuong", "Trọng lượng"], ["doCung", "Độ cứng"]] as const).filter(([key]) => bienThe.thongSo?.[key]).map(([key, title]) => <div key={key}><dt>{title}</dt><dd>{bienThe.thongSo?.[key]}</dd></div>)}</dl>}
+          <div className="pdp-choose-heading"><span>Chọn phiên bản của bạn</span><button type="button" onClick={() => { chonTab("thong-so"); document.getElementById("product-tabs")?.scrollIntoView({ block: "start" }); }}>Xem thông số ↗</button></div>
           {data.mauSacs.length > 0 && (
             <div className="mb-3">
               <div className="fw-semibold mb-1">Màu sắc</div>
               <div className="d-flex flex-wrap gap-2">
-                {data.mauSacs.map((m) => <button key={m.id} type="button" className={`btn btn-sm ${mauId === m.id ? "btn-primary" : "btn-outline-secondary"}`} aria-pressed={mauId === m.id} onClick={() => setMauId(m.id)}>{m.tenMau}</button>)}
+                {data.mauSacs.map((m) => <button key={m.id} type="button" className={`btn btn-sm ${mauId === m.id ? "btn-primary" : "btn-outline-secondary"}`} aria-pressed={mauId === m.id} onClick={() => {
+                  setMauId(m.id);
+                  const cacMau = data.bienThes.filter((b) => b.mau?.id === m.id);
+                  const tiep = cacMau.find((b) => b.size?.id === sizeId && b.soLuongTon > 0) ?? cacMau.find((b) => b.soLuongTon > 0) ?? cacMau[0];
+                  setSizeId(tiep?.size?.id ?? null);
+                }}>{m.tenMau}</button>)}
               </div>
             </div>
           )}
@@ -158,21 +163,18 @@ export default function ChiTietSanPhamPage() {
             </div>
           )}
 
-          <div className="mb-3 small">
-            {bienThe ? (conHang ? <span className="text-success"><i className="fa-solid fa-circle-check" /> Còn {bienThe.soLuongTon} sản phẩm · SKU {bienThe.sku}</span> : <span className="text-danger"><i className="fa-solid fa-circle-xmark" /> Hết hàng</span>)
-              : <span className="text-warning">Phiên bản này hiện không có, vui lòng chọn phiên bản khác.</span>}
-          </div>
+          <p className={`pdp-stock-note ${conHang ? "" : "is-empty"}`}>{bienThe ? conHang ? `${bienThe.soLuongTon} sản phẩm có sẵn cho phiên bản này` : "Phiên bản này đã hết hàng. Bạn có thể chọn màu / size khác hoặc liên hệ cửa hàng." : "Phiên bản này không có. Vui lòng chọn màu / size khác."}</p>
 
           {vuotTon && <p className="text-danger small" role="alert">Phiên bản này chỉ còn {bienThe?.soLuongTon} sản phẩm. Vui lòng giảm số lượng hoặc chọn phiên bản khác.</p>}
           <div className="product-purchase-total" aria-live="polite" aria-atomic="true">
             <span>Tạm tính · {soLuong} sản phẩm</span><strong>{bienThe ? vnd(gia * soLuong) : "—"}</strong>
             {coGiam && bienThe && <small>Tiết kiệm {vnd((giaGocHienThi - gia) * soLuong)}</small>}
           </div>
-          <div className="d-flex flex-wrap gap-2 align-items-center product-purchase-actions">
-            <input type="number" min={1} max={Math.min(100, bienThe?.soLuongTon || 100)} className="form-control" style={{ width: 90 }} value={soLuong}
-              onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Math.floor(Number(e.target.value)) || 1)))} aria-label="Số lượng" />
-            <button ref={nutThem} className="btn btn-primary product-add-btn" aria-busy={dangThem} disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
-            <button className="btn btn-danger" disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
+          <div className="product-purchase-actions">
+            <div className="pdp-quantity"><button type="button" aria-label="Giảm số lượng" disabled={soLuong <= 1 || dangThem || !conHang} onClick={() => setSoLuong((v) => Math.max(1, v - 1))}>−</button><input type="number" min={1} max={Math.min(100, bienThe?.soLuongTon || 100)} value={soLuong} disabled={dangThem || !conHang}
+              onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Math.floor(Number(e.target.value)) || 1)))} aria-label="Số lượng" /><button type="button" aria-label="Tăng số lượng" disabled={soLuong >= Math.min(100, bienThe?.soLuongTon || 100) || dangThem || !conHang} onClick={() => setSoLuong((v) => Math.min(100, bienThe?.soLuongTon || 100, v + 1))}>+</button></div>
+            <button ref={nutThem} className="btn product-add-btn pdp-add-to-cart" aria-busy={dangThem} disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
+            <button className="btn pdp-buy-now" disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
           </div>
           <div className="product-purchase-support">
             <div><i className="fa-solid fa-wallet" aria-hidden="true" /><span><strong>COD hoặc MoMo</strong>Chọn phương thức ở bước thanh toán</span></div>
@@ -182,7 +184,7 @@ export default function ChiTietSanPhamPage() {
         </div>
       </div>
 
-      <div id="product-tabs" className="product-tabs" role="tablist" aria-label="Nội dung sản phẩm">
+      <div id="product-tabs" className="product-tabs pdp-tabs" role="tablist" aria-label="Nội dung sản phẩm">
         {CAC_TAB.map((khoa, i) => <button key={khoa} id={`tab-${khoa}`} type="button" role="tab" ref={(el) => { nutTab.current[i] = el; }} aria-selected={tab === khoa} aria-controls={`panel-${khoa}`} tabIndex={tab === khoa ? 0 : -1}
           onClick={() => chonTab(khoa)} onKeyDown={(e) => {
             let viTri = i;
@@ -230,6 +232,7 @@ export default function ChiTietSanPhamPage() {
         </div>
       </section>
       </div>
+      {sp.loai && <RelatedProducts key={sp.id} sanPhamId={sp.id} loai={sp.loai} />}
     </Page>
   );
 }
