@@ -38,12 +38,14 @@ export function Header() {
   const [moUser, setMoUser] = useState(false);
   const [loaiActive, setLoaiActive] = useState("Vot");
   const [moSub, setMoSub] = useState(false);
+  const [menuDong, setMenuDong] = useState(false);
 
   // Đóng menu di động mỗi khi chuyển trang.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMoMenu(false);
     setMoUser(false);
+    (document.activeElement as HTMLElement | null)?.blur?.();
   }, [pathname]);
 
   const dangXuat = async () => {
@@ -141,7 +143,7 @@ export function Header() {
         <nav className="main-nav">
           <ul>
             <li className={act("/")}><Link href="/">TRANG CHỦ</Link></li>
-            <li className={`mega-menu-item ${act("/SanPham")}`}>
+            <li className={`mega-menu-item ${act("/SanPham")}${menuDong ? " is-shut" : ""}`} onClick={() => { setMenuDong(true); (document.activeElement as HTMLElement | null)?.blur?.(); }} onMouseEnter={() => setMenuDong(false)}>
               <Link href="/SanPham/Index">SẢN PHẨM <i className="fa-solid fa-chevron-down" /></Link>
               <div className="mega-submenu">
                 <div className="sidebar-categories">
@@ -179,7 +181,7 @@ export function Header() {
                 </div>
               </div>
             </li>
-            <li className={`${act("/KhuyenMai")} nav-hot`}><Link href="/KhuyenMai/Index"><i className="fa-solid fa-fire" aria-hidden="true" /> KHUYẾN MÃI</Link></li>
+            <li className={`${act("/KhuyenMai")} nav-hot`}><Link href="/KhuyenMai/Index">KHUYẾN MÃI</Link></li>
             <li className={act("/BangTin")}><Link href="/BangTin">BẢNG TIN</Link></li>
             <li className={act("/DonHang")}><Link href="/DonHang/Index">ĐƠN HÀNG</Link></li>
             <li className={act("/Home/Contact")}><Link href="/Home/Contact">LIÊN HỆ</Link></li>
