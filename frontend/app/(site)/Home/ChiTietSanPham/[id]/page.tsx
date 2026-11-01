@@ -95,17 +95,18 @@ export default function ChiTietSanPhamPage() {
         {sp.loai && <> / <Link href={`/SanPham/Index?loai=${sp.loai.id}`}>{sp.loai.tenLoai}</Link></>} / {sp.tenSanPham}
       </nav>
       <div className="row g-4 product-detail-layout">
-        <div className="col-md-5">
+        <div className="col-lg-6">
           <div className="product-detail-gallery">
             { }
             <img ref={anhSanPham} src={anh} alt={sp.tenSanPham} className="img-fluid"  onError={(e) => { const img = e.currentTarget; img.onerror = null; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
           </div>
         </div>
-        <div className="col-md-7 product-detail-content">
+        <div className="col-lg-6 product-detail-content">
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
           <div className="d-flex align-items-center gap-2 mb-2"><Stars value={data.trungBinhDanhGia} /><span className="text-muted small">({data.soDanhGia} đánh giá)</span></div>
-          <div className="mb-3">
+          {sp.moTa && <div className="product-brief"><p>{sp.moTa}</p><a href="#product-description">Đọc mô tả đầy đủ <span aria-hidden="true">↗</span></a></div>}
+          <div className="mb-3 product-detail-price">
             <span className="h3 text-danger me-2">{vnd(gia)}</span>
             {coGiam && <><span className="text-muted text-decoration-line-through me-2">{vnd(giaGocHienThi)}</span><span className="badge bg-danger">-{Math.round((giaGocHienThi - gia) / giaGocHienThi * 100)}%</span></>}
           </div>
@@ -136,17 +137,31 @@ export default function ChiTietSanPhamPage() {
           </div>
 
           {vuotTon && <p className="text-danger small" role="alert">Phiên bản này chỉ còn {bienThe?.soLuongTon} sản phẩm. Vui lòng giảm số lượng hoặc chọn phiên bản khác.</p>}
-          <div className="d-flex flex-wrap gap-2 align-items-center">
+          <div className="product-purchase-total" aria-live="polite" aria-atomic="true">
+            <span>Tạm tính · {soLuong} sản phẩm</span><strong>{bienThe ? vnd(gia * soLuong) : "—"}</strong>
+            {coGiam && bienThe && <small>Tiết kiệm {vnd((giaGocHienThi - gia) * soLuong)}</small>}
+          </div>
+          <div className="d-flex flex-wrap gap-2 align-items-center product-purchase-actions">
             <input type="number" min={1} max={Math.min(100, bienThe?.soLuongTon || 100)} className="form-control" style={{ width: 90 }} value={soLuong}
               onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Math.floor(Number(e.target.value)) || 1)))} aria-label="Số lượng" />
             <button ref={nutThem} className="btn btn-primary product-add-btn" aria-busy={dangThem} disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
             <button className="btn btn-danger" disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
           </div>
-          <ProductPurchaseInfo bienThe={bienThe} soLuong={soLuong} gia={gia} giaGoc={giaGocHienThi} coGiam={coGiam} />
+          <div className="product-purchase-support">
+            <div><i className="fa-solid fa-wallet" aria-hidden="true" /><span><strong>COD hoặc MoMo</strong>Chọn phương thức ở bước thanh toán</span></div>
+            <Link href="/Home/Contact"><i className="fa-regular fa-comments" aria-hidden="true" /><span><strong>Cần tư vấn thêm?</strong>Liên hệ để chọn size / phiên bản</span><span aria-hidden="true">↗</span></Link>
+          </div>
         </div>
       </div>
 
-      {sp.moTa && <section className="mt-4"><h4>Mô tả sản phẩm</h4><p style={{ whiteSpace: "pre-line" }}>{sp.moTa}</p></section>}
+      <div className="product-information-grid">
+        <section id="product-description" className="product-description">
+          <h2>Về sản phẩm này</h2>
+          <p className="product-section-caption">Thông tin từ cửa hàng</p>
+          <p className="product-description-text">{sp.moTa || "Cửa hàng đang cập nhật mô tả sản phẩm. Vui lòng liên hệ để được tư vấn thêm."}</p>
+        </section>
+        <ProductPurchaseInfo bienThe={bienThe} />
+      </div>
 
       <section className="mt-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
