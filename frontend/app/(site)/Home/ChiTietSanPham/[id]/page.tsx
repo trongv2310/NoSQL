@@ -102,6 +102,7 @@ export default function ChiTietSanPhamPage() {
           </div>
         </div>
         <div className="col-lg-6 product-detail-content">
+          <div className="product-buy-panel">
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
           <div className="d-flex align-items-center gap-2 mb-2"><Stars value={data.trungBinhDanhGia} /><span className="text-muted small">({data.soDanhGia} đánh giá)</span></div>
@@ -151,30 +152,44 @@ export default function ChiTietSanPhamPage() {
             <div><i className="fa-solid fa-wallet" aria-hidden="true" /><span><strong>COD hoặc MoMo</strong>Chọn phương thức ở bước thanh toán</span></div>
             <Link href="/Home/Contact"><i className="fa-regular fa-comments" aria-hidden="true" /><span><strong>Cần tư vấn thêm?</strong>Liên hệ để chọn size / phiên bản</span><span aria-hidden="true">↗</span></Link>
           </div>
+          </div>
         </div>
       </div>
 
+      <nav className="product-section-nav" aria-label="Nội dung sản phẩm">
+        <a href="#product-description">Mô tả sản phẩm</a>
+        <a href="#product-specifications">Thông số kỹ thuật</a>
+        <a href="#product-reviews">Đánh giá <span>{data.soDanhGia}</span></a>
+      </nav>
       <div className="product-information-grid">
-        <section id="product-description" className="product-description">
-          <h2>Về sản phẩm này</h2>
-          <p className="product-section-caption">Thông tin từ cửa hàng</p>
+        <section id="product-description" className="product-description product-section-card">
+          <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-regular fa-file-lines" /></span><div><h2>Mô tả sản phẩm</h2><p className="product-section-caption">Tìm hiểu trước khi lựa chọn</p></div></div>
           <p className="product-description-text">{sp.moTa || "Cửa hàng đang cập nhật mô tả sản phẩm. Vui lòng liên hệ để được tư vấn thêm."}</p>
         </section>
         <ProductPurchaseInfo bienThe={bienThe} />
       </div>
 
-      <section className="mt-5">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h4 className="mb-0">Đánh giá ({data.soDanhGia})</h4>
+      <section id="product-reviews" className="product-reviews product-section-card" aria-labelledby="product-reviews-title">
+        <div className="product-review-heading">
+          <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-regular fa-star" /></span><div><h2 id="product-reviews-title">Đánh giá sản phẩm</h2><p className="product-section-caption">Chia sẻ trải nghiệm cùng người chơi cầu lông</p></div></div>
           <Link href={`/ThemPhanHoiSP/ReviewForm/${sp.id}`} className="btn btn-outline-primary btn-sm">Viết đánh giá</Link>
         </div>
-        {data.danhGias.length === 0 ? <p className="text-muted">Chưa có đánh giá nào cho sản phẩm này.</p> : data.danhGias.map((r) => (
-          <div key={r.id} className="border rounded p-3 mb-2 bg-white">
-            <div className="d-flex justify-content-between"><strong>{r.tenKhachHang}</strong><small className="text-muted">{ngay(r.ngayPhanHoi)}</small></div>
-            <div className="text-warning">{"★".repeat(r.danhGia)}<span className="text-muted">{"★".repeat(5 - r.danhGia)}</span></div>
-            <div>{r.noiDung}</div>
+        <div className="product-review-layout">
+          <div className="product-rating-summary">
+            <strong>{data.soDanhGia > 0 ? data.trungBinhDanhGia.toFixed(1) : "—"}<small>/ 5</small></strong>
+            <Stars value={data.trungBinhDanhGia} />
+            <p>{data.soDanhGia > 0 ? `Từ ${data.soDanhGia} đánh giá` : "Chưa có đánh giá"}</p>
           </div>
-        ))}
+          <div className="product-review-list">
+            {data.danhGias.length === 0 ? <div className="product-review-empty"><span aria-hidden="true"><i className="fa-regular fa-comment-dots" /></span><h3>Bạn đã trải nghiệm sản phẩm này?</h3><p>Hãy chia sẻ cảm nhận để giúp những người chơi khác chọn sản phẩm phù hợp.</p></div> : data.danhGias.map((r) => (
+              <article key={r.id} className="product-review-item">
+                <div className="product-review-author"><span className="product-review-avatar" aria-hidden="true">{r.tenKhachHang?.trim().charAt(0).toLocaleUpperCase('vi') || "K"}</span><div><strong>{r.tenKhachHang}</strong><time dateTime={r.ngayPhanHoi}>{ngay(r.ngayPhanHoi)}</time></div></div>
+                <div className="text-warning" aria-label={`${r.danhGia} trên 5 sao`}><span aria-hidden="true">{"★".repeat(r.danhGia)}<span className="text-muted">{"★".repeat(5 - r.danhGia)}</span></span></div>
+                <p>{r.noiDung}</p>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
     </Page>
   );
