@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { bayVaoGio } from "@/lib/cart-motion";
+import { InlineReviewForm } from "@/components/InlineReviewForm";
 import { ProductPurchaseInfo } from "@/components/ProductPurchaseInfo";
 import { useApp } from "@/components/AppProviders";
 import { ErrorBox, Loading, Page, Stars } from "@/components/Ui";
-import { apiPost, loiTuApi } from "@/lib/api";
+import { api, apiPost, loiTuApi } from "@/lib/api";
 import { imgUrl, ngay, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { BienTheV, SanPhamV } from "@/lib/types";
@@ -35,6 +36,9 @@ export default function ChiTietSanPhamPage() {
   const anhSanPham = useRef<HTMLImageElement>(null);
   const nutThem = useRef<HTMLButtonElement>(null);
   const [dangThem, setDangThem] = useState(false);
+  const [moDanhGia, setMoDanhGia] = useState(false);
+  const [dangGuiDanhGia, setDangGuiDanhGia] = useState(false);
+  const [danhGiaMoi, setDanhGiaMoi] = useState<(Pick<ChiTiet, "danhGias" | "trungBinhDanhGia" | "soDanhGia"> & { sanPhamId: string }) | null>(null);
 
   useEffect(() => {
     if (data) {
@@ -54,6 +58,11 @@ export default function ChiTietSanPhamPage() {
   if (loading) return <Page><Loading /></Page>;
   if (error || !data) return <Page><ErrorBox message={error ?? "Không tìm thấy sản phẩm."} /></Page>;
   const { sanPham: sp } = data;
+  const phanHoi = danhGiaMoi?.sanPhamId === id ? danhGiaMoi : data;
+  const capNhatDanhGia = async () => {
+    const moi = await api<ChiTiet>(`/san-pham/${id}`);
+    setDanhGiaMoi({ sanPhamId: id, danhGias: moi.danhGias, trungBinhDanhGia: moi.trungBinhDanhGia, soDanhGia: moi.soDanhGia });
+  };
   const gia = bienThe?.giaThucTe ?? data.giaBanThucTe;
   const coGiam = sp.dangGiamGia && gia < (bienThe?.giaBan ?? sp.giaGoc);
   const giaGocHienThi = bienThe?.giaBan ?? sp.giaGoc;
@@ -105,7 +114,7 @@ export default function ChiTietSanPhamPage() {
           <div className="product-buy-panel">
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
-          <div className="d-flex align-items-center gap-2 mb-2"><Stars value={data.trungBinhDanhGia} /><span className="text-muted small">({data.soDanhGia} đánh giá)</span></div>
+          <div className="d-flex align-items-center gap-2 mb-2"><Stars value={phanHoi.trungBinhDanhGia} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>
           {sp.moTa && <div className="product-brief"><p>{sp.moTa}</p><a href="#product-description">Đọc mô tả đầy đủ <span aria-hidden="true">↗</span></a></div>}
           <div className="mb-3 product-detail-price">
             <span className="h3 text-danger me-2">{vnd(gia)}</span>
@@ -159,7 +168,7 @@ export default function ChiTietSanPhamPage() {
       <nav className="product-section-nav" aria-label="Nội dung sản phẩm">
         <a href="#product-description">Mô tả sản phẩm</a>
         <a href="#product-specifications">Thông số kỹ thuật</a>
-        <a href="#product-reviews">Đánh giá <span>{data.soDanhGia}</span></a>
+        <a href="#product-reviews">Đánh giá <span>{phanHoi.soDanhGia}</span></a>
       </nav>
       <div className="product-information-grid">
         <section id="product-description" className="product-description product-section-card">
@@ -172,16 +181,19 @@ export default function ChiTietSanPhamPage() {
       <section id="product-reviews" className="product-reviews product-section-card" aria-labelledby="product-reviews-title">
         <div className="product-review-heading">
           <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-regular fa-star" /></span><div><h2 id="product-reviews-title">Đánh giá sản phẩm</h2><p className="product-section-caption">Chia sẻ trải nghiệm cùng người chơi cầu lông</p></div></div>
-          <Link href={`/ThemPhanHoiSP/ReviewForm/${sp.id}`} className="btn btn-outline-primary btn-sm">Viết đánh giá</Link>
+          <button type="button" className="btn btn-outline-primary btn-sm" disabled={dangGuiDanhGia} aria-expanded={moDanhGia} aria-controls="product-inline-review" onClick={() => setMoDanhGia((v) => !v)}>{moDanhGia ? "Đóng form" : "Viết đánh giá"}</button>
+        </div>
+        <div id="product-inline-review">
+          {moDanhGia && <InlineReviewForm key={id} sanPhamId={id} onBusyChange={setDangGuiDanhGia} onSent={capNhatDanhGia} onClose={() => setMoDanhGia(false)} />}
         </div>
         <div className="product-review-layout">
           <div className="product-rating-summary">
-            <strong>{data.soDanhGia > 0 ? data.trungBinhDanhGia.toFixed(1) : "—"}<small>/ 5</small></strong>
-            <Stars value={data.trungBinhDanhGia} />
-            <p>{data.soDanhGia > 0 ? `Từ ${data.soDanhGia} đánh giá` : "Chưa có đánh giá"}</p>
+            <strong>{phanHoi.soDanhGia > 0 ? phanHoi.trungBinhDanhGia.toFixed(1) : "—"}<small>/ 5</small></strong>
+            <Stars value={phanHoi.trungBinhDanhGia} />
+            <p>{phanHoi.soDanhGia > 0 ? `Từ ${phanHoi.soDanhGia} đánh giá` : "Chưa có đánh giá"}</p>
           </div>
           <div className="product-review-list">
-            {data.danhGias.length === 0 ? <div className="product-review-empty"><span aria-hidden="true"><i className="fa-regular fa-comment-dots" /></span><h3>Bạn đã trải nghiệm sản phẩm này?</h3><p>Hãy chia sẻ cảm nhận để giúp những người chơi khác chọn sản phẩm phù hợp.</p></div> : data.danhGias.map((r) => (
+            {phanHoi.danhGias.length === 0 ? <div className="product-review-empty"><span aria-hidden="true"><i className="fa-regular fa-comment-dots" /></span><h3>Bạn đã trải nghiệm sản phẩm này?</h3><p>Hãy chia sẻ cảm nhận để giúp những người chơi khác chọn sản phẩm phù hợp.</p></div> : phanHoi.danhGias.map((r) => (
               <article key={r.id} className="product-review-item">
                 <div className="product-review-author"><span className="product-review-avatar" aria-hidden="true">{r.tenKhachHang?.trim().charAt(0).toLocaleUpperCase('vi') || "K"}</span><div><strong>{r.tenKhachHang}</strong><time dateTime={r.ngayPhanHoi}>{ngay(r.ngayPhanHoi)}</time></div></div>
                 <div className="text-warning" aria-label={`${r.danhGia} trên 5 sao`}><span aria-hidden="true">{"★".repeat(r.danhGia)}<span className="text-muted">{"★".repeat(5 - r.danhGia)}</span></span></div>
