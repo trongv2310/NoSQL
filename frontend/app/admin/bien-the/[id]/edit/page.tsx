@@ -58,7 +58,7 @@ export default function SuaBienThePage() {
   return (
     <>
       <Link href={`/admin/san-pham/${data.sanPham.id}`} className="small">← {data.sanPham.tenSanPham}</Link>
-      <form className="card-custom p-4 mt-3" style={{ maxWidth: 760 }} onSubmit={gui}>
+      <form className="card-custom p-4 mt-3" style={{ maxWidth: 860 }} onSubmit={gui}>
         <h5>Sửa biến thể</h5>
         {loi && <ErrorBox message={loi} />}
         <div className="row">

@@ -192,3 +192,22 @@
     .promo-slider-btn.prev { left: -6px; }
     .promo-slider-btn.next { right: -6px; }
 }
+
+
+/* Trang khuyến mãi dựng trong khung .container: khối không cần nền/đệm riêng, huy hiệu % gọn lại. */
+.container > .promo-block,
+.container > .promo-block:nth-of-type(even) { padding: 0; background: transparent; margin-bottom: 40px !important; scroll-margin-top: 0; }
+.container > .promo-block .promo-head { gap: 16px; margin-bottom: 18px; }
+.container > .promo-block .promo-percent {
+    min-width: 0;
+    flex-direction: row;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    box-shadow: 0 6px 16px rgba(226, 93, 15, .22);
+    font-size: 1.25rem !important;
+    font-weight: 800;
+    line-height: 1;
+}
+.container > .promo-block .promo-head h4 { font-weight: 700; letter-spacing: -.01em; }
+.container > .promo-block .promo-percent.badge { color: #fff !important; background: linear-gradient(135deg, var(--accent) 0%, #f07a2c 100%) !important; }
+.container > .page-title + .promo-block, .container > .page-title { margin-bottom: 28px !important; }

@@ -58,7 +58,7 @@ export function ProductForm({ id }: { id?: string }) {
   const dat = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
 
   return (
-    <form className="card-custom p-4" onSubmit={gui} style={{ maxWidth: 820 }}>
+    <form className="card-custom p-4" onSubmit={gui} style={{ maxWidth: 860 }}>
       {loi && <ErrorBox message={loi} />}
       <Field label="Tên sản phẩm *"><input className="form-control" required maxLength={100} value={f.tenSanPham} onChange={dat("tenSanPham")} /></Field>
       <div className="row">

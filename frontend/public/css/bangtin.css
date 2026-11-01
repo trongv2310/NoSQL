@@ -319,3 +319,23 @@
     .bt-article-cover img { aspect-ratio:1.6; }
 }
 @media(prefers-reduced-motion:reduce) { :is(.bt-page,.l-news-sec) * { animation:none!important; transition:none!important; } }
+
+
+/* Thẻ tin dạng danh sách (trang Bảng tin): khung ảnh cố định để mọi dòng cùng nhịp. */
+.tin-card { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 16px; align-items: start; padding: 10px; margin-bottom: 10px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); transition: border-color .2s ease, box-shadow .2s ease; }
+.tin-card:hover { color: var(--ink); border-color: var(--brand-200); box-shadow: var(--shadow-sm); }
+.tin-card-thumb { display: block; width: 148px; aspect-ratio: 148 / 96; overflow: hidden; border-radius: var(--radius-sm); background: var(--bg); }
+.tin-card-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tin-card-thumb.is-product { background: #f6f8f7; }
+.tin-card-thumb.is-product img { object-fit: contain; padding: 8px; mix-blend-mode: multiply; }
+.tin-card-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tin-card-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.tin-card-top .badge { font-size: .72rem; }
+.tin-card-title { font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tin-card:hover .tin-card-title { color: var(--brand-700); }
+.tin-card-sum { line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 560px) {
+    .tin-card { grid-template-columns: 104px minmax(0, 1fr); gap: 12px; }
+    .tin-card-thumb { width: 104px; }
+    .tin-card-sum { display: none; }
+}

@@ -45,7 +45,8 @@
 
 .l-hero h1 {
     color: #fff;
-    font-size: clamp(2.3rem, 4.8vw, 4rem);
+    font-size: clamp(2.3rem, 4.2vw, 3.6rem);
+    text-wrap: balance;
     font-weight: 700;
     line-height: 1.06;
     letter-spacing: -.035em;
@@ -109,7 +110,7 @@
 .l-hero-chip i { color: #7fe0b6; }
 .l-hero-chip.chip-a { left: 0; bottom: 14%; background: var(--accent); border-color: transparent; }
 .l-hero-chip.chip-a i { color: #fff; }
-.l-hero-chip.chip-b { left: 4%; bottom: 2%; }
+.l-hero-chip.chip-b { left: 0; bottom: 2%; }
 
 
 .l-budgets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
@@ -230,9 +231,13 @@
     .l-budgets { grid-template-columns: repeat(2, 1fr); }
     .l-cats, .l-products { gap: 12px; }
     .l-stats { gap: 12px 28px; }
-    .l-hero-visual { height: 300px; }
+    .l-hero-visual { height: 360px; }
+    .l-hero-card.c1 { top: 2%; width: 54%; }
+    .l-hero-card.c2, .l-hero-card.c3 { width: 41%; }
+    .l-hero-card.c3 { right: 1%; }
+    .l-hero-card-info { padding: 10px 12px 12px; }
     .l-hero-card-info b { font-size: .8rem; }
-    .l-hero-chip.chip-a { left: 2%; bottom: 4%; }
+    .l-hero-chip.chip-a { left: 0; bottom: 0; }
 }
 
 

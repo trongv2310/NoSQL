@@ -50,7 +50,7 @@ export function TaiKhoanForm({ id }: { id?: string }) {
   };
 
   return (
-    <form className="card-custom p-4" style={{ maxWidth: 760 }} onSubmit={gui}>
+    <form className="card-custom p-4" style={{ maxWidth: 860 }} onSubmit={gui}>
       {loi && <ErrorBox message={loi} />}
       <div className="row">
         <div className="col-md-6"><Field label="Tên đăng nhập *"><input className="form-control" required disabled={!!id} minLength={3} maxLength={50} pattern="[A-Za-z0-9_\-]+" value={f.tenDangNhap} onChange={dat("tenDangNhap")} /></Field></div>

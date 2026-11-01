@@ -341,3 +341,10 @@ a.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
     height: 3px;
     background: linear-gradient(90deg, var(--brand) 0%, var(--brand-200) 45%, var(--line) 100%);
 }
+
+
+/* Thẻ thống kê: chữ không rớt dòng, các thẻ cùng chiều cao và cùng nhịp. */
+.stat-card .stat-text { min-width: 0; flex: 1; }
+.stat-card .stat-label { line-height: 1.3; }
+.stat-card .stat-value { margin-top: 2px; white-space: nowrap; font-size: clamp(1.15rem, 1.6vw, 1.5rem); }
+.admin-content h6 { font-weight: 700; }

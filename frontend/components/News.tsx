@@ -5,16 +5,21 @@ import { imgUrl, ngay } from "@/lib/format";
 import type { TinV, TranDauV } from "@/lib/types";
 
 export function TinCard({ t }: { t: TinV }) {
+  const laSanPham = t.loaiTin === "san-pham-hot" || t.loaiTin === "san-pham-moi";
   return (
-    <Link href={`/BangTin/${t.id}`} className="d-flex gap-3 text-decoration-none text-dark border rounded bg-white p-2 mb-2">
-      { }
-      <img src={imgUrl(t.hinhAnh)} alt="" width={140} height={92} style={{ objectFit: "cover", borderRadius: 6 }} />
-      <div>
-        <span className="badge bg-secondary me-2"><i className={`fa-solid ${t.iconLoai}`} /> {t.nhanLoai}</span>
-        <small className="text-muted">{ngay(t.ngayDang)} · {t.luotXem} lượt xem</small>
-        <div className="fw-semibold">{t.tieuDe}</div>
-        {t.tomTat && <small className="text-muted">{t.tomTat}</small>}
-      </div>
+    <Link href={`/BangTin/${t.id}`} className="tin-card">
+      <span className={`tin-card-thumb${laSanPham ? " is-product" : ""}`}>
+        { }
+        <img src={imgUrl(t.hinhAnh)} alt="" loading="lazy" />
+      </span>
+      <span className="tin-card-body">
+        <span className="tin-card-top">
+          <span className="badge bg-secondary"><i className={`fa-solid ${t.iconLoai}`} /> {t.nhanLoai}</span>
+          <small className="text-muted">{ngay(t.ngayDang)} · {t.luotXem} lượt xem</small>
+        </span>
+        <span className="tin-card-title">{t.tieuDe}</span>
+        {t.tomTat && <small className="tin-card-sum text-muted">{t.tomTat}</small>}
+      </span>
     </Link>
   );
 }

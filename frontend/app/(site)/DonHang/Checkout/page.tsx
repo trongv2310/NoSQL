@@ -81,9 +81,9 @@ export default function CheckoutPage() {
           <div className="card"><div className="card-body">
             <h5 className="mb-3">Đơn hàng của bạn</h5>
             {gio.data.items.map((it) => (
-              <div key={it.id} className="d-flex justify-content-between small mb-2">
+              <div key={it.id} className="d-flex justify-content-between align-items-start gap-3 small mb-2">
                 <span>{it.tenSanPham} <span className="text-muted">({[it.bienThe.mau?.tenMau, it.bienThe.size?.tenSize].filter(Boolean).join(", ")}) × {it.soLuong}</span></span>
-                <span>{vnd(it.thanhTien)}</span>
+                <span className="text-nowrap fw-semibold">{vnd(it.thanhTien)}</span>
               </div>
             ))}
             <hr /><div className="d-flex justify-content-between"><strong>Tổng cộng</strong><strong className="text-danger">{vnd(gio.data.tongTien)}</strong></div>

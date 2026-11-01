@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Fragment } from "react";
 import { vnd, imgUrl } from "@/lib/format";
 import type { SanPhamV, Trang } from "@/lib/types";
 
@@ -78,10 +79,12 @@ export function Pagination({ trang }: { trang: Pick<Trang<unknown>, "page" | "pa
           <button className="page-link" onClick={() => di(trang.page - 1)} disabled={trang.page <= 1}>‹</button>
         </li>
         {dsTrang.map((p, i) => (
-          <li key={p} className={`page-item ${p === trang.page ? "active" : ""}`}>
-            {i > 0 && p - dsTrang[i - 1] > 1 && <span className="page-link disabled" style={{ border: 0 }}>…</span>}
-            <button className="page-link" onClick={() => di(p)}>{p}</button>
-          </li>
+          <Fragment key={p}>
+            {i > 0 && p - dsTrang[i - 1] > 1 && <li className="page-item disabled"><span className="page-link">…</span></li>}
+            <li className={`page-item ${p === trang.page ? "active" : ""}`}>
+              <button className="page-link" onClick={() => di(p)}>{p}</button>
+            </li>
+          </Fragment>
         ))}
         <li className={`page-item ${trang.page >= trang.pages ? "disabled" : ""}`}>
           <button className="page-link" onClick={() => di(trang.page + 1)} disabled={trang.page >= trang.pages}>›</button>

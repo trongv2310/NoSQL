@@ -38,16 +38,16 @@ export default function DashboardPage() {
           <div className="col-6 col-xl-3" key={String(nhan)}>
             <div className="stat-card card-custom p-3 d-flex gap-3 align-items-center">
               <span className="stat-icon"><i className={`fa-solid ${icon}`} /></span>
-              <div><div className="stat-label">{nhan}</div><div className="stat-value">{giaTri}</div></div>
+              <div className="stat-text"><div className="stat-label">{nhan}</div><div className="stat-value">{giaTri}</div></div>
             </div>
           </div>
         ))}
       </div>
       <div className="row g-3">
         <div className="col-xl-8">
-          <div className="card-custom p-3">
-            <h6>Doanh thu theo tháng</h6>
-            <div className="d-flex align-items-end gap-2" style={{ height: 220 }}>
+          <div className="card-custom p-3 h-100 d-flex flex-column">
+            <h6 className="mb-3">Doanh thu theo tháng</h6>
+            <div className="d-flex align-items-end gap-2 mt-auto" style={{ height: 220 }}>
               {data.doanhThuThang.map((t) => (
                 <div key={t.thang} className="flex-fill text-center" title={`${vnd(t.tongDoanhThu)} · ${t.soLuongDon} đơn`}>
                   <div style={{ height: `${(t.tongDoanhThu / max) * 180}px`, minHeight: 2, background: "#1f8f4e", borderRadius: "4px 4px 0 0" }} />
@@ -59,15 +59,15 @@ export default function DashboardPage() {
         </div>
         <div className="col-xl-4">
           <div className="card-custom p-3 h-100">
-            <h6>Theo quý</h6>
+            <h6 className="mb-3">Theo quý</h6>
             <table className="table table-sm mb-0"><tbody>
-              {data.doanhThuQuy.map((q) => <tr key={q.quy}><td>Quý {q.quy}</td><td className="text-end">{q.soLuongDon} đơn</td><td className="text-end fw-semibold">{vnd(q.tongDoanhThu)}</td></tr>)}
+              {data.doanhThuQuy.map((q) => <tr key={q.quy}><td className="text-nowrap">Quý {q.quy}</td><td className="text-end text-nowrap text-muted">{q.soLuongDon} đơn</td><td className="text-end text-nowrap fw-semibold">{vnd(q.tongDoanhThu)}</td></tr>)}
             </tbody></table>
           </div>
         </div>
         <div className="col-12">
           <div className="card-custom p-3">
-            <h6>Top 10 sản phẩm bán chạy</h6>
+            <h6 className="mb-3">Top 10 sản phẩm bán chạy</h6>
             <div className="table-responsive"><table className="table align-middle mb-0">
               <thead><tr><th>#</th><th>Sản phẩm</th><th className="text-end">Đã bán</th><th className="text-end">Doanh thu</th></tr></thead>
               <tbody>

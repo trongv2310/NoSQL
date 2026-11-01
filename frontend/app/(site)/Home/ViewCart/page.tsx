@@ -48,26 +48,28 @@ export default function GioHangPage() {
         <div className="row g-4">
           <div className="col-lg-8">
             {data.items.map((it) => (
-              <div key={it.id} className="d-flex gap-3 border rounded bg-white p-3 mb-2">
-                { }
-                <img src={imgUrl(it.bienThe.hinhAnh)} alt="" width={90} height={90} style={{ objectFit: "contain" }} />
-                <div className="flex-grow-1">
-                  <Link href={`/Home/ChiTietSanPham/${it.sanPhamId}`} className="fw-semibold text-decoration-none">{it.tenSanPham}</Link>
+              <div key={it.id} className="cart-item">
+                <span className="cart-item-thumb">
+                  { }
+                  <img src={imgUrl(it.bienThe.hinhAnh)} alt="" />
+                </span>
+                <div className="cart-item-body">
+                  <Link href={`/Home/ChiTietSanPham/${it.sanPhamId}`} className="cart-item-name">{it.tenSanPham}</Link>
                   <div className="small text-muted">{[it.bienThe.mau?.tenMau, it.bienThe.size?.tenSize].filter(Boolean).join(" · ")} · SKU {it.bienThe.sku}</div>
-                  <div className="text-danger fw-semibold">{vnd(it.donGia)}</div>
+                  <div className="small">Đơn giá: <span className="text-danger fw-semibold">{vnd(it.donGia)}</span></div>
                   {!it.sanPhamConKinhDoanh && <div className="text-danger small">Sản phẩm không còn kinh doanh</div>}
-                  <div className="d-flex align-items-center gap-2 mt-2">
+                  <div className="cart-item-actions">
                     <input type="number" min={1} max={Math.min(100, it.bienThe.soLuongTon)} defaultValue={it.soLuong} className="form-control form-control-sm" style={{ width: 80 }}
                       onBlur={(e) => { const q = Number(e.target.value); if (q >= 1 && q !== it.soLuong) void doiSoLuong(it.id, q); }} aria-label="Số lượng" />
                     <button className="btn btn-sm btn-outline-danger" onClick={() => xoa(it.id)}><i className="fa-solid fa-trash" /> Xóa</button>
                   </div>
                 </div>
-                <div className="fw-bold text-nowrap">{vnd(it.thanhTien)}</div>
+                <div className="cart-item-total">{vnd(it.thanhTien)}</div>
               </div>
             ))}
           </div>
           <div className="col-lg-4">
-            <div className="card"><div className="card-body">
+            <div className="card cart-summary"><div className="card-body">
               <div className="d-flex justify-content-between mb-2"><span>Số lượng</span><strong>{data.tongSoLuong}</strong></div>
               <div className="d-flex justify-content-between mb-3"><span>Tổng tiền</span><strong className="text-danger fs-5">{vnd(data.tongTien)}</strong></div>
               <Link href="/DonHang/Checkout" className="btn btn-primary w-100">Tiến hành thanh toán</Link>

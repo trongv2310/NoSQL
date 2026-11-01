@@ -40,14 +40,17 @@ export default function BangTinPage() {
   return (
     <Page>
       <link href="/css/bangtin.css" rel="stylesheet" />
-      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-        <h2 className="page-title mb-0">Bảng tin cầu lông</h2>
+      <div className="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+        <div>
+          <h2 className="page-title mb-1">Bảng tin cầu lông</h2>
+          {data && <div className="small text-muted">{data.tong.tin} bài viết · {data.tong.tran} trận đấu · {data.tong.luotXem.toLocaleString("vi-VN")} lượt xem</div>}
+        </div>
         <form onSubmit={(e) => { e.preventDefault(); di(loai, keyword); }} className="d-flex gap-2">
           <input className="form-control" placeholder="Tìm bài viết..." value={keyword} onChange={(e) => setKeyword(e.target.value)} />
           <button className="btn btn-primary" aria-label="Tìm"><i className="fa-solid fa-magnifying-glass" /></button>
         </form>
       </div>
-      <div className="d-flex flex-wrap gap-2 mb-3">
+      <div className="d-flex flex-wrap gap-2 mb-4">
         {LOAI_TIN.map(([khoa, nhan]) => (
           <button key={khoa} className={`btn btn-sm ${loai === khoa ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => di(khoa, keyword)}>
             {nhan}{khoa && data?.demLoai[khoa] ? ` (${data.demLoai[khoa]})` : ""}
@@ -62,7 +65,6 @@ export default function BangTinPage() {
             <Pagination trang={data} />
           </div>
           <aside className="col-lg-4">
-            <div className="small text-muted mb-3">{data.tong.tin} bài viết · {data.tong.tran} trận đấu · {data.tong.luotXem.toLocaleString("vi-VN")} lượt xem</div>
             <BangDiem ds={data.tranDauMoi} tieuDe="Kết quả thi đấu" />
             <h5>Sản phẩm hot</h5>
             <div className="row g-2">{data.spHot.map((s) => <div key={s.id} className="col-6"><ProductCard sp={s} /></div>)}</div>
