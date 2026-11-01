@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { Empty, ErrorBox, Loading } from "@/components/Ui";
+import { Empty, ErrorBox, Loading, ProductCard } from "@/components/Ui";
 import { useApi } from "@/lib/hooks";
 import { imgUrl, ngay, vnd } from "@/lib/format";
 import type { SanPhamV, TinV, TranDauV } from "@/lib/types";
@@ -13,6 +13,7 @@ interface LandingData {
   danhMuc: { id: string; tenLoai: string; soSanPham: number }[];
   uuDai: SanPhamV[];
   heroSp: SanPhamV[];
+  nhomSanPham?: { id: string; tenLoai: string; sanPhams: SanPhamV[] }[];
   giamToiDa: number;
   danhGia: { id: string; noiDung: string; danhGia: number; tenKhachHang: string; tenSanPham: string | null }[];
   dsNoiBat: TinV[];
@@ -28,27 +29,6 @@ const CAU_HINH_LOAI = [
 ];
 
 const phanTramGiam = (sp: SanPhamV) => (sp.giaGoc > 0 && sp.giaSauKhuyenMai < sp.giaGoc ? Math.max(1, Math.round((1 - sp.giaSauKhuyenMai / sp.giaGoc) * 100)) : 0);
-
-function CardUuDai({ sp }: { sp: SanPhamV }) {
-  const pt = phanTramGiam(sp);
-  return (
-    <div className="product-card">
-      {pt > 0 && <div className="badge-promo">-{pt}%</div>}
-      <Link href={`/Home/ChiTietSanPham/${sp.id}`} className="thumb">
-        { }
-        <img src={imgUrl(sp.hinhAnhDaiDien)} alt={sp.tenSanPham} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-product.jpg"; }} />
-      </Link>
-      <div className="body">
-        <div className="product-brand">{sp.hang?.tenHang ?? "Hãng khác"}</div>
-        <Link href={`/Home/ChiTietSanPham/${sp.id}`} className="product-title" title={sp.tenSanPham}>{sp.tenSanPham}</Link>
-        <div className="product-footer">
-          <span className="product-price">{vnd(sp.giaSauKhuyenMai)}</span>
-          {pt > 0 && <span className="price-small">{vnd(sp.giaGoc)}</span>}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function TinDong({ t }: { t: TinV }) {
   return (
@@ -131,8 +111,9 @@ export default function LandingPage() {
         <div className="container">
           <div className="l-head"><span className="l-kicker">Danh mục</span><h2>Mua sắm theo nhu cầu</h2></div>
           <div className="l-cats">
-            {data.danhMuc.map((dm, i) => {
-              const cfg = CAU_HINH_LOAI[i];
+            {data.danhMuc.map((dm) => {
+              const ten = dm.tenLoai.toLocaleLowerCase("vi");
+              const cfg = CAU_HINH_LOAI[ten.includes("vợt") ? 0 : ten.includes("giày") ? 1 : ten.includes("áo") || ten.includes("quần") ? 2 : 3];
               return (
                 <Link key={dm.id} href={`/SanPham/Index?loai=${dm.id}`} className="l-cat">
                   {cfg ? (  <img src={`/images/${cfg.anh}`} alt={dm.tenLoai} loading="lazy" width={360} height={450} />) : <i className="fa-solid fa-bag-shopping l-cat-icon" />}
@@ -150,9 +131,26 @@ export default function LandingPage() {
             <div><span className="l-kicker">Ưu đãi</span><h2>Đang giảm giá</h2></div>
             <Link href="/KhuyenMai/Index" className="btn-xem-tat-ca">Xem tất cả ưu đãi <i className="fa-solid fa-arrow-right ms-1" /></Link>
           </div>
-          {data.uuDai.length ? <div className="l-products">{data.uuDai.map((sp) => <CardUuDai key={sp.id} sp={sp} />)}</div> : <Empty message="Hiện chưa có ưu đãi nào." />}
+          {data.uuDai.length ? <div className="l-products">{data.uuDai.map((sp) => <ProductCard key={sp.id} sp={sp} />)}</div> : <Empty message="Hiện chưa có ưu đãi nào." />}
         </div>
       </section>
+
+      {(data.nhomSanPham ?? []).filter((n) => n.sanPhams.length > 0).map((nhom) => {
+        const ten = nhom.tenLoai.toLocaleLowerCase("vi");
+        const cfg = CAU_HINH_LOAI[ten.includes("vợt") ? 0 : ten.includes("giày") ? 1 : ten.includes("áo") || ten.includes("quần") ? 2 : 3];
+        return <section className="l-section shop-category-section" key={nhom.id}>
+          <div className="container">
+            <div className="l-head l-head-row"><div><span className="l-kicker">Khám phá bộ sưu tập</span><h2>{nhom.tenLoai}</h2></div><Link href={`/SanPham/Index?loai=${nhom.id}`} className="btn-xem-tat-ca">Xem tất cả <span aria-hidden="true">↗</span></Link></div>
+            <div className="shop-category-row">
+              <Link href={`/SanPham/Index?loai=${nhom.id}`} className="shop-category-banner">
+                <img src={`/images/${cfg.anh}`} alt="" loading="lazy" width={360} height={450} />
+                <div><span>Dụng cụ cho trận đấu tiếp theo</span><h3>{nhom.tenLoai}</h3><p>{cfg.mota}</p><b>Khám phá ngay <span aria-hidden="true">→</span></b></div>
+              </Link>
+              <div className="shop-category-products">{nhom.sanPhams.map((sp) => <ProductCard sp={sp} key={sp.id} />)}</div>
+            </div>
+          </div>
+        </section>;
+      })}
 
       <section className="l-section l-tint">
         <div className="container">

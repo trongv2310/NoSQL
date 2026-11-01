@@ -4,8 +4,7 @@
     padding: clamp(56px, 8vw, 104px) 0;
     background: var(--surface);
     
-    content-visibility: auto;
-    contain-intrinsic-size: auto 640px;
+
 }
 .l-tint { background: var(--brand-50); }
 
@@ -357,4 +356,33 @@
     }
     .promo-slider-btn.prev { left: -6px; }
     .promo-slider-btn.next { right: -6px; }
+}
+
+/* Các nhóm sản phẩm có banner riêng, hiển thị ổn định không đợi hiệu ứng cuộn. */
+.l-section { padding: clamp(36px, 5vw, 64px) 0; }
+.l-head { margin-bottom: 24px; }
+.shop-category-section { background: #f3f6f4; }
+.shop-category-section + .shop-category-section { padding-top: 0; }
+.shop-category-row { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 20px; }
+.shop-category-banner { position: relative; overflow: hidden; min-height: 330px; display: flex; align-items: end; background: #0a4432; border-radius: 16px; color: #fff; }
+.shop-category-banner > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .45; }
+.shop-category-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 10%, #063223 95%); }
+.shop-category-banner > div { position: relative; z-index: 1; padding: 24px; }
+.shop-category-banner > div > span { font-size: .7rem; color: #c5e9d7; }
+.shop-category-banner h3 { font-size: 1.6rem; margin: 10px 0; color: #fff; }
+.shop-category-banner p { font-size: .8rem; line-height: 1.7; color: #d6e9dd; }
+.shop-category-banner b { display: inline-block; font-size: .78rem; padding: 10px 14px; border-radius: 8px; background: #fff; color: #164e36; }
+.shop-category-products { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; }
+@media (max-width: 1100px) {
+    .shop-category-row { grid-template-columns: 190px minmax(0,1fr); }
+    .shop-category-products { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 575px) {
+    .shop-category-row { grid-template-columns: 1fr; gap: 14px; }
+    .shop-category-banner { min-height: 180px; }
+    .shop-category-banner > img { object-position: center 38%; }
+    .shop-category-banner > div { padding: 20px; }
+    .shop-category-banner h3 { font-size: 1.4rem; }
+    .shop-category-banner p { display: none; }
+    .shop-category-products { gap: 12px; }
 }

@@ -13,6 +13,9 @@ import { imgUrl, ngay, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { BienTheV, SanPhamV } from "@/lib/types";
 
+const CAC_TAB = ["mo-ta", "thong-so", "danh-gia"] as const;
+type TabSanPham = typeof CAC_TAB[number];
+
 interface ChiTiet {
   sanPham: SanPhamV;
   bienThes: BienTheV[];
@@ -36,6 +39,9 @@ export default function ChiTietSanPhamPage() {
   const anhSanPham = useRef<HTMLImageElement>(null);
   const nutThem = useRef<HTMLButtonElement>(null);
   const [dangThem, setDangThem] = useState(false);
+  const [tab, setTab] = useState<TabSanPham>("mo-ta");
+  const nutTab = useRef<(HTMLButtonElement | null)[]>([]);
+  const [anhXem, setAnhXem] = useState<{ sanPhamId: string; bienTheId?: string; url: string } | null>(null);
   const [moDanhGia, setMoDanhGia] = useState(false);
   const [dangGuiDanhGia, setDangGuiDanhGia] = useState(false);
   const [danhGiaMoi, setDanhGiaMoi] = useState<(Pick<ChiTiet, "danhGias" | "trungBinhDanhGia" | "soDanhGia"> & { sanPhamId: string }) | null>(null);
@@ -55,6 +61,13 @@ export default function ChiTietSanPhamPage() {
     [data, mauId, sizeId],
   );
 
+  useEffect(() => {
+    const docHash = () => setTab(window.location.hash === "#product-reviews" ? "danh-gia" : window.location.hash === "#product-specifications" ? "thong-so" : "mo-ta");
+    docHash();
+    window.addEventListener("hashchange", docHash);
+    return () => window.removeEventListener("hashchange", docHash);
+  }, [id]);
+
   if (loading) return <Page><Loading /></Page>;
   if (error || !data) return <Page><ErrorBox message={error ?? "Không tìm thấy sản phẩm."} /></Page>;
   const { sanPham: sp } = data;
@@ -69,6 +82,9 @@ export default function ChiTietSanPhamPage() {
   const conHang = !!bienThe && bienThe.soLuongTon > 0;
   const vuotTon = !!bienThe && soLuong > bienThe.soLuongTon;
   const anh = imgUrl(bienThe?.hinhAnh ?? sp.hinhAnhDaiDien);
+  const anhHienThi = anhXem?.sanPhamId === id && anhXem.bienTheId === bienThe?.id ? anhXem.url : anh;
+  const cacAnh = [...new Set([imgUrl(sp.hinhAnhDaiDien), ...data.bienThes.map((b) => imgUrl(b.hinhAnh || sp.hinhAnhDaiDien))])];
+  const chonTab = (moi: TabSanPham) => setTab(moi);
 
   const themVaoGio = async (muaNgay: boolean) => {
     if (!user) {
@@ -86,7 +102,7 @@ export default function ChiTietSanPhamPage() {
     setDangThem(true);
     try {
       const r = await apiPost<{ message: string; cartCount: number }>("/gio-hang", { chiTietId: bienThe.id, quantity: soLuong });
-      if (!muaNgay) await bayVaoGio(anhSanPham.current && anhSanPham.current.getBoundingClientRect().bottom > 0 ? anhSanPham.current : nutThem.current, anh);
+      if (!muaNgay) await bayVaoGio(anhSanPham.current && anhSanPham.current.getBoundingClientRect().bottom > 0 ? anhSanPham.current : nutThem.current, anhHienThi);
       setCartCount(r.cartCount);
       flash("success", r.message);
       if (muaNgay) router.push("/Home/ViewCart");
@@ -107,15 +123,16 @@ export default function ChiTietSanPhamPage() {
         <div className="col-lg-6">
           <div className="product-detail-gallery">
             { }
-            <img ref={anhSanPham} src={anh} alt={sp.tenSanPham} className="img-fluid"  onError={(e) => { const img = e.currentTarget; img.onerror = null; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
+            <img ref={anhSanPham} src={anhHienThi} alt={sp.tenSanPham} className="img-fluid"  onError={(e) => { const img = e.currentTarget; img.onerror = null; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
           </div>
+          {cacAnh.length > 1 && <div className="product-gallery-thumbs" aria-label="Ảnh sản phẩm">{cacAnh.map((url, i) => <button key={url} type="button" aria-label={`Xem ảnh ${i + 1}`} aria-pressed={url === anhHienThi} onClick={() => setAnhXem({ sanPhamId: id, bienTheId: bienThe?.id, url })}><img src={url} alt="" width={72} height={72} loading="lazy" onError={(e) => { if (!e.currentTarget.src.endsWith("/images/default-product.jpg")) e.currentTarget.src = "/images/default-product.jpg"; }} /></button>)}</div>}
         </div>
         <div className="col-lg-6 product-detail-content">
           <div className="product-buy-panel">
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
-          <div className="d-flex align-items-center gap-2 mb-2"><Stars value={phanHoi.trungBinhDanhGia} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>
-          {sp.moTa && <div className="product-brief"><p>{sp.moTa}</p><a href="#product-description">Đọc mô tả đầy đủ <span aria-hidden="true">↗</span></a></div>}
+          <div className="d-flex align-items-center gap-2 mb-2"><Stars value={phanHoi.soDanhGia ? phanHoi.trungBinhDanhGia : 0} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>
+          {sp.moTa && <div className="product-brief"><p>{sp.moTa}</p><button type="button" onClick={() => { chonTab("mo-ta"); document.getElementById("product-tabs")?.scrollIntoView({ block: "start" }); }}>Đọc mô tả đầy đủ <span aria-hidden="true">↗</span></button></div>}
           <div className="mb-3 product-detail-price">
             <span className="h3 text-danger me-2">{vnd(gia)}</span>
             {coGiam && <><span className="text-muted text-decoration-line-through me-2">{vnd(giaGocHienThi)}</span><span className="badge bg-danger">-{Math.round((giaGocHienThi - gia) / giaGocHienThi * 100)}%</span></>}
@@ -165,19 +182,28 @@ export default function ChiTietSanPhamPage() {
         </div>
       </div>
 
-      <nav className="product-section-nav" aria-label="Nội dung sản phẩm">
-        <a href="#product-description">Mô tả sản phẩm</a>
-        <a href="#product-specifications">Thông số kỹ thuật</a>
-        <a href="#product-reviews">Đánh giá <span>{phanHoi.soDanhGia}</span></a>
-      </nav>
-      <div className="product-information-grid">
+      <div id="product-tabs" className="product-tabs" role="tablist" aria-label="Nội dung sản phẩm">
+        {CAC_TAB.map((khoa, i) => <button key={khoa} id={`tab-${khoa}`} type="button" role="tab" ref={(el) => { nutTab.current[i] = el; }} aria-selected={tab === khoa} aria-controls={`panel-${khoa}`} tabIndex={tab === khoa ? 0 : -1}
+          onClick={() => chonTab(khoa)} onKeyDown={(e) => {
+            let viTri = i;
+            if (e.key === "ArrowRight") viTri = (i + 1) % CAC_TAB.length;
+            else if (e.key === "ArrowLeft") viTri = (i + CAC_TAB.length - 1) % CAC_TAB.length;
+            else if (e.key === "Home") viTri = 0;
+            else if (e.key === "End") viTri = CAC_TAB.length - 1;
+            else return;
+            e.preventDefault(); chonTab(CAC_TAB[viTri]); nutTab.current[viTri]?.focus();
+          }}>{khoa === "mo-ta" ? "Mô tả sản phẩm" : khoa === "thong-so" ? "Thông số kỹ thuật" : <>Đánh giá <span>{phanHoi.soDanhGia}</span></>}</button>)}
+      </div>
+      <div id="panel-mo-ta" role="tabpanel" aria-labelledby="tab-mo-ta" hidden={tab !== "mo-ta"} tabIndex={0}>
         <section id="product-description" className="product-description product-section-card">
           <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-regular fa-file-lines" /></span><div><h2>Mô tả sản phẩm</h2><p className="product-section-caption">Tìm hiểu trước khi lựa chọn</p></div></div>
           <p className="product-description-text">{sp.moTa || "Cửa hàng đang cập nhật mô tả sản phẩm. Vui lòng liên hệ để được tư vấn thêm."}</p>
         </section>
+      </div>
+      <div id="panel-thong-so" role="tabpanel" aria-labelledby="tab-thong-so" hidden={tab !== "thong-so"} tabIndex={0}>
         <ProductPurchaseInfo bienThe={bienThe} />
       </div>
-
+      <div id="panel-danh-gia" role="tabpanel" aria-labelledby="tab-danh-gia" hidden={tab !== "danh-gia"} tabIndex={0}>
       <section id="product-reviews" className="product-reviews product-section-card" aria-labelledby="product-reviews-title">
         <div className="product-review-heading">
           <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-regular fa-star" /></span><div><h2 id="product-reviews-title">Đánh giá sản phẩm</h2><p className="product-section-caption">Chia sẻ trải nghiệm cùng người chơi cầu lông</p></div></div>
@@ -189,7 +215,7 @@ export default function ChiTietSanPhamPage() {
         <div className="product-review-layout">
           <div className="product-rating-summary">
             <strong>{phanHoi.soDanhGia > 0 ? phanHoi.trungBinhDanhGia.toFixed(1) : "—"}<small>/ 5</small></strong>
-            <Stars value={phanHoi.trungBinhDanhGia} />
+            <Stars value={phanHoi.soDanhGia ? phanHoi.trungBinhDanhGia : 0} />
             <p>{phanHoi.soDanhGia > 0 ? `Từ ${phanHoi.soDanhGia} đánh giá` : "Chưa có đánh giá"}</p>
           </div>
           <div className="product-review-list">
@@ -203,6 +229,7 @@ export default function ChiTietSanPhamPage() {
           </div>
         </div>
       </section>
+      </div>
     </Page>
   );
 }

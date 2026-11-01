@@ -103,7 +103,7 @@ export class CongKhaiService {
 
   async landing() {
     const all = await this.catalog.tatCaSanPham();
-    const [tongHang, kms, loais, soLoai, danhGia, noiBat] = await Promise.all([
+    const [tongHang, kms, loais, soLoai, danhGia, noiBat, tonKho] = await Promise.all([
       this.hangModel.countDocuments(),
       this.kmModel.find().lean(),
       this.loaiModel.find().sort({ _id: 1 }).lean(),
@@ -118,6 +118,7 @@ export class CongKhaiService {
         .limit(3)
         .lean() as Promise<any[]>,
       this.tinQuery(this.daDang({ noiBat: true })).sort({ thuTu: 1, ngayDang: -1, _id: -1 }).lean() as Promise<any[]>,
+      this.catalog.tonKhoTheoSanPham(),
     ]);
     const gia = (sp: any) => giaSauKhuyenMai(sp.giaGoc, sp.khuyenMai);
     const tiLeGiam = (sp: any) => (sp.giaGoc > 0 ? 1 - gia(sp) / sp.giaGoc : 0);
@@ -161,6 +162,23 @@ export class CongKhaiService {
       danhMuc: loais.map((l) => ({ id: idOf(l), tenLoai: l.tenLoai, moTa: l.moTa ?? null, soSanPham: demLoai.get(String(l._id)) ?? 0 })),
       uuDai: uuDai.map(sanPhamView),
       heroSp: heroSp.map(sanPhamView),
+      nhomSanPham: loais.map((l) => {
+        const cungLoai = all.filter((sp) => idOf(sp.loai) === idOf(l));
+        const conHang = cungLoai.filter((sp) => (tonKho.get(String(sp._id)) ?? 0) > 0);
+        const nguon = conHang.length ? conHang : cungLoai;
+        const hangDaLay = new Set<string>();
+        const daiDien = nguon.filter((sp) => {
+          const hang = idOf(sp.hang) ?? '';
+          if (hangDaLay.has(hang)) return false;
+          hangDaLay.add(hang);
+          return true;
+        });
+        const daLay = new Set(daiDien.map((sp) => String(sp._id)));
+        const chon = [...daiDien, ...nguon.filter((sp) => !daLay.has(String(sp._id)))].slice(0, 4);
+        return { id: idOf(l), tenLoai: l.tenLoai,
+          sanPhams: chon.map((sp) => ({ ...sanPhamView(sp), tongTonKho: tonKho.get(String(sp._id)) ?? 0 })),
+        };
+      }),
       giamToiDa: uuDai.length ? Math.max(...uuDai.map((sp) => Math.round(tiLeGiam(sp) * 100))) : 0,
       danhGia: danhGia.map((r) => ({
         id: idOf(r),

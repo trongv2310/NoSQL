@@ -18,24 +18,27 @@ export function Stars({ value }: { value: number }) {
 }
 
 export function ProductCard({ sp }: { sp: SanPhamV }) {
+  const giam = sp.dangGiamGia && sp.giaGoc > sp.giaSauKhuyenMai;
+  const pt = giam && sp.giaGoc > 0 ? Math.round((1 - sp.giaSauKhuyenMai / sp.giaGoc) * 100) : 0;
   return (
     <div className="product-card">
-      {sp.dangGiamGia && sp.khuyenMai && <div className="badge-promo">-{Math.round(sp.khuyenMai.phanTramGiam)}%</div>}
+      {pt > 0 && <div className="badge-promo">-{pt}%</div>}
       <Link href={`/Home/ChiTietSanPham/${sp.id}`} className="thumb">
         { }
         <img src={imgUrl(sp.hinhAnhDaiDien)} alt={sp.tenSanPham} loading="lazy"
-          onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-product.jpg"; }} />
+          onError={(e) => { const img = e.currentTarget; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
       </Link>
       <div className="body">
         <div className="product-brand">{sp.hang?.tenHang ?? "Hãng khác"}</div>
         <Link href={`/Home/ChiTietSanPham/${sp.id}`} className="product-title" title={sp.tenSanPham}>{sp.tenSanPham}</Link>
-        <Stars value={sp.trungBinhDanhGia} />
+        <span className={`product-availability ${sp.tongTonKho === 0 ? "is-empty" : ""}`}>{sp.tongTonKho === undefined ? "Xem phiên bản sản phẩm" : sp.tongTonKho > 0 ? "Còn hàng" : "Tạm hết hàng"}</span>
         <div className="product-footer">
           <div>
             <span className="product-price">{vnd(sp.giaSauKhuyenMai)}</span>
-            {sp.dangGiamGia && sp.giaSauKhuyenMai < sp.giaGoc && <span className="price-small">{vnd(sp.giaGoc)}</span>}
+            {giam && <span className="price-small">{vnd(sp.giaGoc)}</span>}
           </div>
         </div>
+        <Link className="product-card-cta" href={`/Home/ChiTietSanPham/${sp.id}`}>Xem chi tiết <span aria-hidden="true">↗</span></Link>
       </div>
     </div>
   );

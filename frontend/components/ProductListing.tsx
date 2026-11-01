@@ -53,14 +53,17 @@ export function ProductListing() {
   return (
     <Page>
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <h2 className="page-title mb-0">{data?.tieuDe ?? "Danh sách sản phẩm"}</h2>
+        <div><span className="catalog-kicker">Dụng cụ cho trận đấu của bạn</span><h1 className="page-title mb-0">{data?.tieuDe ?? "Danh sách sản phẩm"}</h1><p className="catalog-count">{data ? `${data.total} sản phẩm · Chọn theo hãng, ngân sách và nhu cầu` : "Đang tìm sản phẩm…"}</p></div>
         <select className="form-select w-auto" value={sp.get("sap_xep") ?? "moi"} onChange={(e) => dat("sap_xep", e.target.value)} aria-label="Sắp xếp">
           <option value="moi">Mới nhất</option><option value="gia_tang">Giá tăng dần</option><option value="gia_giam">Giá giảm dần</option><option value="ten">Tên A–Z</option>
         </select>
       </div>
+      <div className="catalog-shortcuts" aria-label="Lọc nhanh">
+        {[{ key: "", label: "Tất cả sản phẩm" }, { key: "giam_gia", label: "Đang giảm giá" }, { key: "con_hang", label: "Còn hàng" }].map((m) => <button type="button" key={m.key} aria-pressed={m.key ? sp.get(m.key) === "1" : !sp.get("giam_gia") && !sp.get("con_hang")} onClick={() => cap((q) => { if (!m.key) { q.delete("giam_gia"); q.delete("con_hang"); } else { if (q.has(m.key)) q.delete(m.key); else q.set(m.key, "1"); } })}>{m.label}</button>)}
+      </div>
       <div className="row g-4">
         <aside className="col-lg-3">
-          <div className="card"><div className="card-body">
+          <div className="card catalog-filters"><div className="card-body"><div className="catalog-filter-heading"><i className="fa-solid fa-sliders" aria-hidden="true" /> Bộ lọc sản phẩm</div>
             <h6 className="fw-bold">Loại sản phẩm</h6>
             <div className="d-flex flex-column gap-1 mb-3">
               <button className={`btn btn-sm text-start ${!sp.get("loai") ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => dat("loai", null)}>Tất cả</button>
