@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { bayVaoGio } from "@/lib/cart-motion";
+import { ProductPurchaseInfo } from "@/components/ProductPurchaseInfo";
 import { useApp } from "@/components/AppProviders";
 import { ErrorBox, Loading, Page, Stars } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
@@ -22,10 +23,6 @@ interface ChiTiet {
   soDanhGia: number;
   giaBanThucTe: number;
 }
-
-const THONG_SO: [keyof NonNullable<BienTheV["thongSo"]>, string][] = [
-  ["doCanBang", "Điểm cân bằng"], ["trongLuong", "Trọng lượng"], ["doCung", "Độ cứng"], ["chieuDai", "Chiều dài"], ["sucCang", "Sức căng"],
-];
 
 export default function ChiTietSanPhamPage() {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +58,7 @@ export default function ChiTietSanPhamPage() {
   const coGiam = sp.dangGiamGia && gia < (bienThe?.giaBan ?? sp.giaGoc);
   const giaGocHienThi = bienThe?.giaBan ?? sp.giaGoc;
   const conHang = !!bienThe && bienThe.soLuongTon > 0;
+  const vuotTon = !!bienThe && soLuong > bienThe.soLuongTon;
   const anh = imgUrl(bienThe?.hinhAnh ?? sp.hinhAnhDaiDien);
 
   const themVaoGio = async (muaNgay: boolean) => {
@@ -70,6 +68,10 @@ export default function ChiTietSanPhamPage() {
     }
     if (!bienThe) {
       flash("danger", "Vui lòng chọn phiên bản (màu/size) sản phẩm.");
+      return;
+    }
+    if (!conHang || vuotTon) {
+      flash("danger", "Số lượng đã chọn vượt quá tồn kho của phiên bản này.");
       return;
     }
     setDangThem(true);
@@ -92,27 +94,27 @@ export default function ChiTietSanPhamPage() {
         <Link href="/">Trang chủ</Link> / <Link href="/SanPham/Index">Sản phẩm</Link>
         {sp.loai && <> / <Link href={`/SanPham/Index?loai=${sp.loai.id}`}>{sp.loai.tenLoai}</Link></>} / {sp.tenSanPham}
       </nav>
-      <div className="row g-4">
+      <div className="row g-4 product-detail-layout">
         <div className="col-md-5">
-          <div className="border rounded bg-white p-3 text-center">
+          <div className="product-detail-gallery">
             { }
-            <img ref={anhSanPham} src={anh} alt={sp.tenSanPham} className="img-fluid" style={{ maxHeight: 460, objectFit: "contain" }} onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-product.jpg"; }} />
+            <img ref={anhSanPham} src={anh} alt={sp.tenSanPham} className="img-fluid"  onError={(e) => { const img = e.currentTarget; img.onerror = null; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
           </div>
         </div>
-        <div className="col-md-7">
+        <div className="col-md-7 product-detail-content">
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
           <div className="d-flex align-items-center gap-2 mb-2"><Stars value={data.trungBinhDanhGia} /><span className="text-muted small">({data.soDanhGia} đánh giá)</span></div>
           <div className="mb-3">
             <span className="h3 text-danger me-2">{vnd(gia)}</span>
-            {coGiam && <><span className="text-muted text-decoration-line-through me-2">{vnd(giaGocHienThi)}</span><span className="badge bg-danger">-{Math.round(sp.khuyenMai?.phanTramGiam ?? 0)}%</span></>}
+            {coGiam && <><span className="text-muted text-decoration-line-through me-2">{vnd(giaGocHienThi)}</span><span className="badge bg-danger">-{Math.round((giaGocHienThi - gia) / giaGocHienThi * 100)}%</span></>}
           </div>
 
           {data.mauSacs.length > 0 && (
             <div className="mb-3">
               <div className="fw-semibold mb-1">Màu sắc</div>
               <div className="d-flex flex-wrap gap-2">
-                {data.mauSacs.map((m) => <button key={m.id} type="button" className={`btn btn-sm ${mauId === m.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setMauId(m.id)}>{m.tenMau}</button>)}
+                {data.mauSacs.map((m) => <button key={m.id} type="button" className={`btn btn-sm ${mauId === m.id ? "btn-primary" : "btn-outline-secondary"}`} aria-pressed={mauId === m.id} onClick={() => setMauId(m.id)}>{m.tenMau}</button>)}
               </div>
             </div>
           )}
@@ -122,7 +124,7 @@ export default function ChiTietSanPhamPage() {
               <div className="d-flex flex-wrap gap-2">
                 {data.sizes.map((s) => {
                   const co = data.bienThes.some((b) => b.size?.id === s.id && (data.mauSacs.length === 0 || b.mau?.id === mauId));
-                  return <button key={s.id} type="button" disabled={!co} className={`btn btn-sm ${sizeId === s.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setSizeId(s.id)}>{s.tenSize}</button>;
+                  return <button key={s.id} type="button" disabled={!co} aria-pressed={sizeId === s.id} className={`btn btn-sm ${sizeId === s.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setSizeId(s.id)}>{s.tenSize}</button>;
                 })}
               </div>
             </div>
@@ -133,23 +135,16 @@ export default function ChiTietSanPhamPage() {
               : <span className="text-warning">Phiên bản này hiện không có, vui lòng chọn phiên bản khác.</span>}
           </div>
 
+          {vuotTon && <p className="text-danger small" role="alert">Phiên bản này chỉ còn {bienThe?.soLuongTon} sản phẩm. Vui lòng giảm số lượng hoặc chọn phiên bản khác.</p>}
           <div className="d-flex flex-wrap gap-2 align-items-center">
             <input type="number" min={1} max={Math.min(100, bienThe?.soLuongTon || 100)} className="form-control" style={{ width: 90 }} value={soLuong}
-              onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} aria-label="Số lượng" />
-            <button ref={nutThem} className="btn btn-primary product-add-btn" aria-busy={dangThem} disabled={!conHang || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
-            <button className="btn btn-danger" disabled={!conHang || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
+              onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Math.floor(Number(e.target.value)) || 1)))} aria-label="Số lượng" />
+            <button ref={nutThem} className="btn btn-primary product-add-btn" aria-busy={dangThem} disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
+            <button className="btn btn-danger" disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
           </div>
+          <ProductPurchaseInfo bienThe={bienThe} soLuong={soLuong} gia={gia} giaGoc={giaGocHienThi} coGiam={coGiam} />
         </div>
       </div>
-
-      {data.thongSoVot && (
-        <section className="mt-5">
-          <h4>Thông số kỹ thuật</h4>
-          <table className="table table-bordered w-auto"><tbody>
-            {THONG_SO.filter(([k]) => data.thongSoVot?.[k]).map(([k, nhan]) => <tr key={k}><th className="bg-light">{nhan}</th><td>{data.thongSoVot?.[k]}</td></tr>)}
-          </tbody></table>
-        </section>
-      )}
 
       {sp.moTa && <section className="mt-4"><h4>Mô tả sản phẩm</h4><p style={{ whiteSpace: "pre-line" }}>{sp.moTa}</p></section>}
 
