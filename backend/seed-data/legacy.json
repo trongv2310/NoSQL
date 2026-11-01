@@ -1,0 +1,2966 @@
+{
+    "PhanHoi": [
+        {
+            "MaPhanHoi": 1,
+            "NoiDung": "Vợt đánh rất đầm tay, đập cầu uy lực, chính hãng 100%!",
+            "NgayPhanHoi": "2026-11-01 08:20:33",
+            "DanhGia": 5,
+            "MaKhachHang": 3,
+            "MaSanPham": 1
+        },
+        {
+            "MaPhanHoi": 2,
+            "NoiDung": "Giao hàng nhanh, vợt rất đẹp và vừa tay.",
+            "NgayPhanHoi": "2026-11-01 08:20:33",
+            "DanhGia": 5,
+            "MaKhachHang": 4,
+            "MaSanPham": 2
+        },
+        {
+            "MaPhanHoi": 3,
+            "NoiDung": "Cước căng chuẩn số kg, đóng gói cẩn thận.",
+            "NgayPhanHoi": "2026-11-01 08:20:33",
+            "DanhGia": 4,
+            "MaKhachHang": 3,
+            "MaSanPham": 8
+        }
+    ],
+    "ChiTietDonHang": [],
+    "DonHang": [],
+    "GioHang": [],
+    "ThongSoVot": [
+        {
+            "MaThongSo": 1,
+            "MaChiTiet": 1,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 2,
+            "MaChiTiet": 2,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 3,
+            "MaChiTiet": 3,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 4,
+            "MaChiTiet": 4,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 5,
+            "MaChiTiet": 5,
+            "DoCanBang": "Hơi nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "670mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 6,
+            "MaChiTiet": 6,
+            "DoCanBang": "Hơi nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "670mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 7,
+            "MaChiTiet": 7,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 8,
+            "MaChiTiet": 8,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 9,
+            "MaChiTiet": 9,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 10,
+            "MaChiTiet": 10,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 11,
+            "MaChiTiet": 11,
+            "DoCanBang": "Hơi nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 12,
+            "MaChiTiet": 12,
+            "DoCanBang": "Hơi nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 13,
+            "MaChiTiet": 13,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Rất cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 14,
+            "MaChiTiet": 14,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Rất cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 15,
+            "MaChiTiet": 15,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 16,
+            "MaChiTiet": 16,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "19-27 lbs"
+        },
+        {
+            "MaThongSo": 17,
+            "MaChiTiet": 17,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "19-27 lbs"
+        },
+        {
+            "MaThongSo": 18,
+            "MaChiTiet": 18,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 19,
+            "MaChiTiet": 19,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-29 lbs"
+        },
+        {
+            "MaThongSo": 20,
+            "MaChiTiet": 20,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "5U (75-79g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "670mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 21,
+            "MaChiTiet": 21,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 22,
+            "MaChiTiet": 22,
+            "DoCanBang": "Rất nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Rất cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-31 lbs"
+        },
+        {
+            "MaThongSo": 23,
+            "MaChiTiet": 23,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 24,
+            "MaChiTiet": 24,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-29 lbs"
+        },
+        {
+            "MaThongSo": 25,
+            "MaChiTiet": 25,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "5U (75-79g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 26,
+            "MaChiTiet": 40,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 27,
+            "MaChiTiet": 41,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-29 lbs"
+        },
+        {
+            "MaThongSo": 28,
+            "MaChiTiet": 42,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-29 lbs"
+        },
+        {
+            "MaThongSo": 29,
+            "MaChiTiet": 43,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-31 lbs"
+        },
+        {
+            "MaThongSo": 30,
+            "MaChiTiet": 44,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 31,
+            "MaChiTiet": 45,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 32,
+            "MaChiTiet": 46,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-32 lbs"
+        },
+        {
+            "MaThongSo": 33,
+            "MaChiTiet": 47,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-31 lbs"
+        },
+        {
+            "MaThongSo": 34,
+            "MaChiTiet": 48,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "5U (75-79g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 35,
+            "MaChiTiet": 49,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-29 lbs"
+        },
+        {
+            "MaThongSo": 36,
+            "MaChiTiet": 50,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 37,
+            "MaChiTiet": 51,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "22-31 lbs"
+        },
+        {
+            "MaThongSo": 38,
+            "MaChiTiet": 52,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 39,
+            "MaChiTiet": 53,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 40,
+            "MaChiTiet": 54,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "19-27 lbs"
+        },
+        {
+            "MaThongSo": 41,
+            "MaChiTiet": 55,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 42,
+            "MaChiTiet": 56,
+            "DoCanBang": "Nhẹ đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "19-27 lbs"
+        },
+        {
+            "MaThongSo": 43,
+            "MaChiTiet": 57,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-29 lbs"
+        },
+        {
+            "MaThongSo": 44,
+            "MaChiTiet": 58,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-28 lbs"
+        },
+        {
+            "MaThongSo": 45,
+            "MaChiTiet": 59,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "20-30 lbs"
+        },
+        {
+            "MaThongSo": 46,
+            "MaChiTiet": 60,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "5U (75-79g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "19-29 lbs"
+        },
+        {
+            "MaThongSo": 47,
+            "MaChiTiet": 61,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "23-29 lbs"
+        },
+        {
+            "MaThongSo": 48,
+            "MaChiTiet": 62,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "22-28 lbs"
+        },
+        {
+            "MaThongSo": 49,
+            "MaChiTiet": 63,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "23-29 lbs"
+        },
+        {
+            "MaThongSo": 50,
+            "MaChiTiet": 64,
+            "DoCanBang": "Nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Cứng",
+            "ChieuDai": "675mm",
+            "SucCang": "22-28 lbs"
+        },
+        {
+            "MaThongSo": 51,
+            "MaChiTiet": 65,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "22-30 lbs"
+        },
+        {
+            "MaThongSo": 52,
+            "MaChiTiet": 66,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "21-29 lbs"
+        },
+        {
+            "MaThongSo": 53,
+            "MaChiTiet": 67,
+            "DoCanBang": "Hơi nặng đầu",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "22-28 lbs"
+        },
+        {
+            "MaThongSo": 54,
+            "MaChiTiet": 68,
+            "DoCanBang": "Hơi nặng đầu",
+            "TrongLuong": "5U (75-79g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "20-27 lbs"
+        },
+        {
+            "MaThongSo": 55,
+            "MaChiTiet": 69,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "3U (85-89g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "22-28 lbs"
+        },
+        {
+            "MaThongSo": 56,
+            "MaChiTiet": 70,
+            "DoCanBang": "Cân bằng",
+            "TrongLuong": "4U (80-84g)",
+            "DoCung": "Trung bình",
+            "ChieuDai": "675mm",
+            "SucCang": "21-27 lbs"
+        }
+    ],
+    "ChiTietSanPham": [
+        {
+            "MaChiTiet": 1,
+            "MaSanPham": 1,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 4500000,
+            "SoLuongTon": 50,
+            "SKU": "YN-AX100ZZ-3U",
+            "HinhAnh": "astrox100zz.jpg"
+        },
+        {
+            "MaChiTiet": 2,
+            "MaSanPham": 1,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 4500000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX100ZZ-4U",
+            "HinhAnh": "astrox100zz.jpg"
+        },
+        {
+            "MaChiTiet": 3,
+            "MaSanPham": 2,
+            "MaMau": 2,
+            "MaSize": 1,
+            "GiaBan": 4799000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX88DPRO2024-3U",
+            "HinhAnh": "astrox88dpro.jpg"
+        },
+        {
+            "MaChiTiet": 4,
+            "MaSanPham": 2,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 4799000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX88DPRO2024-4U",
+            "HinhAnh": "astrox88dpro.jpg"
+        },
+        {
+            "MaChiTiet": 5,
+            "MaSanPham": 3,
+            "MaMau": 2,
+            "MaSize": 1,
+            "GiaBan": 4799000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX88SPRO2024-3U",
+            "HinhAnh": "astrox88spro.jpg"
+        },
+        {
+            "MaChiTiet": 6,
+            "MaSanPham": 3,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 4799000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX88SPRO2024-4U",
+            "HinhAnh": "astrox88spro.jpg"
+        },
+        {
+            "MaChiTiet": 7,
+            "MaSanPham": 4,
+            "MaMau": 3,
+            "MaSize": 1,
+            "GiaBan": 4190000,
+            "SoLuongTon": 50,
+            "SKU": "YN-AX99PRO-DO-3U",
+            "HinhAnh": "astrox99pro.jpg"
+        },
+        {
+            "MaChiTiet": 8,
+            "MaSanPham": 4,
+            "MaMau": 3,
+            "MaSize": 2,
+            "GiaBan": 4190000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX99PRO-DO-4U",
+            "HinhAnh": "astrox99pro.jpg"
+        },
+        {
+            "MaChiTiet": 9,
+            "MaSanPham": 4,
+            "MaMau": 6,
+            "MaSize": 1,
+            "GiaBan": 4190000,
+            "SoLuongTon": 50,
+            "SKU": "YN-AX99PRO-TRANG-3U",
+            "HinhAnh": "astrox99protrang.jpg"
+        },
+        {
+            "MaChiTiet": 10,
+            "MaSanPham": 4,
+            "MaMau": 6,
+            "MaSize": 2,
+            "GiaBan": 4190000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX99PRO-TRANG-4U",
+            "HinhAnh": "astrox99protrang.jpg"
+        },
+        {
+            "MaChiTiet": 11,
+            "MaSanPham": 5,
+            "MaMau": 3,
+            "MaSize": 1,
+            "GiaBan": 3900000,
+            "SoLuongTon": 50,
+            "SKU": "YN-AX77PRO-DO-3U",
+            "HinhAnh": "astrox77pro.jpg"
+        },
+        {
+            "MaChiTiet": 12,
+            "MaSanPham": 5,
+            "MaMau": 3,
+            "MaSize": 2,
+            "GiaBan": 3900000,
+            "SoLuongTon": 100,
+            "SKU": "YN-AX77PRO-DO-4U",
+            "HinhAnh": "astrox77pro.jpg"
+        },
+        {
+            "MaChiTiet": 13,
+            "MaSanPham": 6,
+            "MaMau": 4,
+            "MaSize": 1,
+            "GiaBan": 4600000,
+            "SoLuongTon": 50,
+            "SKU": "YN-NNF1000Z-VANG-3U",
+            "HinhAnh": "nanoflare1000z.jpg"
+        },
+        {
+            "MaChiTiet": 14,
+            "MaSanPham": 6,
+            "MaMau": 4,
+            "MaSize": 2,
+            "GiaBan": 4600000,
+            "SoLuongTon": 100,
+            "SKU": "YN-NNF1000Z-VANG-4U",
+            "HinhAnh": "nanoflare1000z.jpg"
+        },
+        {
+            "MaChiTiet": 15,
+            "MaSanPham": 7,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 4489000,
+            "SoLuongTon": 50,
+            "SKU": "YN-NNF700PRO-DEN-4U",
+            "HinhAnh": "nanoflare700pro.jpg"
+        },
+        {
+            "MaChiTiet": 16,
+            "MaSanPham": 8,
+            "MaMau": 3,
+            "MaSize": 1,
+            "GiaBan": 4100000,
+            "SoLuongTon": 50,
+            "SKU": "YN-ARC11PRO-DO-3U",
+            "HinhAnh": "arcsaber11pro.jpg"
+        },
+        {
+            "MaChiTiet": 17,
+            "MaSanPham": 8,
+            "MaMau": 3,
+            "MaSize": 2,
+            "GiaBan": 4100000,
+            "SoLuongTon": 100,
+            "SKU": "YN-ARC11PRO-DO-4U",
+            "HinhAnh": "arcsaber11pro.jpg"
+        },
+        {
+            "MaChiTiet": 18,
+            "MaSanPham": 9,
+            "MaMau": 2,
+            "MaSize": 1,
+            "GiaBan": 4300000,
+            "SoLuongTon": 100,
+            "SKU": "LN-AER9000C-XANH-3U",
+            "HinhAnh": "lining_aero9000c.jpg"
+        },
+        {
+            "MaChiTiet": 19,
+            "MaSanPham": 9,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 4300000,
+            "SoLuongTon": 100,
+            "SKU": "LN-AER9000C-XANH-4U",
+            "HinhAnh": "lining_aero9000c.jpg"
+        },
+        {
+            "MaChiTiet": 20,
+            "MaSanPham": 10,
+            "MaMau": 7,
+            "MaSize": 3,
+            "GiaBan": 4300000,
+            "SoLuongTon": 100,
+            "SKU": "LN-AER9000I-TIM-5U",
+            "HinhAnh": "lining_aero9000i.jpg"
+        },
+        {
+            "MaChiTiet": 21,
+            "MaSanPham": 11,
+            "MaMau": 6,
+            "MaSize": 2,
+            "GiaBan": 3200000,
+            "SoLuongTon": 100,
+            "SKU": "LN-TEC7-TRANG-4U",
+            "HinhAnh": "lining_tectonic7.jpg"
+        },
+        {
+            "MaChiTiet": 22,
+            "MaSanPham": 12,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 4100000,
+            "SoLuongTon": 40,
+            "SKU": "LN-AX90-XANH-4U",
+            "HinhAnh": "lining_axforce90max.jpg"
+        },
+        {
+            "MaChiTiet": 23,
+            "MaSanPham": 13,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 3900000,
+            "SoLuongTon": 40,
+            "SKU": "LN-AX80-DEN-3U",
+            "HinhAnh": "lining_axforce80.jpg"
+        },
+        {
+            "MaChiTiet": 24,
+            "MaSanPham": 13,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 3900000,
+            "SoLuongTon": 40,
+            "SKU": "LN-AX80-DEN-4U",
+            "HinhAnh": "lining_axforce80.jpg"
+        },
+        {
+            "MaChiTiet": 25,
+            "MaSanPham": 13,
+            "MaMau": 1,
+            "MaSize": 3,
+            "GiaBan": 3900000,
+            "SoLuongTon": 40,
+            "SKU": "LN-AX80-DEN-5U",
+            "HinhAnh": "lining_axforce80.jpg"
+        },
+        {
+            "MaChiTiet": 26,
+            "MaSanPham": 28,
+            "MaMau": 6,
+            "MaSize": 19,
+            "GiaBan": 2800000,
+            "SoLuongTon": 30,
+            "SKU": "YN-SHB65Z4-TRANG-40",
+            "HinhAnh": "yonex_65z4.jpg"
+        },
+        {
+            "MaChiTiet": 27,
+            "MaSanPham": 28,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 2800000,
+            "SoLuongTon": 30,
+            "SKU": "YN-SHB65Z4-TRANG-41",
+            "HinhAnh": "yonex_65z4.jpg"
+        },
+        {
+            "MaChiTiet": 28,
+            "MaSanPham": 28,
+            "MaMau": 6,
+            "MaSize": 21,
+            "GiaBan": 2800000,
+            "SoLuongTon": 30,
+            "SKU": "YN-SHB65Z4-TRANG-42",
+            "HinhAnh": "yonex_65z4.jpg"
+        },
+        {
+            "MaChiTiet": 29,
+            "MaSanPham": 29,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 3100000,
+            "SoLuongTon": 30,
+            "SKU": "YN-ECLIPSONZ3-TRANG-41",
+            "HinhAnh": "yonex_eclipsion_trang_z3.jpg"
+        },
+        {
+            "MaChiTiet": 30,
+            "MaSanPham": 30,
+            "MaMau": 1,
+            "MaSize": 21,
+            "GiaBan": 3000000,
+            "SoLuongTon": 30,
+            "SKU": "YN-AERUSZ2-DEN-42",
+            "HinhAnh": "yonex_aerus_z2_den.jpg"
+        },
+        {
+            "MaChiTiet": 31,
+            "MaSanPham": 38,
+            "MaMau": 6,
+            "MaSize": 5,
+            "GiaBan": 119000,
+            "SoLuongTon": 25,
+            "SKU": "YN-TRM3089-TRANG-M",
+            "HinhAnh": "yonex_trm3089.jpg"
+        },
+        {
+            "MaChiTiet": 32,
+            "MaSanPham": 38,
+            "MaMau": 6,
+            "MaSize": 6,
+            "GiaBan": 119000,
+            "SoLuongTon": 25,
+            "SKU": "YN-TRM3089-TRANG-L",
+            "HinhAnh": "yonex_trm3089.jpg"
+        },
+        {
+            "MaChiTiet": 33,
+            "MaSanPham": 39,
+            "MaMau": 8,
+            "MaSize": 6,
+            "GiaBan": 169000,
+            "SoLuongTon": 20,
+            "SKU": "YN-TRM3053-XANHLA-L",
+            "HinhAnh": "yonex_trm3053.jpg"
+        },
+        {
+            "MaChiTiet": 34,
+            "MaSanPham": 40,
+            "MaMau": 1,
+            "MaSize": 6,
+            "GiaBan": 139000,
+            "SoLuongTon": 20,
+            "SKU": "YN-TSM3085-DEN-L",
+            "HinhAnh": "yonex_tsm3085.jpg"
+        },
+        {
+            "MaChiTiet": 35,
+            "SKU": "PK-CAU-THIDAU-12",
+            "MaSanPham": 44,
+            "MaMau": null,
+            "MaSize": null,
+            "GiaBan": 340000,
+            "SoLuongTon": 120,
+            "HinhAnh": "pk_cau_thi_dau.jpg"
+        },
+        {
+            "MaChiTiet": 36,
+            "SKU": "PK-CAU-CAOCAP-12",
+            "MaSanPham": 45,
+            "MaMau": null,
+            "MaSize": null,
+            "GiaBan": 520000,
+            "SoLuongTon": 80,
+            "HinhAnh": "pk_cau_cao_cap.jpg"
+        },
+        {
+            "MaChiTiet": 37,
+            "SKU": "PK-CAU-TAPLUYEN-12",
+            "MaSanPham": 46,
+            "MaMau": null,
+            "MaSize": null,
+            "GiaBan": 240000,
+            "SoLuongTon": 150,
+            "HinhAnh": "pk_cau_tap_luyen.jpg"
+        },
+        {
+            "MaChiTiet": 38,
+            "SKU": "PK-QUANCAN-1",
+            "MaSanPham": 47,
+            "MaMau": null,
+            "MaSize": null,
+            "GiaBan": 35000,
+            "SoLuongTon": 300,
+            "HinhAnh": "pk_day_cuon_can.jpg"
+        },
+        {
+            "MaChiTiet": 39,
+            "SKU": "PK-QUANCAN-3",
+            "MaSanPham": 48,
+            "MaMau": null,
+            "MaSize": null,
+            "GiaBan": 90000,
+            "SoLuongTon": 200,
+            "HinhAnh": "pk_day_cuon_can.jpg"
+        },
+        {
+            "MaChiTiet": 40,
+            "SKU": "LN-CAL600-DEN-3U",
+            "MaSanPham": 14,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 3100000,
+            "SoLuongTon": 50,
+            "HinhAnh": "lining_calibar600.jpg"
+        },
+        {
+            "MaChiTiet": 41,
+            "SKU": "LN-CAL600-DEN-4U",
+            "MaSanPham": 14,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 3100000,
+            "SoLuongTon": 80,
+            "HinhAnh": "lining_calibar600.jpg"
+        },
+        {
+            "MaChiTiet": 42,
+            "SKU": "LN-CAL600-BAC-4U",
+            "MaSanPham": 14,
+            "MaMau": 5,
+            "MaSize": 2,
+            "GiaBan": 3100000,
+            "SoLuongTon": 45,
+            "HinhAnh": "lining_calibar600.jpg"
+        },
+        {
+            "MaChiTiet": 43,
+            "SKU": "LN-BLADEX800-DO-3U",
+            "MaSanPham": 15,
+            "MaMau": 3,
+            "MaSize": 1,
+            "GiaBan": 4200000,
+            "SoLuongTon": 50,
+            "HinhAnh": "lining_bladex800.jpg"
+        },
+        {
+            "MaChiTiet": 44,
+            "SKU": "LN-BLADEX800-DO-4U",
+            "MaSanPham": 15,
+            "MaMau": 3,
+            "MaSize": 2,
+            "GiaBan": 4200000,
+            "SoLuongTon": 70,
+            "HinhAnh": "lining_bladex800.jpg"
+        },
+        {
+            "MaChiTiet": 45,
+            "SKU": "LN-BLADEX800-XANH-4U",
+            "MaSanPham": 15,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 4200000,
+            "SoLuongTon": 60,
+            "HinhAnh": "lining_bladex800_xanh.jpg"
+        },
+        {
+            "MaChiTiet": 46,
+            "SKU": "LN-TEC9-DEN-3U",
+            "MaSanPham": 16,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 3500000,
+            "SoLuongTon": 40,
+            "HinhAnh": "lining_tectonic9.jpg"
+        },
+        {
+            "MaChiTiet": 47,
+            "SKU": "LN-TEC9-DEN-4U",
+            "MaSanPham": 16,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 3500000,
+            "SoLuongTon": 75,
+            "HinhAnh": "lining_tectonic9.jpg"
+        },
+        {
+            "MaChiTiet": 48,
+            "SKU": "LN-TEC9-DEN-5U",
+            "MaSanPham": 16,
+            "MaMau": 1,
+            "MaSize": 3,
+            "GiaBan": 3500000,
+            "SoLuongTon": 35,
+            "HinhAnh": "lining_tectonic9.jpg"
+        },
+        {
+            "MaChiTiet": 49,
+            "SKU": "VT-AS100X-DEN-3U",
+            "MaSanPham": 17,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 4100000,
+            "SoLuongTon": 40,
+            "HinhAnh": "victor_as100x_ultra.jpg"
+        },
+        {
+            "MaChiTiet": 50,
+            "SKU": "VT-AS100X-DEN-4U",
+            "MaSanPham": 17,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 4100000,
+            "SoLuongTon": 60,
+            "HinhAnh": "victor_as100x_ultra.jpg"
+        },
+        {
+            "MaChiTiet": 51,
+            "SKU": "VT-RYUGA-DO-3U",
+            "MaSanPham": 18,
+            "MaMau": 3,
+            "MaSize": 1,
+            "GiaBan": 3500000,
+            "SoLuongTon": 45,
+            "HinhAnh": "victor_ryuga_metallic.jpg"
+        },
+        {
+            "MaChiTiet": 52,
+            "SKU": "VT-RYUGA-DO-4U",
+            "MaSanPham": 18,
+            "MaMau": 3,
+            "MaSize": 2,
+            "GiaBan": 3500000,
+            "SoLuongTon": 85,
+            "HinhAnh": "victor_ryuga_metallic.jpg"
+        },
+        {
+            "MaChiTiet": 53,
+            "SKU": "VT-BRS12-XANH-3U",
+            "MaSanPham": 19,
+            "MaMau": 2,
+            "MaSize": 1,
+            "GiaBan": 3200000,
+            "SoLuongTon": 50,
+            "HinhAnh": "victor_brs12_pro.jpg"
+        },
+        {
+            "MaChiTiet": 54,
+            "SKU": "VT-BRS12-XANH-4U",
+            "MaSanPham": 19,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 3200000,
+            "SoLuongTon": 90,
+            "HinhAnh": "victor_brs12_pro.jpg"
+        },
+        {
+            "MaChiTiet": 55,
+            "SKU": "VT-JS10-DEN-3U",
+            "MaSanPham": 20,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 2850000,
+            "SoLuongTon": 40,
+            "HinhAnh": "victor_js10.jpg"
+        },
+        {
+            "MaChiTiet": 56,
+            "SKU": "VT-JS10-DEN-4U",
+            "MaSanPham": 20,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 2850000,
+            "SoLuongTon": 70,
+            "HinhAnh": "victor_js10.jpg"
+        },
+        {
+            "MaChiTiet": 57,
+            "SKU": "VT-DX12-XANH-3U",
+            "MaSanPham": 21,
+            "MaMau": 2,
+            "MaSize": 1,
+            "GiaBan": 3800000,
+            "SoLuongTon": 50,
+            "HinhAnh": "victor_dx12.jpg"
+        },
+        {
+            "MaChiTiet": 58,
+            "SKU": "VT-DX12-XANH-4U",
+            "MaSanPham": 21,
+            "MaMau": 2,
+            "MaSize": 2,
+            "GiaBan": 3800000,
+            "SoLuongTon": 60,
+            "HinhAnh": "victor_dx12.jpg"
+        },
+        {
+            "MaChiTiet": 59,
+            "SKU": "VT-TFCLAW-TRANG-4U",
+            "MaSanPham": 22,
+            "MaMau": 6,
+            "MaSize": 2,
+            "GiaBan": 2150000,
+            "SoLuongTon": 50,
+            "HinhAnh": "victor_tfclaw.jpg"
+        },
+        {
+            "MaChiTiet": 60,
+            "SKU": "VT-TFCLAW-TRANG-5U",
+            "MaSanPham": 22,
+            "MaMau": 6,
+            "MaSize": 3,
+            "GiaBan": 2150000,
+            "SoLuongTon": 50,
+            "HinhAnh": "victor_tfclaw.jpg"
+        },
+        {
+            "MaChiTiet": 61,
+            "SKU": "MZ-F10POWER-DEN-3U",
+            "MaSanPham": 23,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 4800000,
+            "SoLuongTon": 30,
+            "HinhAnh": "mizuno_f10power.jpg"
+        },
+        {
+            "MaChiTiet": 62,
+            "SKU": "MZ-F10POWER-DEN-4U",
+            "MaSanPham": 23,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 4800000,
+            "SoLuongTon": 50,
+            "HinhAnh": "mizuno_f10power.jpg"
+        },
+        {
+            "MaChiTiet": 63,
+            "SKU": "MZ-F10QUICK-DEN-3U",
+            "MaSanPham": 24,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 4800000,
+            "SoLuongTon": 30,
+            "HinhAnh": "mizuno_f10quick.jpg"
+        },
+        {
+            "MaChiTiet": 64,
+            "SKU": "MZ-F10QUICK-DEN-4U",
+            "MaSanPham": 24,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 4800000,
+            "SoLuongTon": 50,
+            "HinhAnh": "mizuno_f10quick.jpg"
+        },
+        {
+            "MaChiTiet": 65,
+            "SKU": "MZ-JPXRES-DEN-3U",
+            "MaSanPham": 25,
+            "MaMau": 1,
+            "MaSize": 1,
+            "GiaBan": 4990000,
+            "SoLuongTon": 30,
+            "HinhAnh": "mizuno_jpx_reserve.jpg"
+        },
+        {
+            "MaChiTiet": 66,
+            "SKU": "MZ-JPXRES-DEN-4U",
+            "MaSanPham": 25,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 4990000,
+            "SoLuongTon": 40,
+            "HinhAnh": "mizuno_jpx_reserve.jpg"
+        },
+        {
+            "MaChiTiet": 67,
+            "SKU": "MZ-FORTIUS70-DEN-4U",
+            "MaSanPham": 26,
+            "MaMau": 1,
+            "MaSize": 2,
+            "GiaBan": 3599000,
+            "SoLuongTon": 45,
+            "HinhAnh": "mizuno_fortius70.jpg"
+        },
+        {
+            "MaChiTiet": 68,
+            "SKU": "MZ-FORTIUS70-DEN-5U",
+            "MaSanPham": 26,
+            "MaMau": 1,
+            "MaSize": 3,
+            "GiaBan": 3599000,
+            "SoLuongTon": 45,
+            "HinhAnh": "mizuno_fortius70.jpg"
+        },
+        {
+            "MaChiTiet": 69,
+            "SKU": "MZ-ALTIUS01-TRANG-3U",
+            "MaSanPham": 27,
+            "MaMau": 6,
+            "MaSize": 1,
+            "GiaBan": 4500000,
+            "SoLuongTon": 30,
+            "HinhAnh": "mizuno_altius01speedlimited.jpg"
+        },
+        {
+            "MaChiTiet": 70,
+            "SKU": "MZ-ALTIUS01-TRANG-4U",
+            "MaSanPham": 27,
+            "MaMau": 6,
+            "MaSize": 2,
+            "GiaBan": 4500000,
+            "SoLuongTon": 50,
+            "HinhAnh": "mizuno_altius01speedlimited.jpg"
+        },
+        {
+            "MaChiTiet": 71,
+            "SKU": "LN-AYAS012-DEN-40",
+            "MaSanPham": 31,
+            "MaMau": 1,
+            "MaSize": 19,
+            "GiaBan": 3000000,
+            "SoLuongTon": 20,
+            "HinhAnh": "lining_ayas012_den.jpg"
+        },
+        {
+            "MaChiTiet": 72,
+            "SKU": "LN-AYAS012-DEN-41",
+            "MaSanPham": 31,
+            "MaMau": 1,
+            "MaSize": 20,
+            "GiaBan": 3000000,
+            "SoLuongTon": 25,
+            "HinhAnh": "lining_ayas012_den.jpg"
+        },
+        {
+            "MaChiTiet": 73,
+            "SKU": "LN-AYAS012-DEN-42",
+            "MaSanPham": 31,
+            "MaMau": 1,
+            "MaSize": 21,
+            "GiaBan": 3000000,
+            "SoLuongTon": 20,
+            "HinhAnh": "lining_ayas012_den.jpg"
+        },
+        {
+            "MaChiTiet": 74,
+            "SKU": "LN-AYAS012-TRANG-41",
+            "MaSanPham": 31,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 3000000,
+            "SoLuongTon": 20,
+            "HinhAnh": "lining_ayas012_trang.jpg"
+        },
+        {
+            "MaChiTiet": 75,
+            "SKU": "LN-AYAS012-TRANG-42",
+            "MaSanPham": 31,
+            "MaMau": 6,
+            "MaSize": 21,
+            "GiaBan": 3000000,
+            "SoLuongTon": 20,
+            "HinhAnh": "lining_ayas012_trang.jpg"
+        },
+        {
+            "MaChiTiet": 76,
+            "SKU": "LN-AYZU017-TRANG-40",
+            "MaSanPham": 32,
+            "MaMau": 6,
+            "MaSize": 19,
+            "GiaBan": 2160000,
+            "SoLuongTon": 25,
+            "HinhAnh": "lining_ayzu017.jpg"
+        },
+        {
+            "MaChiTiet": 77,
+            "SKU": "LN-AYZU017-TRANG-41",
+            "MaSanPham": 32,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 2160000,
+            "SoLuongTon": 30,
+            "HinhAnh": "lining_ayzu017.jpg"
+        },
+        {
+            "MaChiTiet": 78,
+            "SKU": "LN-AYZU017-TRANG-42",
+            "MaSanPham": 32,
+            "MaMau": 6,
+            "MaSize": 21,
+            "GiaBan": 2160000,
+            "SoLuongTon": 25,
+            "HinhAnh": "lining_ayzu017.jpg"
+        },
+        {
+            "MaChiTiet": 79,
+            "SKU": "LN-AYAS018-XANH-40",
+            "MaSanPham": 33,
+            "MaMau": 2,
+            "MaSize": 19,
+            "GiaBan": 2450000,
+            "SoLuongTon": 20,
+            "HinhAnh": "lining_ayas018.jpg"
+        },
+        {
+            "MaChiTiet": 80,
+            "SKU": "LN-AYAS018-XANH-41",
+            "MaSanPham": 33,
+            "MaMau": 2,
+            "MaSize": 20,
+            "GiaBan": 2450000,
+            "SoLuongTon": 30,
+            "HinhAnh": "lining_ayas018.jpg"
+        },
+        {
+            "MaChiTiet": 81,
+            "SKU": "LN-AYAS018-XANH-42",
+            "MaSanPham": 33,
+            "MaMau": 2,
+            "MaSize": 21,
+            "GiaBan": 2450000,
+            "SoLuongTon": 20,
+            "HinhAnh": "lining_ayas018.jpg"
+        },
+        {
+            "MaChiTiet": 82,
+            "SKU": "VT-A970ACE-DEN-40",
+            "MaSanPham": 34,
+            "MaMau": 1,
+            "MaSize": 19,
+            "GiaBan": 2190000,
+            "SoLuongTon": 20,
+            "HinhAnh": "victor_a970.jpg"
+        },
+        {
+            "MaChiTiet": 83,
+            "SKU": "VT-A970ACE-DEN-41",
+            "MaSanPham": 34,
+            "MaMau": 1,
+            "MaSize": 20,
+            "GiaBan": 2190000,
+            "SoLuongTon": 35,
+            "HinhAnh": "victor_a970.jpg"
+        },
+        {
+            "MaChiTiet": 84,
+            "SKU": "VT-A970ACE-DEN-42",
+            "MaSanPham": 34,
+            "MaMau": 1,
+            "MaSize": 21,
+            "GiaBan": 2190000,
+            "SoLuongTon": 25,
+            "HinhAnh": "victor_a970.jpg"
+        },
+        {
+            "MaChiTiet": 85,
+            "SKU": "VT-P9200III-TRANG-40",
+            "MaSanPham": 35,
+            "MaMau": 6,
+            "MaSize": 19,
+            "GiaBan": 2140000,
+            "SoLuongTon": 20,
+            "HinhAnh": "victor_p9200iii.jpg"
+        },
+        {
+            "MaChiTiet": 86,
+            "SKU": "VT-P9200III-TRANG-41",
+            "MaSanPham": 35,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 2140000,
+            "SoLuongTon": 30,
+            "HinhAnh": "victor_p9200iii.jpg"
+        },
+        {
+            "MaChiTiet": 87,
+            "SKU": "VT-P9200III-TRANG-42",
+            "MaSanPham": 35,
+            "MaMau": 6,
+            "MaSize": 21,
+            "GiaBan": 2140000,
+            "SoLuongTon": 25,
+            "HinhAnh": "victor_p9200iii.jpg"
+        },
+        {
+            "MaChiTiet": 88,
+            "SKU": "MZ-WCLAW2-XANH-40",
+            "MaSanPham": 36,
+            "MaMau": 2,
+            "MaSize": 19,
+            "GiaBan": 2750000,
+            "SoLuongTon": 20,
+            "HinhAnh": "mizuno_waveclaw_neo2_xanh.jpg"
+        },
+        {
+            "MaChiTiet": 89,
+            "SKU": "MZ-WCLAW2-XANH-41",
+            "MaSanPham": 36,
+            "MaMau": 2,
+            "MaSize": 20,
+            "GiaBan": 2750000,
+            "SoLuongTon": 30,
+            "HinhAnh": "mizuno_waveclaw_neo2_xanh.jpg"
+        },
+        {
+            "MaChiTiet": 90,
+            "SKU": "MZ-WCLAW2-XANH-42",
+            "MaSanPham": 36,
+            "MaMau": 2,
+            "MaSize": 21,
+            "GiaBan": 2750000,
+            "SoLuongTon": 20,
+            "HinhAnh": "mizuno_waveclaw_neo2_xanh.jpg"
+        },
+        {
+            "MaChiTiet": 91,
+            "SKU": "MZ-WCLAW2-TRANG-41",
+            "MaSanPham": 36,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 2750000,
+            "SoLuongTon": 20,
+            "HinhAnh": "mizuno_waveclaw_neo2_trang.jpg"
+        },
+        {
+            "MaChiTiet": 92,
+            "SKU": "MZ-WFANGPRO-TRANG-40",
+            "MaSanPham": 37,
+            "MaMau": 6,
+            "MaSize": 19,
+            "GiaBan": 3900000,
+            "SoLuongTon": 15,
+            "HinhAnh": "mizuno_fangpro.jpg"
+        },
+        {
+            "MaChiTiet": 93,
+            "SKU": "MZ-WFANGPRO-TRANG-41",
+            "MaSanPham": 37,
+            "MaMau": 6,
+            "MaSize": 20,
+            "GiaBan": 3900000,
+            "SoLuongTon": 25,
+            "HinhAnh": "mizuno_fangpro.jpg"
+        },
+        {
+            "MaChiTiet": 94,
+            "SKU": "MZ-WFANGPRO-TRANG-42",
+            "MaSanPham": 37,
+            "MaMau": 6,
+            "MaSize": 21,
+            "GiaBan": 3900000,
+            "SoLuongTon": 20,
+            "HinhAnh": "mizuno_fangpro.jpg"
+        },
+        {
+            "MaChiTiet": 95,
+            "SKU": "LN-A421-XANH-M",
+            "MaSanPham": 41,
+            "MaMau": 2,
+            "MaSize": 5,
+            "GiaBan": 130000,
+            "SoLuongTon": 30,
+            "HinhAnh": "lining_a421.jpg"
+        },
+        {
+            "MaChiTiet": 96,
+            "SKU": "LN-A421-XANH-L",
+            "MaSanPham": 41,
+            "MaMau": 2,
+            "MaSize": 6,
+            "GiaBan": 130000,
+            "SoLuongTon": 40,
+            "HinhAnh": "lining_a421.jpg"
+        },
+        {
+            "MaChiTiet": 97,
+            "SKU": "LN-A421-XANH-XL",
+            "MaSanPham": 41,
+            "MaMau": 2,
+            "MaSize": 7,
+            "GiaBan": 130000,
+            "SoLuongTon": 30,
+            "HinhAnh": "lining_a421.jpg"
+        },
+        {
+            "MaChiTiet": 98,
+            "SKU": "LN-3715-DO-M",
+            "MaSanPham": 42,
+            "MaMau": 3,
+            "MaSize": 5,
+            "GiaBan": 160000,
+            "SoLuongTon": 30,
+            "HinhAnh": "lining_3715.jpg"
+        },
+        {
+            "MaChiTiet": 99,
+            "SKU": "LN-3715-DO-L",
+            "MaSanPham": 42,
+            "MaMau": 3,
+            "MaSize": 6,
+            "GiaBan": 160000,
+            "SoLuongTon": 40,
+            "HinhAnh": "lining_3715.jpg"
+        },
+        {
+            "MaChiTiet": 100,
+            "SKU": "LN-3715-DO-XL",
+            "MaSanPham": 42,
+            "MaMau": 3,
+            "MaSize": 7,
+            "GiaBan": 160000,
+            "SoLuongTon": 30,
+            "HinhAnh": "lining_3715.jpg"
+        },
+        {
+            "MaChiTiet": 101,
+            "SKU": "LN-Q21-DEN-M",
+            "MaSanPham": 43,
+            "MaMau": 1,
+            "MaSize": 5,
+            "GiaBan": 110000,
+            "SoLuongTon": 35,
+            "HinhAnh": "lining_q21.jpg"
+        },
+        {
+            "MaChiTiet": 102,
+            "SKU": "LN-Q21-DEN-L",
+            "MaSanPham": 43,
+            "MaMau": 1,
+            "MaSize": 6,
+            "GiaBan": 110000,
+            "SoLuongTon": 45,
+            "HinhAnh": "lining_q21.jpg"
+        },
+        {
+            "MaChiTiet": 103,
+            "SKU": "LN-Q21-DEN-XL",
+            "MaSanPham": 43,
+            "MaMau": 1,
+            "MaSize": 7,
+            "GiaBan": 110000,
+            "SoLuongTon": 35,
+            "HinhAnh": "lining_q21.jpg"
+        }
+    ],
+    "SanPham": [
+        {
+            "MaSanPham": 1,
+            "TenSanPham": "Vợt Cầu Lông Yonex Astrox 100ZZ",
+            "MoTa": "Yonex Astrox 100ZZ Kurenai là phiên bản nâng cấp của Astrox 100ZZ, nổi bật với màu đỏ thẫm và công nghệ cải tiến cho lối chơi tấn công mạnh mẽ. Được nhiều vận động viên hàng đầu như Viktor Axelsen sử dụng.",
+            "GiaGoc": 4500000,
+            "HinhAnhDaiDien": "astrox100zz.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 2,
+            "TenSanPham": "Vợt Cầu Lông Yonex Astrox 88D Pro 2024",
+            "MoTa": "Chuyên dụng cho đánh đôi, vị trí cầu sau, thiên về tấn công.",
+            "GiaGoc": 4799000,
+            "HinhAnhDaiDien": "astrox88dpro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 3,
+            "TenSanPham": "Vợt Cầu Lông Yonex Astrox 88S Pro 2024",
+            "MoTa": "Chuyên dụng cho đánh đôi, vị trí cầu trước, thiên về tốc độ và kiểm soát.",
+            "GiaGoc": 4799000,
+            "HinhAnhDaiDien": "astrox88spro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 4,
+            "TenSanPham": "Vợt Cầu Lông Yonex Astrox 99 Pro",
+            "MoTa": "Vợt nặng đầu, thiên công, dành cho VĐV chuyên nghiệp.",
+            "GiaGoc": 4190000,
+            "HinhAnhDaiDien": "astrox99pro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 5,
+            "TenSanPham": "Vợt Cầu Lông Yonex Astrox 77 Pro",
+            "MoTa": "Vợt cân bằng, linh hoạt, dễ chơi, phù hợp cho người chơi phong trào.",
+            "GiaGoc": 3900000,
+            "HinhAnhDaiDien": "astrox77pro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 6,
+            "TenSanPham": "Vợt Cầu Lông Yonex Nanoflare 1000Z",
+            "MoTa": "Dòng vợt nhẹ đầu, tốc độ nhanh nhất, phù hợp cho phản tạt.",
+            "GiaGoc": 4600000,
+            "HinhAnhDaiDien": "nanoflare1000z.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 7,
+            "TenSanPham": "Vợt Cầu Lông Yonex Nanoflare 700 Pro",
+            "MoTa": "Vợt nhẹ đầu, tốc độ cao, hỗ trợ phản tạt nhanh.",
+            "GiaGoc": 4489000,
+            "HinhAnhDaiDien": "nanoflare700pro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 8,
+            "TenSanPham": "Vợt Cầu Lông Yonex Arcsaber 11 Pro",
+            "MoTa": "Dòng vợt cân bằng, kiểm soát cầu tuyệt vời, huyền thoại trở lại.",
+            "GiaGoc": 4100000,
+            "HinhAnhDaiDien": "arcsaber11pro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 9,
+            "TenSanPham": "Vợt Cầu Lông Lining Aeronaut 9000C",
+            "MoTa": "Dòng vợt tấn công, nặng đầu, khung vát gió.",
+            "GiaGoc": 4300000,
+            "HinhAnhDaiDien": "lining_aero9000c.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 10,
+            "TenSanPham": "Vợt Cầu Lông Lining Aeronaut 9000I",
+            "MoTa": "Dòng vợt chuyên đánh tốc độ, phản tạt nhanh.",
+            "GiaGoc": 4300000,
+            "HinhAnhDaiDien": "lining_aero9000i.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 11,
+            "TenSanPham": "Vợt Cầu Lông Lining Tectonic 7",
+            "MoTa": "Vợt công thủ toàn diện, dễ thuần.",
+            "GiaGoc": 3200000,
+            "HinhAnhDaiDien": "lining_tectonic7.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 12,
+            "TenSanPham": "Vợt Cầu Lông Lining Axforce 90 Max",
+            "MoTa": "Vợt Rồng chuyên công, rất nặng đầu.",
+            "GiaGoc": 4100000,
+            "HinhAnhDaiDien": "lining_axforce90max.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 13,
+            "TenSanPham": "Vợt Cầu Lông Lining Axforce 80",
+            "MoTa": "Vợt tấn công, trợ lực tốt, dễ chơi hơn Axforce 90.",
+            "GiaGoc": 3900000,
+            "HinhAnhDaiDien": "lining_axforce80.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 14,
+            "TenSanPham": "Vợt Cầu Lông Lining Calibar 600",
+            "MoTa": "Vợt tầm trung, thiên công, giá cả phải chăng.",
+            "GiaGoc": 3100000,
+            "HinhAnhDaiDien": "lining_calibar600.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 15,
+            "TenSanPham": "Vợt Cầu Lông Lining Bladex 800",
+            "MoTa": "Dòng vợt mới, khung sắc, tốc độ nhanh.",
+            "GiaGoc": 4200000,
+            "HinhAnhDaiDien": "lining_bladex800.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 16,
+            "TenSanPham": "Vợt Cầu Lông Lining Tectonic 9",
+            "MoTa": "Vợt cao cấp, nặng đầu, tăng cường lực đập.",
+            "GiaGoc": 3500000,
+            "HinhAnhDaiDien": "lining_tectonic9.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 17,
+            "TenSanPham": "Vợt Cầu Lông Victor Auraspeed 100X Ultra",
+            "MoTa": "Dòng vợt tốc độ, linh hoạt, công thủ toàn diện.",
+            "GiaGoc": 4100000,
+            "HinhAnhDaiDien": "victor_as100x_ultra.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 18,
+            "TenSanPham": "Vợt Cầu Lông Victor TK Ryuga Metallic",
+            "MoTa": "Vợt chuyên công, thiết kế mạnh mẽ, đập cầu uy lực.",
+            "GiaGoc": 3500000,
+            "HinhAnhDaiDien": "victor_ryuga_metallic.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 19,
+            "TenSanPham": "Vợt Cầu Lông Victor Brave Sword 12 Pro",
+            "MoTa": "Huyền thoại vợt Kiếm, khung vát kim cương, tốc độ cực nhanh.",
+            "GiaGoc": 3200000,
+            "HinhAnhDaiDien": "victor_brs12_pro.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 20,
+            "TenSanPham": "Vợt Cầu Lông Victor Jetspeed S 10",
+            "MoTa": "Vợt tốc độ, nhẹ, phản tạt nhanh, dễ điều khiển.",
+            "GiaGoc": 2850000,
+            "HinhAnhDaiDien": "victor_js10.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 21,
+            "TenSanPham": "Vợt Cầu Lông Victor DriveX 12",
+            "MoTa": "Vợt công thủ toàn diện, kiểm soát cầu tốt.",
+            "GiaGoc": 3800000,
+            "HinhAnhDaiDien": "victor_dx12.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 22,
+            "TenSanPham": "Vợt Cầu Lông Victor Thruster F Claw",
+            "MoTa": "Vợt thiên công, nặng đầu, biệt danh Móng Vuốt.",
+            "GiaGoc": 2150000,
+            "HinhAnhDaiDien": "victor_tfclaw.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 23,
+            "TenSanPham": "Vợt Cầu Lông Mizuno Fortius 10 Power",
+            "MoTa": "Vợt cao cấp, chuyên công, sản xuất tại Nhật Bản.",
+            "GiaGoc": 4800000,
+            "HinhAnhDaiDien": "mizuno_f10power.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 24,
+            "TenSanPham": "Vợt Cầu Lông Mizuno Fortius 10 Quick",
+            "MoTa": "Vợt cao cấp, chuyên tốc độ, sản xuất tại Nhật Bản.",
+            "GiaGoc": 4800000,
+            "HinhAnhDaiDien": "mizuno_f10quick.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 25,
+            "TenSanPham": "Vợt Cầu Lông Mizuno JPX Reserve Edition",
+            "MoTa": "Phiên bản đặc biệt, công thủ toàn diện.",
+            "GiaGoc": 4990000,
+            "HinhAnhDaiDien": "mizuno_jpx_reserve.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": 8,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 26,
+            "TenSanPham": "Vợt Cầu Lông Mizuno Fortius 70",
+            "MoTa": "Vợt tầm trung, nặng đầu, hỗ trợ tấn công.",
+            "GiaGoc": 3599000,
+            "HinhAnhDaiDien": "mizuno_fortius70.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 27,
+            "TenSanPham": "Vợt Cầu Lông Mizuno Altius 01 Speed Limited",
+            "MoTa": "Vợt cân bằng, linh hoạt, dễ điều khiển.",
+            "GiaGoc": 4500000,
+            "HinhAnhDaiDien": "mizuno_altius01speedlimited.jpg",
+            "MaLoai": 1,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 28,
+            "TenSanPham": "Giày Cầu Lông Yonex SHB 65Z4",
+            "MoTa": "Dòng giày toàn diện, êm ái, bám sân.",
+            "GiaGoc": 2800000,
+            "HinhAnhDaiDien": "yonex_65z4.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 1,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 29,
+            "TenSanPham": "Giày Cầu Lông Yonex Eclipsion Z3",
+            "MoTa": "Tăng cường độ ổn định, chống lật cổ chân.",
+            "GiaGoc": 3100000,
+            "HinhAnhDaiDien": "yonex_eclipsion_trang_z3.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 1,
+            "MaHang": 1,
+            "MaKhuyenMai": 1,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 30,
+            "TenSanPham": "Giày Cầu Lông Yonex Aerus Z2",
+            "MoTa": "Siêu nhẹ, tăng tốc độ di chuyển.",
+            "GiaGoc": 3000000,
+            "HinhAnhDaiDien": "yonex_aerus_z2_den.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 1,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 31,
+            "TenSanPham": "Giày Cầu Lông Lining AYAS012-1",
+            "MoTa": "Dòng Lưỡi Dao Bóng Tối, bám sân, ổn định.",
+            "GiaGoc": 3000000,
+            "HinhAnhDaiDien": "lining_ayas012_den.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 32,
+            "TenSanPham": "Giày Cầu Lông Lining AYZU017-1",
+            "MoTa": "Giày bền bỉ, công nghệ Bounse+.",
+            "GiaGoc": 2160000,
+            "HinhAnhDaiDien": "lining_ayzu017.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 33,
+            "TenSanPham": "Giày Cầu Lông Lining AYAS018-6",
+            "MoTa": "Giày tầm trung, êm ái, thiết kế đẹp.",
+            "GiaGoc": 2450000,
+            "HinhAnhDaiDien": "lining_ayas018.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": 3,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 34,
+            "TenSanPham": "Giày Cầu Lông Victor A970ACE",
+            "MoTa": "Phiên bản đặc biệt, ổn định, êm ái.",
+            "GiaGoc": 2190000,
+            "HinhAnhDaiDien": "victor_a970.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": 5,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 35,
+            "TenSanPham": "Giày Cầu Lông Victor P9200III",
+            "MoTa": "Dòng P9200 huyền thoại, siêu bền.",
+            "GiaGoc": 2140000,
+            "HinhAnhDaiDien": "victor_p9200iii.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 3,
+            "MaHang": 3,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 36,
+            "TenSanPham": "Giày Cầu Lông Mizuno Wave Claw Neo 2",
+            "MoTa": "Tốc độ, êm ái, công nghệ Enerzy.",
+            "GiaGoc": 2750000,
+            "HinhAnhDaiDien": "mizuno_waveclaw_neo2_xanh.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 37,
+            "TenSanPham": "Giày Cầu Lông Mizuno Wave Fang Pro",
+            "MoTa": "Dòng giày ổn định, da thật, sản xuất tại Nhật.",
+            "GiaGoc": 3900000,
+            "HinhAnhDaiDien": "mizuno_fangpro.jpg",
+            "MaLoai": 2,
+            "MaNhaCungCap": 4,
+            "MaHang": 4,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 38,
+            "TenSanPham": "Áo Cầu Lông Yonex TRM3089",
+            "MoTa": "Áo thi đấu đội tuyển, chất liệu poly thoáng mát.",
+            "GiaGoc": 119000,
+            "HinhAnhDaiDien": "yonex_trm3089.jpg",
+            "MaLoai": 3,
+            "MaNhaCungCap": 1,
+            "MaHang": 1,
+            "MaKhuyenMai": 2,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 39,
+            "TenSanPham": "Áo Cầu Lông Yonex TRM3053",
+            "MoTa": "Áo thi đấu đội tuyển, chất liệu poly cao cấp.",
+            "GiaGoc": 169000,
+            "HinhAnhDaiDien": "yonex_trm3053.jpg",
+            "MaLoai": 3,
+            "MaNhaCungCap": 1,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 40,
+            "TenSanPham": "Quần Cầu Lông Yonex TSM3085",
+            "MoTa": "Quần short thể thao, co giãn 4 chiều.",
+            "GiaGoc": 139000,
+            "HinhAnhDaiDien": "yonex_tsm3085.jpg",
+            "MaLoai": 3,
+            "MaNhaCungCap": 1,
+            "MaHang": 1,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 41,
+            "TenSanPham": "Áo Cầu Lông Lining A421",
+            "MoTa": "Áo thi đấu đội tuyển Trung Quốc 2024.",
+            "GiaGoc": 130000,
+            "HinhAnhDaiDien": "lining_a421.jpg",
+            "MaLoai": 3,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 42,
+            "TenSanPham": "Áo Cầu Lông Lining 3715",
+            "MoTa": "Áo thi đấu đội tuyển Trung Quốc 2024.",
+            "GiaGoc": 160000,
+            "HinhAnhDaiDien": "lining_3715.jpg",
+            "MaLoai": 3,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": null,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 43,
+            "TenSanPham": "Quần Cầu Lông Lining Q21",
+            "MoTa": "Quần short thể thao, chất liệu thoáng khí.",
+            "GiaGoc": 110000,
+            "HinhAnhDaiDien": "lining_q21.jpg",
+            "MaLoai": 3,
+            "MaNhaCungCap": 2,
+            "MaHang": 2,
+            "MaKhuyenMai": 2,
+            "CoSize": 1,
+            "CoMau": 1
+        },
+        {
+            "MaSanPham": 44,
+            "TenSanPham": "Cầu Lông Lông Vịt Thi Đấu (Ống 12 Quả)",
+            "MoTa": "Cầu lông lông vịt chọn lọc, đầu cork bọc da, quỹ đạo bay ổn định. Phù hợp thi đấu và tập luyện thường xuyên.",
+            "GiaGoc": 340000,
+            "HinhAnhDaiDien": "pk_cau_thi_dau.jpg",
+            "MaLoai": 4,
+            "MaNhaCungCap": 5,
+            "MaHang": null,
+            "MaKhuyenMai": 2,
+            "CoSize": 0,
+            "CoMau": 0,
+            "NgayTao": "2026-11-01 08:20:33",
+            "deleted_at": null
+        },
+        {
+            "MaSanPham": 45,
+            "TenSanPham": "Cầu Lông Lông Ngỗng Cao Cấp (Ống 12 Quả)",
+            "MoTa": "Lông ngỗng cao cấp, độ bền cao, giữ nhịp bay đều khi đánh mạnh. Dành cho người chơi yêu cầu chất lượng cầu tốt.",
+            "GiaGoc": 520000,
+            "HinhAnhDaiDien": "pk_cau_cao_cap.jpg",
+            "MaLoai": 4,
+            "MaNhaCungCap": 5,
+            "MaHang": null,
+            "MaKhuyenMai": null,
+            "CoSize": 0,
+            "CoMau": 0,
+            "NgayTao": "2026-11-01 08:20:33",
+            "deleted_at": null
+        },
+        {
+            "MaSanPham": 46,
+            "TenSanPham": "Cầu Lông Lông Vịt Tập Luyện (Ống 12 Quả)",
+            "MoTa": "Cầu tập luyện giá tốt, độ bền khá, phù hợp câu lạc bộ và người chơi phong trào.",
+            "GiaGoc": 240000,
+            "HinhAnhDaiDien": "pk_cau_tap_luyen.jpg",
+            "MaLoai": 4,
+            "MaNhaCungCap": 5,
+            "MaHang": null,
+            "MaKhuyenMai": 3,
+            "CoSize": 0,
+            "CoMau": 0,
+            "NgayTao": "2026-11-01 08:20:33",
+            "deleted_at": null
+        },
+        {
+            "MaSanPham": 47,
+            "TenSanPham": "Dây Cuốn Cán Vợt Cầu Lông (Cuộn Đơn)",
+            "MoTa": "Quấn cán mỏng, bám tay, thấm mồ hôi tốt. Dễ quấn, giúp cầm vợt chắc và không trơn khi chơi lâu.",
+            "GiaGoc": 35000,
+            "HinhAnhDaiDien": "pk_day_cuon_can.jpg",
+            "MaLoai": 4,
+            "MaNhaCungCap": 5,
+            "MaHang": null,
+            "MaKhuyenMai": null,
+            "CoSize": 0,
+            "CoMau": 0,
+            "NgayTao": "2026-11-01 08:20:33",
+            "deleted_at": null
+        },
+        {
+            "MaSanPham": 48,
+            "TenSanPham": "Dây Cuốn Cán Vợt Cầu Lông (Combo 3 Cuộn)",
+            "MoTa": "Combo 3 cuộn quấn cán tiết kiệm, đủ để thay mới định kỳ cho cây vợt của bạn.",
+            "GiaGoc": 90000,
+            "HinhAnhDaiDien": "pk_day_cuon_can.jpg",
+            "MaLoai": 4,
+            "MaNhaCungCap": 5,
+            "MaHang": null,
+            "MaKhuyenMai": 2,
+            "CoSize": 0,
+            "CoMau": 0,
+            "NgayTao": "2026-11-01 08:20:33",
+            "deleted_at": null
+        }
+    ],
+    "KhachHang": [
+        {
+            "MaKhachHang": 1,
+            "HoTen": "Admin Quản Trị",
+            "Email": "admin@shopcaulong.com",
+            "SoDienThoai": "0901000001",
+            "DiaChi": "Tại cửa hàng",
+            "MaTaiKhoan": 1,
+            "NgayTao": "2026-11-01 08:20:33"
+        },
+        {
+            "MaKhachHang": 2,
+            "HoTen": "Nhân Viên Bán Hàng",
+            "Email": "nhanvien1@shopcaulong.com",
+            "SoDienThoai": "0901000002",
+            "DiaChi": "Tại cửa hàng",
+            "MaTaiKhoan": 2,
+            "NgayTao": "2026-11-01 08:20:33"
+        },
+        {
+            "MaKhachHang": 3,
+            "HoTen": "Nguyễn Văn A",
+            "Email": "nguyenvana@gmail.com",
+            "SoDienThoai": "0901234567",
+            "DiaChi": "123 Nguyễn Trãi, Q.1, TP.HCM",
+            "MaTaiKhoan": 3,
+            "NgayTao": "2026-11-01 08:20:33"
+        },
+        {
+            "MaKhachHang": 4,
+            "HoTen": "Trần Thị B",
+            "Email": "tranthib@gmail.com",
+            "SoDienThoai": "0909876543",
+            "DiaChi": "456 Lê Lợi, Q.3, TP.HCM",
+            "MaTaiKhoan": 4,
+            "NgayTao": "2026-11-01 08:20:33"
+        }
+    ],
+    "TaiKhoan": [
+        {
+            "MaTaiKhoan": 1,
+            "TenDangNhap": "admin",
+            "MatKhau": "$2y$10$fJflhWzIK6ynLHuWeKzA9em0ICV8WhsJ6PRjdpkxJA3m1G7kK55Bm",
+            "Email": "admin@shopcaulong.com",
+            "MaQuyen": 1,
+            "NgayTao": "2026-11-01 08:20:33"
+        },
+        {
+            "MaTaiKhoan": 2,
+            "TenDangNhap": "nhanvien_banhang",
+            "MatKhau": "$2y$10$/iJ4JCQbeuPrGT/DucDd0ODKbt8BhaCkn6c3OkFHAoba3EaaSMomu",
+            "Email": "nhanvien1@shopcaulong.com",
+            "MaQuyen": 2,
+            "NgayTao": "2026-11-01 08:20:33"
+        },
+        {
+            "MaTaiKhoan": 3,
+            "TenDangNhap": "nguyenvana",
+            "MatKhau": "$2y$10$WEmoCAdBF4w695cSGWiFI.9lOEJoKKJRn1qXx0O2UO4o0XaIYbQPu",
+            "Email": "nguyenvana@gmail.com",
+            "MaQuyen": 3,
+            "NgayTao": "2026-11-01 08:20:33"
+        },
+        {
+            "MaTaiKhoan": 4,
+            "TenDangNhap": "tranthib",
+            "MatKhau": "$2y$10$CsjaQTGowlQ5NP/Fvzuh0ODUpgZBwCkcgZfnYsHzKLrrG/OeIsGYS",
+            "Email": "tranthib@gmail.com",
+            "MaQuyen": 3,
+            "NgayTao": "2026-11-01 08:20:33"
+        }
+    ],
+    "PhanQuyen": [
+        {
+            "MaQuyen": 1,
+            "TenQuyen": "Quản trị"
+        },
+        {
+            "MaQuyen": 2,
+            "TenQuyen": "Nhân viên"
+        },
+        {
+            "MaQuyen": 3,
+            "TenQuyen": "Khách hàng"
+        }
+    ],
+    "Size": [
+        {
+            "MaSize": 1,
+            "TenSize": "3U",
+            "LoaiSize": "Vot"
+        },
+        {
+            "MaSize": 2,
+            "TenSize": "4U",
+            "LoaiSize": "Vot"
+        },
+        {
+            "MaSize": 3,
+            "TenSize": "5U",
+            "LoaiSize": "Vot"
+        },
+        {
+            "MaSize": 4,
+            "TenSize": "S",
+            "LoaiSize": "AoQuan"
+        },
+        {
+            "MaSize": 5,
+            "TenSize": "M",
+            "LoaiSize": "AoQuan"
+        },
+        {
+            "MaSize": 6,
+            "TenSize": "L",
+            "LoaiSize": "AoQuan"
+        },
+        {
+            "MaSize": 7,
+            "TenSize": "XL",
+            "LoaiSize": "AoQuan"
+        },
+        {
+            "MaSize": 8,
+            "TenSize": "2XL",
+            "LoaiSize": "AoQuan"
+        },
+        {
+            "MaSize": 9,
+            "TenSize": "30",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 10,
+            "TenSize": "31",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 11,
+            "TenSize": "32",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 12,
+            "TenSize": "33",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 13,
+            "TenSize": "34",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 14,
+            "TenSize": "35",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 15,
+            "TenSize": "36",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 16,
+            "TenSize": "37",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 17,
+            "TenSize": "38",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 18,
+            "TenSize": "39",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 19,
+            "TenSize": "40",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 20,
+            "TenSize": "41",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 21,
+            "TenSize": "42",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 22,
+            "TenSize": "43",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 23,
+            "TenSize": "44",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 24,
+            "TenSize": "45",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 25,
+            "TenSize": "46",
+            "LoaiSize": "Giay"
+        },
+        {
+            "MaSize": 26,
+            "TenSize": "47",
+            "LoaiSize": "Giay"
+        }
+    ],
+    "MauSac": [
+        {
+            "MaMau": 1,
+            "TenMau": "Đen"
+        },
+        {
+            "MaMau": 2,
+            "TenMau": "Xanh dương"
+        },
+        {
+            "MaMau": 3,
+            "TenMau": "Đỏ"
+        },
+        {
+            "MaMau": 4,
+            "TenMau": "Vàng"
+        },
+        {
+            "MaMau": 5,
+            "TenMau": "Bạc"
+        },
+        {
+            "MaMau": 6,
+            "TenMau": "Trắng"
+        },
+        {
+            "MaMau": 7,
+            "TenMau": "Tím"
+        },
+        {
+            "MaMau": 8,
+            "TenMau": "Xanh lá"
+        },
+        {
+            "MaMau": 9,
+            "TenMau": "Cam"
+        },
+        {
+            "MaMau": 10,
+            "TenMau": "Hồng"
+        }
+    ],
+    "KhuyenMai": [
+        {
+            "MaKhuyenMai": 1,
+            "TenChuongTrinh": "Đại lễ 30/4 - 1/5",
+            "MoTa": "Mừng ngày giải phóng miền Nam và Quốc tế lao động",
+            "NgayBatDau": "2025-04-25",
+            "NgayKetThuc": "2027-05-05",
+            "PhanTramGiam": 10,
+            "GiamToiDa": 150000,
+            "SoLuongSuDung": 200
+        },
+        {
+            "MaKhuyenMai": 2,
+            "TenChuongTrinh": "Chào Hè Sôi Động",
+            "MoTa": "Giảm giá dụng cụ thể thao mùa hè",
+            "NgayBatDau": "2025-06-01",
+            "NgayKetThuc": "2027-06-30",
+            "PhanTramGiam": 12,
+            "GiamToiDa": 200000,
+            "SoLuongSuDung": 150
+        },
+        {
+            "MaKhuyenMai": 3,
+            "TenChuongTrinh": "Back To School",
+            "MoTa": "Đồng hành cùng học sinh sinh viên",
+            "NgayBatDau": "2025-08-15",
+            "NgayKetThuc": "2027-09-10",
+            "PhanTramGiam": 10,
+            "GiamToiDa": 100000,
+            "SoLuongSuDung": 300
+        },
+        {
+            "MaKhuyenMai": 4,
+            "TenChuongTrinh": "Siêu Sale 9.9",
+            "MoTa": "Săn sale ngày đôi tháng 9",
+            "NgayBatDau": "2025-09-09",
+            "NgayKetThuc": "2027-09-11",
+            "PhanTramGiam": 25,
+            "GiamToiDa": 500000,
+            "SoLuongSuDung": 50
+        },
+        {
+            "MaKhuyenMai": 5,
+            "TenChuongTrinh": "Black Friday 2026",
+            "MoTa": "Lễ hội mua sắm lớn nhất năm",
+            "NgayBatDau": "2025-11-28",
+            "NgayKetThuc": "2027-11-30",
+            "PhanTramGiam": 40,
+            "GiamToiDa": 1000000,
+            "SoLuongSuDung": 100
+        },
+        {
+            "MaKhuyenMai": 6,
+            "TenChuongTrinh": "Giáng Sinh An Lành",
+            "MoTa": "Quà tặng giáng sinh cho lông thủ",
+            "NgayBatDau": "2025-11-20",
+            "NgayKetThuc": "2027-12-25",
+            "PhanTramGiam": 15,
+            "GiamToiDa": 200000,
+            "SoLuongSuDung": 100
+        },
+        {
+            "MaKhuyenMai": 7,
+            "TenChuongTrinh": "Xả kho cuối năm",
+            "MoTa": "Thanh lý các mẫu vợt đời cũ",
+            "NgayBatDau": "2025-12-26",
+            "NgayKetThuc": "2027-12-31",
+            "PhanTramGiam": 50,
+            "GiamToiDa": null,
+            "SoLuongSuDung": 20
+        },
+        {
+            "MaKhuyenMai": 8,
+            "TenChuongTrinh": "Khách hàng thân thiết",
+            "MoTa": "Tri ân khách hàng đã mua trên 5 triệu",
+            "NgayBatDau": "2025-01-01",
+            "NgayKetThuc": "2027-12-31",
+            "PhanTramGiam": 5,
+            "GiamToiDa": 500000,
+            "SoLuongSuDung": null
+        }
+    ],
+    "Hang": [
+        {
+            "MaHang": 1,
+            "TenHang": "Yonex",
+            "QuocGia": "Nhật Bản"
+        },
+        {
+            "MaHang": 2,
+            "TenHang": "Lining",
+            "QuocGia": "Trung Quốc"
+        },
+        {
+            "MaHang": 3,
+            "TenHang": "Victor",
+            "QuocGia": "Đài Loan"
+        },
+        {
+            "MaHang": 4,
+            "TenHang": "Mizuno",
+            "QuocGia": "Nhật Bản"
+        }
+    ],
+    "NhaCungCap": [
+        {
+            "MaNhaCungCap": 1,
+            "TenNhaCungCap": "Công ty TNHH Thể thao Đức Phát",
+            "DiaChi": "25 Hoàng Hoa Thám, Q.Tân Bình, TP.HCM",
+            "SoDienThoai": "0905123456",
+            "Email": "sales@ducphat.vn"
+        },
+        {
+            "MaNhaCungCap": 2,
+            "TenNhaCungCap": "Công ty TNHH Cầu Lông Sunrise Việt Nam",
+            "DiaChi": "22 Nguyễn Văn Trỗi, Q.Phú Nhuận, TP.HCM",
+            "SoDienThoai": "0908789123",
+            "Email": "info@sunrisevn.com"
+        },
+        {
+            "MaNhaCungCap": 3,
+            "TenNhaCungCap": "Công ty TNHH Thể thao Đại Hưng",
+            "DiaChi": "19 Nguyễn Hữu Cảnh, Q.Bình Thạnh, TP.HCM",
+            "SoDienThoai": "0903332121",
+            "Email": "contact@daihung.vn"
+        },
+        {
+            "MaNhaCungCap": 4,
+            "TenNhaCungCap": "Công ty TNHH SportPro Việt Nam",
+            "DiaChi": "88 Trần Hưng Đạo, Q.1, TP.HCM",
+            "SoDienThoai": "0918234567",
+            "Email": "support@sportpro.vn"
+        },
+        {
+            "MaNhaCungCap": 5,
+            "TenNhaCungCap": "Công ty TNHH Thể thao Phúc Gia",
+            "DiaChi": "12 Cầu Giấy, Hà Nội",
+            "SoDienThoai": "0934556677",
+            "Email": "info@phucgiasport.vn"
+        }
+    ],
+    "LoaiSanPham": [
+        {
+            "MaLoai": 1,
+            "TenLoai": "Vợt cầu lông",
+            "MoTa": "Dành cho người chơi chuyên nghiệp và phong trào"
+        },
+        {
+            "MaLoai": 2,
+            "TenLoai": "Giày cầu lông",
+            "MoTa": "Giày thi đấu và tập luyện"
+        },
+        {
+            "MaLoai": 3,
+            "TenLoai": "Áo quần thể thao",
+            "MoTa": "Trang phục cầu lông"
+        },
+        {
+            "MaLoai": 4,
+            "TenLoai": "Phụ kiện cầu lông",
+            "MoTa": "Túi, băng tay, quấn cán..."
+        }
+    ],
+    "TranDau": [
+        {
+            "MaTranDau": 1,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2026",
+            "Vong": "Chung kết",
+            "NoiDung": "Đơn nam",
+            "DoiA": "Alex Lanier (Pháp)",
+            "DoiB": "Kodai Naraoka (Nhật Bản)",
+            "TiSo": "21-11, 21-11",
+            "DoiThang": "A",
+            "NgayThiDau": "2026-08-23",
+            "DiaDiem": "New Delhi (Ấn Độ)",
+            "NguonTin": "Badminton Planet",
+            "LienKetNguon": "https://www.badmintonplanet.com/?p=26517"
+        },
+        {
+            "MaTranDau": 2,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2026",
+            "Vong": "Chung kết",
+            "NoiDung": "Đơn nữ",
+            "DoiA": "An Se-young (Hàn Quốc)",
+            "DoiB": "Akane Yamaguchi (Nhật Bản)",
+            "TiSo": "21-17, 21-14",
+            "DoiThang": "A",
+            "NgayThiDau": "2026-08-23",
+            "DiaDiem": "New Delhi (Ấn Độ)",
+            "NguonTin": "Badminton Planet",
+            "LienKetNguon": "https://www.badmintonplanet.com/?p=26512"
+        },
+        {
+            "MaTranDau": 3,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2026",
+            "Vong": "Chung kết",
+            "NoiDung": "Đôi nam",
+            "DoiA": "Liang Weikeng / Wang Chang (Trung Quốc)",
+            "DoiB": "Aaron Chia / Soh Wooi Yik (Malaysia)",
+            "TiSo": "21-17, 21-16",
+            "DoiThang": "A",
+            "NgayThiDau": "2026-08-23",
+            "DiaDiem": "New Delhi (Ấn Độ)",
+            "NguonTin": "Outlook India",
+            "LienKetNguon": "https://www.outlookindia.com/sports/badminton/bwf-world-championships-2026-liang-weikeng-wang-chang-vs-aaron-chia-soh-wooi-yikmens-doubles-final-new-delhi-in-pics"
+        },
+        {
+            "MaTranDau": 4,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2026",
+            "Vong": "Chung kết",
+            "NoiDung": "Đôi nam nữ",
+            "DoiA": "Thom Gicquel / Delphine Delrue (Pháp)",
+            "DoiB": "Feng Yanzhe / Huang Dongping (Trung Quốc)",
+            "TiSo": "22-20, 19-21, 21-15",
+            "DoiThang": "A",
+            "NgayThiDau": "2026-08-23",
+            "DiaDiem": "New Delhi (Ấn Độ)",
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/2026_BWF_World_Championships"
+        },
+        {
+            "MaTranDau": 5,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2026",
+            "Vong": "Chung kết",
+            "NoiDung": "Đôi nữ",
+            "DoiA": "Baek Ha-na / Lee So-hee (Hàn Quốc)",
+            "DoiB": "Liu Shengshu / Tan Ning (Trung Quốc)",
+            "TiSo": null,
+            "DoiThang": "A",
+            "NgayThiDau": "2026-08-23",
+            "DiaDiem": "New Delhi (Ấn Độ)",
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/2026_BWF_World_Championships"
+        },
+        {
+            "MaTranDau": 6,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2025",
+            "Vong": "Chung kết",
+            "NoiDung": "Đơn nam",
+            "DoiA": "Shi Yuqi (Trung Quốc)",
+            "DoiB": "Kunlavut Vitidsarn (Thái Lan)",
+            "TiSo": "19-21, 21-10, 21-18",
+            "DoiThang": "A",
+            "NgayThiDau": "2025-08-31",
+            "DiaDiem": "Paris (Pháp)",
+            "NguonTin": "CGTN",
+            "LienKetNguon": "https://news.cgtn.com/news/2025-09-01/Shi-holds-off-Vitidsarn-to-win-maiden-badminton-world-title-1Gj5F2WR1UQ/share_amp.html"
+        },
+        {
+            "MaTranDau": 7,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2025",
+            "Vong": "Chung kết",
+            "NoiDung": "Đơn nữ",
+            "DoiA": "Akane Yamaguchi (Nhật Bản)",
+            "DoiB": "Chen Yufei (Trung Quốc)",
+            "TiSo": "21-9, 21-13",
+            "DoiThang": "A",
+            "NgayThiDau": "2025-08-31",
+            "DiaDiem": "Paris (Pháp)",
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/2025_BWF_World_Championships"
+        },
+        {
+            "MaTranDau": 8,
+            "TenGiaiDau": "Giải vô địch thế giới BWF 2025",
+            "Vong": "Chung kết",
+            "NoiDung": "Đôi nam",
+            "DoiA": "Kim Won-ho / Seo Seung-jae (Hàn Quốc)",
+            "DoiB": "Chen Boyang / Liu Yi (Trung Quốc)",
+            "TiSo": "21-17, 21-12",
+            "DoiThang": "A",
+            "NgayThiDau": "2025-08-31",
+            "DiaDiem": "Paris (Pháp)",
+            "NguonTin": "Korea JoongAng Daily",
+            "LienKetNguon": "https://www.koreajoongangdaily.com/sports/seo-seung-jae-kim-won-ho-win-mens-doubles-title-at-badminton-worlds/12382401"
+        },
+        {
+            "MaTranDau": 9,
+            "TenGiaiDau": "Olympic Paris 2024",
+            "Vong": "Chung kết",
+            "NoiDung": "Đơn nam",
+            "DoiA": "Viktor Axelsen (Đan Mạch)",
+            "DoiB": "Kunlavut Vitidsarn (Thái Lan)",
+            "TiSo": "21-11, 21-11",
+            "DoiThang": "A",
+            "NgayThiDau": "2024-08-05",
+            "DiaDiem": "Paris (Pháp)",
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/Badminton_at_the_2024_Summer_Olympics_%E2%80%93_Men%27s_singles"
+        },
+        {
+            "MaTranDau": 10,
+            "TenGiaiDau": "Olympic Paris 2024",
+            "Vong": "Chung kết",
+            "NoiDung": "Đơn nữ",
+            "DoiA": "An Se-young (Hàn Quốc)",
+            "DoiB": "He Bingjiao (Trung Quốc)",
+            "TiSo": "21-13, 21-16",
+            "DoiThang": "A",
+            "NgayThiDau": "2024-08-05",
+            "DiaDiem": "Paris (Pháp)",
+            "NguonTin": "Badminton Asia",
+            "LienKetNguon": "https://badmintonasia.org/2024/08/05/paris-olympics-2024-an-se-young-clinches-historic-gold-ends-koreas-28-year-wait/"
+        },
+        {
+            "MaTranDau": 11,
+            "TenGiaiDau": "Olympic Paris 2024",
+            "Vong": "Chung kết",
+            "NoiDung": "Đôi nam",
+            "DoiA": "Lee Yang / Wang Chi-lin (Đài Bắc Trung Hoa)",
+            "DoiB": "Liang Weikeng / Wang Chang (Trung Quốc)",
+            "TiSo": "21-17, 18-21, 21-19",
+            "DoiThang": "A",
+            "NgayThiDau": "2024-08-04",
+            "DiaDiem": "Paris (Pháp)",
+            "NguonTin": "ESPN",
+            "LienKetNguon": "https://www.espn.com/olympics/story/_/id/40724728/taiwan-duo-defends-badminton-men-doubles-gold-olympics"
+        }
+    ],
+    "TinTuc": [
+        {
+            "MaTin": 1,
+            "TieuDe": "Alex Lanier viết nên lịch sử: tay vợt Pháp đầu tiên vô địch thế giới đơn nam",
+            "TomTat": "Hạt giống số 9 thắng Kodai Naraoka 21-11, 21-11 ở chung kết giải vô địch thế giới 2026 tại New Delhi.",
+            "NoiDung": "Tại Indira Gandhi Arena (New Delhi), Alex Lanier, hạt giống số 9, đánh bại Kodai Naraoka (hạt giống số 10 của Nhật Bản) với tỉ số 21-11, 21-11 sau khoảng 50 phút để trở thành nhà vô địch thế giới đơn nam đầu tiên của cầu lông Pháp.\n\nTrên đường vào chung kết, Lanier có màn lội ngược dòng ở bán kết trước Victor Lai (Canada) với tỉ số 16-21, 21-13, 21-14. Cùng ngày, Pháp còn có thêm tấm huy chương vàng đôi nam nữ nhờ cặp Thom Gicquel/Delphine Delrue, lần đầu tiên nước này đăng quang ở nội dung này.",
+            "LoaiTin": "tran-dau",
+            "MaSanPham": null,
+            "MaTranDau": 1,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Badminton Planet",
+            "LienKetNguon": "https://www.badmintonplanet.com/?p=26517",
+            "NoiBat": true,
+            "NgayDang": "2026-08-24 09:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 2,
+            "TieuDe": "An Se-young lần thứ hai lên ngôi đơn nữ thế giới",
+            "TomTat": "Tay vợt số 1 thế giới thắng Akane Yamaguchi 21-17, 21-14 và không để thua ván nào suốt giải.",
+            "NoiDung": "An Se-young bảo vệ vị thế số 1 thế giới bằng chiếc huy chương vàng thế giới thứ hai trong sự nghiệp (sau lần đầu năm 2023). Ở chung kết ngày 23/8/2026, cô thắng Akane Yamaguchi 21-17, 21-14.\n\nĐây là chiến thắng thứ sáu liên tiếp của An trước Yamaguchi, nâng thành tích đối đầu lên 20-15 nghiêng về tay vợt Hàn Quốc. Theo các báo cáo, An vượt qua giải đấu mà không thua ván nào dù đang vướng chấn thương ở chân.",
+            "LoaiTin": "tran-dau",
+            "MaSanPham": null,
+            "MaTranDau": 2,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Badminton Planet",
+            "LienKetNguon": "https://www.badmintonplanet.com/?p=26512",
+            "NoiBat": false,
+            "NgayDang": "2026-08-24 10:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 3,
+            "TieuDe": "Liang Weikeng/Wang Chang đăng quang đôi nam thế giới 2026",
+            "TomTat": "Cặp đôi Trung Quốc thắng Aaron Chia/Soh Wooi Yik 21-17, 21-16 trong trận chung kết chỉ khoảng 35 phút.",
+            "NoiDung": "Liang Weikeng và Wang Chang (hạt giống số 3) thắng Aaron Chia/Soh Wooi Yik (hạt giống số 4, Malaysia) với tỉ số 21-17, 21-16 ở chung kết đôi nam. Trước đó, cặp Malaysia đã gây bất ngờ khi đánh bại cặp số 1 thế giới Kim Won-ho/Seo Seung-jae ở bán kết (21-17, 21-18).\n\nChiến thắng giúp Liang/Wang nới rộng thành tích đối đầu với Chia/Soh lên 12-3.",
+            "LoaiTin": "tran-dau",
+            "MaSanPham": null,
+            "MaTranDau": 3,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Outlook India",
+            "LienKetNguon": "https://www.outlookindia.com/sports/badminton/bwf-world-championships-2026-liang-weikeng-wang-chang-vs-aaron-chia-soh-wooi-yikmens-doubles-final-new-delhi-in-pics",
+            "NoiBat": false,
+            "NgayDang": "2026-08-24 11:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 4,
+            "TieuDe": "Vô địch thế giới 2026 khép lại: Hàn Quốc và Pháp cùng giành 2 huy chương vàng",
+            "TomTat": "Giải diễn ra từ 17 đến 23/8/2026 tại New Delhi, năm nội dung có năm nhà vô địch đến từ ba quốc gia.",
+            "NoiDung": "Giải vô địch thế giới BWF 2026 (lần thứ 30) diễn ra từ 17 đến 23/8/2026 tại Indira Gandhi Arena, New Delhi (Ấn Độ).\n\nCác nhà vô địch: đơn nam Alex Lanier (Pháp); đơn nữ An Se-young (Hàn Quốc); đôi nam Liang Weikeng/Wang Chang (Trung Quốc); đôi nữ Baek Ha-na/Lee So-hee (Hàn Quốc); đôi nam nữ Thom Gicquel/Delphine Delrue (Pháp).\n\nBảng tổng sắp huy chương: Hàn Quốc 2 vàng - 0 bạc - 1 đồng, Pháp 2-0-0, Trung Quốc 1 vàng - 2 bạc - 3 đồng.",
+            "LoaiTin": "giai-dau",
+            "MaSanPham": null,
+            "MaTranDau": null,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/2026_BWF_World_Championships",
+            "NoiBat": true,
+            "NgayDang": "2026-08-25 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 5,
+            "TieuDe": "Nhìn lại giải vô địch thế giới 2025 tại Paris",
+            "TomTat": "Shi Yuqi lần đầu vô địch thế giới sau trận chung kết ba ván với Kunlavut Vitidsarn.",
+            "NoiDung": "Giải vô địch thế giới BWF 2025 diễn ra tại Adidas Arena (Paris). Ở chung kết ngày 31/8/2025, Shi Yuqi (Trung Quốc) thắng đương kim vô địch Kunlavut Vitidsarn 19-21, 21-10, 21-18 sau 1 giờ 17 phút để lần đầu đăng quang.\n\nAkane Yamaguchi giành chức vô địch đơn nữ thứ ba (21-9, 21-13 trước Chen Yufei). Đôi nam thuộc về Kim Won-ho/Seo Seung-jae (Hàn Quốc) sau chiến thắng 21-17, 21-12 trước Chen Boyang/Liu Yi. Liu Shengshu/Tan Ning vô địch đôi nữ, còn Chen Tang Jie/Toh Ee Wei (Malaysia) vô địch đôi nam nữ.",
+            "LoaiTin": "giai-dau",
+            "MaSanPham": null,
+            "MaTranDau": 6,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/2025_BWF_World_Championships",
+            "NoiBat": false,
+            "NgayDang": "2025-09-01 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 6,
+            "TieuDe": "Olympic Paris 2024: danh sách các nhà vô địch cầu lông",
+            "TomTat": "Năm nội dung, năm nhà vô địch: Axelsen, An Se-young, Lee/Wang, Chen/Jia và Zheng/Huang.",
+            "NoiDung": "Môn cầu lông Olympic Paris 2024 diễn ra từ 27/7 đến 5/8/2024 tại Porte de La Chapelle Arena (Paris).\n\nHuy chương vàng: đơn nam Viktor Axelsen (Đan Mạch); đơn nữ An Se-young (Hàn Quốc); đôi nam Lee Yang/Wang Chi-lin (Đài Bắc Trung Hoa); đôi nữ Chen Qingchen/Jia Yifan (Trung Quốc); đôi nam nữ Zheng Siwei/Huang Yaqiong (Trung Quốc). Trung Quốc có hai huy chương vàng ở nội dung đôi nữ và đôi nam nữ.",
+            "LoaiTin": "giai-dau",
+            "MaSanPham": null,
+            "MaTranDau": null,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/Badminton_at_the_2024_Summer_Olympics",
+            "NoiBat": false,
+            "NgayDang": "2024-08-06 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 7,
+            "TieuDe": "Hồ sơ tuyển thủ: An Se-young, tay vợt số 1 thế giới",
+            "TomTat": "Huy chương vàng Olympic Paris 2024, hai lần vô địch thế giới (2023, 2026).",
+            "NoiDung": "An Se-young (Hàn Quốc) hiện là tay vợt đơn nữ số 1 thế giới. Tại Olympic Paris 2024, cô thắng He Bingjiao 21-13, 21-16 ở chung kết ngày 5/8/2024, trở thành tay vợt nữ Hàn Quốc thứ hai giành vàng Olympic đơn nữ, sau Bang Soo-hyun năm 1996.\n\nVới chức vô địch thế giới 2023 và 2026, An có hai danh hiệu thế giới. Lối chơi được nhắc đến nhiều nhờ khả năng phòng thủ bền bỉ và giữ nhịp độ trận đấu.",
+            "LoaiTin": "tuyen-thu",
+            "MaSanPham": null,
+            "MaTranDau": 10,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Badminton Asia",
+            "LienKetNguon": "https://badmintonasia.org/2024/08/05/paris-olympics-2024-an-se-young-clinches-historic-gold-ends-koreas-28-year-wait/",
+            "NoiBat": false,
+            "NgayDang": "2026-08-26 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 8,
+            "TieuDe": "Viktor Axelsen bảo vệ thành công huy chương vàng Olympic đơn nam",
+            "TomTat": "Tay vợt Đan Mạch thắng Kunlavut Vitidsarn 21-11, 21-11 và không thua ván nào suốt giải.",
+            "NoiDung": "Tại Paris 2024, Viktor Axelsen (Đan Mạch) giữ vững ngôi vô địch Olympic đơn nam sau khi thắng Kunlavut Vitidsarn (Thái Lan) 21-11, 21-11 ở trận chung kết. Anh không để thua ván nào trong cả giải đấu. Huy chương đồng thuộc về Lee Zii Jia (Malaysia).",
+            "LoaiTin": "tuyen-thu",
+            "MaSanPham": null,
+            "MaTranDau": 9,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Wikipedia",
+            "LienKetNguon": "https://en.wikipedia.org/wiki/Badminton_at_the_2024_Summer_Olympics_%E2%80%93_Men%27s_singles",
+            "NoiBat": false,
+            "NgayDang": "2024-08-06 09:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 9,
+            "TieuDe": "Yonex Astrox 100ZZ Kurenai: cây vợt thiên công màu đỏ thẫm",
+            "TomTat": "Phiên bản nâng cấp dành cho người chơi thiên về tấn công, đang được quan tâm nhiều tại cửa hàng.",
+            "NoiDung": "Yonex Astrox 100ZZ Kurenai là phiên bản nâng cấp của Astrox 100ZZ, nổi bật với màu đỏ thẫm và thiết kế cải tiến cho lối chơi tấn công mạnh mẽ.\n\nNếu bạn thích những cú đập dứt điểm và chủ động dồn điểm, đây là dòng vợt đầu nặng đáng cân nhắc. Hãy xem chi tiết và các tùy chọn trọng lượng ngay bên dưới.",
+            "LoaiTin": "san-pham-hot",
+            "MaSanPham": 1,
+            "MaTranDau": null,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Cửa Hàng Cầu Lông",
+            "LienKetNguon": null,
+            "NoiBat": true,
+            "NgayDang": "2026-10-20 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 10,
+            "TieuDe": "Yonex Nanoflare 1000Z: nhẹ đầu, tốc độ cao cho các pha phản tạt",
+            "TomTat": "Dòng vợt nhẹ đầu tập trung vào tốc độ vung vợt, hợp với lối chơi nhanh ở lưới.",
+            "NoiDung": "Nanoflare 1000Z thuộc nhóm vợt nhẹ đầu, cho tốc độ vung nhanh và phản tạt linh hoạt. Đây là lựa chọn quen thuộc với người chơi đôi, hay đứng gần lưới và thích đổi nhịp liên tục.",
+            "LoaiTin": "san-pham-hot",
+            "MaSanPham": 6,
+            "MaTranDau": null,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Cửa Hàng Cầu Lông",
+            "LienKetNguon": null,
+            "NoiBat": false,
+            "NgayDang": "2026-10-15 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 11,
+            "TieuDe": "Phụ kiện mới về: cầu lông lông vịt thi đấu (ống 12 quả)",
+            "TomTat": "Quả cầu lông vịt đầu cork bọc da, quỹ đạo bay ổn định cho thi đấu và tập luyện thường xuyên.",
+            "NoiDung": "Cửa hàng vừa bổ sung nhóm Phụ kiện cầu lông. Cầu lông lông vịt thi đấu (ống 12 quả) có đầu cork bọc da, quỹ đạo bay ổn định, phù hợp thi đấu và tập luyện thường xuyên. Đang áp dụng khuyến mãi theo chương trình hiện hành.",
+            "LoaiTin": "san-pham-moi",
+            "MaSanPham": 44,
+            "MaTranDau": null,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Cửa Hàng Cầu Lông",
+            "LienKetNguon": null,
+            "NoiBat": false,
+            "NgayDang": "2026-10-24 08:00:00",
+            "deleted_at": null
+        },
+        {
+            "MaTin": 12,
+            "TieuDe": "Giày Yonex Eclipsion Z3: ổn định và chống lật cổ chân",
+            "TomTat": "Mẫu giày thiên về độ ổn định, phù hợp người hay di chuyển nhanh và đổi hướng liên tục.",
+            "NoiDung": "Giày cầu lông Yonex Eclipsion Z3 tăng cường độ ổn định và hạn chế lật cổ chân khi di chuyển, phù hợp với người chơi cần cảm giác chắc chân trong các pha đổi hướng. Sản phẩm đang có ưu đãi theo chương trình khuyến mãi của cửa hàng.",
+            "LoaiTin": "san-pham-moi",
+            "MaSanPham": 29,
+            "MaTranDau": null,
+            "MaTaiKhoan": 1,
+            "NguonTin": "Cửa Hàng Cầu Lông",
+            "LienKetNguon": null,
+            "NoiBat": false,
+            "NgayDang": "2026-10-18 08:00:00",
+            "deleted_at": null
+        }
+    ]
+}
