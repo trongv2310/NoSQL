@@ -121,6 +121,28 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
     expect(r2.body.success).toBe(false);
   });
 
+  it('chatbot không sập khi không truy cập được dữ liệu kho: trả success=false kèm lời xin lỗi', async () => {
+    const r = await request(app.getHttpServer())
+      .post('/api/chatbot/ask')
+      .set('x-forwarded-for', '10.0.0.1')
+      .send({ message: 'Tư vấn vợt cho người mới', history: [{ vai: 'user', text: 'xin chào' }], context: { loai: 'vot', giaMax: 'rác' } })
+      .expect(201);
+    expect(r.body.success).toBe(false);
+    expect(r.body.reply).toMatch(/bận/);
+    expect(r.body.products).toEqual([]);
+  });
+
+  it('chatbot giới hạn tần suất theo địa chỉ: vượt 15 lượt/phút trả 429 kèm Retry-After', async () => {
+    const gui = () => request(app.getHttpServer()).post('/api/chatbot/ask').set('x-forwarded-for', '10.0.0.2').send({ message: 'xin chào' });
+    for (let i = 0; i < 15; i++) {
+      await gui().expect(201);
+    }
+    const bi = await gui().expect(429);
+    expect(bi.headers['retry-after']).toBeDefined();
+    expect(JSON.stringify(bi.body.message)).toMatch(/thử lại sau/);
+    await request(app.getHttpServer()).post('/api/chatbot/ask').set('x-forwarded-for', '10.0.0.3').send({ message: 'xin chào' }).expect(201);
+  });
+
   it('đổi trạng thái đơn với giá trị ngoài danh sách bị từ chối (nhân viên)', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/admin/don-hang/1/trang-thai')

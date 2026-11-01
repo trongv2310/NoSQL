@@ -89,3 +89,13 @@ cd frontend && npm run lint && npm run build
 - MongoDB bản standalone không có transaction nên đặt/hủy đơn dùng cập nhật nguyên tử + hoàn kho thủ công; nếu cần ACID đầy đủ hãy chạy replica set rồi dùng `session.withTransaction`.
 - Giao diện Landing/Bảng tin được dựng lại gọn hơn bản Blade (không có slider/hiệu ứng cuộn, khối “nổi bật” đơn giản); trình soạn thảo CKEditor được thay bằng ô HTML có xem trước, chèn ảnh và nút AI soạn nháp.
 - Trang khách render phía client (gọi API sau khi tải) nên SEO kém hơn bản Blade; có thể chuyển các trang công khai sang Server Components khi cần.
+
+## Chatbot tư vấn
+
+`POST /api/chatbot/ask` nhận `{ message, history?, context? }` và trả `{ reply, products[], donHang[], quickReplies[], lienKet[], context, nguon }`.
+
+- **Hiểu ý định bằng luật** (`backend/src/cong-khai/chatbot/nlu.ts`): tư vấn vợt/giày/áo quần/phụ kiện theo ngân sách, trình độ, lối chơi, hãng, size; hỏi giá, tồn kho, khuyến mãi, so sánh, trạng thái đơn (cần đăng nhập, chỉ đơn của chính tài khoản), thanh toán/hủy đơn/cửa hàng.
+- **Tra cứu và xếp hạng từ MongoDB** (`kho.ts`, `xep-hang.ts`): giá sau khuyến mãi, chỉ gợi ý hàng còn kho, chấm điểm theo thông số vợt (cân bằng, độ cứng, trọng lượng). Chính sách nào hệ thống chưa có (bảo hành, đổi trả, phí ship) thì bot nói thẳng là chưa có và hướng dẫn liên hệ cửa hàng.
+- **Ngữ cảnh nhiều lượt**: server không lưu phiên; mỗi phản hồi trả `context`, client gửi lại ở lượt sau (đã được làm sạch phía server).
+- **Gemini (tùy chọn)**: có `GEMINI_API_KEY` thì AI diễn đạt lại dữ kiện đã tra cứu (system prompt chống bịa, mọi số tiền trong câu trả lời phải khớp dữ liệu kho, ngược lại bị loại). Lỗi/timeout/hết hạn mức → tự dùng lời đáp tra cứu; lỗi liên tiếp sẽ tạm ngưng gọi AI 60 giây.
+- **Giới hạn tần suất**: 15 tin/phút và 200 tin/giờ mỗi khách (IP hoặc tài khoản), 300 tin/phút toàn hệ thống; vượt quá trả HTTP 429.

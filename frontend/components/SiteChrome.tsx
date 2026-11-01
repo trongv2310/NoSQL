@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { api, apiPost, loiTuApi } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { apiPost } from "@/lib/api";
 import { imgUrl } from "@/lib/format";
 import { useApp } from "./AppProviders";
 
@@ -244,61 +244,5 @@ export function Footer() {
   );
 }
 
-interface Tin { vai: "user" | "bot"; text: string }
-
-export function Chatbot() {
-  const [mo, setMo] = useState(false);
-  const [ds, setDs] = useState<Tin[]>([{ vai: "bot", text: "Xin chào! Mình là trợ lý ảo của Shop Cầu Lông. Bạn cần tư vấn vợt, giày hay khuyến mãi nào ạ?" }]);
-  const [nhap, setNhap] = useState("");
-  const [cho, setCho] = useState(false);
-  const cuoi = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { cuoi.current?.scrollIntoView({ behavior: "smooth" }); }, [ds, mo]);
-
-  const gui = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = nhap.trim();
-    if (!text || cho) return;
-    setNhap("");
-    setDs((d) => [...d, { vai: "user", text }]);
-    setCho(true);
-    try {
-      const r = await api<{ success: boolean; reply: string }>("/chatbot/ask", { method: "POST", body: { message: text } });
-      setDs((d) => [...d, { vai: "bot", text: r.reply }]);
-    } catch (err) {
-      setDs((d) => [...d, { vai: "bot", text: `Lỗi kết nối server: ${loiTuApi(err)}` }]);
-    } finally {
-      setCho(false);
-    }
-  };
-
-  return (
-    <>
-      <button id="chat-toggle-btn" className="btn btn-primary rounded-circle shadow-lg" aria-label="Chat với trợ lý"
-        style={{ position: "fixed", right: 20, bottom: 20, width: 56, height: 56, zIndex: 1500 }} onClick={() => setMo((v) => !v)}>
-        <i className="fa-solid fa-comments" />
-      </button>
-      {mo && (
-        <div id="chat-container" className="card shadow-lg" style={{ position: "fixed", right: 20, bottom: 88, width: 340, maxWidth: "calc(100vw - 40px)", height: 460, zIndex: 1500, display: "flex", flexDirection: "column" }}>
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0 fw-bold"><i className="fa-solid fa-robot" /> Trợ lý Shop Cầu Lông</h6>
-            <button type="button" className="btn-close" aria-label="Đóng" onClick={() => setMo(false)} />
-          </div>
-          <div className="card-body" style={{ flexGrow: 1, overflowY: "auto", background: "#f8f9fa", padding: 15 }}>
-            {ds.map((t, i) => (
-              <div key={i} className={`my-2 d-flex ${t.vai === "user" ? "justify-content-end" : ""}`}>
-                <div className={`px-3 py-2 rounded ${t.vai === "user" ? "bg-primary text-white" : "bg-white border"}`} style={{ maxWidth: "85%", whiteSpace: "pre-wrap" }}>{t.text}</div>
-              </div>
-            ))}
-            {cho && <div className="text-muted small ms-2"><i>Đang trả lời...</i></div>}
-            <div ref={cuoi} />
-          </div>
-          <form className="card-footer bg-white d-flex gap-2" style={{ padding: 10 }} onSubmit={gui}>
-            <input className="form-control" value={nhap} onChange={(e) => setNhap(e.target.value)} placeholder="Nhập câu hỏi..." maxLength={500} />
-            <button className="btn btn-primary" type="submit" disabled={cho} aria-label="Gửi"><i className="fa-solid fa-paper-plane" /></button>
-          </form>
-        </div>
-      )}
-    </>
-  );
-}
+/** Chatbot tư vấn nằm ở file riêng (components/Chatbot.tsx); xuất lại đây để layout của site giữ nguyên cách import. */
+export { Chatbot } from "./Chatbot";
