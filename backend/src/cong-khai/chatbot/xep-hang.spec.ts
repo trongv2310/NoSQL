@@ -44,6 +44,11 @@ describe('timTheoTen', () => {
     expect(timTheoTen(kho, chuanHoa('tectonic 7 còn không')).length).toBe(1);
   });
 
+  it('size/cỡ không bị nhầm với mã model, gõ đủ tên thì khớp đúng mẫu', () => {
+    expect(timTheoTen(kho, chuanHoa('đặt giày Aerus size 99'))).toEqual([]);
+    expect(timTheoTen(kho, chuanHoa('Dây Cuốn Cán Vợt Cầu Lông (Cuộn Đơn)')).map((x) => x.sp.ten)).toEqual(['Dây Cuốn Cán Vợt Cầu Lông (Cuộn Đơn)']);
+  });
+
   it('chỉ nhắc hãng hoặc dòng chung chung thì không coi là một mẫu', () => {
     expect(timTheoTen(kho, chuanHoa('vợt yonex'))).toEqual([]);
     expect(timTheoTen(kho, chuanHoa('astrox'))).toEqual([]);

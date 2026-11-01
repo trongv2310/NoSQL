@@ -21,7 +21,7 @@ const TRINH_DO = ['moi', 'trung_binh', 'nang_cao'] as const;
 const LOI_CHOI = ['cong', 'thu', 'toan_dien'] as const;
 const SAP_XEP = ['re', 'cao'] as const;
 const NHOM = ['cau', 'tui', 'cuon_can'] as const;
-const Y_DINH = ['chao_hoi', 'cam_on', 'tam_biet', 'tro_giup', 'don_hang', 'chinh_sach', 'khuyen_mai', 'ton_kho', 'hoi_gia', 'so_sanh', 'huong_dan', 'tu_van', 'khac'] as const;
+const Y_DINH = ['chao_hoi', 'cam_on', 'tam_biet', 'tro_giup', 'don_hang', 'chinh_sach', 'khuyen_mai', 'ton_kho', 'hoi_gia', 'so_sanh', 'dat_hang', 'huong_dan', 'tu_van', 'khac'] as const;
 const ID_HEX = /^[0-9a-f]{24}$/i;
 
 const chon = <T extends string>(v: unknown, ds: readonly T[]): T | undefined => (ds as readonly string[]).includes(v as string) ? (v as T) : undefined;

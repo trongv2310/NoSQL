@@ -190,6 +190,8 @@ const LIEN_HE = `${CH.ten} – ${CH.diaChi}. Điện thoại ${CH.dienThoai}, em
 
 export function loiChinhSach(chuDe: ChuDeChinhSach, dsHang: string[]): string {
   switch (chuDe) {
+    case 'dat_hang':
+      return 'Bạn chỉ cần nhắn kiểu "Đặt hàng Astrox 99 Pro số lượng 2" (không nêu số lượng thì mình đặt 1). Mình sẽ thêm sản phẩm còn hàng vào giỏ rồi chuyển bạn tới trang thanh toán; bạn kiểm tra thông tin giao hàng và bấm xác nhận ở đó. Cần đăng nhập trước khi đặt.';
     case 'thanh_toan':
       return 'Khi đặt hàng, bạn có thể chọn một trong hai hình thức: thanh toán khi nhận hàng (COD) hoặc thanh toán online qua ví MoMo. Hiện mình chưa có thông tin về trả góp hay chuyển khoản trực tiếp.';
     case 'huy_don':

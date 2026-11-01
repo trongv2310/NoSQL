@@ -183,10 +183,11 @@ const trongSoTu = (w: string) => (/\d/.test(w) ? 3 : 1.5);
  * Cần ít nhất một mã model (có chữ số) hoặc hai từ khóa trùng; số đứng đầu mã ("88") được coi là tiền tố ("88d", "88s").
  */
 export function timTheoTen(kho: SanPhamKho[], chuan: string, toiDa = 3): KhopTen[] {
-  const tu = tachTuGhep(chuan);
+  // "size 42", "4U" là kích cỡ chứ không phải mã model (tránh nhầm size 99 với Astrox 99).
+  const tu = tachTuGhep(chuan.replace(/(?:^|\s)(?:size|sz|co|so)\s*\d{2}(?=\s|$)/g, ' '));
   const ds: KhopTen[] = [];
   for (const sp of kho) {
-    let khop = 0;
+    let khop = chuan.includes(sp.tenChuan) ? 100 : 0; // gõ đủ tên sản phẩm thì chắc chắn là mẫu đó
     for (const w of sp.tuKhoa) {
       const dung = tu.includes(w) || tu.some((m) => /^\d{2,}$/.test(m) && w.startsWith(m) && w.length <= m.length + 2);
       if (dung) khop += trongSoTu(w);

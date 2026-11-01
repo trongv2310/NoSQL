@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { duLieuMau, KM_10 } from '../../test/chatbot-mau';
 import { lamSachNguCanh } from './chatbot/an-toan';
@@ -7,7 +8,7 @@ import { ChatbotService } from './chatbot.service';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const NGUOI_DUNG = { id: 'u'.padEnd(24, '1'), tenDangNhap: 'khach', maQuyen: 3 };
 
-function taoService(opts: { key?: string; don?: any[]; coKhachHang?: boolean } = {}) {
+function taoService(opts: { key?: string; don?: any[]; coKhachHang?: boolean; them?: any } = {}) {
   const { sanPhams, bienThes } = duLieuMau();
   const chuoi = (kq: any) => ({ populate: () => chuoi(kq), sort: () => chuoi(kq), limit: () => chuoi(kq), lean: async () => kq });
   const spModel = { find: () => chuoi(sanPhams) };
@@ -20,7 +21,8 @@ function taoService(opts: { key?: string; don?: any[]; coKhachHang?: boolean } =
   };
   const khModel = { findOne: () => chuoi(opts.coKhachHang === false ? null : { _id: 'kh1' }) };
   const cfg = { get: (k: string, def?: string) => (k === 'GEMINI_API_KEY' ? (opts.key ?? '') : def) } as unknown as ConfigService;
-  const svc = new ChatbotService(cfg, spModel as any, ctModel as any, kmModel as any, phModel as any, dhModel as any, khModel as any);
+  const gioHang = { them: opts.them ?? vi.fn(async () => ({ message: 'ok', cartCount: 1 })) };
+  const svc = new ChatbotService(cfg, spModel as any, ctModel as any, kmModel as any, phModel as any, dhModel as any, khModel as any, gioHang as any);
   (svc as any).chamThuLaiMs = 0;
   return svc;
 }
@@ -258,6 +260,116 @@ describe('ChatbotService – Gemini', () => {
     await chat('thanh toán bằng gì');
     await chat('đơn hàng #1');
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('ChatbotService – đặt hàng qua chat', () => {
+  const idBienThe = expect.stringMatching(/^9[0-9]{23}$/);
+
+  it('chưa đăng nhập: mời đăng nhập, không thêm gì vào giỏ', async () => {
+    const them = vi.fn();
+    const r = await phien(taoService({ them }))('đặt hàng Nanoflare 700 giúp mình');
+    expect(r.yDinh).toBe('dat_hang');
+    expect(them).not.toHaveBeenCalled();
+    expect(r.hanhDong).toBeNull();
+    expect(r.lienKet[0].href).toBe('/TaiKhoan/DangNhap');
+  });
+
+  it('không nêu số lượng thì mặc định 1, thêm giỏ và báo chuyển tới thanh toán', async () => {
+    const them = vi.fn(async () => ({ cartCount: 1 }));
+    const r = await phien(taoService({ them }), NGUOI_DUNG)('đặt hàng Nanoflare 700 cho mình');
+    expect(them).toHaveBeenCalledWith(NGUOI_DUNG.id, idBienThe, 1);
+    expect(r.hanhDong).toEqual({ loai: 'thanh_toan', href: '/DonHang/Checkout', nhan: 'Đến trang thanh toán', soLuongGio: 1 });
+    expect(r.reply).toContain('Nanoflare 700');
+    expect(r.reply).toMatch(/chưa nêu số lượng/);
+    expect(r.products).toHaveLength(1);
+  });
+
+  it('nêu số lượng thì dùng đúng số lượng đó', async () => {
+    const them = vi.fn(async () => ({ cartCount: 3 }));
+    const r = await phien(taoService({ them }), NGUOI_DUNG)('mua 3 cây Nanoflare 700 giúp mình');
+    expect(them).toHaveBeenCalledWith(NGUOI_DUNG.id, idBienThe, 3);
+    expect(r.hanhDong?.soLuongGio).toBe(3);
+    const r2 = await phien(taoService({ them }), NGUOI_DUNG)('đặt hàng Nanoflare 700 số lượng 2');
+    expect(them).toHaveBeenLastCalledWith(NGUOI_DUNG.id, idBienThe, 2);
+    expect(r2.reply).not.toMatch(/chưa nêu số lượng/);
+  });
+
+  it('tên sản phẩm có số ("Ống 12 Quả") không bị hiểu là số lượng', async () => {
+    const them = vi.fn(async () => ({ cartCount: 1 }));
+    await phien(taoService({ them }), NGUOI_DUNG)('Đặt Cầu Lông Lông Vịt Thi Đấu (Ống 12 Quả)');
+    expect(them).toHaveBeenCalledWith(NGUOI_DUNG.id, idBienThe, 1);
+  });
+
+  it('nhiều size còn hàng mà khách chưa chọn thì hỏi size, chọn xong mới thêm giỏ', async () => {
+    const them = vi.fn(async () => ({ cartCount: 1 }));
+    const chat = phien(taoService({ them }), NGUOI_DUNG);
+    const r1 = await chat('đặt hàng Astrox 99 Pro');
+    expect(them).not.toHaveBeenCalled();
+    expect(r1.hanhDong).toBeNull();
+    expect(r1.quickReplies.some((q) => q.includes('size 4U'))).toBe(true);
+    const r2 = await chat(r1.quickReplies.find((q) => q.includes('size 4U'))!);
+    expect(them).toHaveBeenCalledTimes(1);
+    expect(r2.hanhDong?.href).toBe('/DonHang/Checkout');
+    expect(r2.reply).toContain('size 4U');
+  });
+
+  it('hết hàng: báo rõ, không thêm giỏ, gợi ý mẫu còn hàng', async () => {
+    const them = vi.fn();
+    const r = await phien(taoService({ them }), NGUOI_DUNG)('đặt Calibar 600');
+    expect(them).not.toHaveBeenCalled();
+    expect(r.hanhDong).toBeNull();
+    expect(r.reply).toMatch(/hết hàng/);
+    expect(r.products.every((p) => p.conHang)).toBe(true);
+  });
+
+  it('size đã hết hoặc số lượng vượt tồn kho thì báo, không thêm giỏ', async () => {
+    const them = vi.fn();
+    const chat = phien(taoService({ them }), NGUOI_DUNG);
+    expect((await chat('đặt giày Aerus size 42')).reply).toMatch(/không còn size 42/);
+    expect((await chat('đặt 50 cây Nanoflare 700')).reply).toMatch(/chỉ còn tối đa 10/);
+    expect((await chat('đặt 500 cây Nanoflare 700')).reply).toMatch(/từ 1 đến 100/);
+    expect(them).not.toHaveBeenCalled();
+  });
+
+  it('lỗi từ giỏ hàng (vượt tồn kho khi cộng với giỏ cũ...) được báo lại cho khách', async () => {
+    const them = vi.fn().mockRejectedValue(new BadRequestException('Số lượng sản phẩm trong giỏ vượt quá tồn kho!'));
+    const r = await phien(taoService({ them }), NGUOI_DUNG)('đặt hàng Nanoflare 700');
+    expect(r.hanhDong).toBeNull();
+    expect(r.reply).toMatch(/chưa thêm được/);
+    expect(r.reply).toMatch(/vượt quá tồn kho/);
+    const them2 = vi.fn().mockRejectedValue(new Error('mongo'));
+    const r2 = await phien(taoService({ them: them2 }), NGUOI_DUNG)('đặt hàng Nanoflare 700');
+    expect(r2.success).toBe(true);
+    expect(r2.reply).toMatch(/chưa thêm được/);
+  });
+
+  it('đặt theo mẫu vừa được gợi ý: "đặt cái thứ 1 size 4U"', async () => {
+    const them = vi.fn(async () => ({ cartCount: 2 }));
+    const chat = phien(taoService({ them }), NGUOI_DUNG);
+    const r1 = await chat('tư vấn vợt cho người mới');
+    const r2 = await chat('đặt cái thứ 1 size 4U');
+    expect(them).toHaveBeenCalledTimes(1);
+    expect(r2.products[0].id).toBe(r1.products[0].id);
+    expect(r2.hanhDong?.loai).toBe('thanh_toan');
+  });
+
+  it('chưa rõ sản phẩm nào thì hỏi lại; hỏi cách đặt hàng chỉ hướng dẫn', async () => {
+    const them = vi.fn();
+    const chat = phien(taoService({ them }), NGUOI_DUNG);
+    expect((await chat('đặt hàng giúp mình')).reply).toMatch(/sản phẩm nào/);
+    const r = await chat('làm sao để đặt hàng');
+    expect(r.yDinh).toBe('chinh_sach');
+    expect(them).not.toHaveBeenCalled();
+  });
+
+  it('hỏi giá/tồn kho/đơn hàng không bị hiểu là đặt hàng', async () => {
+    const them = vi.fn();
+    const chat = phien(taoService({ them }), NGUOI_DUNG);
+    expect((await chat('Nanoflare 700 giá bao nhiêu')).yDinh).toBe('hoi_gia');
+    expect((await chat('Nanoflare 700 còn hàng không')).yDinh).toBe('ton_kho');
+    expect((await chat('kiểm tra đơn hàng đã đặt của tôi')).yDinh).toBe('don_hang');
+    expect(them).not.toHaveBeenCalled();
   });
 });
 

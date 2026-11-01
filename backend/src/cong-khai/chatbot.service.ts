@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -6,9 +6,10 @@ import type { NguoiDung } from '../auth/auth.types';
 import { khuyenMaiConHieuLuc } from '../common/pricing';
 import { ChiTietSanPham, DonHang, KhachHang, KhuyenMai, PhanHoi, SanPham } from '../schemas';
 import { CauDao, GioiHanTanSuat, giaHopLe, KetQuaGioiHan, LuotChat, trichSoTien, YeuCauChat } from './chatbot/an-toan';
-import { PhanHoiChatbot, THONG_TIN_CUA_HANG, TheDonHang, TheSanPham } from './chatbot/chatbot.types';
+import { GioHangService } from '../gio-hang/gio-hang.service';
+import { HanhDong, PhanHoiChatbot, THONG_TIN_CUA_HANG, TheDonHang, TheSanPham } from './chatbot/chatbot.types';
 import { dsHangTrongKho, dungKho, SanPhamKho, TEN_LOAI, timTheoTen, tuKhoaTrongKho } from './chatbot/kho';
-import { chuanHoa, gopNguCanh, KetQuaPhanTich, NguCanh, phanTich, phanTichNganSach, YDinh } from './chatbot/nlu';
+import { chuanHoa, gopNguCanh, KetQuaPhanTich, NguCanh, nhanSoLuong, phanTich, phanTichNganSach, YDinh } from './chatbot/nlu';
 import * as TL from './chatbot/tra-loi';
 import { dinhDangTien, KetQuaXepHang, MucXepHang, moTaThongSo, TieuChi, xepHang } from './chatbot/xep-hang';
 
@@ -16,7 +17,7 @@ import { dinhDangTien, KetQuaXepHang, MucXepHang, moTaThongSo, TieuChi, xepHang 
 const THOI_GIAN_CACHE_KHO_MS = 8_000;
 const GEMINI_TOI_DA_MS = 14_000;
 const SO_THE_TOI_DA = 4;
-const LA_Y_DINH_SAN_PHAM = new Set<YDinh>(['tu_van', 'hoi_gia', 'ton_kho', 'so_sanh']);
+const LA_Y_DINH_SAN_PHAM = new Set<YDinh>(['tu_van', 'hoi_gia', 'ton_kho', 'so_sanh', 'dat_hang']);
 
 const GHI_CHU_AI: Record<string, string> = {
   ngoai_ngan_sach: 'Không có mẫu nào đúng khoảng giá khách nêu; các mẫu liệt kê là gần nhất (vượt hoặc thấp hơn khoảng giá).',
@@ -35,6 +36,7 @@ interface KetQuaXuLy {
   donHang: TheDonHang[];
   chips: string[];
   lienKet: { nhan: string; href: string }[];
+  hanhDong?: HanhDong;
   nguCanh: NguCanh;
   /** Dữ kiện đưa cho AI (rỗng nghĩa là không cần AI). */
   duLieuAi?: string;
@@ -75,6 +77,7 @@ export class ChatbotService {
     @InjectModel(PhanHoi.name) private readonly phModel: Model<PhanHoi>,
     @InjectModel(DonHang.name) private readonly dhModel: Model<DonHang>,
     @InjectModel(KhachHang.name) private readonly khModel: Model<KhachHang>,
+    private readonly gioHang: GioHangService,
   ) {
     this.apiKey = cfg.get<string>('GEMINI_API_KEY', '');
     this.model = cfg.get<string>('GEMINI_MODEL', 'gemini-2.5-flash');
@@ -152,7 +155,7 @@ export class ChatbotService {
   }
 
   private phanHoi(kq: KetQuaXuLy, yDinh: YDinh, nguon: 'ai' | 'tra-cuu', success: boolean): PhanHoiChatbot {
-    return { success, reply: kq.reply, products: kq.the, donHang: kq.donHang, quickReplies: kq.chips.slice(0, 4), lienKet: kq.lienKet, context: kq.nguCanh, nguon, yDinh };
+    return { success, reply: kq.reply, products: kq.the, donHang: kq.donHang, quickReplies: kq.chips.slice(0, 4), lienKet: kq.lienKet, hanhDong: kq.hanhDong ?? null, context: kq.nguCanh, nguon, yDinh };
   }
 
   /** "Rẻ hơn" / "cao cấp hơn" so với mẫu đứng đầu ở lượt trước. */
@@ -198,6 +201,8 @@ export class ChatbotService {
       }
       case 'don_hang':
         return this.xuLyDonHang(pt, trong, nguoiDung);
+      case 'dat_hang':
+        return this.xuLyDatHang(pt, trong, kho, khopTen, truoc, nguoiDung);
       case 'khuyen_mai':
         return this.xuLyKhuyenMai(pt, trong, kho);
       case 'hoi_gia':
@@ -398,6 +403,97 @@ export class ChatbotService {
       duLieuAi: `Khách hỏi khuyến mãi (${tt}).\nCHƯƠNG TRÌNH ĐANG CHẠY: ${km.join(' | ') || 'không có'}\nSẢN PHẨM GIẢM NHIỀU NHẤT (còn hàng, hiển thị thành thẻ bên dưới):\n${muc.map((m, i) => this.moTaMuc(m, i)).join('\n') || 'không có'}`,
       choPhepGia: [...trong.choPhepGia, ...dsKm.map((k) => Number(k.giamToiDa)).filter(Boolean), ...this.giaChoPhep(muc.map((m) => m.sp))],
     };
+  }
+
+  /**
+   * "Đặt hàng giúp tôi ...": thêm vào giỏ (mặc định số lượng 1) rồi báo giao diện chuyển tới trang thanh toán.
+   * Chưa chốt đơn: khách vẫn phải kiểm tra thông tin giao hàng và bấm xác nhận ở trang thanh toán.
+   * Gặp bất cứ vướng mắc nào (chưa đăng nhập, hết hàng, thiếu size, vượt tồn kho...) thì nói rõ và không thêm gì.
+   */
+  private async xuLyDatHang(pt: KetQuaPhanTich, trong: KetQuaXuLy, kho: SanPhamKho[], khopTen: SanPhamKho[], truoc: SanPhamKho[], nguoiDung?: NguoiDung): Promise<KetQuaXuLy> {
+    const c = trong.nguCanh;
+    const hoiLai = (reply: string, chips: string[], the: SanPhamKho[] = []): KetQuaXuLy => ({ ...trong, reply, chips, the: the.map((sp) => this.theSanPham(sp, [])) });
+
+    let ds = this.chonSanPham(pt, khopTen, c, truoc);
+    if (!ds.length && (c.loai || c.nhom || c.tuKhoa?.length)) {
+      const r = xepHang(kho, { loai: c.loai, nhom: c.nhom, hang: c.hang, giaMin: c.giaMin, giaMax: c.giaMax, tuKhoa: c.tuKhoa }, SO_THE_TOI_DA);
+      ds = r.tongKhop === 1 ? [r.muc[0].sp] : r.muc.map((m) => m.sp);
+    }
+    if (!ds.length) {
+      return hoiLai('Bạn muốn đặt sản phẩm nào ạ? Bạn gửi tên sản phẩm giúp mình, ví dụ "Đặt hàng Astrox 99 Pro số lượng 2" (không nêu số lượng thì mình đặt 1).', TL.GOI_Y_MO_DAU);
+    }
+
+    // Số lượng: bỏ phần tên sản phẩm khỏi câu để "(Ống 12 Quả)", "Combo 3 Cuộn" không bị hiểu là số lượng.
+    let soLuong = pt.soLuong;
+    if (khopTen.length) soLuong = nhanSoLuong(khopTen.reduce((t, sp) => t.replace(sp.tenChuan, ' '), pt.chuan));
+    const daNeuSoLuong = soLuong !== undefined;
+    soLuong ??= 1;
+    const tienToSl = daNeuSoLuong ? `${soLuong} ` : '';
+
+    if (ds.length > 1) {
+      const hienThi = ds.slice(0, SO_THE_TOI_DA);
+      return hoiLai('Bạn muốn đặt mẫu nào ạ? Bấm vào mẫu bạn chọn bên dưới nhé.', hienThi.map((sp) => `Đặt ${tienToSl}${sp.ten}`), hienThi);
+    }
+    const sp = ds[0];
+    const ctx = this.ghiNhoSanPham(c, [sp]);
+    const kq = (reply: string, chips: string[], extra: Partial<KetQuaXuLy> = {}): KetQuaXuLy => ({ ...trong, nguCanh: ctx, reply, chips, the: [this.theSanPham(sp, [])], ...extra });
+
+    if (!nguoiDung) {
+      return kq(`Để đặt **${sp.ten}** bạn cần đăng nhập trước. Đăng nhập xong, bạn nhắn lại "Đặt ${tienToSl}${sp.ten}" là mình thêm vào giỏ và chuyển tới thanh toán ngay.`, [], { lienKet: [{ nhan: 'Đăng nhập', href: '/TaiKhoan/DangNhap' }] });
+    }
+    if (!Number.isInteger(soLuong) || soLuong < 1 || soLuong > 100) {
+      return kq('Số lượng đặt phải từ 1 đến 100. Bạn cho mình biết lại số lượng nhé.', [`Đặt 1 ${sp.ten}`]);
+    }
+    if (sp.tonKho <= 0) {
+      const thay = xepHang(kho, { loai: sp.loai ?? undefined, giaMin: sp.gia * 0.7, giaMax: sp.gia * 1.3, loaiTru: new Set([sp.id]) }, 3);
+      const goiY = thay.muc.filter((m) => m.sp.tonKho > 0);
+      return {
+        ...kq(`Rất tiếc **${sp.ten}** hiện đã hết hàng nên mình chưa đặt được.${goiY.length ? ' Bạn tham khảo các mẫu còn hàng gần giá bên dưới nhé.' : ''}`, goiY.length ? ['Mẫu khác', 'Rẻ hơn'] : TL.GOI_Y_MO_DAU),
+        the: goiY.map((m) => this.theTuMuc(m)),
+      };
+    }
+
+    let conHang = sp.bienThe.filter((b) => b.ton > 0);
+    const kichCo = pt.slot.kichCo;
+    const dsSize = [...new Set(conHang.map((b) => b.size).filter((x): x is string => !!x))];
+    const chonSize = (s: string) => `Đặt ${tienToSl}${sp.ten} size ${s}`;
+    if (kichCo) {
+      const theo = conHang.filter((b) => chuanHoa(b.size ?? '') === chuanHoa(kichCo));
+      if (!theo.length) {
+        return kq(`**${sp.ten}** hiện không còn size ${kichCo}.${dsSize.length ? ` Các size còn hàng: ${dsSize.join(', ')}. Bạn chọn size khác nhé.` : ''}`, dsSize.slice(0, 4).map(chonSize));
+      }
+      conHang = theo;
+    } else if (dsSize.length > 1) {
+      return kq(`**${sp.ten}** có nhiều size còn hàng: ${dsSize.join(', ')}. Bạn chọn size nào ạ?`, dsSize.slice(0, 4).map(chonSize));
+    }
+    const duKho = conHang.filter((b) => b.ton >= soLuong!);
+    if (!duKho.length) {
+      const toiDa = Math.max(...conHang.map((b) => b.ton));
+      return kq(`**${sp.ten}**${kichCo ? ` size ${kichCo}` : ''} hiện chỉ còn tối đa ${toiDa} sản phẩm, chưa đủ ${soLuong} như bạn muốn.`, [`Đặt ${toiDa} ${sp.ten}${kichCo ? ` size ${kichCo}` : ''}`]);
+    }
+    const bt = duKho[0];
+
+    try {
+      const r = await this.gioHang.them(nguoiDung.id, bt.id, soLuong);
+      const nhanBt = [bt.size && `size ${bt.size}`, !bt.size && bt.mau && bt.mau !== 'Mặc định' ? bt.mau : ''].filter(Boolean).join(', ');
+      const thanhTien = bt.gia * soLuong;
+      const gioKhac = r.cartCount > soLuong ? ` Giỏ hàng của bạn hiện có tổng ${r.cartCount} sản phẩm, trang thanh toán sẽ tính cả những sản phẩm này.` : '';
+      return kq(
+        `Mình đã thêm **${sp.ten}**${nhanBt ? ` (${nhanBt})` : ''} × ${soLuong}${daNeuSoLuong ? '' : ' (bạn chưa nêu số lượng nên mình đặt 1)'} vào giỏ hàng, thành tiền ${dinhDangTien(thanhTien)}.${gioKhac} Đang chuyển bạn tới trang thanh toán…`,
+        [],
+        { hanhDong: { loai: 'thanh_toan', href: '/DonHang/Checkout', nhan: 'Đến trang thanh toán', soLuongGio: r.cartCount } },
+      );
+    } catch (e) {
+      const msg = e instanceof HttpException ? this.thongBaoLoi(e) : '';
+      this.logger.warn(`Chatbot không thêm được vào giỏ: ${(e as Error).message}`);
+      return kq(`Mình chưa thêm được **${sp.ten}** vào giỏ hàng${msg ? `: ${msg}` : '. Bạn thử lại sau ít phút hoặc thêm trực tiếp ở trang sản phẩm nhé'}.`, []);
+    }
+  }
+
+  private thongBaoLoi(e: HttpException): string {
+    const r = e.getResponse();
+    const m = typeof r === 'string' ? r : (r as { message?: string | string[] }).message;
+    return (Array.isArray(m) ? m[0] : m ?? '').replace(/[.!]+$/, '');
   }
 
   private async xuLyDonHang(pt: KetQuaPhanTich, trong: KetQuaXuLy, nguoiDung?: NguoiDung): Promise<KetQuaXuLy> {

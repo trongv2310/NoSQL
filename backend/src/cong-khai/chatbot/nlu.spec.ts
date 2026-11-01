@@ -1,4 +1,4 @@
-import { chuanHoa, gopNguCanh, nhanKichCo, nhanLoai, nhanSoDonHang, nhanTrinhDo, phanTich, phanTichNganSach, TuDienPhanTich } from './nlu';
+import { chuanHoa, gopNguCanh, nhanKichCo, nhanLoai, nhanSoDonHang, nhanSoLuong, nhanTrinhDo, phanTich, phanTichNganSach, TuDienPhanTich } from './nlu';
 
 const tuDien: TuDienPhanTich = {
   hang: ['Yonex', 'Lining', 'Victor', 'Mizuno'],
@@ -67,6 +67,36 @@ describe('nhận diện thuộc tính', () => {
     expect(nhanSoDonHang(chuanHoa('đơn hàng #12 đến đâu rồi'))).toBe(12);
     expect(nhanSoDonHang(chuanHoa('mã đơn 345'))).toBe(345);
     expect(nhanSoDonHang(chuanHoa('mình hay đánh đơn 3 set'))).toBeUndefined();
+  });
+});
+
+describe('nhanSoLuong và ý định đặt hàng', () => {
+  it.each([
+    ['số lượng 2', 2],
+    ['mua 3 cây astrox', 3],
+    ['hai đôi giày', 2],
+    ['x4', 4],
+    ['lấy 5 cái', 5],
+    ['đặt hàng astrox 99', undefined],
+    ['vợt 3U size 42', undefined],
+  ])('"%s"', (cau, mong) => {
+    expect(nhanSoLuong(chuanHoa(cau))).toBe(mong);
+  });
+
+  it('nhận diện đặt hàng khi có động từ đặt/mua + sản phẩm', () => {
+    expect(hoi('đặt hàng Astrox 99 giúp mình', 1).yDinh).toBe('dat_hang');
+    expect(hoi('mua luôn cái này đi').yDinh).toBe('dat_hang');
+    expect(hoi('mình muốn mua Astrox 99', 1).yDinh).toBe('dat_hang');
+    expect(hoi('chốt đơn cái thứ 2 nhé').yDinh).toBe('dat_hang');
+    expect(hoi('cho vào giỏ 2 cây Astrox 99', 1).yDinh).toBe('dat_hang');
+  });
+
+  it('không nhầm với tư vấn, hỏi giá, hỏi đơn hay hỏi cách đặt', () => {
+    expect(hoi('mua vợt dưới 3 triệu').yDinh).toBe('tu_van');
+    expect(hoi('mua Astrox 99 giá bao nhiêu', 1).yDinh).toBe('hoi_gia');
+    expect(hoi('đơn hàng đã đặt của tôi đâu').yDinh).toBe('don_hang');
+    expect(hoi('làm sao để đặt hàng').chuDeChinhSach).toBe('dat_hang');
+    expect(hoi('làm sao để đặt hàng').yDinh).toBe('chinh_sach');
   });
 });
 

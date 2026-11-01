@@ -31,6 +31,14 @@ export interface TheDonHang {
   link: string;
 }
 
+export interface HanhDong {
+  loai: 'thanh_toan';
+  href: string;
+  nhan: string;
+  /** Tổng số lượng trong giỏ sau khi thêm, để cập nhật biểu tượng giỏ hàng. */
+  soLuongGio: number;
+}
+
 export interface PhanHoiChatbot {
   success: boolean;
   reply: string;
@@ -39,6 +47,8 @@ export interface PhanHoiChatbot {
   quickReplies: string[];
   /** Nút điều hướng (ví dụ "Đăng nhập") hiển thị dưới lời đáp. */
   lienKet: { nhan: string; href: string }[];
+  /** Hành động cho giao diện thực hiện sau lời đáp (ví dụ chuyển tới trang thanh toán). */
+  hanhDong: HanhDong | null;
   context: NguCanh;
   /** "ai" khi lời đáp do Gemini diễn đạt; "tra-cuu" khi đến từ tra cứu kho (không key, lỗi hoặc hết hạn mức). */
   nguon: 'ai' | 'tra-cuu';

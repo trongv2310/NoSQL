@@ -99,3 +99,9 @@ cd frontend && npm run lint && npm run build
 - **Ngữ cảnh nhiều lượt**: server không lưu phiên; mỗi phản hồi trả `context`, client gửi lại ở lượt sau (đã được làm sạch phía server).
 - **Gemini (tùy chọn)**: có `GEMINI_API_KEY` thì AI diễn đạt lại dữ kiện đã tra cứu (system prompt chống bịa, mọi số tiền trong câu trả lời phải khớp dữ liệu kho, ngược lại bị loại). Lỗi/timeout/hết hạn mức → tự dùng lời đáp tra cứu; lỗi liên tiếp sẽ tạm ngưng gọi AI 60 giây.
 - **Giới hạn tần suất**: 15 tin/phút và 200 tin/giờ mỗi khách (IP hoặc tài khoản), 300 tin/phút toàn hệ thống; vượt quá trả HTTP 429.
+
+### Chatbot: thẻ sản phẩm, đặt hàng và giọng nói
+
+- Mỗi thẻ sản phẩm có nút **Xem chi tiết** (tới `/Home/ChiTietSanPham/:id`) và **Đặt hàng**.
+- Nhắn kiểu "đặt hàng Astrox 99 Pro số lượng 2" (không nêu số lượng thì mặc định 1): bot thêm vào giỏ rồi giao diện tự chuyển tới `/DonHang/Checkout`. Chưa chốt đơn: khách vẫn kiểm tra thông tin giao hàng và bấm xác nhận ở trang thanh toán. Chưa đăng nhập, hết hàng, hết size, số lượng vượt tồn kho hoặc lỗi giỏ hàng thì bot báo rõ lý do và không thêm gì; sản phẩm nhiều size mà chưa chọn thì bot hỏi size.
+- **Giọng nói** (Web Speech API, cần Chrome/Edge/Safari và cấp quyền micro): nút micro để nói câu hỏi (tự gửi khi nói xong, bot đọc to câu trả lời), nút loa trên tiêu đề để luôn đọc to. Trình duyệt không hỗ trợ thì nút micro bị vô hiệu hóa, vẫn gõ chữ bình thường.

@@ -18,11 +18,12 @@ export type YDinh =
   | 'ton_kho'
   | 'hoi_gia'
   | 'so_sanh'
+  | 'dat_hang'
   | 'huong_dan'
   | 'tu_van'
   | 'khac';
 
-export type ChuDeChinhSach = 'thanh_toan' | 'huy_don' | 'giao_hang' | 'bao_hanh' | 'doi_tra' | 'cua_hang' | 'chinh_hang' | 'chung';
+export type ChuDeChinhSach = 'dat_hang' | 'thanh_toan' | 'huy_don' | 'giao_hang' | 'bao_hanh' | 'doi_tra' | 'cua_hang' | 'chinh_hang' | 'chung';
 export type ChuDeHuongDan = 'trong_luong' | 'can_bang' | 'do_cung' | 'suc_cang' | 'chon_vot' | 'chon_giay' | 'chung';
 
 /** Trạng thái hội thoại: client gửi lại nguyên văn ở mỗi lượt để server giữ được ngữ cảnh (server không lưu session). */
@@ -59,6 +60,8 @@ export interface KetQuaPhanTich {
   datLai: boolean;
   xemThem: boolean;
   soDonHang?: number;
+  /** Số lượng khách muốn đặt (chỉ có khi nêu rõ). */
+  soLuong?: number;
   thuTu?: number | 'cuoi';
   daiTu: boolean;
   tuongDoi?: 're_hon' | 'dat_hon';
@@ -320,6 +323,20 @@ export function nhanThuTu(t: string): number | 'cuoi' | undefined {
   return undefined;
 }
 
+const SO_CHU: Record<string, number> = { mot: 1, hai: 2, ba: 3, bon: 4, sau: 6, bay: 7, tam: 8, chin: 9, muoi: 10 };
+const DON_VI_DEM = 'cay|doi|cai|chiec|cuon|ong|hop|bo|san pham|mon';
+
+/** Số lượng khách nêu khi đặt hàng: "số lượng 2", "2 cây", "hai đôi", "x3", "mua 2". */
+export function nhanSoLuong(t: string): number | undefined {
+  const so = (s: string) => (/^\d+$/.test(s) ? parseInt(s, 10) : SO_CHU[s]);
+  const m =
+    /(?:so luong|sl)\s*(?:la\s*)?(\d{1,3})(?!\d)/.exec(t) ??
+    /(?:^|[^a-z0-9])x\s*(\d{1,3})(?!\d)/.exec(t) ??
+    new RegExp(`(?:^|[^a-z0-9])(\\d{1,3}|mot|hai|ba|bon|sau|bay|tam|chin|muoi)\\s*(?:${DON_VI_DEM})(?=$|[^a-z0-9])`).exec(t) ??
+    /(?:mua|dat|lay)\s+(\d{1,3})(?=\s|$)/.exec(t);
+  return m ? so(m[1]) : undefined;
+}
+
 export function nhanDaiTu(t: string): boolean {
   return coCum(t, 'cai nay', 'mau nay', 'cay nay', 'doi nay', 'san pham nay', 'cai do', 'mau do', 'cay do', 'doi do', 'no', 'cai tren', 'mau tren', 'vua roi', 'vua goi y', 'o tren', 'mau vua', 'cay vua', 'doi vua');
 }
@@ -334,6 +351,7 @@ export function nhanSoDonHang(t: string): number | undefined {
 // ---------------------------------------------------------------------------
 
 function nhanChuDeChinhSach(t: string): ChuDeChinhSach | undefined {
+  if (coCum(t, 'lam sao dat', 'lam sao de dat', 'cach de dat', 'lam the nao de dat', 'cach dat', 'dat hang nhu the nao', 'huong dan dat', 'dat hang the nao', 'dat hang ra sao')) return 'dat_hang';
   if (coCum(t, 'bao hanh')) return 'bao_hanh';
   if (coCum(t, 'doi tra', 'doi hang', 'tra hang', 'hoan tien', 'hoan hang', 'doi size', 'doi mau', 'tra lai')) return 'doi_tra';
   if (coCum(t, 'huy don', 'huy dat hang', 'khong mua nua', 'huy hang')) return 'huy_don';
@@ -405,12 +423,20 @@ export function phanTich(van: string, tuDien: TuDienPhanTich, soSanPhamKhopTen =
   const chuDeHD = nhanChuDeHuongDan(t);
   const lienQuanSanPham = !!(slot.loai || slot.hang || slot.tuKhoa || soSanPhamKhopTen > 0 || daiTu || thuTu !== undefined);
 
-  const base = { chuan: t, slot, datLai, xemThem, soDonHang, thuTu, daiTu, tuongDoi, nhacKhuyenMai };
+  const soLuong = nhanSoLuong(t);
+  const base = { chuan: t, slot, datLai, xemThem, soDonHang, soLuong, thuTu, daiTu, tuongDoi, nhacKhuyenMai };
   const ra = (yDinh: YDinh, them: Partial<KetQuaPhanTich> = {}): KetQuaPhanTich => ({ ...base, yDinh, ...them });
 
   const tu = tachTu(t);
   const ngan = tu.length <= 6;
 
+  const hoiThongTin = coCum(t, 'gia bao nhieu', 'bao nhieu tien', 'con hang', 'het hang', 'don hang cua', 'don da dat', 'don vua dat', 'trang thai', 'kiem tra', 'tra cuu', 'theo doi', 'so sanh');
+  const cueDat = coCum(t, 'dat hang', 'dat mua', 'dat giup', 'dat cho', 'dat luon', 'dat ngay', 'mua ngay', 'mua luon', 'mua giup', 'mua cho', 'lay cho', 'lay luon', 'chot don', 'order', 'them vao gio', 'cho vao gio', 'bo vao gio', 'thanh toan luon', 'muon dat', 'toi dat', 'minh dat', 'cho minh dat');
+  const cueMua = coCum(t, 'muon mua', 'can mua', 'mua', 'lay');
+  const datTheoSanPham = coCum(t, 'dat') && lienQuanSanPham && !hoiThongTin;
+  if (!chuDeCS && ((cueDat && !(hoiThongTin && !coCum(t, 'dat cho', 'dat giup', 'dat luon', 'dat ngay'))) || datTheoSanPham || (cueMua && (soSanPhamKhopTen > 0 || !!slot.tuKhoa) && !hoiThongTin))) {
+    return ra('dat_hang');
+  }
   if (soDonHang !== undefined || coCum(t, 'don hang', 'ma don', 'kiem tra don', 'trang thai don', 'don cua toi', 'don cua minh', 'theo doi don', 'tra cuu don', 'don da dat', 'don vua dat', 'don dat hom', 'hang cua toi', 'hang cua minh')) {
     if (!(chuDeCS === 'huy_don' && soDonHang === undefined && coCum(t, 'chinh sach', 'quy dinh', 'co the huy', 'duoc huy'))) {
       return ra('don_hang', { chuDeChinhSach: chuDeCS });
