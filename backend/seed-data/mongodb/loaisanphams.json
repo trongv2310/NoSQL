@@ -1,0 +1,6 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da945"},"tenLoai":"Vợt cầu lông","moTa":"Dành cho người chơi chuyên nghiệp và phong trào"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da946"},"tenLoai":"Giày cầu lông","moTa":"Giày thi đấu và tập luyện"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da947"},"tenLoai":"Áo quần thể thao","moTa":"Trang phục cầu lông"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da948"},"tenLoai":"Phụ kiện cầu lông","moTa":"Túi, băng tay, quấn cán..."}
+]

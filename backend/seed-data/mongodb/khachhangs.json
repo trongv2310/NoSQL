@@ -1,0 +1,6 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da9bf"},"hoTen":"Admin Quản Trị","email":"admin@shopcaulong.com","soDienThoai":"0901000001","diaChi":"Tại cửa hàng","taiKhoan":{"$oid":"6aeef73504c66f8f737da9b7"},"ngayTao":{"$date":"2026-11-01T01:20:33Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9c0"},"hoTen":"Nhân Viên Bán Hàng","email":"nhanvien1@shopcaulong.com","soDienThoai":"0901000002","diaChi":"Tại cửa hàng","taiKhoan":{"$oid":"6aeef73504c66f8f737da9b8"},"ngayTao":{"$date":"2026-11-01T01:20:33Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9c1"},"hoTen":"Nguyễn Văn A","email":"nguyenvana@gmail.com","soDienThoai":"0901234567","diaChi":"123 Nguyễn Trãi, Q.1, TP.HCM","taiKhoan":{"$oid":"6aeef73504c66f8f737da9b9"},"ngayTao":{"$date":"2026-11-01T01:20:33Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9c2"},"hoTen":"Trần Thị B","email":"tranthib@gmail.com","soDienThoai":"0909876543","diaChi":"456 Lê Lợi, Q.3, TP.HCM","taiKhoan":{"$oid":"6aeef73504c66f8f737da9ba"},"ngayTao":{"$date":"2026-11-01T01:20:33Z"}}
+]

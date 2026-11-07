@@ -1,0 +1,12 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da95f"},"tenMau":"Đen"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da960"},"tenMau":"Xanh dương"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da961"},"tenMau":"Đỏ"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da962"},"tenMau":"Vàng"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da963"},"tenMau":"Bạc"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da964"},"tenMau":"Trắng"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da965"},"tenMau":"Tím"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da966"},"tenMau":"Xanh lá"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da967"},"tenMau":"Cam"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da968"},"tenMau":"Hồng"}
+]
