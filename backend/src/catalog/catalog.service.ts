@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { bienTheView, idOf, khuyenMaiView, sanPhamView } from '../common/mappers';
 import { dangGiamGia, giaSauKhuyenMai, khuyenMaiConHieuLuc } from '../common/pricing';
 import { parseObjectId, phanTrang } from '../common/helpers';
+import { ghepTrangChu } from './trang-chu';
 import {
   ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, PhanHoi, SanPham,
 } from '../schemas';
@@ -176,6 +177,16 @@ export class CatalogService {
         dangLoc: tu !== null || den !== null || hangDangChon.length > 0 || bool(q.giam_gia) || bool(q.con_hang),
       },
     };
+  }
+
+  /** Một lần gọi cho landing: mọi sản phẩm + tồn kho + thông số vợt (xem trang-chu.ts). */
+  async trangChu() {
+    const [sps, tonKho, bienThes] = await Promise.all([
+      this.tatCaSanPham(),
+      this.tonKhoTheoSanPham(),
+      this.chiTietModel.find({ thongSo: { $ne: null } }, { sanPham: 1, thongSo: 1 }).sort({ _id: 1 }).lean(),
+    ]);
+    return { sanPhams: ghepTrangChu(sps, tonKho, bienThes) };
   }
 
   async cuaHang() {

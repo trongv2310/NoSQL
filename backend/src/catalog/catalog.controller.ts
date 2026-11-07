@@ -11,6 +11,11 @@ export class CatalogController {
     return this.catalog.danhSach(q);
   }
 
+  @Get('trang-chu')
+  trangChu() {
+    return this.catalog.trangChu();
+  }
+
   @Get('cua-hang')
   cuaHang() {
     return this.catalog.cuaHang();
