@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useApp } from "@/components/AppProviders";
+import { PageHero } from "@/components/PageHero";
+import { ChipTrangThai, OrderTrack } from "@/components/Steps";
 import { ErrorBox, Loading, Page } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
-import { imgUrl, ngayGio, tenTrangThaiClass, vnd } from "@/lib/format";
+import { imgUrl, ngayGio, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { DonHangV } from "@/lib/types";
 
@@ -30,41 +32,49 @@ export default function ChiTietDonPage() {
   if (!ready || loading) return <Page><Loading /></Page>;
   if (error || !data) return <Page><ErrorBox message={error ?? "Không tìm thấy đơn hàng"} /></Page>;
   return (
-    <Page>
-      <Link href="/DonHang/Index" className="small">← Quay lại danh sách</Link>
-      <div className="d-flex flex-wrap justify-content-between align-items-center my-3 gap-2">
-        <h2 className="page-title mb-0">Đơn hàng #{data.soDonHang}</h2>
-        <span className={`badge fs-6 ${tenTrangThaiClass(data.trangThai)}`}>{data.trangThai}</span>
-      </div>
-      <div className="row g-4">
-        <div className="col-lg-8">
-          <div className="table-responsive"><table className="table table-bordered align-middle bg-white">
-            <thead className="table-light"><tr><th>Sản phẩm</th><th className="text-end">Đơn giá</th><th className="text-center">SL</th><th className="text-end">Thành tiền</th></tr></thead>
-            <tbody>{data.chiTiet.map((c) => (
-              <tr key={c.id}>
-                <td><div className="d-flex gap-2 align-items-center">
-                  { }
-                  <img src={imgUrl(c.hinhAnh)} alt="" width={56} height={56} style={{ objectFit: "contain" }} />
-                  <div>{c.sanPhamId ? <Link href={`/Home/ChiTietSanPham/${c.sanPhamId}`}>{c.tenSanPham}</Link> : c.tenSanPham}<div className="small text-muted">{[c.tenMau, c.tenSize].filter(Boolean).join(" · ")} · {c.sku}</div></div>
-                </div></td>
-                <td className="text-end">{vnd(c.donGia)}</td><td className="text-center">{c.soLuong}</td><td className="text-end">{vnd(c.thanhTien)}</td>
-              </tr>))}</tbody>
-          </table></div>
+    <>
+      <PageHero compact tone="green" kicker="Chi tiết đơn hàng" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Đơn hàng", href: "/DonHang/Index" }, { nhan: `#${data.soDonHang}` }]}
+        title={<>Đơn hàng <em>#{data.soDonHang}</em></>} sub={`Đặt lúc ${ngayGio(data.ngayDat)}`} aside={<ChipTrangThai t={data.trangThai} />} />
+      <Page className="od-wrap">
+        <div className="od-card"><OrderTrack trangThai={data.trangThai} /></div>
+        <div className="row g-4">
+          <div className="col-lg-8">
+            <section className="od-card">
+              <h3 className="ct-card-title"><i className="fa-solid fa-box-open" aria-hidden="true" /> Sản phẩm trong đơn</h3>
+              <ul className="od-items is-detail">
+                {data.chiTiet.map((c) => (
+                  <li key={c.id}>
+                    { }
+                    <img src={imgUrl(c.hinhAnh)} alt="" loading="lazy" />
+                    <div>
+                      <b>{c.sanPhamId ? <Link href={`/Home/ChiTietSanPham/${c.sanPhamId}`}>{c.tenSanPham}</Link> : c.tenSanPham}</b>
+                      <small>{[c.tenMau, c.tenSize].filter(Boolean).join(" · ")}{c.tenMau || c.tenSize ? " · " : ""}{c.sku}</small>
+                      <small>{vnd(c.donGia)} × {c.soLuong}</small>
+                    </div>
+                    <span>{vnd(c.thanhTien)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+          <div className="col-lg-4">
+            <section className="od-card od-summary">
+              <h3 className="ct-card-title"><i className="fa-solid fa-receipt" aria-hidden="true" /> Thông tin đơn</h3>
+              <dl className="od-info">
+                <div><dt><i className="fa-solid fa-location-dot" aria-hidden="true" /> Địa chỉ giao</dt><dd>{data.diaChiGiaoHang}</dd></div>
+                <div><dt><i className="fa-solid fa-phone" aria-hidden="true" /> SĐT nhận hàng</dt><dd>{data.soDienThoaiNhanHang}</dd></div>
+                {data.ghiChu && <div><dt><i className="fa-solid fa-note-sticky" aria-hidden="true" /> Ghi chú</dt><dd>{data.ghiChu}</dd></div>}
+              </dl>
+              <div className="od-total">
+                <div><span>Tạm tính</span><span>{vnd(data.tongTien)}</span></div>
+                <div><span>Giảm giá</span><span>-{vnd(data.tienGiam)}</span></div>
+                <div className="is-sum"><span>Thành tiền</span><strong>{vnd(data.tongTienSauGiam)}</strong></div>
+              </div>
+              {KHACH_DUOC_HUY.includes(data.trangThai) && <button className="od-btn is-danger w-100 mt-3 justify-content-center" onClick={huy}>Hủy đơn hàng</button>}
+            </section>
+          </div>
         </div>
-        <div className="col-lg-4">
-          <div className="card"><div className="card-body small">
-            <div className="mb-1"><strong>Ngày đặt:</strong> {ngayGio(data.ngayDat)}</div>
-            <div className="mb-1"><strong>Địa chỉ giao:</strong> {data.diaChiGiaoHang}</div>
-            <div className="mb-1"><strong>SĐT nhận hàng:</strong> {data.soDienThoaiNhanHang}</div>
-            {data.ghiChu && <div className="mb-1"><strong>Ghi chú:</strong> {data.ghiChu}</div>}
-            <hr />
-            <div className="d-flex justify-content-between"><span>Tạm tính</span><span>{vnd(data.tongTien)}</span></div>
-            <div className="d-flex justify-content-between"><span>Giảm giá</span><span>-{vnd(data.tienGiam)}</span></div>
-            <div className="d-flex justify-content-between fw-bold fs-6 text-danger"><span>Thành tiền</span><span>{vnd(data.tongTienSauGiam)}</span></div>
-            {KHACH_DUOC_HUY.includes(data.trangThai) && <button className="btn btn-outline-danger w-100 mt-3" onClick={huy}>Hủy đơn hàng</button>}
-          </div></div>
-        </div>
-      </div>
-    </Page>
+      </Page>
+    </>
   );
 }

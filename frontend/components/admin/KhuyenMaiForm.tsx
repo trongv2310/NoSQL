@@ -45,7 +45,7 @@ export function KhuyenMaiForm({ id }: { id?: string }) {
   };
 
   return (
-    <form className="card-custom p-4" style={{ maxWidth: 720 }} onSubmit={gui}>
+    <form className="card-custom p-4" style={{ maxWidth: 860 }} onSubmit={gui}>
       {loi && <ErrorBox message={loi} />}
       <Field label="Tên chương trình *"><input className="form-control" required maxLength={100} value={f.tenChuongTrinh} onChange={dat("tenChuongTrinh")} /></Field>
       <Field label="Mô tả"><input className="form-control" maxLength={255} value={f.moTa} onChange={dat("moTa")} /></Field>

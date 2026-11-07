@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useApp } from "@/components/AppProviders";
+import { PageHero } from "@/components/PageHero";
+import { CheckoutSteps } from "@/components/Steps";
 import { ErrorBox, Loading, Page } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
 import { vnd } from "@/lib/format";
@@ -60,13 +62,16 @@ export default function CheckoutPage() {
   if (gio.error || !gio.data) return <Page><ErrorBox message={gio.error ?? "Giỏ hàng trống"} /></Page>;
 
   return (
-    <Page>
-      <h2 className="page-title mb-3">Thanh toán</h2>
+    <>
+    <PageHero compact tone="green" kicker="Thanh toán" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Giỏ hàng", href: "/Home/ViewCart" }, { nhan: "Thanh toán" }]}
+      title={<>Hoàn tất <em>đơn hàng</em></>} sub="Kiểm tra thông tin nhận hàng và chọn cách thanh toán phù hợp." />
+    <Page className="ct-wrap">
+      <CheckoutSteps buoc={2} />
       {loi && <ErrorBox message={loi} />}
       <div className="row g-4">
         <div className="col-lg-7">
-          <form className="card" onSubmit={(e) => { e.preventDefault(); void gui("cod"); }}><div className="card-body">
-            <h5 className="mb-3">Thông tin nhận hàng</h5>
+          <form className="card ct-form" onSubmit={(e) => { e.preventDefault(); void gui("cod"); }}><div className="card-body">
+            <h5 className="ct-card-title"><i className="fa-solid fa-location-dot" aria-hidden="true" /> Thông tin nhận hàng</h5>
             <div className="mb-3"><label className="form-label">Họ tên người nhận</label><input className="form-control" required maxLength={100} value={f.hoTenNhan} onChange={dat("hoTenNhan")} /></div>
             <div className="mb-3"><label className="form-label">Số điện thoại</label><input className="form-control" required pattern="0[0-9]{9,10}" title="Bắt đầu bằng 0, gồm 10–11 chữ số" value={f.soDienThoaiNhan} onChange={dat("soDienThoaiNhan")} /></div>
             <div className="mb-3"><label className="form-label">Địa chỉ giao hàng</label><input className="form-control" required maxLength={255} value={f.diaChiGiao} onChange={dat("diaChiGiao")} /></div>
@@ -78,12 +83,12 @@ export default function CheckoutPage() {
           </div></form>
         </div>
         <div className="col-lg-5">
-          <div className="card"><div className="card-body">
-            <h5 className="mb-3">Đơn hàng của bạn</h5>
+          <div className="card ct-summary"><div className="card-body">
+            <h5 className="ct-card-title"><i className="fa-solid fa-bag-shopping" aria-hidden="true" /> Đơn hàng của bạn</h5>
             {gio.data.items.map((it) => (
-              <div key={it.id} className="d-flex justify-content-between small mb-2">
+              <div key={it.id} className="d-flex justify-content-between align-items-start gap-3 small mb-2">
                 <span>{it.tenSanPham} <span className="text-muted">({[it.bienThe.mau?.tenMau, it.bienThe.size?.tenSize].filter(Boolean).join(", ")}) × {it.soLuong}</span></span>
-                <span>{vnd(it.thanhTien)}</span>
+                <span className="text-nowrap fw-semibold">{vnd(it.thanhTien)}</span>
               </div>
             ))}
             <hr /><div className="d-flex justify-content-between"><strong>Tổng cộng</strong><strong className="text-danger">{vnd(gio.data.tongTien)}</strong></div>
@@ -91,5 +96,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </Page>
+    </>
   );
 }

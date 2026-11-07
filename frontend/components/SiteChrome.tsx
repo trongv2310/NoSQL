@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { api, apiPost, loiTuApi } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { apiPost } from "@/lib/api";
 import { imgUrl } from "@/lib/format";
 import { useApp } from "./AppProviders";
 
@@ -25,6 +25,8 @@ const HANG_THEO_LOAI: Record<string, { hang: string; dong: string[] }[]> = {
   AoQuan: [{ hang: "Yonex", dong: [] }, { hang: "Lining", dong: [] }, { hang: "Victor", dong: [] }, { hang: "Mizuno", dong: [] }],
 };
 
+const GOI_Y_TIM = ["Vợt Yonex", "Giày Victor", "Áo Lining", "Quả cầu lông", "Quấn cán"];
+
 const spUrl = (p: Record<string, string>) => `/SanPham/Index?${new URLSearchParams(p).toString()}`;
 
 export function Header() {
@@ -36,12 +38,14 @@ export function Header() {
   const [moUser, setMoUser] = useState(false);
   const [loaiActive, setLoaiActive] = useState("Vot");
   const [moSub, setMoSub] = useState(false);
+  const [menuDong, setMenuDong] = useState(false);
 
   // Đóng menu di động mỗi khi chuyển trang.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMoMenu(false);
     setMoUser(false);
+    (document.activeElement as HTMLElement | null)?.blur?.();
   }, [pathname]);
 
   const dangXuat = async () => {
@@ -71,22 +75,40 @@ export function Header() {
         : [];
 
   const logo = imgUrl(site.logo, "images/HUIT.jpg");
+  const act = (p: string) => ((p === "/" ? pathname === "/" : pathname.startsWith(p)) ? "active" : "");
 
   return (
     <>
       <header className="main-header">
+        <div className="sf-topbar">
+          <div className="container sf-topbar-in">
+            <div className="sf-topbar-left">
+              <span><i className="fa-solid fa-phone-volume" aria-hidden="true" /> Hotline <a href="tel:0123456789">0123456789</a></span>
+              <span className="d-none d-lg-inline-flex"><i className="fa-solid fa-truck-fast" aria-hidden="true" /> Giao hàng tận nơi</span>
+              <span className="d-none d-xl-inline-flex"><i className="fa-solid fa-wallet" aria-hidden="true" /> Thanh toán COD hoặc MoMo</span>
+            </div>
+            <div className="sf-topbar-right">
+              <Link href="/DonHang/Index"><i className="fa-solid fa-box-open" aria-hidden="true" /> Theo dõi đơn hàng</Link>
+              <Link href="/Home/Contact"><i className="fa-solid fa-location-dot" aria-hidden="true" /> Cửa hàng</Link>
+            </div>
+          </div>
+        </div>
         <div className="header-top">
           <div className="header-brand-wrap">
             <button className="mobile-toggle-btn" type="button" aria-label="Mở menu" aria-expanded={moMenu} onClick={() => setMoMenu(true)}>
               <i className="fa-solid fa-bars" />
             </button>
             <div className="logo">
-              <Link href="/">{ }<img src={logo} alt="Logo Cửa Hàng Cầu Lông" /></Link>
+              <Link href="/" className="sf-brand">{ }<img src={logo} alt="Logo Cửa Hàng Cầu Lông" /><span className="sf-brand-text"><b>{site.tenSite}</b><small>Dụng cụ cầu lông chính hãng</small></span></Link>
             </div>
           </div>
           <form className="search-form search-absolute" onSubmit={(e) => { e.preventDefault(); if (keyword.trim()) router.push(`/SanPham/TimKiem?keyword=${encodeURIComponent(keyword.trim())}`); }}>
             <input type="text" name="keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm kiếm sản phẩm..." className="search-input" />
             <button type="submit" className="search-btn" aria-label="Tìm kiếm"><i className="fa-solid fa-magnifying-glass" /></button>
+            <div className="sf-suggest" aria-label="Gợi ý tìm kiếm">
+              <span>Tìm nhiều</span>
+              {GOI_Y_TIM.map((t) => <Link key={t} href={`/SanPham/TimKiem?keyword=${encodeURIComponent(t)}`}><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /> {t}</Link>)}
+            </div>
           </form>
           <div className="header-actions">
             <div className="account-section">
@@ -113,15 +135,15 @@ export function Header() {
                 </div>
               )}
             </div>
-            <Link href="/Home/ViewCart" className="cart-btn" aria-label="Giỏ hàng" title="Giỏ hàng">
-              <i className="fa-solid fa-cart-shopping" aria-hidden="true" /><span className="cart-count">{cartCount}</span>
+            <Link href="/Home/ViewCart" className="cart-btn" data-cart-target aria-label={`Giỏ hàng, ${cartCount} sản phẩm`} title="Giỏ hàng">
+              <i className="fa-solid fa-cart-shopping" aria-hidden="true" /><span key={cartCount} className="cart-count" aria-hidden="true">{cartCount}</span><span className="visually-hidden" role="status">{cartCount} sản phẩm trong giỏ hàng</span>
             </Link>
           </div>
         </div>
         <nav className="main-nav">
           <ul>
-            <li><Link href="/">TRANG CHỦ</Link></li>
-            <li className="mega-menu-item">
+            <li className={act("/")}><Link href="/">TRANG CHỦ</Link></li>
+            <li className={`mega-menu-item ${act("/SanPham")}${menuDong ? " is-shut" : ""}`} onClick={() => { setMenuDong(true); (document.activeElement as HTMLElement | null)?.blur?.(); }} onMouseEnter={() => setMenuDong(false)}>
               <Link href="/SanPham/Index">SẢN PHẨM <i className="fa-solid fa-chevron-down" /></Link>
               <div className="mega-submenu">
                 <div className="sidebar-categories">
@@ -159,10 +181,10 @@ export function Header() {
                 </div>
               </div>
             </li>
-            <li><Link href="/KhuyenMai/Index">KHUYẾN MÃI</Link></li>
-            <li><Link href="/BangTin">BẢNG TIN</Link></li>
-            <li><Link href="/DonHang/Index">ĐƠN HÀNG</Link></li>
-            <li><Link href="/Home/Contact">LIÊN HỆ</Link></li>
+            <li className={`${act("/KhuyenMai")} nav-hot`}><Link href="/KhuyenMai/Index">KHUYẾN MÃI</Link></li>
+            <li className={act("/BangTin")}><Link href="/BangTin">BẢNG TIN</Link></li>
+            <li className={act("/DonHang")}><Link href="/DonHang/Index">ĐƠN HÀNG</Link></li>
+            <li className={act("/Home/Contact")}><Link href="/Home/Contact">LIÊN HỆ</Link></li>
           </ul>
         </nav>
       </header>
@@ -222,83 +244,49 @@ export function Header() {
 
 export function Footer() {
   return (
-    <footer>
+    <>
+    <div className="sf-trust-wrap">
+        <ul className="sf-trust" aria-label="Cam kết của cửa hàng">
+          {[
+            ["fa-medal", "Hàng chính hãng", "Sản phẩm từ Yonex, Li-Ning, Victor, Mizuno"],
+            ["fa-truck-fast", "Giao hàng tận nơi", "Đặt online, theo dõi trạng thái đơn"],
+            ["fa-wallet", "Thanh toán linh hoạt", "Trả khi nhận hàng (COD) hoặc ví MoMo"],
+            ["fa-robot", "Trợ lý AI tư vấn", "Gợi ý vợt, giày theo ngân sách của bạn"],
+          ].map(([icon, ten, mota]) => (
+            <li key={ten}><span><i className={`fa-solid ${icon}`} aria-hidden="true" /></span><div><b>{ten}</b><small>{mota}</small></div></li>
+          ))}
+        </ul>
+    </div>
+    <footer className="sf-footer">
       <div className="footer-content">
+        <div className="footer-section footer-brand">
+          <h4>CỬA HÀNG CẦU LÔNG</h4>
+          <p className="footer-about">Dụng cụ, trang phục và phụ kiện cầu lông chính hãng. Chọn theo ngân sách, theo lối chơi — và có người đồng hành tư vấn.</p>
+          <div className="footer-pay"><span>Thanh toán</span><b>COD</b>{ }<img src="/images/momo-logo.png" alt="MoMo" height={22} /></div>
+        </div>
         <div className="footer-section">
           <h4>THÔNG TIN LIÊN HỆ</h4>
           <p><i className="fa-solid fa-location-dot" /> 140 Lê Trọng Tấn, Tây Thạnh, Tân Phú, TP.HCM</p>
           <p><i className="fa-solid fa-phone" /> 0123456789</p>
           <p><i className="fa-solid fa-envelope" /> HUIT@gmail.com</p>
+          <p><i className="fa-solid fa-clock" /> 8:00 – 21:00 mỗi ngày</p>
         </div>
         <div className="footer-section">
           <h4>DANH MỤC SẢN PHẨM</h4>
           {LOAI.map((l) => <Link key={l.khoa} href={spUrl({ loai: l.khoa })}>{l.tenThuong}</Link>)}
+          <Link href="/KhuyenMai/Index">Khuyến mãi đang chạy</Link>
         </div>
         <div className="footer-section">
           <h4>HỖ TRỢ KHÁCH HÀNG</h4>
           {["Hướng dẫn mua hàng", "Chính sách bảo hành", "Chính sách đổi trả", "Câu hỏi thường gặp"].map((t) => <Link key={t} href="/">{t}</Link>)}
+          <Link href="/DonHang/Index">Theo dõi đơn hàng</Link>
         </div>
       </div>
       <div className="footer-bottom"><p>&copy; {new Date().getFullYear()} Cửa hàng Cầu Lông HUIT. Bảo lưu mọi quyền.</p></div>
     </footer>
-  );
-}
-
-interface Tin { vai: "user" | "bot"; text: string }
-
-export function Chatbot() {
-  const [mo, setMo] = useState(false);
-  const [ds, setDs] = useState<Tin[]>([{ vai: "bot", text: "Xin chào! Mình là trợ lý ảo của Shop Cầu Lông. Bạn cần tư vấn vợt, giày hay khuyến mãi nào ạ?" }]);
-  const [nhap, setNhap] = useState("");
-  const [cho, setCho] = useState(false);
-  const cuoi = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { cuoi.current?.scrollIntoView({ behavior: "smooth" }); }, [ds, mo]);
-
-  const gui = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = nhap.trim();
-    if (!text || cho) return;
-    setNhap("");
-    setDs((d) => [...d, { vai: "user", text }]);
-    setCho(true);
-    try {
-      const r = await api<{ success: boolean; reply: string }>("/chatbot/ask", { method: "POST", body: { message: text } });
-      setDs((d) => [...d, { vai: "bot", text: r.reply }]);
-    } catch (err) {
-      setDs((d) => [...d, { vai: "bot", text: `Lỗi kết nối server: ${loiTuApi(err)}` }]);
-    } finally {
-      setCho(false);
-    }
-  };
-
-  return (
-    <>
-      <button id="chat-toggle-btn" className="btn btn-primary rounded-circle shadow-lg" aria-label="Chat với trợ lý"
-        style={{ position: "fixed", right: 20, bottom: 20, width: 56, height: 56, zIndex: 1500 }} onClick={() => setMo((v) => !v)}>
-        <i className="fa-solid fa-comments" />
-      </button>
-      {mo && (
-        <div id="chat-container" className="card shadow-lg" style={{ position: "fixed", right: 20, bottom: 88, width: 340, maxWidth: "calc(100vw - 40px)", height: 460, zIndex: 1500, display: "flex", flexDirection: "column" }}>
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <h6 className="mb-0 fw-bold"><i className="fa-solid fa-robot" /> Trợ lý Shop Cầu Lông</h6>
-            <button type="button" className="btn-close" aria-label="Đóng" onClick={() => setMo(false)} />
-          </div>
-          <div className="card-body" style={{ flexGrow: 1, overflowY: "auto", background: "#f8f9fa", padding: 15 }}>
-            {ds.map((t, i) => (
-              <div key={i} className={`my-2 d-flex ${t.vai === "user" ? "justify-content-end" : ""}`}>
-                <div className={`px-3 py-2 rounded ${t.vai === "user" ? "bg-primary text-white" : "bg-white border"}`} style={{ maxWidth: "85%", whiteSpace: "pre-wrap" }}>{t.text}</div>
-              </div>
-            ))}
-            {cho && <div className="text-muted small ms-2"><i>Đang trả lời...</i></div>}
-            <div ref={cuoi} />
-          </div>
-          <form className="card-footer bg-white d-flex gap-2" style={{ padding: 10 }} onSubmit={gui}>
-            <input className="form-control" value={nhap} onChange={(e) => setNhap(e.target.value)} placeholder="Nhập câu hỏi..." maxLength={500} />
-            <button className="btn btn-primary" type="submit" disabled={cho} aria-label="Gửi"><i className="fa-solid fa-paper-plane" /></button>
-          </form>
-        </div>
-      )}
     </>
   );
 }
+
+/** Chatbot tư vấn nằm ở file riêng (components/Chatbot.tsx); xuất lại đây để layout của site giữ nguyên cách import. */
+export { Chatbot } from "./Chatbot";

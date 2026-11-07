@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export const TRANG_THAI = {
   ChoXacNhan: 'Chờ xác nhận',
@@ -15,8 +15,8 @@ export const TRANG_THAI = {
 /** Dòng hàng nhúng trong đơn: lưu ảnh chụp tên/SKU/giá tại thời điểm đặt. */
 @Schema({ _id: true })
 export class ChiTietDonHang {
-  @Prop({ type: Types.ObjectId, ref: 'ChiTietSanPham' }) chiTietSanPham?: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'SanPham' }) sanPham?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham' }) chiTietSanPham?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'SanPham' }) sanPham?: Types.ObjectId;
   @Prop() tenSanPham?: string;
   @Prop() hinhAnh?: string;
   @Prop() sku?: string;
@@ -39,7 +39,7 @@ export class DonHang {
   @Prop({ default: 0 }) tongTien: number;
   @Prop({ default: 0 }) tongTienSauGiam: number;
   @Prop({ default: 0 }) tienGiam: number;
-  @Prop({ type: Types.ObjectId, ref: 'KhachHang', index: true }) khachHang?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang', index: true }) khachHang?: Types.ObjectId;
   @Prop({ maxlength: 255 }) diaChiGiaoHang?: string;
   @Prop({ maxlength: 15 }) soDienThoaiNhanHang?: string;
   @Prop({ maxlength: 500 }) ghiChu?: string;
@@ -50,10 +50,10 @@ export const DonHangSchema = SchemaFactory.createForClass(DonHang);
 
 @Schema({ collection: 'giohangs' })
 export class GioHang {
-  @Prop({ type: Types.ObjectId, ref: 'KhachHang', required: true, index: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang', required: true, index: true })
   khachHang: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'ChiTietSanPham', required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham', required: true })
   chiTietSanPham: Types.ObjectId;
 
   @Prop({ default: 1, min: 1 }) soLuong: number;
@@ -65,7 +65,7 @@ GioHangSchema.index({ khachHang: 1, chiTietSanPham: 1 }, { unique: true });
 
 @Schema({ collection: 'counters' })
 export class Counter {
-  @Prop({ required: true, unique: true }) _id: string;
+  @Prop({ required: true }) _id: string;
   @Prop({ default: 0 }) seq: number;
 }
 export type CounterDocument = HydratedDocument<Counter>;

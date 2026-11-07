@@ -378,3 +378,77 @@ label.form-check-label { font-weight: 400; }
 .empty-state .empty-text { margin: 0; font-weight: 500; }
 .empty-state.is-compact { padding: 36px 16px; border: 0; border-radius: 0; background: transparent; }
 .empty-state.is-compact .empty-icon { width: 48px; height: 48px; }
+/* Phản hồi thao tác: giỏ hàng và thông báo dùng chung cho cả site/admin. */
+.cart-flight {
+    position: fixed;
+    z-index: 3500;
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid #cce6dc;
+    box-shadow: 0 12px 32px #143e342b;
+    font-size: 30px;
+    overflow: hidden;
+    will-change: transform, opacity;
+}
+.cart-flight img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+.cart-count { animation: cart-count-pop .4s cubic-bezier(.16,1,.3,1); }
+@keyframes cart-count-pop {
+    0% { transform: translateY(5px) scale(.65); opacity: .4; }
+    55% { transform: translateY(-2px) scale(1.18); }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.product-add-btn { min-width: 158px; transition: transform .18s ease, box-shadow .18s ease; }
+.product-add-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px #0a624b26; }
+.product-add-btn:active:not(:disabled) { transform: scale(.97); }
+.flash-dock {
+    position: fixed;
+    left: max(24px, env(safe-area-inset-left));
+    bottom: max(24px, env(safe-area-inset-bottom));
+    z-index: 3100;
+    width: min(380px, calc(100vw - 112px));
+    pointer-events: none;
+}
+.flash-notice {
+    --notice-color: #12765a;
+    --notice-soft: #e6f5ee;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    color: #17352c;
+    background: #ffffff;
+    border: 1px solid #dde8e2;
+    border-radius: 18px;
+    box-shadow: 0 8px 16px #16392c08, 0 20px 60px #16392c1a;
+    pointer-events: auto;
+    animation: notice-enter .35s cubic-bezier(.16,1,.3,1) both;
+}
+.flash-notice.is-danger { --notice-color: #ba3b45; --notice-soft: #fcebed; border-color: #f0d5d8; }
+.flash-notice-icon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; color: var(--notice-color); background: var(--notice-soft); border-radius: 12px; }
+.flash-notice-body { flex: 1; min-width: 0; padding-top: 1px; }
+.flash-notice-body strong { font-size: .88rem; font-weight: 650; letter-spacing: -.01em; }
+.flash-notice-body p { margin: 4px 0 0; color: #5b6c65; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.flash-notice-close { display: grid; place-items: center; flex: 0 0 28px; height: 28px; padding: 0; border: 0; background: transparent; border-radius: 8px; color: #7a8b82; transition: background-color .15s; }
+.flash-notice-close:hover { background: #f0f5f2; color: #17352c; }
+.flash-notice-close:focus-visible { outline: 2px solid var(--notice-color); outline-offset: 2px; }
+.flash-notice.is-closing { animation: notice-exit .18s ease-in both; }
+@keyframes notice-enter { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes notice-exit { to { opacity: 0; transform: translateY(8px) scale(.98); } }
+@media (max-width: 575px) {
+    .flash-dock { left: 12px; bottom: max(16px, env(safe-area-inset-bottom)); width: calc(100vw - 96px); }
+    .flash-notice { padding: 12px; gap: 8px; border-radius: 14px; }
+    .flash-notice-icon { flex-basis: 28px; height: 28px; border-radius: 9px; }
+    .flash-notice-close { flex-basis: 24px; height: 28px; }
+    /* Chat toàn màn hình: đặt thông báo phía trên ô nhập để khách vẫn gõ được. */
+    body:has(#chat-container) .flash-dock { bottom: 112px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cart-count, .flash-notice, .flash-notice.is-closing { animation: none; }
+    .product-add-btn { transition: none; }
+    .product-add-btn:hover:not(:disabled), .product-add-btn:active:not(:disabled) { transform: none; }
+}

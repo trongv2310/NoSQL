@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Empty, ErrorBox, Loading, Page, Pagination, ProductCard } from "@/components/Ui";
-import { BangDiem, TinCard } from "@/components/News";
+import { CountUp } from "@/components/Motion";
+import { BangDiem, NewsCard, NewsLead, SpMini, TinCard } from "@/components/News";
+import { PageHero } from "@/components/PageHero";
+import { Empty, ErrorBox, Loading, Page, Pagination } from "@/components/Ui";
 import { useApi } from "@/lib/hooks";
 import type { SanPhamV, TinV, TranDauV, Trang } from "@/lib/types";
 
@@ -37,38 +39,58 @@ export default function BangTinPage() {
     router.push(`/BangTin${p.toString() ? `?${p}` : ""}`);
   };
 
+  const tatCa = data ? [...data.dsNoiBat, ...data.items] : [];
+  const lead = tatCa[0];
+  const phu = tatCa.slice(1, 3);
+  const con = tatCa.slice(3);
+
   return (
-    <Page>
+    <>
       <link href="/css/bangtin.css" rel="stylesheet" />
-      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-        <h2 className="page-title mb-0">Bảng tin cầu lông</h2>
-        <form onSubmit={(e) => { e.preventDefault(); di(loai, keyword); }} className="d-flex gap-2">
-          <input className="form-control" placeholder="Tìm bài viết..." value={keyword} onChange={(e) => setKeyword(e.target.value)} />
-          <button className="btn btn-primary" aria-label="Tìm"><i className="fa-solid fa-magnifying-glass" /></button>
-        </form>
-      </div>
-      <div className="d-flex flex-wrap gap-2 mb-3">
-        {LOAI_TIN.map(([khoa, nhan]) => (
-          <button key={khoa} className={`btn btn-sm ${loai === khoa ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => di(khoa, keyword)}>
-            {nhan}{khoa && data?.demLoai[khoa] ? ` (${data.demLoai[khoa]})` : ""}
-          </button>
-        ))}
-      </div>
-      {loading && !data ? <Loading /> : error || !data ? <ErrorBox message={error ?? "Lỗi tải dữ liệu"} /> : (
-        <div className="row g-4">
-          <div className="col-lg-8">
-            {data.dsNoiBat.map((t) => <TinCard key={t.id} t={t} />)}
-            {data.items.length === 0 && data.dsNoiBat.length === 0 ? <Empty message="Chưa có bài viết phù hợp." /> : data.items.map((t) => <TinCard key={t.id} t={t} />)}
-            <Pagination trang={data} />
-          </div>
-          <aside className="col-lg-4">
-            <div className="small text-muted mb-3">{data.tong.tin} bài viết · {data.tong.tran} trận đấu · {data.tong.luotXem.toLocaleString("vi-VN")} lượt xem</div>
-            <BangDiem ds={data.tranDauMoi} tieuDe="Kết quả thi đấu" />
-            <h5>Sản phẩm hot</h5>
-            <div className="row g-2">{data.spHot.map((s) => <div key={s.id} className="col-6"><ProductCard sp={s} /></div>)}</div>
-          </aside>
+      <PageHero compact tone="navy" kicker="Tin tức & kết quả" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Bảng tin" }]}
+        title={<>Bảng tin <em>cầu lông</em></>}
+        sub="Tin thi đấu, hồ sơ tuyển thủ và sản phẩm mới — cập nhật cho người chơi cầu lông."
+        stats={data ? [{ value: <CountUp to={data.tong.tin} />, nhan: "Bài viết" }, { value: <CountUp to={data.tong.tran} />, nhan: "Trận đấu" }, { value: <CountUp to={data.tong.luotXem} />, nhan: "Lượt xem" }] : undefined}
+        aside={
+          <form className="nw-search" onSubmit={(e) => { e.preventDefault(); di(loai, keyword); }} role="search">
+            <i className="fa-solid fa-magnifying-glass" aria-hidden="true" />
+            <input placeholder="Tìm bài viết..." value={keyword} onChange={(e) => setKeyword(e.target.value)} aria-label="Tìm bài viết" />
+            <button aria-label="Tìm">Tìm</button>
+          </form>
+        } />
+      <Page className="nw-wrap">
+        <div className="nw-filters" role="tablist" aria-label="Loại bài viết">
+          {LOAI_TIN.map(([khoa, nhan]) => (
+            <button key={khoa} type="button" role="tab" aria-selected={loai === khoa} onClick={() => di(khoa, keyword)}>
+              {nhan}{khoa && data?.demLoai[khoa] ? <b>{data.demLoai[khoa]}</b> : null}
+            </button>
+          ))}
         </div>
-      )}
-    </Page>
+        {loading && !data ? <Loading /> : error || !data ? <ErrorBox message={error ?? "Lỗi tải dữ liệu"} /> : (
+          <div className="row g-4">
+            <div className="col-lg-8">
+              {!lead ? <Empty message="Chưa có bài viết phù hợp." /> : (
+                <>
+                  <div className="nw-top">
+                    <NewsLead t={lead} />
+                    {phu.length > 0 && <div className="nw-top-side">{phu.map((t) => <TinCard key={t.id} t={t} />)}</div>}
+                  </div>
+                  {con.length > 0 && <div className="nw-grid">{con.map((t) => <NewsCard key={t.id} t={t} />)}</div>}
+                </>
+              )}
+              <Pagination trang={data} />
+            </div>
+            <aside className="col-lg-4 nw-side">
+              <BangDiem ds={data.tranDauMoi} tieuDe="Kết quả thi đấu" />
+              <section className="nw-board">
+                <h3 className="nw-side-title"><span><i className="fa-solid fa-fire" aria-hidden="true" /></span>Sản phẩm hot</h3>
+                <div className="nw-minis">{data.spHot.map((s) => <SpMini key={s.id} sp={s} />)}</div>
+                <Link href="/SanPham/Index" className="nw-side-link">Xem tất cả sản phẩm <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
+              </section>
+            </aside>
+          </div>
+        )}
+      </Page>
+    </>
   );
 }

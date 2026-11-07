@@ -1,0 +1,633 @@
+/*
+ * Style riêng của landing mới (CSS Module: mọi tên lớp được băm, không rò sang header/footer hay trang khác).
+ * Quy ước chuyển động: trạng thái mặc định là trạng thái CUỐI; hiệu ứng chỉ được thêm trong
+ * `prefers-reduced-motion: no-preference`, nên nội dung luôn đọc được khi giảm chuyển động hoặc chưa chạy animation.
+ * Chỉ animate transform/opacity (và clip-path đúng một lần lúc mở màn).
+ */
+
+.root {
+  /* Canvas thế giới 3D là con `position: fixed` của main; clip-path cắt nó trong khung main nên không lấn xuống footer. */
+  position: relative;
+  z-index: 0;
+  clip-path: inset(0);
+  --cta: #f4691a;
+  --cta-hover: #ff8a45;
+  --deep: #05241a;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+/* ───────────── Hero: phần dùng chung ───────────── */
+
+.hero {
+  composes: grain;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  background: var(--deep);
+  /* Không phụ thuộc chiều cao header (đo sau khi hydrate) để tránh nhảy bố cục. */
+  min-height: clamp(520px, 78svh, 740px);
+  padding-bottom: 72px; /* chỗ cho đoạn đè của khu danh mục */
+}
+
+.heroInner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+/*
+ * Hạ màn theo từng lớp khi bắt đầu cuộn (`--p` do HeroScroll ghi): mỗi lớp có cửa sổ riêng nên hero rút dần chứ không mờ cùng lúc.
+ * `--e` là mức đã rút của lớp (0 → 1). Ở trạng thái mặc định (`--p` = 0, kể cả giảm chuyển động) mọi lớp hiện đủ.
+ */
+.x1,
+.x2,
+.x3 {
+  --e: clamp(0, calc((var(--p, 0) - var(--at)) / var(--span)), 1);
+  opacity: calc(1 - var(--e));
+  transform: translate3d(0, calc(var(--e) * -30px), 0);
+  filter: blur(calc(var(--e) * 5px));
+}
+.x1 { --at: 0; --span: 0.38; }
+.x2 { --at: 0.1; --span: 0.36; }
+.x3 { --at: 0.2; --span: 0.34; }
+
+/* Vân hạt phim: lớp phủ nằm trong phần tử nên phần tử cần là mốc định vị. */
+.grain {
+  position: relative;
+}
+/* Vân hạt phim rất nhẹ cho các cảnh tối (một lớp tĩnh, không chuyển động nên không tốn khi cuộn). */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+.copy {
+  max-width: 36rem;
+}
+
+.title {
+  margin: 0;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(3rem, 5.7vw, 5.75rem);
+  line-height: 1;
+  letter-spacing: -0.005em;
+  color: #fff;
+}
+
+/* Khung cắt chữ: chừa chỗ cho dấu tiếng Việt phía trên chữ hoa. */
+.line {
+  display: block;
+  overflow: hidden;
+  padding: 0.16em 0 0.14em;
+  margin: -0.16em 0 -0.14em;
+}
+.line > span {
+  display: inline-block;
+}
+.lineAccent {
+  color: var(--cta);
+}
+
+.rule {
+  display: block;
+  width: 88px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--cta);
+  margin: 24px 0 18px;
+  transform-origin: left center;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.lede {
+  max-width: 31rem;
+  margin: 0 0 26px;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btnPrimary,
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 52px;
+  padding: 0 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s var(--ease);
+}
+.btnPrimary {
+  background: var(--cta);
+  color: #140a02;
+}
+.btnPrimary span {
+  display: inline-block;
+  transition: transform 0.2s var(--ease);
+}
+.btnGhost {
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+}
+.btnPrimary,
+.btnPrimary:hover,
+.btnPrimary:focus-visible,
+.btnPrimary:active {
+  color: #140a02;
+}
+.btnGhost,
+.btnGhost:hover,
+.btnGhost:focus-visible,
+.btnGhost:active {
+  color: #fff;
+}
+.btnPrimary:focus-visible,
+.btnGhost:focus-visible,
+.tile:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.sheet .tile:focus-visible {
+  outline-color: var(--brand-900);
+}
+@media (hover: hover) {
+  .btnPrimary:hover {
+    background: var(--cta-hover);
+    color: #140a02;
+    transform: translateY(-2px);
+  }
+  .btnPrimary:hover span {
+    transform: translateX(4px);
+  }
+  .btnGhost:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #fff;
+    color: #fff;
+  }
+}
+.btnPrimary:active,
+.btnGhost:active {
+  transform: scale(0.97);
+}
+
+/* ───────────── Phương án A: sân toàn khung ───────────── */
+
+.courtMask {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+/* Khi thế giới 3D đã sẵn sàng: hero trong suốt để cảnh lộ ra, ảnh tĩnh mờ đi (vẫn là phương án dự phòng). */
+:global([data-gl="on"]) .hero {
+  background: transparent;
+}
+:global([data-gl="on"]) .courtMedia {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.courtMedia {
+  position: absolute;
+  inset: 0;
+  transform-origin: 78% 62%;
+  transform:
+    translate3d(calc(var(--mx, 0) * -14px), calc(var(--p, 0) * 14% + var(--my, 0) * -8px), 0)
+    scale(calc(1.05 + var(--p, 0) * 0.09));
+  will-change: transform;
+}
+.courtImg {
+  object-fit: cover;
+  object-position: 80% 50%;
+}
+.courtShade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(3, 26, 19, 0.92) 0%, rgba(3, 26, 19, 0.7) 34%, rgba(3, 26, 19, 0.1) 72%),
+    linear-gradient(0deg, rgba(3, 26, 19, 0.65) 0%, rgba(3, 26, 19, 0) 38%);
+}
+
+/* ───────────── Khu danh mục: tờ giấy đè lên hero ───────────── */
+
+.sheet {
+  position: relative;
+  z-index: 3;
+  margin-top: -72px;
+  padding: 64px 0 88px;
+  border-radius: 32px 32px 0 0;
+  background: var(--bg);
+  scroll-margin-top: 80px;
+  /* Ô đang chờ trượt vào từ bên phải không được làm trang rộng ra. `clip` không tạo vùng cuộn mới. */
+  overflow-x: clip;
+}
+.sheetTitle {
+  margin: 0 0 28px;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--brand-900);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 300px 270px;
+  gap: 16px;
+}
+.tile_vot { grid-column: 1 / 6; grid-row: 1 / 3; }
+.tile_giay { grid-column: 6 / 13; grid-row: 1; }
+.tile_aoquan { grid-column: 6 / 10; grid-row: 2; }
+.tile_phukien { grid-column: 10 / 13; grid-row: 2; }
+
+.tile {
+  position: relative;
+  display: block;
+  min-height: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #dfe6e2;
+  color: #fff;
+  text-decoration: none;
+  isolation: isolate;
+}
+.tile,
+.tile:hover,
+.tile:focus-visible,
+.tile:active {
+  color: #fff;
+}
+.tile_vot,
+.tile_vot:hover,
+.tile_vot:focus-visible,
+.tile_vot:active {
+  color: var(--ink);
+}
+.tileMedia {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.tileImg {
+  object-fit: cover;
+  transition: transform 0.7s var(--ease);
+}
+.tile_giay .tileImg { object-position: 50% 32%; }
+.tile_aoquan .tileImg { object-position: 50% 18%; }
+
+/* Ô vợt: ảnh nền trắng hòa vào mặt ô sáng (multiply cần nền ngay trong .tileMedia vì nó là một stacking context),
+   đặt chéo như vợt đang nghiêng; dải chữ nằm dưới, không đè lên cán. */
+.tile_vot {
+  background: #eef2ef;
+  color: var(--ink);
+}
+.tile_vot .tileMedia {
+  bottom: 124px;
+  overflow: hidden;
+  background: #eef2ef;
+}
+.tile_vot .tileImg {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transform: rotate(20deg) scale(1.08) translateY(2%);
+}
+
+.tileBody {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 56px 20px 18px;
+  background: linear-gradient(0deg, rgba(3, 26, 19, 0.86) 0%, rgba(3, 26, 19, 0.5) 55%, rgba(3, 26, 19, 0) 100%);
+}
+.tile_vot .tileBody {
+  padding-top: 20px;
+  background: #eef2ef;
+}
+.tileText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.tileName {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.tileDesc {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  opacity: 0.88;
+}
+.tileCount {
+  margin-top: 4px;
+  min-height: 1.2em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffb07a;
+}
+.tile_vot .tileCount {
+  color: var(--accent-700);
+}
+.tileArrow {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  font-size: 1.2rem;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.35s var(--ease);
+}
+@media (hover: hover) {
+  .tile:hover .tileArrow,
+  .tile:focus-visible .tileArrow {
+    background: var(--cta);
+    border-color: var(--cta);
+    color: #140a02;
+    transform: translateX(4px);
+  }
+  .tile:hover .tileImg {
+    transform: scale(1.06);
+  }
+  .tile_vot:hover .tileImg {
+    transform: rotate(17deg) scale(1.15) translateY(2%);
+  }
+}
+.tile:active .tileArrow {
+  background: var(--cta);
+  border-color: var(--cta);
+  color: #140a02;
+}
+
+/* ───────────── Hiện dần khi cuộn tới (LandingMotion gắn data-rv-state) ─────────────
+   Chỉ phần tử nằm dưới màn hình lúc tải mới có trạng thái "hidden"; không có JS hoặc giảm chuyển động thì không bao giờ bị ẩn.
+   Trạng thái "in" mang transition; sau khi xong chuyển sang "done" (không còn quy tắc) để transition hover của phần tử không bị trễ. */
+.wm {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* chừa chỗ cho dấu tiếng Việt trên chữ hoa; margin âm giữ nguyên chiều cao dòng */
+  padding: 0.2em 0 0.16em;
+  margin: -0.2em 0 -0.16em;
+}
+.w {
+  display: inline-block;
+}
+.root [data-rv-state="hidden"] {
+  opacity: 0;
+}
+.root [data-rv="up"][data-rv-state="hidden"] {
+  transform: translate3d(0, 34px, 0);
+}
+.root [data-rv="scale"][data-rv-state="hidden"] {
+  transform: translate3d(0, 24px, 0) scale(0.96);
+}
+.root [data-rv="words"][data-rv-state="hidden"] {
+  opacity: 1;
+}
+.root [data-rv="words"][data-rv-state="hidden"] .w {
+  transform: translate3d(0, 118%, 0);
+}
+.root [data-rv-state="in"] {
+  transition: opacity 0.9s var(--ease), transform 1.1s var(--ease);
+  transition-delay: var(--rv-d, 0ms);
+}
+.root [data-rv="words"][data-rv-state="in"] {
+  transition: none;
+}
+.root [data-rv="words"][data-rv-state="in"] .w {
+  transition: transform 0.9s var(--ease);
+  transition-delay: calc(var(--rv-d, 0ms) + var(--w, 0) * 70ms);
+}
+
+/* ───────────── Responsive ───────────── */
+
+@media (max-width: 991px) {
+  .tiles {
+    grid-template-rows: 280px 250px;
+  }
+  .tileName {
+    font-size: 1.45rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero {
+    align-items: flex-start;
+    padding-bottom: 80px;
+  }
+  .heroInner {
+    padding-top: 40px;
+  }
+  .x1,
+  .x2,
+  .x3 {
+    transform: translate3d(0, calc(var(--e) * -16px), 0);
+    filter: none;
+  }
+  .title {
+    font-size: clamp(2.9rem, 15vw, 3.8rem);
+  }
+  .rule {
+    margin: 22px 0 18px;
+    width: 72px;
+  }
+  .lede {
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+  .btnPrimary,
+  .btnGhost {
+    flex: 1 1 auto;
+    padding: 0 1.1rem;
+  }
+  .courtMedia {
+    transform: translate3d(0, calc(var(--p, 0) * 6%), 0) scale(calc(1.02 + var(--p, 0) * 0.04));
+  }
+  .courtImg {
+    object-position: 96% 50%;
+  }
+  .courtShade {
+    background:
+      linear-gradient(180deg, rgba(3, 26, 19, 0.8) 0%, rgba(3, 26, 19, 0.45) 58%, rgba(3, 26, 19, 0.2) 100%);
+  }
+
+  .sheet {
+    margin-top: -64px;
+    padding: 44px 0 64px;
+    border-radius: 24px 24px 0 0;
+  }
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 230px;
+    gap: 12px;
+  }
+  .tile_vot { grid-column: 1 / 3; grid-row: auto; }
+  .tile_giay { grid-column: 1 / 3; grid-row: auto; }
+  .tile_aoquan,
+  .tile_phukien { grid-column: auto; grid-row: auto; }
+  .tile_vot .tileMedia {
+    inset: 0 0 0 42%;
+  }
+  .tile_vot .tileImg {
+    transform: rotate(20deg) scale(1.12);
+  }
+  .tile_vot .tileBody {
+    inset: 0 auto 0 0;
+    width: 62%;
+    align-items: flex-end;
+    padding: 0 14px 14px;
+    background: linear-gradient(90deg, #eef2ef 70%, rgba(238, 242, 239, 0));
+  }
+  .tile_vot .tileArrow {
+    display: none;
+  }
+  .tileBody {
+    padding: 44px 14px 14px;
+  }
+  .tileName {
+    font-size: 1.4rem;
+  }
+  .tile_aoquan .tileDesc,
+  .tile_phukien .tileDesc {
+    display: none;
+  }
+  .tileArrow {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* ───────────── Chuyển động (chỉ khi người dùng không yêu cầu giảm) ───────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Mở màn: ảnh mở bằng lớp cắt, chữ trồi theo dòng, nút hiện sớm. */
+  @keyframes wipe-up {
+    from { clip-path: inset(100% 0 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes settle {
+    from { transform: scale(1.2); }
+    to { transform: scale(1); }
+  }
+  @keyframes line-up {
+    from { transform: translateY(110%); }
+    to { transform: none; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes rule-grow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .courtMask { animation: wipe-up 0.95s var(--ease-io) both; }
+  .courtImg { animation: settle 1.6s var(--ease) both; }
+
+  .line > span { animation: line-up 0.85s var(--ease) both; }
+  .line:nth-child(1) > span { animation-delay: 0.25s; }
+  .line:nth-child(2) > span { animation-delay: 0.36s; }
+  .line:nth-child(3) > span { animation-delay: 0.47s; }
+  .rule { animation: rule-grow 0.7s var(--ease) 0.7s both; }
+  .lede { animation: fade-up 0.6s var(--ease) 0.6s both; }
+  .cta { animation: fade-up 0.45s var(--ease) 0.3s both; }
+
+  /* Khu danh mục: mỗi ô vào theo hướng riêng, gắn với tiến độ cuộn (CSS thuần, không JS).
+     Trình duyệt chưa hỗ trợ thì giữ nguyên trạng thái cuối. */
+  @supports (animation-timeline: view()) {
+    @keyframes tile-from-left {
+      from { opacity: 0; transform: translate3d(-48px, 24px, 0); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes tile-from-right {
+      from { opacity: 0; transform: translate3d(48px, 24px, 0); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes tile-from-below {
+      from { opacity: 0; transform: translate3d(0, 56px, 0); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes media-settle {
+      from { transform: scale(1.16); }
+      to { transform: scale(1); }
+    }
+    .sheetTitle,
+    .tile,
+    .tileMedia {
+      animation-timeline: view();
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+    }
+    .sheetTitle { animation-name: tile-from-below; animation-range: entry 5% entry 70%; }
+    .tile_vot { animation-name: tile-from-left; animation-range: entry 0% entry 55%; }
+    .tile_giay { animation-name: tile-from-right; animation-range: entry 0% entry 55%; }
+    .tile_aoquan,
+    .tile_phukien { animation-name: tile-from-below; animation-range: entry 0% entry 60%; }
+    .tileMedia { animation-name: media-settle; animation-range: entry 0% cover 45%; }
+
+    /* Ảnh trôi ngược chiều cuộn trong khung ô: chiều sâu. Phóng 10% trước để dịch không lộ mép. */
+    @keyframes tile-pan {
+      from { translate: 0 -4%; }
+      to { translate: 0 4%; }
+    }
+    .tile_giay .tileImg,
+    .tile_aoquan .tileImg,
+    .tile_phukien .tileImg {
+      scale: 1.1;
+      animation: tile-pan linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root [data-rv-state] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .root [data-rv-state] .w {
+    transform: none;
+    transition: none;
+  }
+  .tileImg,
+  .tileArrow,
+  .btnPrimary,
+  .btnPrimary span {
+    transition: none;
+  }
+}

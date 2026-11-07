@@ -1,0 +1,339 @@
+/* ==========================================================================
+   STOREFRONT — lớp giao diện "sân đấu" cho trang khách (nạp sau Site.css).
+   Mục lục: 1 Token · 2 Chuyển động nền · 3 Header · 4 Footer · 5 Banner trang con
+            6 Thẻ sản phẩm · 7 Khung chờ · 8 Khuyến mãi · 9 Danh sách · 10 Bảng tin
+            11 Giỏ hàng/Thanh toán · 12 Đơn hàng · 13 Liên hệ · 14 Tài khoản · 15 Responsive
+   ========================================================================== */
+
+/* 1 ── Token ─────────────────────────────────────────────────────────────── */
+:root {
+    --hot: #ff6a13;
+    --hot-600: #e25d0f;
+    --hot-700: #bf4a08;
+    --grad-hot: linear-gradient(135deg, #ff8a2a 0%, #ee5a0c 100%);
+    --grad-brand: linear-gradient(135deg, #0b3b2b 0%, #0f5a3f 55%, #148f5f 100%);
+    --ease-out: cubic-bezier(.2, .7, .2, 1);
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+    --shadow-card: 0 1px 2px rgba(23, 33, 28, .05), 0 8px 24px -12px rgba(23, 33, 28, .18);
+    --shadow-pop: 0 18px 44px -14px rgba(11, 59, 43, .38);
+}
+
+/* 2 ── Chuyển động nền ───────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Hiện dần khi cuộn: chỉ ẩn khi JS đã sẵn sàng (html.sf-js), nên không bao giờ mất nội dung. */
+.sf-js .sf-reveal { opacity: 0; transform: translateY(26px) scale(.985); }
+.sf-js .sf-reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity .6s var(--ease-out) var(--sf-delay, 0ms), transform .7s var(--ease-out) var(--sf-delay, 0ms);
+}
+
+.sf-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 2000; pointer-events: none; }
+.sf-progress i { display: block; height: 100%; transform-origin: 0 50%; transform: scaleX(var(--sf-progress, 0)); background: linear-gradient(90deg, var(--brand-500), var(--hot)); box-shadow: 0 0 10px rgba(255, 106, 19, .55); }
+
+.sf-to-top {
+    position: fixed;
+    left: 22px;
+    bottom: 24px;
+    z-index: 1500;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: var(--brand-900);
+    box-shadow: var(--shadow-pop);
+    opacity: 0;
+    transform: translateY(16px) scale(.8);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .35s var(--ease-spring), background-color .2s ease;
+}
+.sf-to-top.is-show { opacity: 1; transform: none; pointer-events: auto; }
+.sf-to-top:hover { background: var(--hot-600); transform: translateY(-3px); }
+.sf-to-top:focus-visible { outline: 3px solid var(--hot); outline-offset: 3px; }
+
+/* Chuyển trang bằng View Transitions: nội dung trồi nhẹ lên, header đứng yên. */
+.main-header { view-transition-name: sf-header; }
+::view-transition-group(sf-header) { animation: none; z-index: 100; }
+::view-transition-old(sf-header) { display: none; }
+::view-transition-new(sf-header) { animation: none; }
+::view-transition { pointer-events: none; }
+::view-transition-old(.sf-page-out) { animation: 160ms ease-in both sf-page-fade reverse; }
+::view-transition-new(.sf-page-in) { animation: 280ms var(--ease-out) 120ms both sf-page-fade, 460ms var(--ease-out) 120ms both sf-page-rise; }
+@keyframes sf-page-fade { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: blur(0); } }
+@keyframes sf-page-rise { from { translate: 0 14px; } to { translate: 0 0; } }
+/* Ảnh sản phẩm bay từ thẻ sang trang chi tiết. */
+::view-transition-group(sp-hero) { animation-duration: 520ms; animation-timing-function: var(--ease-out); }
+::view-transition-image-pair(sp-hero) { isolation: auto; }
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(*), ::view-transition-new(*), ::view-transition-group(*) { animation-duration: 0s !important; animation-delay: 0s !important; }
+    .sf-js .sf-reveal { opacity: 1; transform: none; }
+}
+
+/* 3 ── Header ────────────────────────────────────────────────────────────── */
+.main-header { background: rgba(255, 255, 255, .94); backdrop-filter: saturate(170%) blur(14px); border-bottom: 1px solid var(--line); box-shadow: 0 1px 0 rgba(23, 33, 28, .02); transition: box-shadow .25s ease; }
+.sf-scrolled .main-header { box-shadow: 0 10px 30px -18px rgba(11, 59, 43, .45); }
+
+/* Chiều cao cố định: header dính với top âm nên thanh hotline trượt khuất khi cuộn, không đổi layout (tránh vòng lặp giật). */
+.main-header { top: -36px; }
+.sf-topbar { height: 36px; background: var(--brand-900); color: #cfe3da; font-size: .78rem; overflow: hidden; }
+.sf-topbar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 36px; }
+.sf-topbar-left, .sf-topbar-right { display: flex; align-items: center; gap: 22px; }
+.sf-topbar span, .sf-topbar a { display: inline-flex; align-items: center; gap: 8px; color: inherit; white-space: nowrap; }
+.sf-topbar a:hover { color: #fff; }
+.sf-topbar i { color: var(--hot); font-size: .8rem; }
+.sf-topbar-left a { font-weight: 700; color: #fff; }
+
+.header-top { padding-top: 12px; padding-bottom: 12px; }
+.sf-brand { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+.sf-brand:hover { color: var(--ink); }
+.logo img { transition: transform .4s var(--ease-spring); }
+.sf-brand:hover img { transform: rotate(-8deg) scale(1.06); }
+.sf-brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.sf-brand-text b { font-size: 1rem; font-weight: 800; letter-spacing: -.01em; }
+.sf-brand-text small { font-size: .7rem; color: var(--muted); font-weight: 500; }
+
+.search-form { background: #f1f5f3; border: 1.5px solid transparent; }
+.search-form:hover { background: #eaf1ed; }
+.search-form:focus-within { border-color: var(--brand); }
+.search-btn { background: var(--grad-hot); box-shadow: 0 6px 14px -6px rgba(238, 90, 12, .7); transition: transform .25s var(--ease-spring), box-shadow .2s ease; }
+.search-btn:hover { background: var(--grad-hot); transform: scale(1.08) rotate(-6deg); }
+.sf-suggest {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 50;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity .2s ease, transform .25s var(--ease-out), visibility .2s;
+}
+.search-form:focus-within .sf-suggest { opacity: 1; visibility: visible; transform: none; }
+.sf-suggest span { width: 100%; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.sf-suggest a { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; background: var(--brand-50); color: var(--brand-700); font-size: .84rem; font-weight: 600; }
+.sf-suggest a i { font-size: .7rem; opacity: .7; }
+.sf-suggest a:hover { background: var(--brand); color: #fff; }
+
+.login-btn { background: var(--grad-brand); border-color: transparent; box-shadow: 0 8px 18px -10px rgba(11, 59, 43, .8); }
+.login-btn:hover { background: var(--grad-brand); filter: brightness(1.12); transform: translateY(-1px); }
+.cart-btn { border-radius: 14px; }
+
+/* Thanh menu dạng viên thuốc nổi */
+.main-nav { background: transparent; border-top: 0; padding: 0 var(--page-gutter) 12px; transition: padding .25s ease; }
+.main-nav ul {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 5px;
+    gap: 2px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: 0 6px 20px -12px rgba(11, 59, 43, .35);
+}
+.main-nav > ul > li > a {
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: .76rem;
+    letter-spacing: .07em;
+    transition: background-color .2s ease, color .2s ease, transform .2s var(--ease-spring);
+}
+.main-nav > ul > li > a::after { display: none; }
+.main-nav > ul > li > a:hover, .main-nav li:hover > a { background: var(--brand-50); color: var(--brand-700); }
+.main-nav > ul > li.active > a { background: var(--grad-brand); color: #fff; box-shadow: 0 8px 16px -10px rgba(11, 59, 43, .9); }
+@keyframes sf-flicker { 0%, 100% { transform: scale(1) rotate(0); } 45% { transform: scale(1.18) rotate(-8deg); } 70% { transform: scale(.94) rotate(5deg); } }
+.mega-submenu { top: calc(100% + 12px); border-radius: 20px; box-shadow: var(--shadow-lg); }
+
+/* 4 ── Footer ────────────────────────────────────────────────────────────── */
+.sf-trust-wrap { position: relative; z-index: 3; width: 100%; max-width: var(--page-max); margin: 72px auto -44px; padding: 0 var(--page-gutter); flex-shrink: 0; }
+.sf-footer { margin-top: 0; padding-top: 44px; background: radial-gradient(900px 380px at 88% -10%, rgba(255, 106, 19, .16), transparent 60%), linear-gradient(180deg, #0b3b2b 0%, #07281d 100%); }
+.sf-footer::before { opacity: .22; }
+.sf-trust {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 0;
+    padding: 18px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow-pop);
+}
+.sf-trust li { display: flex; align-items: center; gap: 14px; padding: 6px 10px; border-radius: 16px; transition: background-color .2s ease, transform .3s var(--ease-spring); }
+.sf-trust li:hover { background: var(--brand-50); transform: translateY(-2px); }
+.sf-trust li > span { flex: 0 0 auto; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: var(--grad-brand); font-size: 1.1rem; }
+.sf-trust li:nth-child(2) > span { background: var(--grad-hot); }
+.sf-trust li:nth-child(4) > span { background: linear-gradient(135deg, #2b74b8, #1e5a93); }
+.sf-trust b { display: block; color: var(--ink); font-size: .92rem; }
+.sf-trust small { display: block; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+.sf-footer .footer-content { grid-template-columns: 1.35fr 1.2fr 1fr 1fr; gap: 44px; padding-top: 56px; }
+.sf-footer .footer-section h4 { position: relative; padding-bottom: 12px; }
+.sf-footer .footer-section h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 28px; height: 3px; border-radius: 3px; background: var(--hot); }
+.sf-footer .footer-section a { transition: color .2s ease, transform .25s var(--ease-out); }
+.sf-footer .footer-section a:hover { transform: translateX(5px); }
+.footer-about { color: #a9c5b8 !important; line-height: 1.65; }
+.footer-pay { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.footer-pay span { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #86a899; }
+.footer-pay b { padding: 4px 11px; border-radius: 8px; background: rgba(255, 255, 255, .1); color: #fff; font-size: .78rem; }
+.footer-pay img { padding: 3px 9px; border-radius: 8px; background: #fff; height: 28px; width: auto; }
+
+/* 5 ── Banner trang con ──────────────────────────────────────────────────── */
+.sf-hero { position: relative; isolation: isolate; overflow: hidden; color: #fff; background: var(--grad-brand); }
+.sf-hero.is-orange { background: linear-gradient(135deg, #3b1604 0%, #8d3205 48%, #ee5a0c 100%); }
+.sf-hero.is-navy { background: linear-gradient(135deg, #0a2230 0%, #0f3b52 55%, #1b6b87 100%); }
+.sf-hero-bg { position: absolute; inset: 0; z-index: -1; background: url("../images/court-lines-light.svg") no-repeat right -120px center / 760px auto; }
+.sf-hero-bg::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(115deg, rgba(255, 255, 255, .035) 0 2px, transparent 2px 38px); }
+.sf-hero-glow { position: absolute; width: 560px; height: 560px; right: -120px; top: -220px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 138, 42, .55), transparent 68%); animation: sf-breathe 7s ease-in-out infinite; }
+@keyframes sf-breathe { 0%, 100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.12); opacity: 1; } }
+.sf-hero-shuttle { position: absolute; width: 74px; opacity: .9; filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .35)); }
+.sf-hero-shuttle.s1 { right: 33%; top: 18%; transform: rotate(32deg); animation: sf-float 6s ease-in-out infinite; }
+.sf-hero-shuttle.s2 { right: 6%; bottom: 12%; width: 46px; transform: rotate(-24deg); opacity: .6; animation: sf-float 7.5s ease-in-out -2s infinite; }
+@keyframes sf-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -16px; } }
+.sf-hero-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 40px; padding-top: 52px; padding-bottom: 60px; }
+.sf-hero.is-compact .sf-hero-inner { padding-top: 38px; padding-bottom: 42px; }
+.sf-hero-copy > * { animation: sf-rise .7s var(--ease-out) both; }
+.sf-hero-copy > *:nth-child(2) { animation-delay: .08s; }
+.sf-hero-copy > *:nth-child(3) { animation-delay: .16s; }
+.sf-hero-copy > *:nth-child(4) { animation-delay: .24s; }
+.sf-hero-copy > *:nth-child(5) { animation-delay: .32s; }
+@keyframes sf-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.sf-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; font-size: .8rem; color: rgba(255, 255, 255, .72); }
+.sf-crumbs a { color: rgba(255, 255, 255, .85); }
+.sf-crumbs a:hover { color: #fff; text-decoration: underline; }
+.sf-crumbs b { color: #fff; font-weight: 600; }
+.sf-crumbs i { font-size: .6rem; margin-left: 8px; opacity: .6; }
+.sf-crumbs span { display: inline-flex; align-items: center; }
+.sf-kicker { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .2); font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #ffd9bd; backdrop-filter: blur(6px); }
+.sf-kicker::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--hot); box-shadow: 0 0 0 4px rgba(255, 106, 19, .25); animation: sf-pulse 2s ease infinite; }
+@keyframes sf-pulse { 50% { box-shadow: 0 0 0 8px rgba(255, 106, 19, 0); } }
+.sf-hero h1 { margin: 0 0 12px; color: #fff; font-size: clamp(2rem, 4.4vw, 3.4rem); font-weight: 800; line-height: 1.08; letter-spacing: -.035em; text-wrap: balance; }
+.sf-hero h1 em { font-style: normal; background: linear-gradient(90deg, #ffd29e, #ff8a2a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sf-hero p { max-width: 560px; margin: 0; color: rgba(255, 255, 255, .8); font-size: 1.05rem; line-height: 1.65; }
+.sf-hero-stats { display: flex; flex-wrap: wrap; gap: 14px 38px; margin: 26px 0 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, .18); }
+.sf-hero-stats dt { font-size: 1.8rem; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.sf-hero-stats dd { margin: 6px 0 0; font-size: .8rem; color: rgba(255, 255, 255, .7); }
+
+/* 6 ── Thẻ sản phẩm ──────────────────────────────────────────────────────── */
+.product-card { border-radius: 18px; border-color: #e4ebe7; box-shadow: var(--shadow-card); transition: transform .35s var(--ease-out), box-shadow .35s ease, border-color .25s ease; }
+.product-card:hover { transform: translateY(-7px); box-shadow: 0 26px 46px -22px rgba(11, 59, 43, .45); border-color: var(--brand-200); }
+.product-card .thumb { position: relative; overflow: hidden; background: radial-gradient(120% 90% at 50% 0%, #fff 0%, #f1f5f3 70%); }
+.product-card .thumb img { transition: transform .6s var(--ease-out); }
+.product-card:hover .thumb img { transform: scale(1.09) rotate(-1.2deg); }
+.sf-thumb-cta {
+    position: absolute;
+    left: 50%;
+    bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: rgba(11, 59, 43, .94);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, .5);
+    opacity: 0;
+    transform: translate(-50%, 14px);
+    transition: opacity .25s ease, transform .35s var(--ease-out);
+}
+.sf-thumb-cta i { font-size: .7rem; transition: transform .25s var(--ease-out); }
+.product-card:hover .sf-thumb-cta, .product-card:focus-within .sf-thumb-cta { opacity: 1; transform: translate(-50%, 0); }
+.product-card .thumb:hover .sf-thumb-cta i { transform: translateX(4px); }
+@media (hover: none) { .sf-thumb-cta { display: none; } }
+.badge-promo { top: 12px; left: 12px; padding: 5px 11px; background: var(--grad-hot); box-shadow: 0 8px 14px -8px rgba(238, 90, 12, .9); font-size: .74rem; letter-spacing: .01em; }
+.badge-state { position: absolute; top: 12px; right: 12px; z-index: 2; padding: 5px 11px; border-radius: 999px; font-size: .7rem; font-weight: 700; background: #fff; color: var(--warn); border: 1px solid #f3e1b6; box-shadow: var(--shadow-xs); }
+.badge-state.is-out { background: #eef1ef; color: #66756e; border-color: #dbe2de; }
+.product-card .product-title { font-weight: 700; transition: color .2s ease; }
+.product-price { font-weight: 800; letter-spacing: -.01em; }
+.product-saving { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 2px; padding: 3px 10px; border-radius: 999px; background: #fff2e8; color: var(--hot-700); font-size: .72rem; font-weight: 700; }
+.product-card-cta { transition: color .2s ease, gap .2s ease; }
+.product-card:hover .product-card-cta { color: var(--hot-600); }
+
+/* 7 ── Khung chờ & trạng thái ────────────────────────────────────────────── */
+.sf-loading { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 70px 0; color: var(--muted); font-weight: 600; }
+.sf-loading-shuttle { width: 44px; animation: sf-bounce 1s var(--ease-out) infinite alternate; transform-origin: 50% 80%; }
+@keyframes sf-bounce { from { transform: translateY(0) rotate(-14deg); } to { transform: translateY(-26px) rotate(14deg); } }
+.sf-skel { border-radius: 10px; background: linear-gradient(90deg, #edf1ef 0%, #f8faf9 45%, #edf1ef 90%) 0 0 / 220% 100%; animation: sf-shimmer 1.3s linear infinite; }
+@keyframes sf-shimmer { to { background-position: -220% 0; } }
+.sf-skel-card { padding: 0 0 18px; background: #fff; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; gap: 10px; }
+.sf-skel-img { height: 210px; border-radius: 0; }
+.sf-skel-line { height: 12px; margin: 0 16px; }
+.sf-skel-line.w-40 { width: 40%; } .sf-skel-line.w-50 { width: 50%; } .sf-skel-line.w-70 { width: 70%; }
+.sf-skel-line.big { height: 20px; margin-top: 6px; }
+
+.sf-countdown { display: inline-flex; gap: 8px; min-height: 66px; }
+.sf-countdown > div { min-width: 60px; padding: 9px 8px 8px; border-radius: 14px; text-align: center; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); backdrop-filter: blur(8px); }
+.sf-countdown b { display: block; font-size: 1.55rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.sf-countdown span { display: block; margin-top: 5px; font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+
+.sf-tilt { transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); transition: transform .25s ease-out; will-change: transform; }
+
+/* ==========================================================================
+   (Các khối trang cụ thể được nối tiếp bên dưới)
+   ========================================================================== */
+
+/* Căn giá thẳng hàng giữa các thẻ: dòng giá cũ và nhãn "Tiết kiệm" luôn chiếm chỗ. */
+.product-card .product-footer { margin-top: auto; padding-top: 6px; }
+.product-card .product-footer > div { display: flex; flex-direction: column; gap: 1px; }
+.product-card .price-small.is-placeholder { visibility: hidden; }
+.product-card .product-saving { margin-top: 0; }
+.product-card .product-saving.is-placeholder { visibility: hidden; padding-top: 0; padding-bottom: 0; background: none; }
+
+/* 15 ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 991px) {
+    .sf-topbar-right { display: none; }
+    .sf-hero-inner { grid-template-columns: 1fr; gap: 24px; padding-top: 36px; padding-bottom: 44px; }
+    .sf-hero-shuttle.s1 { right: 6%; top: 10%; width: 56px; }
+    .sf-hero-shuttle.s2 { display: none; }
+    .sf-trust { grid-template-columns: 1fr 1fr; }
+    .sf-footer .footer-content { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .main-header { backdrop-filter: none; background: #fff; }
+}
+@media (max-width: 767px) {
+    .sf-topbar { display: none; }
+    .main-header { top: 0; }
+    .sf-trust-wrap { margin-top: 48px; }
+}
+@media (max-width: 575px) {
+    .sf-brand-text small { display: none; }
+    .sf-brand-text b { font-size: .9rem; }
+    .sf-trust { grid-template-columns: 1fr; padding: 12px; }
+    .sf-footer .footer-content { grid-template-columns: 1fr; }
+    .sf-hero h1 { font-size: 1.9rem; }
+    .sf-to-top { left: 14px; bottom: 16px; width: 42px; height: 42px; }
+    .sf-countdown > div { min-width: 54px; }
+}
+
+/* Tắt hiệu ứng mờ dần mặc định của toàn trang: chỉ phần nội dung được React đặt tên mới chuyển động,
+   nên header và footer đứng yên và không bị "bóng ma" của trang cũ chồng lên. */
+::view-transition-old(root) { display: none; }
+::view-transition-new(root) { animation: none; }
+
+@media (max-width: 480px) {
+    .sf-brand-text { display: none; }
+    .header-top { gap: 8px; }
+}
+
+/* Menu con: cầu nối vô hình lấp khoảng hở giữa mục "Sản phẩm" và khung menu để rê chuột xuống không bị tắt;
+   .is-shut đóng menu ngay sau khi bấm (CSS :hover/:focus-within sẽ giữ nó mở nếu không có lớp này). */
+.mega-menu-item::after { content: ""; position: absolute; left: -12px; right: -12px; top: 100%; height: 22px; }
+.main-nav .mega-menu-item.is-shut .mega-submenu { display: none !important; opacity: 0 !important; pointer-events: none !important; }

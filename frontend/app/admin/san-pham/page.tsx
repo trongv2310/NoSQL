@@ -51,7 +51,7 @@ export default function QuanLySanPhamPage() {
                 <tr key={s.id}>
                   <td>{ }<img src={imgUrl(s.hinhAnhDaiDien)} alt="" width={48} height={48} style={{ objectFit: "contain" }} /></td>
                   <td><Link href={`/admin/san-pham/${s.id}`} className="fw-semibold text-decoration-none">{s.tenSanPham}</Link>{s.khuyenMai && <span className="badge bg-danger ms-2">-{Math.round(s.khuyenMai.phanTramGiam)}%</span>}</td>
-                  <td>{s.loai?.tenLoai}</td><td>{s.hang?.tenHang}</td><td className="text-end">{vnd(s.giaGoc)}</td>
+                  <td className="text-nowrap">{s.loai?.tenLoai}</td><td className="text-nowrap">{s.hang?.tenHang}</td><td className="text-end text-nowrap">{vnd(s.giaGoc)}</td>
                   <td className="text-end">{s.tongTonKho === 0 ? <span className="badge bg-danger">Hết hàng</span> : s.tongTonKho}</td>
                   <td className="text-end text-nowrap">
                     <Link href={`/admin/san-pham/${s.id}`} className="btn btn-sm btn-outline-secondary me-1" title="Biến thể"><i className="fa-solid fa-layer-group" /></Link>

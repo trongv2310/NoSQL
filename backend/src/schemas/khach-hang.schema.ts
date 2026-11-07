@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 @Schema({ collection: 'khachhangs' })
 export class KhachHang {
@@ -15,7 +15,7 @@ export class KhachHang {
   @Prop({ trim: true, maxlength: 255, default: '' })
   diaChi?: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'TaiKhoan', unique: true, sparse: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'TaiKhoan', unique: true, sparse: true })
   taiKhoan?: Types.ObjectId;
 
   @Prop({ default: () => new Date() })

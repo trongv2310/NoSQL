@@ -35,7 +35,7 @@ export default function QuanLyTranDauPage() {
             <tbody>{data.items.map((t) => (
               <tr key={t.id}><td><div className="fw-semibold">{t.tenGiaiDau}</div><small className="text-muted">{t.vong} · {t.noiDung}</small></td>
                 <td><span className={t.doiThang === "A" ? "fw-bold" : ""}>{t.doiA}</span> vs <span className={t.doiThang === "B" ? "fw-bold" : ""}>{t.doiB}</span></td>
-                <td>{t.tiSo ?? "—"}</td><td>{ngay(t.ngayThiDau)}</td><td>{t.soTin}</td>
+                <td className="text-nowrap">{t.tiSo ?? "—"}</td><td className="text-nowrap">{ngay(t.ngayThiDau)}</td><td>{t.soTin}</td>
                 <td className="text-end text-nowrap"><Link href={`/admin/tran-dau/${t.id}/edit`} className="btn btn-sm btn-outline-primary me-1"><i className="fa-solid fa-pen" /></Link><button className="btn btn-sm btn-outline-danger" onClick={() => xoa(t)}><i className="fa-solid fa-trash" /></button></td></tr>))}</tbody>
           </table></div>
           <Pagination trang={data} />

@@ -90,7 +90,7 @@ export function BanTinForm({ id }: { id?: string }) {
   };
 
   return (
-    <form className="card-custom p-4" style={{ maxWidth: 940 }} onSubmit={gui}>
+    <form className="card-custom p-4" style={{ maxWidth: 860 }} onSubmit={gui}>
       {loi && <ErrorBox message={loi} />}
       <div className="row">
         <div className="col-md-8"><Field label="Tiêu đề *"><input className="form-control" required maxLength={200} value={f.tieuDe} onChange={dat("tieuDe")} /></Field></div>

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 /** Loại tin -> [nhãn hiển thị, icon FontAwesome]. */
 export const LOAI_TIN: Record<string, [string, string]> = {
@@ -34,9 +34,9 @@ export class TinTuc {
   @Prop({ required: true }) noiDung: string;
   @Prop() hinhAnh?: string;
   @Prop({ required: true, index: true }) loaiTin: string;
-  @Prop({ type: Types.ObjectId, ref: 'SanPham' }) sanPham?: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'TranDau' }) tranDau?: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, ref: 'TaiKhoan' }) tacGia?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'SanPham' }) sanPham?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'TranDau' }) tranDau?: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'TaiKhoan' }) tacGia?: Types.ObjectId;
   @Prop({ maxlength: 150 }) nguonTin?: string;
   @Prop({ maxlength: 300 }) lienKetNguon?: string;
   @Prop({ default: false }) noiBat: boolean;

@@ -45,7 +45,7 @@ export function TranDauForm({ id }: { id?: string }) {
   };
 
   return (
-    <form className="card-custom p-4" style={{ maxWidth: 820 }} onSubmit={gui}>
+    <form className="card-custom p-4" style={{ maxWidth: 860 }} onSubmit={gui}>
       {loi && <ErrorBox message={loi} />}
       <div className="row">
         <div className="col-md-8"><Field label="Tên giải đấu *"><input className="form-control" required maxLength={150} value={f.tenGiaiDau} onChange={dat("tenGiaiDau")} /></Field></div>

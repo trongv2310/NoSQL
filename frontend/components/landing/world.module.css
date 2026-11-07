@@ -1,0 +1,24 @@
+/*
+ * Canvas thế giới 3D: cố định kín màn hình phía sau nội dung trang chủ. Trang chủ (`main`) có clip-path nên canvas chỉ lộ ra
+ * trong khung của `main` (không lấn xuống footer). Mặc định ẩn; chỉ hiện (cross-fade) khi cảnh đã vẽ khung đầu và
+ * `main` được gắn data-gl="on".
+ */
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.1s ease;
+}
+:global([data-gl="on"]) .canvas {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    transition: none;
+  }
+}

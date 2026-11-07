@@ -1,0 +1,269 @@
+/* Niềm tin và hỗ trợ: đánh giá thật, thương hiệu, lời mời kết thúc. Token lấy từ .root của landing. */
+
+.reviews {
+  position: relative;
+  z-index: 3;
+  padding: 72px 0 40px;
+  background: var(--bg);
+}
+.title {
+  margin: 0 0 28px;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--brand-900);
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 20px 40px;
+}
+.quoteMain,
+.quote {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quoteMain {
+  grid-row: span 2;
+  justify-content: center;
+  padding: 8px 0;
+}
+.quote {
+  padding: 18px 0 0;
+  border-top: 1.5px solid var(--line-strong);
+}
+.quoteMain blockquote {
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--brand-900);
+}
+.quote blockquote {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.reviews blockquote {
+  margin: 0;
+}
+.stars {
+  margin: 0;
+  letter-spacing: 2px;
+  color: var(--star);
+}
+.stars i {
+  font-style: normal;
+  color: var(--line-strong);
+}
+.reviews figcaption {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.reviews figcaption b {
+  color: var(--ink);
+}
+
+.brands {
+  position: relative;
+  z-index: 3;
+  padding: 24px 0 64px;
+  background: var(--bg);
+}
+.brandRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 40px;
+  padding-top: 24px;
+  border-top: 1.5px solid var(--line-strong);
+}
+.brandLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 36px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 4px;
+  filter: grayscale(1);
+  opacity: 0.7;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+.logo img {
+  display: block;
+  height: 28px;
+  width: auto;
+  max-width: 120px;
+}
+.logo:hover,
+.logo:focus-visible {
+  filter: none;
+  opacity: 1;
+}
+.logo:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.final {
+  composes: grain from "./landing.module.css";
+  position: relative;
+  z-index: 3;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: clamp(460px, 64svh, 640px);
+  padding: 88px 0;
+  background: var(--brand-900);
+  color: #fff;
+}
+/* Nền: ảnh sân phóng lớn rồi "dừng" lại ở quả cầu khi khối vào màn hình (camera chốt cảnh), phủ lớp xanh để chữ rõ. */
+.finalWorld {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  transform: scale(calc(1.35 - min(var(--p, 0.7) * 1.45, 1) * 0.35));
+  transform-origin: 88% 62%;
+  will-change: transform;
+}
+:global([data-gl="on"]) .final {
+  background: transparent;
+}
+:global([data-gl="on"]) .finalWorld {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+:global([data-gl="on"]) .final::before {
+  background: linear-gradient(90deg, rgba(3, 18, 13, 0.88) 0%, rgba(3, 18, 13, 0.55) 50%, rgba(3, 18, 13, 0.15) 100%);
+}
+.finalImg {
+  object-fit: cover;
+  object-position: 92% 60%;
+  opacity: 0.55;
+}
+.final::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--brand-900) 8%, rgba(11, 59, 43, 0.72) 48%, rgba(11, 59, 43, 0.25));
+}
+.finalInner {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 40px;
+}
+.finalTitle {
+  margin: 0;
+  max-width: 24ch;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #fff;
+}
+.finalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.btnPrimary,
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 52px;
+  padding: 0 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s var(--ease);
+}
+.btnPrimary,
+.btnPrimary:hover {
+  background: var(--cta);
+  color: #140a02;
+}
+.btnGhost,
+.btnGhost:hover {
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #fff;
+}
+@media (hover: hover) {
+  .btnPrimary:hover {
+    background: var(--cta-hover);
+    transform: translateY(-2px);
+  }
+  .btnGhost:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #fff;
+  }
+}
+.btnPrimary:active,
+.btnGhost:active {
+  transform: scale(0.97);
+}
+.btnPrimary:focus-visible,
+.btnGhost:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .reviews {
+    padding: 52px 0 28px;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .quoteMain {
+    grid-row: auto;
+  }
+  .brands {
+    padding-bottom: 48px;
+  }
+  .final {
+    padding: 48px 0;
+  }
+  .finalActions {
+    width: 100%;
+  }
+  .btnPrimary,
+  .btnGhost {
+    flex: 1 1 auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo,
+  .btnPrimary,
+  .btnGhost {
+    transition: none;
+  }
+}
