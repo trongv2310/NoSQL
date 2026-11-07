@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Chatbot, Footer, Header } from "@/components/SiteChrome";
 import { SiteMotion } from "@/components/Motion";
 
@@ -12,7 +11,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <link href="/css/storefront-news.css" rel="stylesheet" />
       <link href="/css/storefront-shop.css" rel="stylesheet" />
       <Header />
-      <Suspense fallback={null}>{children}</Suspense>
+      {children}
       <Footer />
       <Chatbot />
       <SiteMotion />

@@ -1,0 +1,112 @@
+/* Thanh chương ở mép phải. Chỉ hiện từ màn hình rộng (dưới đó chạm vào nội dung), ẩn khi in. */
+
+.rail {
+  display: none;
+}
+@media (min-width: 1200px) {
+  .rail {
+    position: fixed;
+    z-index: 45;
+    right: 10px;
+    top: 50%;
+    display: block;
+    transform: translateY(-50%);
+    --rail-p: 0;
+    --cta: #f4691a;
+  }
+  .rail ul {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Vạch nối chạy sau các chấm; phần đã đi qua đổi sang màu nhấn. */
+  .line {
+    position: absolute;
+    left: 50%;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    translate: -50% 0;
+    background: rgba(23, 33, 28, 0.18);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .line i {
+    position: absolute;
+    inset: 0;
+    background: var(--cta);
+    transform-origin: top;
+    transform: scaleY(var(--rail-p));
+  }
+  .dot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .dot i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgba(23, 33, 28, 0.35);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .dot[aria-current="true"] i {
+    transform: scale(1.5);
+    background: var(--cta);
+    border-color: var(--cta);
+  }
+  .dot:hover i,
+  .dot:focus-visible i {
+    transform: scale(1.4);
+    border-color: var(--cta);
+  }
+  .dot:focus-visible {
+    outline: 3px solid #0b3b2b;
+    outline-offset: 2px;
+    border-radius: 50%;
+  }
+  .label {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: #0b3b2b;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    translate: 6px -50%;
+    transition: opacity 0.2s ease, translate 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .dot:hover .label,
+  .dot:focus-visible .label,
+  .dot[aria-current="true"]:focus-visible .label {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot i,
+  .label {
+    transition: none;
+  }
+}
+@media print {
+  .rail {
+    display: none;
+  }
+}

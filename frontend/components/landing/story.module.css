@@ -1,0 +1,207 @@
+/*
+ * Câu chuyện trên sân. Mặc định (điện thoại / giảm chuyển động) = bố cục dọc, không ghim, mọi thứ hiện sẵn.
+ * Cảnh ghim theo cuộn chỉ bật khi màn hình rộng VÀ người dùng không yêu cầu giảm chuyển động.
+ */
+
+.story {
+  position: relative;
+  z-index: 3;
+  background: var(--deep);
+  color: #fff;
+}
+.stage {
+  composes: grain from "./landing.module.css";
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 72px 0;
+}
+:global([data-gl="on"]) .story {
+  background: transparent;
+}
+:global([data-gl="on"]) .media {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  transform: scale(calc(1.05 + var(--p, 0) * 0.12)) translate3d(calc(var(--p, 0) * -3%), 0, 0);
+  will-change: transform;
+}
+.img {
+  object-fit: cover;
+  object-position: 14% 50%;
+}
+.shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(3, 26, 19, 0.9), rgba(3, 26, 19, 0.55) 55%, rgba(3, 26, 19, 0.35));
+}
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: 40px;
+  align-items: center;
+}
+
+.beats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.02;
+  text-transform: uppercase;
+}
+.beatEnd {
+  color: var(--cta);
+}
+
+.article {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+}
+.article:not(:has(.articleThumb)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.articleThumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #eef2ef;
+}
+.articleImg {
+  object-fit: cover;
+}
+.articleBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.meta {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-700);
+}
+.articleTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.articleTitle a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.more {
+  display: grid;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: 0.86rem;
+}
+.more a {
+  color: var(--brand-700);
+  text-decoration: none;
+}
+.more a:hover,
+.articleTitle a:hover {
+  text-decoration: underline;
+}
+.all {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 8px 0;
+  font-weight: 700;
+  color: var(--brand-700);
+  text-decoration: none;
+}
+.all:hover {
+  color: var(--brand-900);
+  text-decoration: underline;
+}
+.article a:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (max-width: 991px) {
+  .inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .shade {
+    background: linear-gradient(180deg, rgba(3, 26, 19, 0.82), rgba(3, 26, 19, 0.6));
+  }
+}
+@media (max-width: 575px) {
+  .stage {
+    padding: 52px 0;
+  }
+  .article {
+    grid-template-columns: 96px minmax(0, 1fr);
+    padding: 14px;
+    gap: 14px;
+  }
+  .articleTitle {
+    font-size: 1.02rem;
+  }
+}
+
+/* Cảnh ghim theo cuộn (desktop + cho phép chuyển động). `--p` do HeroScroll ghi (mode="section"). */
+@media (min-width: 992px) and (prefers-reduced-motion: no-preference) {
+  .story {
+    height: 250vh;
+  }
+  .stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 100svh;
+    min-height: 560px;
+    padding: var(--sf-header-h, 130px) 0 48px;
+  }
+  .beats span {
+    opacity: clamp(0.16, calc((var(--p, 0) - var(--t, 0)) * 7), 1);
+  }
+  .beats span:nth-child(1) { --t: 0.02; }
+  .beats span:nth-child(2) { --t: 0.2; }
+  .beats span:nth-child(3) { --t: 0.38; }
+  .side {
+    --a: clamp(0, calc((var(--p, 0) - 0.5) * 6), 1);
+    opacity: var(--a);
+    translate: 0 calc((1 - var(--a)) * 48px);
+  }
+  /* Bàn phím vào bài viết khi chưa cuộn tới: hiện ngay để không có điều khiển "vô hình". */
+  .side:focus-within {
+    opacity: 1;
+    translate: none;
+  }
+}

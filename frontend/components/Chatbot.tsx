@@ -279,6 +279,13 @@ export function Chatbot() {
     }
   }, [mo, dungDoc]);
 
+  // Cho phép nơi khác trong site (nút "Hỏi trợ lý tư vấn" ở landing) mở khung chat.
+  useEffect(() => {
+    const moChat = () => setMo(true);
+    window.addEventListener("sf:open-chat", moChat);
+    return () => window.removeEventListener("sf:open-chat", moChat);
+  }, []);
+
   useEffect(() => {
     if (!mo) return;
     const dong = (e: KeyboardEvent) => { if (e.key === "Escape") setMo(false); };
