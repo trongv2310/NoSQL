@@ -3,8 +3,10 @@ import { Catalog } from "@/components/landing/Catalog";
 import { ChapterRail } from "@/components/landing/ChapterRail";
 import { Categories } from "@/components/landing/Categories";
 import { HeroCourt } from "@/components/landing/Hero";
+import { fontTieuDe } from "@/components/landing/fonts";
 import { LandingMotion } from "@/components/landing/LandingMotion";
 import { Story } from "@/components/landing/Story";
+import { World } from "@/components/landing/World";
 import { Brands, FinalCta, Reviews } from "@/components/landing/Trust";
 import s from "@/components/landing/landing.module.css";
 
@@ -31,9 +33,13 @@ export const metadata: Metadata = {
  */
 export const revalidate = 120;
 
+/** Bốn thương hiệu shop đang bán, in trên bảng quảng cáo ven sân trong thế giới 3D. */
+const HANG = ["Yonex", "Li-Ning", "Victor", "Mizuno"];
+
 export default function TrangChu() {
   return (
     <main className={s.root} data-landing>
+      <World fontFamily={fontTieuDe.style.fontFamily} brands={HANG} wordmark="CẦU LÔNG" />
       <LandingMotion />
       <ChapterRail />
       <HeroCourt />
