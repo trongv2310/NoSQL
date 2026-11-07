@@ -1,0 +1,10 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da9a7"},"tenChuongTrinh":"Đại lễ 30/4 - 1/5","moTa":"Mừng ngày giải phóng miền Nam và Quốc tế lao động","ngayBatDau":{"$date":"2025-04-24T17:00:00Z"},"ngayKetThuc":{"$date":"2027-05-04T17:00:00Z"},"phanTramGiam":10,"giamToiDa":150000,"soLuongSuDung":200},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9a8"},"tenChuongTrinh":"Chào Hè Sôi Động","moTa":"Giảm giá dụng cụ thể thao mùa hè","ngayBatDau":{"$date":"2025-05-31T17:00:00Z"},"ngayKetThuc":{"$date":"2027-06-29T17:00:00Z"},"phanTramGiam":12,"giamToiDa":200000,"soLuongSuDung":150},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9a9"},"tenChuongTrinh":"Back To School","moTa":"Đồng hành cùng học sinh sinh viên","ngayBatDau":{"$date":"2025-08-14T17:00:00Z"},"ngayKetThuc":{"$date":"2027-09-09T17:00:00Z"},"phanTramGiam":10,"giamToiDa":100000,"soLuongSuDung":300},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9aa"},"tenChuongTrinh":"Siêu Sale 9.9","moTa":"Săn sale ngày đôi tháng 9","ngayBatDau":{"$date":"2025-09-08T17:00:00Z"},"ngayKetThuc":{"$date":"2027-09-10T17:00:00Z"},"phanTramGiam":25,"giamToiDa":500000,"soLuongSuDung":50},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9ab"},"tenChuongTrinh":"Black Friday 2026","moTa":"Lễ hội mua sắm lớn nhất năm","ngayBatDau":{"$date":"2025-11-27T17:00:00Z"},"ngayKetThuc":{"$date":"2027-11-29T17:00:00Z"},"phanTramGiam":40,"giamToiDa":1000000,"soLuongSuDung":100},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9ac"},"tenChuongTrinh":"Giáng Sinh An Lành","moTa":"Quà tặng giáng sinh cho lông thủ","ngayBatDau":{"$date":"2025-11-19T17:00:00Z"},"ngayKetThuc":{"$date":"2027-12-24T17:00:00Z"},"phanTramGiam":15,"giamToiDa":200000,"soLuongSuDung":100},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9ad"},"tenChuongTrinh":"Xả kho cuối năm","moTa":"Thanh lý các mẫu vợt đời cũ","ngayBatDau":{"$date":"2025-12-25T17:00:00Z"},"ngayKetThuc":{"$date":"2027-12-30T17:00:00Z"},"phanTramGiam":50,"soLuongSuDung":20},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9ae"},"tenChuongTrinh":"Khách hàng thân thiết","moTa":"Tri ân khách hàng đã mua trên 5 triệu","ngayBatDau":{"$date":"2024-12-31T17:00:00Z"},"ngayKetThuc":{"$date":"2027-12-30T17:00:00Z"},"phanTramGiam":5,"giamToiDa":500000}
+]

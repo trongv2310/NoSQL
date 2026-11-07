@@ -1,0 +1,5 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737dab1a"},"khoa":"logo_url","giaTri":"images/HUIT.jpg","moTa":"Đường dẫn logo hệ thống","createdAt":{"$date":"2026-11-07T10:02:29.513Z"},"updatedAt":{"$date":"2026-11-07T10:02:29.513Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737dab1b"},"khoa":"site_name","giaTri":"Shop Cầu Lông","moTa":"Tên thương hiệu hệ thống","createdAt":{"$date":"2026-11-07T10:02:29.513Z"},"updatedAt":{"$date":"2026-11-07T10:02:29.513Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737dab1c"},"khoa":"site_description","giaTri":"Cửa hàng dụng cụ và phụ kiện cầu lông chính hãng","moTa":"Mô tả ngắn gọn hệ thống","createdAt":{"$date":"2026-11-07T10:02:29.513Z"},"updatedAt":{"$date":"2026-11-07T10:02:29.513Z"}}
+]

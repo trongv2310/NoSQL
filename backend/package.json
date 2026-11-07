@@ -21,6 +21,9 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.mts",
     "seed": "nest build && node dist/seed/seed.js",
     "seed:reset": "nest build && node dist/seed/seed.js --reset --don-mau",
+    "data:import": "nest build && node dist/seed/nhap-du-lieu.js",
+    "data:import:reset": "nest build && node dist/seed/nhap-du-lieu.js --reset",
+    "data:export": "nest build && node dist/seed/xuat-du-lieu.js",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
