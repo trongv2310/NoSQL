@@ -39,10 +39,6 @@
   --bone-dim-rgb:169, 197, 184;
   --font-head:'Barlow Condensed', 'Inter', system-ui, sans-serif;
   --font-body:'Inter', system-ui, sans-serif;
-  --poster-0:linear-gradient(150deg, #0e261e 0%, #07130f 60%, #148f5f 130%);
-  --poster-1:linear-gradient(150deg, #0e261e 0%, #07130f 60%, #ff6a13 130%);
-  --poster-2:linear-gradient(150deg, #0e261e 0%, #07130f 60%, #ffc98a 130%);
-  --poster-3:linear-gradient(150deg, #0e261e 0%, #07130f 60%, #148f5f 130%);
   --pad:clamp(20px, 3.4vw, 56px);
   --nav-h:84px;
   --ease:cubic-bezier(.22,.61,.36,1);
@@ -85,10 +81,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase;
   color:var(--bone-dim); text-shadow:0 1px 16px rgba(var(--ink-rgb),.9);
 }
-.jp{ font-family:var(--font-body); font-weight:400; }
 h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacing:.01em; }
 .display{
-  font-family:var(--font-head); text-transform:uppercase; line-height:1.055; letter-spacing:.02em;
+  font-family:var(--font-head); text-transform:uppercase; line-height:1.14; letter-spacing:.02em;
   font-weight:700; text-shadow:0 2px 34px rgba(var(--ink-rgb),.72);
 }
 .h-hero{ font-size:clamp(28px,3.8vw,52px); }
@@ -103,11 +98,13 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 [data-rv="fade"]{ transform:none; }
 [data-rv].rv-in{ opacity:1; transform:none;
   transition:opacity .9s var(--ease-out), transform 1.05s var(--ease-out); }
-.mask-line{ display:block; overflow:hidden; }
+/* Mặt nạ trượt chữ phải chừa chỗ cho dấu chồng (Ỗ, Ẫ) và dấu nặng/hỏi dưới chân chữ hoa:
+   line-height 1.055 cắt mất các dấu này ("Mỗi" thành "MÔI"). Padding nới vùng cắt, margin âm giữ nguyên dòng. */
+.mask-line{ display:block; overflow:hidden; padding:.24em 0 .16em; margin:-.24em 0 -.16em; }
 .mask-line:not(.word-reveal) > span{ display:block; transform:translate3d(0,110%,0); }
 .rv-in .mask-line:not(.word-reveal) > span, .mask-line:not(.word-reveal).rv-in > span{ transform:none; }
 .mask-line:not(.word-reveal) > span{ transition:transform 1.05s var(--ease-out); }
-.word-mask{ display:inline-block; overflow:hidden; vertical-align:top; }
+.word-mask{ display:inline-block; overflow:hidden; vertical-align:top; padding:.24em .05em .16em; margin:-.24em -.05em -.16em; }
 .word{
   display:inline-block; opacity:0; transform:translate3d(0,112%,0); will-change:transform,opacity;
   transition:transform .82s var(--ease-out), opacity .5s var(--ease-out);
@@ -125,7 +122,7 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .pre-in{ width:min(440px,78vw); text-align:center; }
 .pre-mark{ margin:0 auto 24px; width:48px; height:48px; opacity:.95; }
 .pre-mark svg{ width:100%; height:100%; display:block; }
-.pre-jp{ font-size:12px; letter-spacing:.5em; color:var(--metal); margin-bottom:20px; font-weight:500; }
+.pre-name{ font-size:12px; letter-spacing:.42em; text-transform:uppercase; color:var(--metal); margin-bottom:20px; font-weight:500; }
 .pre-bar{ position:relative; height:2px; background:rgba(var(--bone-rgb),.14); overflow:hidden; }
 .pre-bar i{ position:absolute; inset:0 100% 0 0; background:var(--primary); transition:right .35s linear; }
 .pre-meta{ display:flex; justify-content:space-between; margin-top:14px;
@@ -161,11 +158,10 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
   position:relative; font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
   color:var(--bone-dim); display:block; height:15px; line-height:15px; overflow:hidden;
 }
-.nav-link span{ display:block; height:15px; line-height:15px; transition:transform .55s var(--ease-out), color .3s; }
-.nav-link .alt{ position:absolute; inset:0; transform:translate3d(0,100%,0); color:var(--metal); letter-spacing:.28em; }
-.nav-link:hover span{ transform:translate3d(0,-100%,0); }
-.nav-link:hover .alt{ transform:none; }
+.nav-link span{ display:block; height:15px; line-height:15px; transition:color .3s; }
+.nav-link:hover{ color:var(--metal); }
 .nav-link.on{ color:var(--bone); }
+.nav-link.m-only{ display:none; }
 .nav-link.on::after{ content:''; position:absolute; left:0; bottom:0; width:100%; height:1.5px; background:var(--primary); }
 
 .nav-actions{ display:flex; align-items:center; gap:12px; }
@@ -176,7 +172,8 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
   color:var(--bone); background:rgba(var(--ink2-rgb),.5); transition:all .3s var(--ease);
 }
 .nav-bag-btn:hover{ border-color:var(--ember); color:var(--ember); background:rgba(var(--accent-rgb),.1); }
-.nav-bag-btn #bag-count{ color:var(--metal); font-variant-numeric:tabular-nums; }
+.nav-bag-btn #bag-count{ min-width:18px; padding:1px 5px; border-radius:9px; text-align:center; color:var(--ink); background:var(--metal); font-variant-numeric:tabular-nums; letter-spacing:0; }
+.nav-bag-btn svg{ width:14px; height:14px; flex:0 0 auto; }
 .nav-shop-btn{
   display:inline-flex; align-items:center; padding:7px 14px;
   border-radius:20px; font-family:var(--font-head); font-size:11px; font-weight:700;
@@ -190,7 +187,7 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 }
 .nav-back-home:hover{ color:var(--bone); }
 
-.nav-burger{ margin-left:12px; width:26px; height:16px; position:relative; flex:0 0 auto; }
+.nav-burger{ margin-left:12px; width:26px; height:16px; position:relative; flex:0 0 auto; display:none; }
 .nav-burger i{ position:absolute; right:0; height:1.5px; background:var(--bone); transition:width .45s var(--ease-out), transform .45s var(--ease-out); }
 .nav-burger i:nth-child(1){ top:4px; width:26px; }
 .nav-burger i:nth-child(2){ top:11px; width:17px; }
@@ -223,40 +220,17 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .chip b{ display:block; font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
   color:var(--bone); margin-bottom:6px; transition:color .4s;
   text-shadow:0 1px 16px rgba(var(--ink-rgb),.9); }
-.chip p{ margin:0; font-size:11px; line-height:1.5; color:var(--muted); max-width:24ch;
-  transition:color .4s; }
+.chip p{ margin:0; font-size:11.5px; line-height:1.5; color:#b3c7bd; max-width:26ch;
+  text-shadow:0 1px 14px rgba(var(--ink-rgb),.95); transition:color .4s; }
+.chip:focus-visible{ outline:2px solid var(--metal); outline-offset:6px; border-radius:4px; }
+.hero::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:38%; pointer-events:none; z-index:1;
+  background:linear-gradient(transparent, rgba(var(--ink-rgb),.5) 55%, rgba(var(--ink-rgb),.78)); }
 .chip:hover .num{ color:var(--ember); transform:translate3d(0,-2px,0); }
 .chip:hover b{ color:var(--metal); }
 .chip:hover p{ color:var(--bone); }
 .chip.on .num{ color:var(--ember); }
 .chip.on b{ color:var(--metal); }
 
-.peek{
-  position:absolute; z-index:2; right:clamp(78px,11vw,190px); top:clamp(132px,25vh,238px);
-  width:clamp(150px,16vw,262px); display:block;
-  transition:transform .8s var(--ease-out);
-}
-.peek-fr{ display:block; aspect-ratio:16/10;
-  background:linear-gradient(180deg, rgba(var(--ink-rgb),.04) 24%, rgba(var(--ink-rgb),.48) 100%), var(--poster-0);
-  outline:1px solid rgba(var(--bone-rgb),.16); outline-offset:-1px;
-  box-shadow:0 34px 70px -30px rgba(0,0,0,.9); transition:outline-color .5s; }
-.peek:hover{ transform:translate3d(0,-5px,0); }
-.peek:hover .peek-fr{ outline-color:rgba(var(--bone-rgb),.42); }
-.peek-play{ position:absolute; top:0; right:0; left:0; bottom:auto; aspect-ratio:16/10;
-  display:grid; place-items:center; pointer-events:none; }
-.peek-play svg{ width:clamp(30px,3.2vw,46px); height:auto; filter:drop-shadow(0 2px 12px rgba(0,0,0,.7));
-  transition:transform .55s var(--ease-out); }
-.peek:hover .peek-play svg{ transform:scale(1.14); }
-.peek-cap{ display:flex; align-items:baseline; gap:9px; margin-top:9px; }
-.peek-cap b{ font-size:11px; font-weight:500; letter-spacing:.24em; color:var(--bone-dim); }
-.peek-cap i{ font-style:normal; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
-@media (max-width:820px){ .peek{ display:none; } }
-
-.hero-side{
-  position:absolute; z-index:2; right:var(--pad); top:50%; transform:translateY(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:14px; pointer-events:none;
-}
-.hero-side .v{ writing-mode:vertical-rl; font-size:13px; letter-spacing:.62em; color:rgba(var(--bone-rgb),.5); }
 @keyframes cue{ 0%{transform:scaleX(0)} 42%{transform:scaleX(1)} 100%{transform:scaleX(1) translateX(100%)} }
 
 /* ============================================================= sections */
@@ -268,13 +242,14 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
           mask-image:linear-gradient(transparent, #000 44%);
 }
 #pathways::before{ background:radial-gradient(108% 64% at 50% 50%, rgba(var(--ink-rgb),.70), rgba(var(--ink-rgb),.44) 50%, transparent); }
-#eternity::before{ background:radial-gradient(82% 58% at 50% 46%, rgba(var(--ink-rgb),.26), rgba(var(--ink-rgb),.66) 56%, rgba(var(--ink-rgb),.90) 82%, transparent); }
+#eternity::before{ background:radial-gradient(70% 52% at 50% 48%, rgba(var(--ink-rgb),.78), rgba(var(--ink-rgb),.5) 60%, transparent 92%); }
+#gate::before, #lessons::before{ background:radial-gradient(120% 70% at 28% 50%, rgba(var(--ink-rgb),.9), rgba(var(--ink-rgb),.7) 46%, rgba(var(--ink-rgb),.3) 80%, transparent); }
 .foot::before{
   content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
   background:linear-gradient(rgba(var(--ink-rgb),.55), rgba(var(--ink-rgb),.94) 40%, rgba(var(--ink-rgb),.98));
 }
 .sec-head{ display:flex; align-items:baseline; gap:16px; margin-bottom:clamp(30px,5vh,66px); }
-.sec-head .k{ font-size:11px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:var(--muted); }
+.sec-head .k{ font-size:11px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:#8fae9f; }
 .sec-head .k b{ color:var(--primary); font-weight:700; }
 .rule{ flex:1 1 auto; height:1px; background:var(--line-soft); }
 
@@ -296,143 +271,110 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .gate-stats div b{ display:block; font-family:var(--font-head); font-size:clamp(22px,2.1vw,32px); font-weight:700; letter-spacing:-.02em; color:var(--metal); }
 .gate-stats div span{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
 
-/* — chapter II: pathways cards */
-.cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(10px,1.4vw,22px); align-items:start; }
-.card{ position:relative; cursor:pointer; }
-.card:nth-child(1){ transform:translateY(0); }
-.card:nth-child(2){ transform:translateY(clamp(26px,5vw,74px)); }
-.card:nth-child(3){ transform:translateY(clamp(52px,10vw,148px)); }
-.card-fr{
-  position:relative; aspect-ratio:4/5; background:transparent;
-  outline:1px solid var(--line-soft); outline-offset:-1px;
-  transition:outline-color .5s var(--ease);
-}
+/* — chương 01: hàng thương hiệu (logo màu gốc đặt trên ô sáng: logo Yonex/Victor là chữ trắng trên khối màu, đổi sang trắng sẽ thành khối đặc) */
+.brand-row{ margin-top:clamp(22px,3.4vh,40px); display:grid; grid-template-columns:minmax(120px,.38fr) minmax(0,1.96fr); gap:clamp(20px,3vw,54px); align-items:center; }
+.brand-row h3{ font-family:var(--font-body); font-size:10px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); line-height:1.6; }
+.brand-list{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.brand-tile{ display:flex; align-items:center; gap:14px; padding:12px 14px; border:1px solid var(--line-soft); border-radius:10px;
+  background:rgba(var(--ink2-rgb),.78); transition:border-color .35s var(--ease), transform .45s var(--ease-out); }
+.brand-tile:hover{ border-color:rgba(var(--metal-rgb),.55); transform:translate3d(0,-2px,0); }
+.brand-tile b{ display:block; font-family:var(--font-head); font-size:22px; font-weight:700; line-height:1; color:var(--metal); font-variant-numeric:tabular-nums; }
+.brand-tile span{ display:block; margin-top:4px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.logo-chip{ display:grid; place-items:center; flex:0 0 auto; width:96px; height:42px; padding:7px 11px; border-radius:6px; background:#f6f4ee; }
+.logo-chip img{ display:block; width:100%; height:100%; min-height:0; object-fit:contain; }
+.logo-chip.sm{ width:74px; height:30px; padding:5px 8px; border-radius:5px; }
+.logo-chip:empty{ display:none; }
+
+/* — chương 02: bốn danh mục thật, ảnh banner thật (bento: Vợt rộng, Giày cao, Trang phục + Phụ kiện) */
+.cards{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.84fr); grid-template-rows:minmax(0,1.18fr) minmax(0,1fr);
+  gap:14px; height:min(80vh,780px); min-height:540px; }
+.card{ position:relative; display:flex; flex-direction:column; min-height:0; cursor:pointer; }
+.card[data-cat="vot"]{ grid-column:1 / 3; grid-row:1; }
+.card[data-cat="giay"]{ grid-column:3; grid-row:1 / 3; }
+.card[data-cat="aoquan"]{ grid-column:1; grid-row:2; }
+.card[data-cat="phukien"]{ grid-column:2; grid-row:2; }
+.card-fr{ position:relative; flex:1 1 auto; min-height:0; border-radius:14px; overflow:hidden; isolation:isolate;
+  background:var(--ink-2); outline:1px solid var(--line-soft); outline-offset:-1px; transition:outline-color .5s var(--ease); }
 .card:hover .card-fr{ outline-color:rgba(var(--bone-rgb),.30); }
-.card:nth-child(1) .card-fr{
-  background:
-    linear-gradient(180deg,rgba(var(--ink-rgb),.04) 36%,rgba(var(--ink-rgb),.72) 100%),
-    var(--poster-0);
-}
-.card:nth-child(2) .card-fr{
-  background:
-    linear-gradient(180deg,rgba(var(--ink-rgb),.06) 36%,rgba(var(--ink-rgb),.74) 100%),
-    var(--poster-1);
-}
-.card:nth-child(3) .card-fr{
-  background:
-    linear-gradient(180deg,rgba(var(--ink-rgb),.05) 36%,rgba(var(--ink-rgb),.74) 100%),
-    var(--poster-2);
-}
-.card-fr::after{ content:''; position:absolute; inset:0;
-  background:linear-gradient(transparent 46%, rgba(var(--ink-rgb),.80)); pointer-events:none; }
+.card-fr > img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:var(--fx,50%) var(--fy,50%);
+  transition:transform 1.2s var(--ease-out); }
+.card:hover .card-fr > img{ transform:scale(1.035); }
+.card-fr::after{ content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, transparent 44%, rgba(var(--ink-rgb),.86)); }
 .cloth-out{ position:absolute; pointer-events:none; z-index:1; }
 .on-cloth{ background:none !important; outline:0 !important; overflow:visible; }
-.on-cloth::after{ display:none; }
+.on-cloth > img, .on-cloth::after{ visibility:hidden; }
+.card-lab{ position:absolute; left:20px; right:20px; bottom:18px; z-index:2; pointer-events:none;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+.card-lab b{ display:block; font-family:var(--font-head); font-size:clamp(20px,2vw,30px); font-weight:700; letter-spacing:.03em;
+  text-transform:uppercase; color:var(--bone); text-shadow:0 2px 18px rgba(0,0,0,.75); }
+.card-lab small{ display:block; margin-top:5px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#cfe0d8;
+  text-shadow:0 1px 12px rgba(0,0,0,.8); }
+.card-ar{ position:absolute; top:16px; right:16px; z-index:2; width:34px; height:34px; border-radius:50%;
+  display:grid; place-items:center; background:rgba(var(--ink-rgb),.55); border:1px solid rgba(var(--bone-rgb),.22);
+  opacity:0; transform:translate3d(-4px,4px,0); transition:.5s var(--ease-out); }
+.card-ar svg{ width:13px; height:13px; }
+.card:hover .card-ar, .card:focus-visible .card-ar{ opacity:1; transform:none; }
+.card-meta{ margin-top:10px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
 
-.card-fr{ isolation:isolate; }
-.glow{
-  position:absolute; z-index:1; pointer-events:none;
-  left:var(--gx); top:var(--gy); width:calc(var(--gr) * 2); aspect-ratio:1;
-  translate:-50% -50%;
-  mix-blend-mode:screen;
-  animation:glow-swell var(--gt2) var(--ease-io) infinite alternate;
-}
-.glow::before{
-  content:''; position:absolute; inset:0; border-radius:50%;
-  background:radial-gradient(closest-side, var(--gc1), var(--gc2) 40%, transparent 72%);
-  animation:glow-pulse var(--gt) var(--ease-io) infinite;
-}
-@keyframes glow-swell{ from{ transform:scale(.93); } to{ transform:scale(1.07); } }
-@keyframes glow-pulse{ from{ opacity:.78; } 50%{ opacity:1; } to{ opacity:.78; } }
-@keyframes glow-flame{
-  0%{ opacity:.74 }   6%{ opacity:.97 }  12%{ opacity:.63 }  19%{ opacity:.90 }
-  27%{ opacity:.55 }  34%{ opacity:.94 } 42%{ opacity:.71 }  51%{ opacity:1 }
-  58%{ opacity:.60 }  66%{ opacity:.88 } 74%{ opacity:.67 }  83%{ opacity:.96 }
-  91%{ opacity:.72 } 100%{ opacity:.74 }
-}
-.glow--flame::before{ animation-name:glow-flame; }
-.glow--flame{ animation-duration:var(--gt2); }
-@media (prefers-reduced-motion:reduce){
-  .glow, .glow::before{ animation:none; }
-}
-
-.card-buy{
-  position:absolute; left:16px; bottom:42px; z-index:4;
-  padding:8px 16px; border-radius:20px; border:1px solid var(--line);
-  background:rgba(var(--ink2-rgb),.65); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  color:var(--bone); font-family:var(--font-head); font-size:12px; font-weight:700;
-  letter-spacing:.14em; text-transform:uppercase; cursor:pointer;
-  transition:all .3s var(--ease);
-}
-.card-buy:hover{
-  background:var(--ember); border-color:var(--ember); color:var(--ink);
-  transform:translate3d(0,-2px,0); box-shadow:0 6px 20px rgba(var(--accent-rgb),.35);
-}
-
-.no-webgl .card-fr{ background:linear-gradient(150deg,#101a1d,#0a0d10 62%,#1a0c0b); }
+.no-webgl .card-fr{ background:var(--ink-2); }
 .word-fb{ display:none; }
-.no-webgl #gl, .no-webgl .peek-play{ display:none; }
+.no-webgl #gl{ display:none; }
 .no-webgl body{ background:
-  radial-gradient(11vw 11vw at 73% 17%, rgba(var(--primary-rgb),.95), rgba(var(--primary-deep-rgb),.62) 44%, rgba(var(--ink-rgb),.20) 64%, transparent 72%),
-  radial-gradient(38vw 32vw at 50% 46%, rgba(var(--accent-rgb),.40), rgba(var(--primary-deep-rgb),.18) 54%, transparent 74%),
-  radial-gradient(120% 80% at 50% 0%, rgba(var(--bone-dim-rgb),.16), transparent 60%), var(--ink);
+  radial-gradient(38vw 32vw at 62% 38%, rgba(var(--primary-rgb),.45), rgba(var(--primary-deep-rgb),.18) 54%, transparent 74%),
+  radial-gradient(120% 80% at 50% 0%, rgba(var(--bone-dim-rgb),.12), transparent 60%), var(--ink);
   background-attachment:fixed; }
-.no-webgl .peek-fr{ background:linear-gradient(160deg,#162326,#0b1013 55%,#241010); }
 .no-webgl .word-fb{
-  display:block; position:absolute; left:0; right:0; bottom:16%; z-index:1;
-  font-family:var(--font-head); font-weight:700; font-size:21.4vw; line-height:.78;
-  letter-spacing:.052em; text-align:center; pointer-events:none;
+  display:block; position:absolute; left:0; right:0; bottom:18%; z-index:1;
+  font-family:var(--font-head); font-weight:700; font-size:15vw; line-height:1.1;
+  letter-spacing:.04em; text-align:center; pointer-events:none;
   background:linear-gradient(var(--bone), var(--bone-dim)); -webkit-background-clip:text; background-clip:text;
-  color:transparent;
+  color:transparent; opacity:.2;
 }
 .no-webgl .hero::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:34%;
   pointer-events:none; background:linear-gradient(transparent, rgba(var(--ink-rgb),.72) 52%, rgba(var(--ink-rgb),.96)); }
 .no-webgl .sec::before, .no-webgl #pathways::before, .no-webgl #eternity::before{ background:none; }
-.card-lab{ position:absolute; left:16px; right:16px; bottom:14px; z-index:2;
-  display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
-.card-lab b{ font-family:var(--font-head); font-size:clamp(14px,1.25vw,18px); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--bone); }
-.card-lab .jp{ font-size:11px; letter-spacing:.3em; color:var(--metal); }
-.card-ar{ position:absolute; top:14px; right:14px; z-index:2; width:26px; height:26px;
-  opacity:0; transform:translate3d(-4px,4px,0); transition:.5s var(--ease-out); }
-.card:hover .card-ar{ opacity:1; transform:none; }
-.card-meta{ display:flex; justify-content:space-between; margin-top:12px;
-  font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
 
-/* — chapter III: curriculum */
-.cur-head{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.72fr); gap:clamp(28px,5vw,90px); align-items:end; margin-bottom:clamp(34px,6vh,72px); }
-.cur-head h2{ max-width:13ch; }
-.cur{ border-top:1px solid var(--line-soft); }
-.les{
-  position:relative; display:grid; align-items:center;
-  grid-template-columns:64px minmax(0,1.05fr) minmax(0,1.25fr) 110px;
-  gap:clamp(14px,2.4vw,40px);
-  padding:clamp(20px,2.4vw,30px) 0; border-bottom:1px solid var(--line-soft);
-  cursor:pointer; transition:padding .5s var(--ease-out);
-}
-.les::before{ content:''; position:absolute; left:calc(var(--pad) * -1); right:0; top:0; bottom:0;
-  background:linear-gradient(90deg, rgba(var(--primary-rgb),.12), transparent 46%);
-  opacity:0; transition:opacity .55s var(--ease); pointer-events:none; }
-.les:hover::before{ opacity:1; }
-.les:hover{ padding-left:clamp(8px,1.2vw,18px); }
+/* — chương 03: vợt nổi bật, có ảnh sản phẩm và logo hãng */
+.cur-head{ display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.1fr); gap:clamp(28px,5vw,90px); align-items:end; margin-bottom:clamp(30px,5vh,60px); }
+.cur-head h2{ max-width:14ch; }
+.cur-note{ margin-top:10px; font-size:12px; color:var(--muted); }
+.cur{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }
+.les{ position:relative; grid-column:span 2; display:grid; grid-template-rows:auto 1fr; gap:16px; min-width:0;
+  padding:16px 16px 20px; border:1px solid var(--line-soft); border-radius:14px; background:rgba(var(--ink2-rgb),.9);
+  cursor:pointer; overflow:hidden; transition:border-color .4s var(--ease), transform .5s var(--ease-out); }
+.les:nth-child(-n+2){ grid-column:span 3; grid-template-rows:none; grid-template-columns:minmax(150px,.82fr) minmax(0,1fr); align-items:stretch; }
+.les:hover, .les:focus-visible{ border-color:rgba(var(--metal-rgb),.45); transform:translate3d(0,-3px,0); }
+.les-img{ position:relative; display:grid; place-items:center; min-height:170px; padding:14px; border-radius:10px; background:#f4f2ec; overflow:hidden; }
+.les:nth-child(-n+2) .les-img{ min-height:220px; }
+.les-img img{ width:100%; height:100%; max-height:200px; object-fit:contain; mix-blend-mode:multiply; transition:transform .8s var(--ease-out); }
+.les:nth-child(-n+2) .les-img img{ max-height:240px; }
+.les:hover .les-img img{ transform:scale(1.04); }
+.les-img img:not([src]), .les-img img[src=""]{ visibility:hidden; }
+.les-tx{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+.les-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .les .k{ font-family:var(--font-head); font-size:12px; letter-spacing:.16em; color:var(--muted); font-variant-numeric:tabular-nums; transition:color .4s; }
 .les:hover .k{ color:var(--ember); }
-.les h3{ font-family:var(--font-head); font-size:clamp(17px,1.6vw,24px); font-weight:700; letter-spacing:.02em; }
-.les h3 em{ font-style:normal; font-family:var(--font-body); font-size:.72em; color:var(--metal); margin-left:12px; letter-spacing:.2em; }
-.les p{ margin:0; font-size:13px; line-height:1.6; color:#a2b3ab; text-shadow:0 1px 16px rgba(var(--ink-rgb),.92); }
-.les .t{ text-align:right; font-family:var(--font-head); font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--metal); font-variant-numeric:tabular-nums; text-shadow:0 1px 16px rgba(var(--ink-rgb),.92); }
-.les .bar{ position:absolute; left:0; bottom:-1px; height:1.5px; width:100%; background:var(--primary);
+.les h3{ font-family:var(--font-head); font-size:clamp(18px,1.6vw,24px); font-weight:700; letter-spacing:.02em; line-height:1.18; }
+.les:nth-child(-n+2) h3{ font-size:clamp(20px,1.9vw,28px); }
+.les p{ margin:0; font-size:13px; line-height:1.6; color:#a9bcb3; }
+.les .t{ margin-top:auto; display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  font-family:var(--font-head); font-size:18px; font-weight:700; letter-spacing:.02em; color:var(--metal); font-variant-numeric:tabular-nums; }
+.les .t small{ font-family:var(--font-body); font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--bone-dim); }
+.les .bar{ position:absolute; left:0; bottom:0; height:2px; width:100%; background:var(--primary);
   transform:scaleX(0); transform-origin:left; transition:transform .7s var(--ease-out); }
 .les:hover .bar{ transform:scaleX(1); }
 
-/* — chapter IV: eternity */
+/* — chương 04: ra sân */
 .fin{ min-height:100svh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
-.fin .eyebrow{ margin-bottom:26px; }
-.fin h2{ font-family:var(--font-head); font-size:clamp(38px,7.4vw,124px); line-height:.94; letter-spacing:.01em; text-transform:uppercase; }
-.fin p{ max-width:44ch; margin:26px auto 0; }
+.fin .eyebrow{ margin-bottom:22px; }
+.fin h2{ font-family:var(--font-head); font-size:clamp(40px,6.6vw,108px); line-height:1; letter-spacing:.01em; text-transform:uppercase; }
+.fin p{ max-width:46ch; margin:24px auto 0; }
+.fin-actions{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:34px; }
 .cta{
-  position:relative; display:inline-flex; align-items:center; gap:14px; margin-top:44px;
-  padding:17px 30px; border:1px solid var(--line); border-radius:100px; overflow:hidden;
-  font-family:var(--font-head); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  position:relative; display:inline-flex; align-items:center; gap:14px;
+  padding:17px 30px; border:1px solid var(--line); border-radius:100px; overflow:hidden; isolation:isolate;
+  font-family:var(--font-head); font-size:13px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
   transition:color .45s var(--ease), border-color .45s;
 }
 .cta i{ position:absolute; inset:0; background:var(--bone); transform:translate3d(0,101%,0);
@@ -441,8 +383,10 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .cta:hover{ color:var(--ink); border-color:var(--bone); }
 .cta:hover i{ transform:none; }
 .cta:hover svg path{ stroke:var(--ink); }
-.cta-sub{ border-color:rgba(var(--bone-rgb),.2); color:var(--bone-dim); }
-.cta-sub:hover{ color:var(--ink); border-color:var(--metal); }
+.cta-main{ background:var(--ember); border-color:var(--ember); color:var(--ink); }
+.cta-main svg path{ stroke:var(--ink); }
+.cta-sub{ border-color:rgba(var(--bone-rgb),.42); color:var(--bone); background:rgba(var(--ink-rgb),.45); }
+.cta-sub:hover{ color:var(--ink); border-color:var(--bone); }
 
 /* — footer */
 .foot{ position:relative; padding:clamp(50px,8vh,96px) var(--pad) clamp(26px,4vh,40px);
@@ -457,6 +401,8 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .foot-base{ display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
   margin-top:clamp(38px,6vh,74px); padding-top:20px; border-top:1px solid var(--line-soft);
   font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.sec, .foot{ overflow-x:clip; }
+.sec > *, .foot > *{ position:relative; z-index:2; }
 
 /* ============================================================= progress rail */
 .rail{ position:fixed; right:calc(var(--pad) - 4px); top:50%; transform:translateY(-50%); z-index:45;
@@ -472,73 +418,15 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
   transition:width .35s var(--ease-out), height .35s var(--ease-out), margin .35s var(--ease-out),
              background .35s, border-color .35s, opacity .3s; opacity:0; }
 .cur-dot.act{ width:52px; height:52px; margin:-26px 0 0 -26px; background:rgba(var(--bone-rgb),.07); border-color:rgba(var(--bone-rgb),.6); }
-@media (hover:hover) and (pointer:fine){ .cur-dot{ opacity:1 } }
+@media (hover:hover) and (pointer:fine){ .cur-dot.live{ opacity:1 } }
 
-/* ============================================================= responsive */
-@media (max-width:1080px){
-  .hero-top{ max-width:none; }
-  .gate-grid{ grid-template-columns:1fr; gap:26px; }
-  .cur-head{ grid-template-columns:1fr; gap:18px; }
-  .les{ grid-template-columns:44px minmax(0,1fr) 90px; }
-  .les p{ display:none; }
-  .foot-grid{ grid-template-columns:1fr 1fr; }
-}
-@media (max-width:820px){
-  .nav-links{
-    display:flex; position:fixed; top:0; right:0; bottom:0; width:min(84vw,360px);
-    padding:calc(var(--nav-h) + 28px) var(--pad) 34px; flex-direction:column; align-items:flex-start; gap:0;
-    background:rgba(var(--ink-rgb),.98); border-left:1px solid var(--line-soft);
-    transform:translate3d(100%,0,0); opacity:0; visibility:hidden; pointer-events:none;
-    transition:transform .65s var(--ease-out), opacity .4s, visibility 0s linear .65s;
-  }
-  .nav.menu-open .nav-links{
-    transform:none; opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s;
-  }
-  .nav-links .nav-link{
-    width:100%; height:auto; padding:17px 0; overflow:visible; border-bottom:1px solid var(--line-soft);
-    font-size:17px; line-height:1.2;
-  }
-  .nav-links .nav-link span{ height:auto; line-height:1.2; transform:none !important; }
-  .nav-links .nav-link .alt{ position:static; margin-top:6px; font-size:10px; color:var(--muted); }
-  .nav.menu-open{ transform:none; transition:none; }
-  .nav-burger{ margin-left:auto; }
-  .nav-burger.active i:nth-child(1){ top:7px; width:26px; transform:rotate(45deg); }
-  .nav-burger.active i:nth-child(2){ top:7px; width:26px; transform:rotate(-45deg); }
-  html.nav-open,html.nav-open body{ overflow:hidden; }
-  .rail{ display:none; }
-  .hero-side{ display:none; }
-  .chapters{ grid-template-columns:repeat(2,1fr); gap:18px 14px; }
-  .chip p{ font-size:10px; }
-  .cards{ grid-template-columns:1fr; gap:14px; }
-  .card:nth-child(2),.card:nth-child(3){ transform:none; }
-  .gate-stats{ flex-wrap:wrap; gap:20px 34px; }
-  .foot-grid{ grid-template-columns:1fr; }
-  .hero-cue{ display:none; }
-}
-
-/* ================================================== section layouts (B set) */
+/* ================================================== bố cục B (hero, chương 01, chân trang) */
 body[data-layout-hero="b"] .hero-top{ margin-left:0; max-width:min(590px,46vw); }
-body[data-layout-hero="b"] .hero-foot{ width:min(480px,40vw); margin-left:0; }
+body[data-layout-hero="b"] .hero-foot{ width:min(820px,64vw); margin-left:0; }
 body[data-layout-hero="b"] .hero-cue{ justify-content:flex-start; }
-body[data-layout-hero="b"] .chapters{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-body[data-layout-hero="b"] .chip{ position:relative; flex-direction:column; gap:0; }
-body[data-layout-hero="b"] .chip .num{ font-size:clamp(29px,3.1vw,48px); }
-body[data-layout-hero="b"] .chip .tx{
-  position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
-  clip-path:inset(50%); white-space:nowrap;
-}
-body[data-layout-hero="b"] .peek{
-  left:auto; right:var(--pad); top:auto; bottom:clamp(38px,7vh,96px);
-}
-body[data-layout-hero="b"] .peek-cap b.jp{ font-size:clamp(20px,2.2vw,34px); letter-spacing:.18em; }
-body[data-layout-hero="b"] .hero-side{
-  left:auto; right:var(--pad); top:calc(var(--nav-h) + clamp(14px,3vh,42px));
-  bottom:auto; transform:none; display:block;
-}
-body[data-layout-hero="b"] .hero-side .v{
-  position:static; transform:none;
-  font-size:clamp(30px,3.2vw,54px); letter-spacing:.12em; color:rgba(var(--bone-rgb),.62);
-}
+body[data-layout-hero="b"] .chapters{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
+body[data-layout-hero="b"] .chip{ flex-direction:column; gap:8px; }
+body[data-layout-hero="b"] .chip .num{ font-size:clamp(20px,1.7vw,26px); }
 
 body[data-layout-story="b"] .gate-grid{
   grid-template-columns:minmax(120px,.38fr) minmax(0,1.08fr) minmax(280px,.88fr);
@@ -546,50 +434,9 @@ body[data-layout-story="b"] .gate-grid{
 }
 body[data-layout-story="b"] .gate-grid h2{ grid-column:1 / 3; max-width:13ch; }
 body[data-layout-story="b"] .gate-copy{ grid-column:3; }
-body[data-layout-story="b"] .gate-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
-body[data-layout-story="b"] .gate-stats div{ min-height:108px; padding:18px; border-left:1px solid var(--line-soft); }
+body[data-layout-story="b"] .gate-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; }
+body[data-layout-story="b"] .gate-stats div{ min-height:104px; padding:18px; border-left:1px solid var(--line-soft); background:rgba(var(--ink-rgb),.42); }
 body[data-layout-story="b"] .gate-stats div:last-child{ border-right:1px solid var(--line-soft); }
-
-body[data-layout-gallery="b"] .cards{
-  grid-template-columns:minmax(0,1.55fr) minmax(260px,.75fr);
-  grid-template-rows:repeat(2,minmax(0,1fr));
-  gap:14px; align-items:stretch;
-}
-body[data-layout-gallery="b"] .card{ transform:none; display:flex; flex-direction:column; min-height:0; }
-body[data-layout-gallery="b"] .card-fr{ aspect-ratio:auto; flex:1 1 auto; min-height:0; }
-body[data-layout-gallery="b"] .card:first-child{ grid-row:1 / 3; }
-body[data-layout-gallery="b"] .card:first-child .card-fr{ flex:0 0 auto; height:min(72vh,760px); }
-body[data-layout-gallery="b"] .card:not(:first-child) .card-fr{ min-height:200px; }
-
-body[data-layout-curriculum="b"] .cur-head{ grid-template-columns:minmax(0,.72fr) minmax(0,1.2fr); align-items:start; }
-body[data-layout-curriculum="b"] .cur{
-  display:grid; grid-template-columns:repeat(6,1fr); gap:1px;
-  background:var(--line-soft); border:1px solid var(--line-soft);
-}
-body[data-layout-curriculum="b"] .les{
-  display:flex; flex-direction:column; align-items:flex-start; min-height:250px;
-  padding:24px; gap:14px; border:0; background:rgba(var(--ink2-rgb),.84); overflow:hidden;
-}
-body[data-layout-curriculum="b"] .les:nth-child(-n+2){ grid-column:span 3; }
-body[data-layout-curriculum="b"] .les:nth-child(n+3){ grid-column:span 2; }
-body[data-layout-curriculum="b"] .les::before{ left:0; background:linear-gradient(145deg,rgba(var(--primary-rgb),.13),transparent 58%); }
-body[data-layout-curriculum="b"] .les:hover{ padding-left:32px; }
-body[data-layout-curriculum="b"] .les h3{ font-size:clamp(20px,2vw,30px); }
-body[data-layout-curriculum="b"] .les p{ display:block; max-width:34ch; }
-body[data-layout-curriculum="b"] .les .t{ text-align:left; margin-top:auto; }
-
-body[data-layout-closing="b"] .fin{
-  display:grid; grid-template-columns:minmax(260px,.7fr) minmax(0,1.3fr); grid-template-rows:auto auto auto;
-  align-content:center; align-items:end; text-align:left;
-  column-gap:clamp(40px,7vw,120px); row-gap:clamp(16px,2.6vh,30px);
-}
-body[data-layout-closing="b"] .fin .eyebrow{ grid-column:1; grid-row:1; margin:0; }
-body[data-layout-closing="b"] .fin h2{
-  grid-column:2; grid-row:1 / 4; align-self:center; justify-self:end;
-  font-size:clamp(52px,6vw,82px); writing-mode:vertical-rl;
-}
-body[data-layout-closing="b"] .fin p{ grid-column:1; grid-row:2; margin:0; }
-body[data-layout-closing="b"] .fin .cta{ grid-column:1; grid-row:3; justify-self:start; margin-top:4px; }
 
 body[data-layout-footer="b"] .foot-grid{ grid-template-columns:repeat(3,1fr); }
 body[data-layout-footer="b"] .foot-brand{
@@ -606,152 +453,88 @@ body[data-layout-footer="b"] .foot-grid > div:nth-child(n+3){
 body[data-layout-footer="b"] .foot-base{ display:grid; grid-template-columns:1fr auto 1fr; }
 body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 
-/* ================================================= foreground layers */
-.fg{
-  position:absolute; inset:0; z-index:3;
-  overflow:visible; pointer-events:none;
-}
-.sec, .foot{ overflow-x:clip; overflow-y:visible; }
-#fg-sky{
-  position:fixed; left:0; top:0; width:0; height:0;
-  z-index:52; pointer-events:none;
-}
-.sec > *:not(.fg), .foot > *:not(.fg){ position:relative; z-index:2; }
-.fg-el{ position:absolute; display:block; opacity:0; }
-.fg-el > img{
-  width:100%; height:auto;
-  opacity:1;
-  filter:saturate(.88) brightness(.86);
-}
-.fg-el--flip > img{ transform:scaleX(-1); }
-[data-fg-in="up"]   { transform:translate3d(0,13%,0); }
-[data-fg-in="left"] { transform:translate3d(-11%,6%,0); }
-[data-fg-in="right"]{ transform:translate3d(11%,6%,0); }
-@keyframes fg-sway{
-  from{ transform:rotate(-.45deg) translate3d(0,2px,0); }
-  to  { transform:rotate(.45deg)  translate3d(0,-6px,0); }
-}
-.fg-el--sway > img{ animation:fg-sway 21s var(--ease-io) infinite alternate; transform-origin:0% 45%; }
-
-.fg.fg-active,.fg.fg-retiring{
-  position:fixed; left:0; right:0; top:auto; bottom:0; height:min(56svh,680px);
-  z-index:1; overflow:visible; pointer-events:none;
-}
-.fg.fg-active .fg-el{
-  opacity:1; transform:none;
-  transition:opacity 1.2s var(--ease-out), transform 1.5s var(--ease-out);
-  transition-delay:var(--fg-delay,0ms);
-}
-.fg .fg-el:nth-child(2){ --fg-delay:90ms; }
-.fg .fg-el:nth-child(3){ --fg-delay:180ms; }
-.fg .fg-el:nth-child(4){ --fg-delay:270ms; }
-.fg.fg-retiring .fg-el{
-  opacity:0; transform:translate3d(0,8vh,0) scale(.98); filter:blur(18px);
-  transition:opacity .68s var(--ease-out),transform .78s var(--ease-out),filter .78s var(--ease-out);
-}
-
-[data-fg="gate"] .fg-wall  { left:0; bottom:-30px; width:clamp(430px,47vw,780px); }
-[data-fg="gate"] .fg-pine  { right:-4%; bottom:-46px; width:clamp(190px,21vw,370px); }
-[data-fg="gate"] .fg-grass { left:3%;   bottom:-150px; width:clamp(420px,60vw,1050px); }
-
-[data-fg="pathways"] .fg-sakura { left:-6%;  bottom:-86px;  width:clamp(430px,50vw,880px); }
-[data-fg="pathways"] .fg-leaves { right:-6%; bottom:-62px;  width:clamp(330px,38vw,670px); }
-[data-fg="pathways"] .fg-lantern{ left:-1%;  bottom:-96px;  width:clamp(120px,13vw,215px); }
-[data-fg="pathways"] .fg-bush   { right:-4%; bottom:-38px;  width:clamp(250px,30vw,530px); }
-[data-fg="pathways"] .fg-lantern > img{ filter:saturate(.96) brightness(1); }
-[data-fg="pathways"] .fg-leaves > img{ transform-origin:100% 40%; }
-
-[data-fg="lessons"] .fg-wall   { right:-8%; bottom:-78px; width:clamp(390px,50vw,870px); }
-[data-fg="lessons"] .fg-stones { left:-4%;  bottom:-48px; width:clamp(250px,30vw,530px); }
-[data-fg="lessons"] .fg-grass  { left:24%;  bottom:-84px; width:clamp(280px,33vw,580px); }
-
-[data-fg="eternity"] .fg-hill   { left:-8%; width:min(150vh,116%); bottom:calc(-1 * min(20vh,15.5vw)); }
-[data-fg="eternity"] .fg-ruins  { left:-5%;  bottom:-32px; width:clamp(240px,28vw,500px); }
-[data-fg="eternity"] .fg-grass  { right:-7%; bottom:-60px; width:clamp(300px,37vw,670px); }
-[data-fg="eternity"] .fg-sakura { left:-15%; bottom:-70px; width:clamp(280px,33vw,580px); }
-
-[data-fg="foot"] .fg-bush   { left:-6%;  bottom:-110px; width:clamp(230px,28vw,480px); }
-[data-fg="foot"] .fg-grass  { right:-5%; bottom:-98px;  width:clamp(255px,30vw,530px); }
-[data-fg="foot"] .fg-stones { left:36%;  bottom:-104px; width:clamp(190px,22vw,370px); }
-
+/* ============================================================= responsive */
 @media (max-width:1080px){
-  [data-fg="gate"] .fg-wall      { width:clamp(390px,42vw,600px); }
-  [data-fg="pathways"] .fg-sakura{ width:clamp(400px,46vw,660px); }
-  [data-fg="pathways"] .fg-leaves{ width:clamp(310px,35vw,500px); }
-  [data-fg="lessons"] .fg-wall   { width:clamp(360px,45vw,640px); }
-  [data-fg="eternity"] .fg-sakura{ width:clamp(260px,30vw,430px); }
-}
-@media (max-width:820px){
-  [data-fg="gate"] .fg-pine, [data-fg="pathways"] .fg-sakura,
-  [data-fg="pathways"] .fg-leaves, [data-fg="lessons"] .fg-wall,
-  [data-fg="eternity"] .fg-sakura, [data-fg="foot"] .fg-stones{ display:none; }
-  [data-fg="gate"] .fg-wall     { left:-14%; bottom:-22px; width:min(82vw,440px); }
-  [data-fg="gate"] .fg-grass    { left:auto; right:-10%; bottom:-76px; width:min(94vw,530px); }
-  [data-fg="pathways"] .fg-lantern{ left:-4%;   bottom:-58px; width:clamp(80px,20vw,128px); }
-  [data-fg="pathways"] .fg-bush   { right:-10%; bottom:-38px; width:min(72vw,400px); }
-  [data-fg="lessons"] .fg-stones  { left:-8%; bottom:-34px; width:min(66vw,360px); }
-  [data-fg="lessons"] .fg-grass   { left:auto; right:-8%; bottom:-44px; width:min(70vw,380px); }
-  [data-fg="eternity"] .fg-ruins  { left:-8%;   bottom:-25px; width:min(54vw,300px); }
-  [data-fg="eternity"] .fg-grass  { right:-12%; bottom:-34px; width:min(80vw,440px); }
-  [data-fg="foot"] .fg-bush  { left:-12%;  bottom:-26px; width:min(68vw,340px); }
-  [data-fg="foot"] .fg-grass { right:-12%; bottom:-30px; width:min(74vw,380px); }
-}
-@media (prefers-reduced-motion:reduce){
-  .fg-el--sway > img{ animation:none; }
-  .fg.fg-retiring .fg-el{ transition:none !important; filter:none !important; }
-}
-
-@media (max-width:1080px){
-  body[data-layout-hero="b"] .chapters{ gap:16px 20px; }
+  .hero-top{ max-width:none; }
+  .gate-grid{ grid-template-columns:1fr; gap:26px; }
+  .cur-head{ grid-template-columns:1fr; gap:18px; }
+  .cur{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .les, .les:nth-child(-n+2){ grid-column:auto; grid-template-columns:none; grid-template-rows:auto 1fr; }
+  .les:last-child{ grid-column:1 / -1; }
+  .les:nth-child(-n+2) .les-img{ min-height:170px; }
+  .brand-row{ grid-template-columns:1fr; gap:14px; }
+  .brand-list{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .foot-grid{ grid-template-columns:1fr 1fr; }
+  body[data-layout-hero="b"] .hero-foot{ width:100%; }
   body[data-layout-story="b"] .gate-grid{ grid-template-columns:1fr; }
   body[data-layout-story="b"] .gate-grid h2,
   body[data-layout-story="b"] .gate-copy{ grid-column:auto; }
   body[data-layout-story="b"] .gate-grid h2{ max-width:16ch; }
-  body[data-layout-curriculum="b"] .les:nth-child(n){ grid-column:span 3; }
-  body[data-layout-curriculum="b"] .les:last-child{ grid-column:span 6; }
 }
 @media (max-width:820px){
-  body[data-layout-hero="b"] .hero-top{ margin-left:0; max-width:none; }
-  body[data-layout-hero="b"] .hero-foot{ width:100%; }
-  body[data-layout-hero="b"] .chapters{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 14px; }
-  body[data-layout-hero="b"] .chip{ flex-direction:row; gap:14px; }
-  body[data-layout-curriculum="b"] .cur-head{ grid-template-columns:1fr; gap:18px; align-items:start; }
-  body[data-layout-hero="b"] .chip .num{ font-size:clamp(26px,8vw,36px); }
-  body[data-layout-hero="b"] .chip .tx{
-    position:static; width:auto; height:auto; overflow:visible; clip:auto;
-    clip-path:none; white-space:normal;
+  :root{ --nav-h:68px; }
+  .nav{ gap:12px; }
+  .brand-tx i{ display:none; }
+  .nav-links{
+    display:flex; position:fixed; top:0; right:0; bottom:0; width:min(84vw,360px);
+    padding:calc(var(--nav-h) + 28px) var(--pad) 34px; flex-direction:column; align-items:flex-start; gap:0;
+    background:rgba(var(--ink-rgb),.98); border-left:1px solid var(--line-soft);
+    transform:translate3d(100%,0,0); opacity:0; visibility:hidden; pointer-events:none;
+    transition:transform .65s var(--ease-out), opacity .4s, visibility 0s linear .65s;
   }
-  body[data-layout-story="b"] .gate-stats{ grid-template-columns:repeat(2,1fr); border-right:1px solid var(--line-soft); }
-  body[data-layout-story="b"] .gate-stats div{ min-height:86px; padding:14px; }
-  body[data-layout-story="b"] .gate-stats div:nth-child(-n+2){ border-bottom:1px solid var(--line-soft); }
-  body[data-layout-story="b"] .gate-stats div:last-child{ border-right:0; }
-  body[data-layout-gallery="b"] .cards{ grid-template-columns:1fr; grid-template-rows:auto; }
-  body[data-layout-gallery="b"] .card:first-child{ grid-row:auto; }
-  body[data-layout-gallery="b"] .card-fr{ flex:0 0 auto; height:auto; }
-  body[data-layout-gallery="b"] .card:first-child .card-fr{ height:auto; aspect-ratio:4 / 5; }
-  body[data-layout-gallery="b"] .card:not(:first-child) .card-fr{ aspect-ratio:16 / 10; min-height:0; }
-  body[data-layout-curriculum="b"] .cur{ grid-template-columns:1fr; }
-  body[data-layout-curriculum="b"] .les:nth-child(n){ grid-column:auto; min-height:0; padding:20px; }
-  body[data-layout-curriculum="b"] .les:hover{ padding-left:20px; }
-  body[data-layout-closing="b"] .fin{ display:flex; align-items:center; text-align:center; gap:0; }
-  body[data-layout-closing="b"] .fin .eyebrow{ margin:0 0 26px; }
-  body[data-layout-closing="b"] .fin h2{ writing-mode:horizontal-tb; font-size:clamp(38px,7.4vw,124px); }
-  body[data-layout-closing="b"] .fin p{ margin:26px auto 0; }
-  body[data-layout-closing="b"] .fin .cta{ margin-top:40px; }
+  .nav.menu-open .nav-links{
+    transform:none; opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s;
+  }
+  .nav-links .nav-link, .nav-links .nav-link.m-only{
+    display:block; width:100%; height:auto; padding:17px 0; overflow:visible; border-bottom:1px solid var(--line-soft);
+    font-size:17px; line-height:1.2;
+  }
+  .nav-links .nav-link span{ height:auto; line-height:1.2; }
+  .nav-actions{ margin-left:auto; gap:8px; }
+  .nav-shop-btn, .nav-back-home{ display:none; }
+  .nav-bag-btn{ padding:8px 12px; }
+  .nav-bag-btn .tx{ display:none; }
+  .nav.menu-open{ transform:none; transition:none; }
+  .nav-burger{ display:block; margin-left:6px; }
+  .nav-burger.active i:nth-child(1){ top:7px; width:26px; transform:rotate(45deg); }
+  .nav-burger.active i:nth-child(2){ top:7px; width:26px; transform:rotate(-45deg); }
+  html.nav-open,html.nav-open body{ overflow:hidden; }
+  .rail{ display:none; }
+  .hero-cue{ display:none; }
+  .gate-stats{ flex-wrap:wrap; gap:20px 34px; }
+  body[data-layout-hero="b"] .hero-top{ margin-left:0; max-width:none; }
+  body[data-layout-hero="b"] .chapters{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 14px; }
+  body[data-layout-story="b"] .gate-stats{ grid-template-columns:1fr 1fr 1fr; }
+  body[data-layout-story="b"] .gate-stats div{ min-height:86px; padding:12px; }
+  .gate-stats div b{ font-size:22px; }
+  .cards{ grid-template-columns:1fr 1fr; grid-template-rows:none; height:auto; min-height:0; gap:12px; }
+  .card[data-cat]{ grid-column:auto; grid-row:auto; }
+  .card[data-cat="vot"]{ grid-column:1 / -1; }
+  .card-fr{ flex:0 0 auto; aspect-ratio:4 / 5; }
+  .card[data-cat="vot"] .card-fr{ aspect-ratio:16 / 9; }
+  .card-lab{ left:14px; right:14px; bottom:12px; }
+  .card-lab b{ font-size:18px; }
+  .card-lab small{ font-size:10px; letter-spacing:.1em; }
+  .cur{ grid-template-columns:1fr; }
+  .les:last-child{ grid-column:auto; }
+  .les, .les:nth-child(-n+2){ grid-template-rows:none; grid-template-columns:110px minmax(0,1fr); gap:14px; padding:12px; }
+  .les-img, .les:nth-child(-n+2) .les-img{ min-height:0; height:130px; padding:8px; }
+  .les-img img{ max-height:114px; }
+  .les p{ font-size:12px; }
+  .brand-tile{ padding:10px; gap:10px; }
+  .logo-chip{ width:78px; height:34px; }
+  .foot-grid{ grid-template-columns:1fr; }
   body[data-layout-footer="b"] .foot-grid{ grid-template-columns:1fr; }
   body[data-layout-footer="b"] .foot-brand{ grid-column:auto; grid-template-columns:minmax(0,1fr); row-gap:16px; }
   body[data-layout-footer="b"] .foot-grid > div:nth-child(n+3){ padding-left:0; border-left:0; }
   body[data-layout-footer="b"] .foot-base{ display:flex; }
   body[data-layout-footer="b"] .foot-base span:last-child{ text-align:left; }
 }
-
 @media (max-width:560px){
-  body[data-layout-hero="b"] .chip{ flex-direction:column; gap:4px; }
-  body[data-layout-hero="b"] .chip .num{ font-size:clamp(22px,7.4vw,30px); }
-  body[data-layout-hero="b"] .chip .tx{ padding-top:0; }
-  body[data-layout-hero="b"] .chip p{ max-width:none; }
+  body[data-layout-hero="b"] .chip .num{ font-size:20px; }
+  .brand-list{ gap:8px; }
+  .brand-tile{ flex-direction:column; align-items:flex-start; }
 }
-
 /* ============================================================= shop drawer */
 #shop-drawer{
   position:fixed; inset:0; z-index:90; display:flex; justify-content:flex-end;
@@ -783,11 +566,13 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 }
 .sd-close:hover{ border-color:var(--ember); color:var(--ember); }
 .sd-body{ padding:24px; display:flex; flex-direction:column; gap:20px; }
+.sd-brand{ display:flex; align-items:center; gap:12px; }
 .sd-poster-wrap{
-  width:100%; aspect-ratio:16/10; border-radius:6px; overflow:hidden;
-  background:rgba(var(--ink-rgb),.5); border:1px solid var(--line-soft);
+  width:100%; aspect-ratio:16/10; border-radius:8px; overflow:hidden; padding:14px;
+  background:#f4f2ec; display:grid; place-items:center;
 }
-.sd-poster{ width:100%; height:100%; object-fit:cover; display:block; }
+.sd-poster{ width:100%; height:100%; object-fit:contain; display:block; mix-blend-mode:multiply; }
+.sd-poster:not([src]){ visibility:hidden; }
 .sd-title{ font-family:var(--font-head); font-size:24px; line-height:1.2; letter-spacing:.02em; margin:0; color:var(--bone); }
 .sd-price-row{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
 .sd-price{ font-family:var(--font-head); font-size:24px; font-weight:700; color:var(--ember); letter-spacing:-.01em; }
@@ -849,35 +634,33 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 }
 </style>
 </head>
-<body data-layout-hero="b" data-layout-story="b" data-layout-gallery="b"
-      data-layout-curriculum="b" data-layout-closing="b" data-layout-footer="b">
+<body data-layout-hero="b" data-layout-story="b" data-layout-footer="b">
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <div id="vignette"></div>
 <div id="grain"></div>
 <div class="cur-dot" id="cursor"></div>
 
-<!-- ============================================================ preloader -->
+<!-- ============================================================ màn tải -->
 <div id="pre">
   <div class="pre-in">
     <div class="pre-mark">
       <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <!-- Racket oval and shuttlecock feather emblem -->
         <ellipse cx="24" cy="20" rx="14" ry="17" stroke="var(--primary)" stroke-width="1.8"/>
         <path d="M14 20h20M24 6v28M17 10l14 20M31 10 17 30" stroke="var(--bone)" stroke-width="0.8" stroke-opacity=".5"/>
         <path d="M24 37v7M21 44h6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
         <circle cx="24" cy="20" r="4" fill="var(--ember)"/>
       </svg>
     </div>
-    <div class="pre-jp jp">羽球の極致</div>
+    <div class="pre-name">Shop Cầu Lông</div>
     <div class="pre-bar"><i id="pre-fill"></i></div>
     <div class="pre-meta">
-      <span>Tensioning carbon frame &amp; calibrating court lines</span><b><span id="pre-pct">0</span>%</b>
+      <span>Đang dựng nhà thi đấu</span><b><span id="pre-pct">0</span>%</b>
     </div>
   </div>
 </div>
 
-<!-- ============================================================ nav -->
+<!-- ============================================================ điều hướng -->
 <header class="nav" id="nav">
   <a class="brand" href="#top" data-cursor>
     <svg viewBox="0 0 44 44" fill="none" aria-hidden="true">
@@ -886,225 +669,208 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
       <path d="M22 33v8M19 41h6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
       <circle cx="22" cy="18" r="3.5" fill="var(--ember)"/>
     </svg>
-    <span class="brand-tx"><b>SHOP CẦU LÔNG</b><i>3D COURT SHOWROOM</i></span>
+    <span class="brand-tx"><b>SHOP CẦU LÔNG</b><i>SÂN TRƯNG BÀY 3D</i></span>
   </a>
-  <nav class="nav-links" id="navlinks">
-    <a class="nav-link" href="#gate" data-cursor><span>Công nghệ</span><span class="alt">炭素</span></a>
-    <a class="nav-link" href="#pathways" data-cursor><span>Bộ sưu tập</span><span class="alt">装備</span></a>
-    <a class="nav-link" href="#lessons" data-cursor><span>Vợt nổi bật</span><span class="alt">名器</span></a>
-    <a class="nav-link" href="#eternity" data-cursor><span>Đan vợt</span><span class="alt">張人</span></a>
+  <nav class="nav-links" id="navlinks" aria-label="Các chương">
+    <a class="nav-link" href="#gate" data-cursor><span>Công nghệ</span></a>
+    <a class="nav-link" href="#pathways" data-cursor><span>Danh mục</span></a>
+    <a class="nav-link" href="#lessons" data-cursor><span>Vợt nổi bật</span></a>
+    <a class="nav-link" href="#eternity" data-cursor><span>Ra sân</span></a>
+    <a class="nav-link m-only" href="/SanPham/Index?loai=Vot"><span>Vào cửa hàng</span></a>
+    <a class="nav-link m-only" href="/"><span>Trang chủ</span></a>
   </nav>
   <div class="nav-actions">
-    <button id="nav-bag-btn" class="nav-bag-btn" data-cursor type="button">COURT BAG (<span id="bag-count">0</span>)</button>
-    <a id="nav-shop" class="nav-shop-btn" href="/SanPham/Index?loai=Vot" data-cursor><span>Vào Cửa Hàng</span></a>
+    <button id="nav-bag-btn" class="nav-bag-btn" data-cursor type="button" aria-label="Giỏ hàng">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2.5 5.5h11l-1 8h-9z"/><path d="M5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5"/>
+      </svg>
+      <span class="tx">Giỏ hàng</span><span id="bag-count">0</span>
+    </button>
+    <a id="nav-shop" class="nav-shop-btn" href="/SanPham/Index?loai=Vot" data-cursor><span>Vào cửa hàng</span></a>
     <a class="nav-back-home" href="/" data-cursor><span>Trang chủ</span></a>
   </div>
-  <button class="nav-burger" aria-label="Menu" data-cursor><i></i><i></i></button>
+  <button class="nav-burger" type="button" aria-label="Mở menu" data-cursor><i></i><i></i></button>
 </header>
 
 <div class="page" id="top">
 
-<!-- ============================================================ hero -->
+<!-- ============================================================ mở đầu -->
 <section class="hero" id="hero" data-cam="0">
   <div class="hero-top">
-    <div class="eyebrow" data-rv="fade"><span class="dot"></span> Chapter 00 — Không Gian Sân Đấu 3D</div>
+    <div class="eyebrow" data-rv="fade"><span class="dot"></span> Chương 00 — Nhà thi đấu 3D</div>
     <h1 class="display h-hero">
       <span class="mask-line"><span>Mỗi cú đập cầu</span></span>
       <span class="mask-line"><span>khởi đầu từ</span></span>
       <span class="mask-line"><span>sự chuẩn xác.</span></span>
     </h1>
-    <p class="hero-sub body" data-rv="up">Khám phá kết cấu khung carbon định hình, độ cân bằng điểm ngọt và đặc tính chuyển động trong từng đường cầu.</p>
+    <p class="hero-sub body" data-rv="up">Khám phá kết cấu khung carbon, điểm cân bằng và cảm giác vung của từng cây vợt, trong một nhà thi đấu dựng bằng 3D.</p>
   </div>
 
   <div class="hero-spacer"></div>
 
   <div class="hero-foot">
     <div class="hero-cue" data-rv="fade"><span>Cuộn để khám phá</span><span class="track"><i></i></span></div>
-    <div class="chapters" id="chips">
-      <div class="chip" data-chip="0" data-line="cong" data-rv="up" data-cursor><span class="num">01</span>
-        <span class="tx"><b>Vợt tấn công</b><p>Đầu đầm, thân cứng, tối ưu sức mạnh smash uy lực.</p></span></div>
-      <div class="chip" data-chip="1" data-line="toc" data-rv="up" data-cursor><span class="num">02</span>
-        <span class="tx"><b>Vợt phản tạt</b><p>Khung khí động học thanh mảnh, tốc độ vung cầu chớp nhoáng.</p></span></div>
-      <div class="chip" data-chip="2" data-line="giay" data-rv="up" data-cursor><span class="num">03</span>
-        <span class="tx"><b>Giày bám sân</b><p>Đế cao su lục giác đa hướng, hỗ trợ giảm chấn và tăng độ vững cổ chân tùy mẫu.</p></span></div>
-      <div class="chip" data-chip="3" data-line="cuoc" data-rv="up" data-cursor><span class="num">04</span>
-        <span class="tx"><b>Căng cước chuẩn</b><p>Ghi nhận thông số cân cước dự định, hỗ trợ lựa chọn phù hợp lối chơi.</p></span></div>
-    </div>
+    <nav class="chapters" id="chips" aria-label="Chọn vợt theo lối chơi">
+      <a class="chip" href="/SanPham/Index?loai=Vot&amp;loi_choi=cong" data-rv="up" data-cursor><span class="num">01</span>
+        <span class="tx"><b>Vợt tấn công</b><p>Đầu nặng, thân cứng, dồn lực cho cú đập.</p></span></a>
+      <a class="chip" href="/SanPham/Index?loai=Vot&amp;loi_choi=toc" data-rv="up" data-cursor><span class="num">02</span>
+        <span class="tx"><b>Vợt phản tạt</b><p>Nhẹ đầu, vung nhanh, hợp đánh đôi và phòng thủ.</p></span></a>
+      <a class="chip" href="/SanPham/Index?loai=Vot&amp;loi_choi=toan" data-rv="up" data-cursor><span class="num">03</span>
+        <span class="tx"><b>Vợt cân bằng</b><p>Dễ điều cầu, hợp người đang lên trình.</p></span></a>
+      <a class="chip" href="/SanPham/Index?loai=Giay" data-rv="up" data-cursor><span class="num">04</span>
+        <span class="tx"><b>Giày bám sân</b><p>Đế cao su bám sàn, đệm êm khi đổi hướng.</p></span></a>
+    </nav>
   </div>
 
-  <a class="peek" href="#pathways" data-view="3" data-rv="fade" data-cursor aria-label="Khám phá phòng trưng bày vợt">
-    <span class="peek-fr" data-frame></span>
-    <span class="peek-play"><svg viewBox="0 0 22 22" fill="none"><path d="M8 5.6 16.4 11 8 16.4z" fill="#f2efe6"/></svg></span>
-    <span class="peek-cap"><b class="jp">羽球</b><i>Showroom — Khung &amp; Mặt lưới</i></span>
-  </a>
-
-  <div class="word-fb" aria-hidden="true">SHOP CAU LONG</div>
-
-  <div class="hero-side" data-rv="up">
-    <span class="v jp">羽球の極致</span>
-  </div>
+  <div class="word-fb" aria-hidden="true">SHOP CẦU LÔNG</div>
 </section>
 
-<!-- ============================================================ chapter I -->
+<!-- ============================================================ chương 01 -->
 <section class="sec" id="gate" data-cam="1">
-  <div class="fg" data-fg="gate" aria-hidden="true">
-    <span class="fg-el fg-wall" data-fg-in="left">
-      <img crossorigin="anonymous" data-fg="vot-goc" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="884" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-pine" data-fg-in="right">
-      <img crossorigin="anonymous" data-fg="ong-cau" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1024" height="1438" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-grass" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="luoi" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1717" height="916" loading="lazy" decoding="async">
-    </span>
-  </div>
   <div class="sec-head" data-rv="fade">
-    <span class="k"><b>01</b> — Kết cấu &amp; Vật liệu</span><span class="rule"></span><span class="k jp">炭素</span>
+    <span class="k"><b>01</b> — Kết cấu &amp; vật liệu</span><span class="rule"></span>
   </div>
   <div class="gate-grid">
-    <h2 class="display h-sec" data-rv="up">Sợi carbon đa trục, khớp nối chữ T, cấu trúc tôi luyện qua thử thách.</h2>
+    <h2 class="display h-sec" data-rv="up">Sợi carbon đa trục, khớp chữ T, khung chịu lực.</h2>
     <div class="gate-copy">
-      <p class="lead" data-rv="up">Khung vợt hiện đại thường được tạo tác từ những sợi carbon liên kết theo nhiều hướng chịu lực, giúp giảm đáng kể rung chấn và truyền lực hiệu quả hơn khi vung vợt.</p>
-      <p class="body" data-rv="up">Khớp nối chữ T tích hợp sâu bên trong cổ vợt hỗ trợ gia cố khung, giúp mặt vợt ổn định hơn khi đánh lệch tâm, tùy cấu trúc từng mẫu.</p>
+      <p class="lead" data-rv="up">Khung vợt hiện đại thường được tạo từ những lớp sợi carbon xếp theo nhiều hướng chịu lực, giúp giảm rung và truyền lực tốt hơn khi vung.</p>
+      <p class="body" data-rv="up">Khớp nối chữ T giữa thân và khung giữ mặt vợt ổn định hơn khi đánh lệch tâm, tùy cấu trúc từng mẫu.</p>
       <a class="arrowlink" href="#pathways" data-rv="fade" data-cursor>
-        <span>Khám phá bộ sưu tập</span>
+        <span>Xem các danh mục</span>
         <span class="ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
       </a>
     </div>
   </div>
   <div class="gate-stats" data-rv="up">
     <div><b data-stat="soVot">—</b><span>Vợt đang còn hàng</span></div>
-    <div><b data-stat="nheNhat">—</b><span>Nhẹ nhất ghi trong kho</span></div>
+    <div><b data-stat="nheNhat">—</b><span>Hạng vợt nhẹ nhất trong kho</span></div>
     <div><b data-stat="cangCaoNhat">—</b><span>Mức căng tối đa cao nhất</span></div>
-    <div><b data-stat="soHang">—</b><span>Thương hiệu</span></div>
+  </div>
+  <div class="brand-row" data-rv="up">
+    <h3><span data-stat="soHang">4</span> thương hiệu đang bán</h3>
+    <div class="brand-list" id="brand-list">
+      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="yonex" data-cursor><span class="logo-chip"><img src="/images/brands/yonex.svg" alt="Yonex" width="120" height="33"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
+      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="lining" data-cursor><span class="logo-chip"><img src="/images/brands/lining.svg" alt="Li-Ning" width="120" height="48"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
+      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="victor" data-cursor><span class="logo-chip"><img src="/images/brands/victor.svg" alt="Victor" width="120" height="34"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
+      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="mizuno" data-cursor><span class="logo-chip"><img src="/images/brands/mizuno.svg" alt="Mizuno" width="120" height="56"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ chapter II -->
+<!-- ============================================================ chương 02 -->
 <section class="sec" id="pathways" data-cam="2">
-  <div class="fg" data-fg="pathways" aria-hidden="true">
-    <span class="fg-el fg-sakura fg-el--sway" data-fg-in="left">
-      <img crossorigin="anonymous" data-fg="vot-goc" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="1024" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-leaves fg-el--sway" data-fg-in="right">
-      <img crossorigin="anonymous" data-fg="cau-bay" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="1024" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-lantern" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="ong-cau" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1024" height="1499" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-bush" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="bokeh" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1717" height="876" loading="lazy" decoding="async">
-    </span>
-  </div>
   <div class="sec-head" data-rv="fade">
-    <span class="k"><b>02</b> — Bộ sưu tập</span><span class="rule"></span><span class="k jp">装備</span>
+    <span class="k"><b>02</b> — Danh mục</span><span class="rule"></span><span class="k">Bấm để vào cửa hàng</span>
   </div>
   <div class="cards" id="cards">
-    <article class="card" data-line="cong" data-card-index="0" data-rv="up" data-view="0" data-cursor>
+    <a class="card" data-cat="vot" href="/SanPham/Index?loai=Vot" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
+        <img src="/trai-nghiem/anh/vot-astrox99.webp" alt="Banner vợt Yonex Astrox 99" width="1600" height="595" decoding="async" style="--fx:62%; --fy:50%">
         <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <i class="glow" style="--gx:80.2%; --gy:23.9%; --gr:22%; --gt:6.1s; --gt2:9.7s; --gc1:rgba(var(--primary-rgb),.50); --gc2:rgba(var(--accent-rgb),.24)"></i>
-        <div class="card-lab"><b>Vợt Tấn Công</b><span class="jp">強打</span></div>
+        <div class="card-lab"><span><b>Vợt cầu lông</b><small data-dem="vot">Tấn công · Phản tạt · Cân bằng</small></span></div>
       </div>
-      <div class="card-meta"><span>Đầu đầm · Smash sấm sét</span><span>01 / 03</span></div>
-    </article>
-    <article class="card" data-line="toc" data-card-index="1" data-rv="up" data-view="1" data-cursor>
+      <div class="card-meta">Ảnh: Yonex Astrox 99</div>
+    </a>
+    <a class="card" data-cat="giay" href="/SanPham/Index?loai=Giay" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
+        <img src="/trai-nghiem/anh/giay-lining.webp" alt="Banner giày cầu lông Li-Ning" width="720" height="926" loading="lazy" decoding="async" style="--fx:56%; --fy:44%">
         <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <i class="glow glow--flame" style="--gx:70.5%; --gy:47.2%; --gr:14%; --gt:3.7s; --gt2:5.3s; --gc1:rgba(var(--accent-rgb),.62); --gc2:rgba(var(--metal-rgb),.30)"></i>
-        <div class="card-lab"><b>Vợt Phản Tạt</b><span class="jp">速攻</span></div>
+        <div class="card-lab"><span><b>Giày cầu lông</b><small data-dem="giay">Bám sân · Đệm giảm chấn</small></span></div>
       </div>
-      <div class="card-meta"><span>Nhẹ đầu · Tốc độ phản xạ</span><span>02 / 03</span></div>
-    </article>
-    <article class="card" data-line="giay" data-card-index="2" data-rv="up" data-view="2" data-cursor>
+      <div class="card-meta">Ảnh: giày Li-Ning</div>
+    </a>
+    <a class="card" data-cat="aoquan" href="/SanPham/Index?loai=AoQuan" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
+        <img src="/trai-nghiem/anh/trang-phuc.webp" alt="Áo thi đấu Yonex" width="720" height="999" loading="lazy" decoding="async" style="--fx:45%; --fy:26%">
         <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <i class="glow" style="--gx:48.0%; --gy:16.8%; --gr:20%; --gt:7.3s; --gt2:11.2s; --gc1:rgba(var(--metal-rgb),.52); --gc2:rgba(var(--primary-rgb),.24)"></i>
-        <div class="card-lab"><b>Giày Cầu Lông</b><span class="jp">球靴</span></div>
+        <div class="card-lab"><span><b>Trang phục</b><small data-dem="aoquan">Áo, quần thi đấu</small></span></div>
       </div>
-      <div class="card-meta"><span>Bám sân · Đệm giảm chấn</span><span>03 / 03</span></div>
-    </article>
+      <div class="card-meta">Ảnh: áo thi đấu Yonex</div>
+    </a>
+    <a class="card" data-cat="phukien" href="/SanPham/Index?loai=PhuKien" data-rv="up" data-cursor>
+      <div class="card-fr" data-frame>
+        <img src="/trai-nghiem/anh/phu-kien.webp" alt="Quả cầu lông" width="600" height="750" loading="lazy" decoding="async" style="--fx:50%; --fy:58%">
+        <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
+        <div class="card-lab"><span><b>Phụ kiện</b><small data-dem="phukien">Cầu, dây cuốn cán</small></span></div>
+      </div>
+      <div class="card-meta">Ảnh: quả cầu lông</div>
+    </a>
   </div>
 </section>
 
-<!-- ============================================================ chapter III -->
+<!-- ============================================================ chương 03 -->
 <section class="sec" id="lessons" data-cam="3">
-  <div class="fg" data-fg="lessons" aria-hidden="true">
-    <span class="fg-el fg-wall fg-el--flip" data-fg-in="right">
-      <img crossorigin="anonymous" data-fg="luoi" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="884" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-stones" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="vot-goc" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="996" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-grass" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="cau-bay" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1717" height="916" loading="lazy" decoding="async">
-    </span>
-  </div>
   <div class="sec-head" data-rv="fade">
-    <span class="k"><b>03</b> — Vợt Nổi Bật</span><span class="rule"></span><span class="k jp">名器</span>
+    <span class="k"><b>03</b> — Vợt nổi bật</span><span class="rule"></span>
   </div>
   <div class="cur-head">
-    <h2 class="display h-sec" data-rv="up">Dòng vợt tuyển chọn. Giá và tồn kho lấy từ cửa hàng.</h2>
+    <h2 class="display h-sec" data-rv="up">Vợt nổi bật, đang có hàng.</h2>
     <div>
-      <p class="body-lg" data-rv="up">Các cây vợt nổi bật đang sẵn hàng tại cửa hàng. Giá bán và số lượng tồn kho được đối soát từ hệ thống quản trị.</p>
-      <p class="body" style="margin-top:10px; color:var(--metal);" data-rv="up">* Giá và tồn kho lấy từ cửa hàng lúc trang tải.</p>
+      <p class="body-lg" data-rv="up">Mỗi hãng một cây tiêu biểu, ưu tiên mẫu còn nhiều hàng. Bấm vào thẻ để chọn phiên bản, xem mức căng ghi trong kho và thêm vào giỏ ngay tại đây.</p>
+      <p class="cur-note" data-rv="up">Giá và tồn kho cập nhật từ cửa hàng khi bạn mở trang.</p>
     </div>
   </div>
   <div class="cur" id="cur">
     <div class="les" data-les="0" data-slot="0" data-cursor>
-      <span class="k">01</span>
-      <h3><span data-f="ten">Đang tải...</span><em class="jp" data-f="loai">—</em></h3>
-      <p data-f="thongso">Đang đồng bộ thông số kỹ thuật từ kho hàng...</p>
-      <span class="t"><span data-f="gia">Đang tải...</span></span><i class="bar"></i>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+      <div class="les-tx">
+        <div class="les-top"><span class="k">01</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <h3 data-f="ten">Đang tải…</h3>
+        <p data-f="thongso">Đang lấy thông số từ kho…</p>
+        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+      </div>
+      <i class="bar"></i>
     </div>
     <div class="les" data-les="1" data-slot="1" data-cursor>
-      <span class="k">02</span>
-      <h3><span data-f="ten">Đang tải...</span><em class="jp" data-f="loai">—</em></h3>
-      <p data-f="thongso">Đang đồng bộ thông số kỹ thuật từ kho hàng...</p>
-      <span class="t"><span data-f="gia">Đang tải...</span></span><i class="bar"></i>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+      <div class="les-tx">
+        <div class="les-top"><span class="k">02</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <h3 data-f="ten">Đang tải…</h3>
+        <p data-f="thongso">Đang lấy thông số từ kho…</p>
+        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+      </div>
+      <i class="bar"></i>
     </div>
     <div class="les" data-les="2" data-slot="2" data-cursor>
-      <span class="k">03</span>
-      <h3><span data-f="ten">Đang tải...</span><em class="jp" data-f="loai">—</em></h3>
-      <p data-f="thongso">Đang đồng bộ thông số kỹ thuật từ kho hàng...</p>
-      <span class="t"><span data-f="gia">Đang tải...</span></span><i class="bar"></i>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+      <div class="les-tx">
+        <div class="les-top"><span class="k">03</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <h3 data-f="ten">Đang tải…</h3>
+        <p data-f="thongso">Đang lấy thông số từ kho…</p>
+        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+      </div>
+      <i class="bar"></i>
     </div>
     <div class="les" data-les="3" data-slot="3" data-cursor>
-      <span class="k">04</span>
-      <h3><span data-f="ten">Đang tải...</span><em class="jp" data-f="loai">—</em></h3>
-      <p data-f="thongso">Đang đồng bộ thông số kỹ thuật từ kho hàng...</p>
-      <span class="t"><span data-f="gia">Đang tải...</span></span><i class="bar"></i>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+      <div class="les-tx">
+        <div class="les-top"><span class="k">04</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <h3 data-f="ten">Đang tải…</h3>
+        <p data-f="thongso">Đang lấy thông số từ kho…</p>
+        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+      </div>
+      <i class="bar"></i>
     </div>
     <div class="les" data-les="4" data-slot="4" data-cursor>
-      <span class="k">05</span>
-      <h3><span data-f="ten">Đang tải...</span><em class="jp" data-f="loai">—</em></h3>
-      <p data-f="thongso">Đang đồng bộ thông số kỹ thuật từ kho hàng...</p>
-      <span class="t"><span data-f="gia">Đang tải...</span></span><i class="bar"></i>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+      <div class="les-tx">
+        <div class="les-top"><span class="k">05</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <h3 data-f="ten">Đang tải…</h3>
+        <p data-f="thongso">Đang lấy thông số từ kho…</p>
+        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+      </div>
+      <i class="bar"></i>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ chapter IV -->
+<!-- ============================================================ chương 04 -->
 <section class="sec fin" id="eternity" data-cam="4">
-  <div class="fg" data-fg="eternity" aria-hidden="true">
-    <span class="fg-el fg-hill" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="bokeh" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1774" height="887" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-ruins" data-fg-in="left">
-      <img crossorigin="anonymous" data-fg="vot-goc" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="1001" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-grass" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="cau-bay" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1717" height="916" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-sakura" data-fg-in="left">
-      <img crossorigin="anonymous" data-fg="ong-cau" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="1024" loading="lazy" decoding="async">
-    </span>
-  </div>
-  <div class="eyebrow" data-rv="fade">Chương 04 — Sẵn Sàng Ra Sân</div>
-  <h2 class="display" data-rv="up">Bước Vào Trận Đấu</h2>
-  <p class="body-lg" data-rv="up">Mỗi cây vợt chỉ phát huy hiệu quả khi được căng đúng số pound và vừa vặn với tay cầm. Ghé thăm quầy tư vấn hoặc trang chi tiết sản phẩm để tùy chỉnh thông số căng cước.</p>
-  <div class="fin-actions" style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:36px;">
-    <a class="cta" href="/SanPham/Index?loai=Vot" data-rv="fade" data-cursor>
+  <div class="eyebrow" data-rv="fade">Chương 04 — Sẵn sàng ra sân</div>
+  <h2 class="display" data-rv="up">Bước vào trận đấu</h2>
+  <p class="body-lg" data-rv="up">Mỗi cây vợt chỉ phát huy hết khi được căng đúng mức và vừa tay cầm. Ghé quầy tư vấn hoặc trang chi tiết sản phẩm để chọn mức căng cước phù hợp.</p>
+  <div class="fin-actions">
+    <a class="cta cta-main" href="/SanPham/Index?loai=Vot" data-rv="fade" data-cursor>
       <i></i><span>Vào cửa hàng</span>
       <svg viewBox="0 0 14 14" fill="none" width="13" height="13"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg>
     </a>
@@ -1115,19 +881,8 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
   </div>
 </section>
 
-<!-- ============================================================ footer -->
+<!-- ============================================================ chân trang -->
 <footer class="foot" data-cam="5">
-  <div class="fg" data-fg="foot" aria-hidden="true">
-    <span class="fg-el fg-bush" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="bokeh" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1717" height="876" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-grass" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="cau-bay" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1717" height="916" loading="lazy" decoding="async">
-    </span>
-    <span class="fg-el fg-stones" data-fg-in="up">
-      <img crossorigin="anonymous" data-fg="vot-goc" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" width="1536" height="996" loading="lazy" decoding="async">
-    </span>
-  </div>
   <div class="foot-grid">
     <div class="foot-brand">
       <svg viewBox="0 0 44 44" fill="none" width="40" height="40" aria-hidden="true">
@@ -1136,75 +891,72 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
         <path d="M22 33v8M19 41h6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
         <circle cx="22" cy="18" r="3.5" fill="var(--ember)"/>
       </svg>
-      <p>Không gian trải nghiệm 3D tương tác của Shop Cầu Lông, kết nối dữ liệu danh mục từ cửa hàng lúc tải trang.</p>
+      <p>Sân trưng bày 3D của Shop Cầu Lông. Giá, tồn kho và thông số trên trang lấy thẳng từ cửa hàng.</p>
     </div>
     <div><h4>Khám phá</h4><ul>
-      <li><a href="#gate" data-cursor>Công nghệ carbon</a></li>
-      <li><a href="#pathways" data-cursor>Bộ sưu tập vợt &amp; giày</a></li>
+      <li><a href="#gate" data-cursor>Công nghệ khung vợt</a></li>
+      <li><a href="#pathways" data-cursor>Danh mục sản phẩm</a></li>
       <li><a href="#lessons" data-cursor>Vợt nổi bật</a></li>
-      <li><a href="#eternity" data-cursor>Thông số căng cước</a></li>
+      <li><a href="#eternity" data-cursor>Ra sân</a></li>
     </ul></div>
     <div><h4>Cửa hàng</h4><ul>
       <li><a href="/SanPham/Index?loai=Vot" data-cursor>Vợt cầu lông</a></li>
       <li><a href="/SanPham/Index?loai=Giay" data-cursor>Giày cầu lông</a></li>
-      <li><a href="/so-sanh" data-cursor>Công cụ so sánh</a></li>
+      <li><a href="/so-sanh" data-cursor>So sánh vợt</a></li>
       <li><a href="/tu-vot" data-cursor>Tủ vợt cá nhân</a></li>
     </ul></div>
     <div><h4>Hỗ trợ</h4><ul>
-      <li><a href="/" data-cursor>Trang chủ chính</a></li>
+      <li><a href="/" data-cursor>Trang chủ</a></li>
       <li><a href="/ChinhSach/giao-hang" data-cursor>Chính sách giao hàng</a></li>
       <li><a href="/ChinhSach/bao-hanh" data-cursor>Chính sách bảo hành</a></li>
-      <li><a href="/Home/Contact" data-cursor>Liên hệ hỗ trợ</a></li>
+      <li><a href="/Home/Contact" data-cursor>Liên hệ</a></li>
     </ul></div>
   </div>
   <div class="foot-base">
-    <span>© 2026 Shop Cầu Lông — 3D Badminton Showroom</span>
-    <span class="jp">羽球の極致 · Chuẩn xác từng đường cầu</span>
-    <span>WebGL2 · Three.js r150 · Shop Cầu Lông</span>
+    <span>© 2026 Shop Cầu Lông</span>
+    <span>Chuẩn xác từng đường cầu</span>
+    <span>Ảnh banner thuộc các hãng</span>
   </div>
 </footer>
 
 </div><!-- /.page -->
 
-<div id="fg-sky" aria-hidden="true"></div>
-
 <div class="rail" id="rail"></div>
 
-<!-- ============================================================ shop drawer -->
-<aside id="shop-drawer" role="dialog" aria-modal="true" aria-labelledby="sd-title" aria-label="Quầy sản phẩm" hidden>
+<!-- ============================================================ bảng mua hàng -->
+<aside id="shop-drawer" role="dialog" aria-modal="true" aria-labelledby="sd-title" hidden>
   <div class="sd-backdrop" data-cursor></div>
   <div class="sd-panel">
     <div class="sd-head">
-      <div class="sd-brand" id="sd-brand">Shop Cầu Lông · Quầy Tư Vấn</div>
+      <div class="sd-brand" id="sd-brand"><span class="logo-chip sm" id="sd-logo"></span><span id="sd-brand-name">Shop Cầu Lông</span></div>
       <button type="button" id="sd-close" class="sd-close" data-close aria-label="Đóng bảng mua hàng" data-cursor>
         <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
           <path d="M3 3l10 10M13 3L3 13"/>
         </svg>
       </button>
     </div>
-    
+
     <div class="sd-body">
       <div class="sd-poster-wrap">
-        <canvas id="sd-poster" class="sd-poster" width="400" height="250"></canvas>
+        <img id="sd-poster" class="sd-poster" alt="">
       </div>
-      
-      <h2 id="sd-title" class="sd-title">Vợt Cầu Lông</h2>
-      <p data-status class="sd-note">Chọn sản phẩm và phiên bản phù hợp với phong cách của bạn.</p>
-      
+
+      <h2 id="sd-title" class="sd-title">Vợt cầu lông</h2>
+
       <div class="sd-price-row">
         <div id="sd-price" class="sd-price">—</div>
         <div id="sd-stock" class="sd-stock">—</div>
       </div>
-      
+
       <div class="sd-field">
         <div class="sd-label-row">
-          <label class="sd-label" id="sd-variants-label">Phiên bản (Màu sắc / Trọng lượng)</label>
+          <span class="sd-label" id="sd-variants-label">Phiên bản (màu / trọng lượng)</span>
         </div>
-        <div id="sd-variants" class="sd-variants" data-products role="group" aria-labelledby="sd-variants-label">
-          <button type="button" class="sd-chip" disabled>Đang tải...</button>
+        <div id="sd-variants" class="sd-variants" role="group" aria-labelledby="sd-variants-label">
+          <button type="button" class="sd-chip" disabled>Đang tải…</button>
         </div>
       </div>
-      
+
       <div class="sd-field" id="sd-tension-wrap">
         <div class="sd-label-row">
           <label class="sd-label" for="sd-tension">Mức căng cước dự định</label>
@@ -1213,26 +965,25 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
         <input type="range" id="sd-tension" class="sd-range" step="0.5">
         <div id="sd-tension-note" class="sd-note">Chưa có thông tin sức căng</div>
       </div>
-      
+
       <div class="sd-field sd-qty-field">
         <label class="sd-label" for="sd-qty">Số lượng</label>
         <div class="sd-qty-wrap">
-          <button type="button" class="sd-qty-btn" id="sd-qty-minus" aria-label="Giảm số lượng">-</button>
+          <button type="button" class="sd-qty-btn" id="sd-qty-minus" aria-label="Giảm số lượng">−</button>
           <input type="number" id="sd-qty" class="sd-qty" min="1" max="100" value="1">
           <button type="button" class="sd-qty-btn" id="sd-qty-plus" aria-label="Tăng số lượng">+</button>
         </div>
       </div>
-      
+
       <div id="sd-msg" class="sd-msg" aria-live="polite"></div>
-      
+
       <div class="sd-actions">
         <button type="button" id="sd-add" class="sd-add-btn" data-cursor>Thêm vào giỏ hàng</button>
-        <a id="sd-pdp" class="sd-pdp-link" href="/SanPham/Index" data-cursor>Xem chi tiết sản phẩm &amp; Trạm căng cước →</a>
+        <a id="sd-pdp" class="sd-pdp-link" href="/SanPham/Index" data-cursor>Xem chi tiết và trạm căng cước →</a>
       </div>
     </div>
   </div>
 </aside>
-
 <script src="/trai-nghiem/brand-theme.js"></script>
 <script src="/trai-nghiem/vendor/three.min.js"></script>
 <script>
@@ -1386,33 +1137,6 @@ function texFloor() {
 /* Tên hàm giữ tương thích; bề mặt mới là carbon dệt, không còn vân kiến trúc cũ. */
 function texWood(seed, opt) { return makeSurfaceTexture(seed || 3, 'BG_DEEP', true); }
 function texStone(seed, opt) { return makeSurfaceTexture(seed || 17, 'BG_SURFACE', false); }
-function texLacquer() { return makeSurfaceTexture(59, 'PRIMARY_DEEP', true); }
-function texShoji() {
-  const c = cvs(256, 512), x = c.getContext('2d');
-  x.fillStyle = brandCss('BG_SURFACE'); x.fillRect(0, 0, 256, 512);
-  for (let i = 0; i < 5; i++) {
-    const glow = x.createLinearGradient(i * 56, 0, i * 56 + 18, 0);
-    glow.addColorStop(0, brandCss('ACCENT', 0)); glow.addColorStop(.5, brandCss('ACCENT', .65)); glow.addColorStop(1, brandCss('ACCENT', 0));
-    x.fillStyle = glow; x.fillRect(i * 56, 0, 18, 512);
-  }
-  return c;
-}
-function texLeaf() {
-  const c = cvs(128, 384), x = c.getContext('2d');
-  x.beginPath(); x.moveTo(64, 368); x.bezierCurveTo(14, 254, 12, 82, 62, 14);
-  x.bezierCurveTo(112, 68, 114, 251, 64, 368); x.closePath();
-  const gradient = x.createLinearGradient(16, 0, 112, 0);
-  gradient.addColorStop(0, brandMixCss('TEXT_MAIN', 'PRIMARY', .18));
-  gradient.addColorStop(.48, brandCss('TEXT_MAIN')); gradient.addColorStop(1, brandMixCss('TEXT_MAIN', 'TEXT_DIM', .22));
-  x.fillStyle = gradient; x.fill();
-  x.save(); x.clip();
-  x.lineWidth = 1; x.strokeStyle = brandCss('PRIMARY_DEEP', .28);
-  for (let y = 28; y < 356; y += 6) {
-    x.beginPath(); x.moveTo(64, y); x.lineTo(8, y - 20); x.moveTo(64, y); x.lineTo(120, y - 17); x.stroke();
-  }
-  x.restore(); x.lineWidth = 3; x.strokeStyle = brandCss('TEXT_MAIN');
-  x.beginPath(); x.moveTo(64, 381); x.quadraticCurveTo(58, 180, 64, 19); x.stroke(); return c;
-}
 function texSky() {
   const c = cvs(1024, 512), x = c.getContext('2d');
   const gradient = x.createLinearGradient(0, 0, 0, 512);
@@ -1422,28 +1146,6 @@ function texSky() {
   glow.addColorStop(0, brandCss('PRIMARY', .12)); glow.addColorStop(1, brandCss('PRIMARY', 0));
   x.fillStyle = glow; x.fillRect(0, 0, 1024, 512); return c;
 }
-function texRidge() {
-  const c = cvs(1024, 256), x = c.getContext('2d');
-  x.fillStyle = brandCss('BG_DEEP'); x.fillRect(0, 160, 1024, 96);
-  x.strokeStyle = brandCss('PRIMARY', .16); x.lineWidth = 2;
-  for (let i = 0; i < 16; i++) {
-    const px = i * 70; x.beginPath(); x.moveTo(px, 256); x.lineTo(px + 28, 112); x.lineTo(px + 56, 256); x.stroke();
-  }
-  return c;
-}
-function texRoof() { return makeSurfaceTexture(88, 'BG_SURFACE', false); }
-function texMoon() {
-  const c = cvs(768, 768), x = c.getContext('2d');
-  const ring = x.createRadialGradient(384, 384, 240, 384, 384, 353);
-  ring.addColorStop(0, brandCss('PRIMARY', 0)); ring.addColorStop(.64, brandCss('PRIMARY', .08));
-  ring.addColorStop(.87, brandCss('PRIMARY', .76)); ring.addColorStop(.92, brandCss('TEXT_MAIN', .7));
-  ring.addColorStop(1, brandCss('PRIMARY', 0));
-  x.fillStyle = ring; x.fillRect(0, 0, 768, 768);
-  x.lineWidth = 5; x.strokeStyle = brandCss('ACCENT', .85);
-  x.beginPath(); x.arc(384, 384, 338, -.85, .36); x.stroke();
-  x.lineWidth = 1; x.strokeStyle = brandCss('TEXT_DIM', .36);
-  x.beginPath(); x.arc(384, 384, 310, .5, 4.6); x.stroke(); return c;
-}
 function texGlow(inner, mid) {
   const c = cvs(256, 256), x = c.getContext('2d'), gradient = x.createRadialGradient(128, 128, 0, 128, 128, 128);
   gradient.addColorStop(0, inner || brandCss('TEXT_MAIN', .6));
@@ -1451,32 +1153,6 @@ function texGlow(inner, mid) {
   x.fillStyle = gradient; x.fillRect(0, 0, 256, 256); return c;
 }
 function texWisp() { return texGlow(brandCss('TEXT_MAIN', .75), brandCss('PRIMARY', .18)); }
-function texGrassCutout(seed, opt) {
-  /* Cây cảnh sảnh được giữ sát đáy; không dựng một bức màn che mô hình. */
-  const c = cvs(1024, 512), x = c.getContext('2d'), random = mulberry32(seed || 101), o = opt || {};
-  const number = Math.min(100, Math.max(25, Math.round((o.blades || 1200) / 160)));
-  x.lineCap = 'round';
-  for (let i = 0; i < number; i++) {
-    const px = random() * 1024, top = 512 - (24 + random() * 94);
-    x.strokeStyle = brandMixCss('BG_DEEP', 'PRIMARY', .16 + random() * .22, .85); x.lineWidth = 3 + random() * 5;
-    x.beginPath(); x.moveTo(px, 512); x.quadraticCurveTo(px - 10, top + 25, px + (random() - .5) * 45, top); x.stroke();
-  }
-  return c;
-}
-function texRockCutout(seed, opt) {
-  const c = cvs(768, 512), x = c.getContext('2d');
-  x.fillStyle = brandCss('BG_DEEP', .92); x.fillRect(65, 440, 640, 72);
-  x.fillStyle = brandCss('BG_SURFACE', .85); x.fillRect(110, 421, 550, 25);
-  x.fillStyle = brandCss('PRIMARY', .25); x.fillRect(120, 423, 530, 2); return c;
-}
-function texBranchCutout(seed) {
-  const c = cvs(768, 512), x = c.getContext('2d');
-  x.strokeStyle = brandCss('BG_SURFACE', .8); x.lineWidth = 8;
-  x.beginPath(); x.moveTo(665, 512); x.lineTo(665, 430); x.lineTo(745, 400); x.stroke();
-  x.strokeStyle = brandCss('PRIMARY', .3); x.lineWidth = 2;
-  x.beginPath(); x.moveTo(666, 434); x.lineTo(742, 405); x.stroke(); return c;
-}
-
 const canvas = document.getElementById('gl');
 const vpW = () => Math.max(1, document.documentElement.clientWidth || innerWidth);
 const vpH = () => Math.max(1, document.documentElement.clientHeight || innerHeight);
@@ -1522,8 +1198,6 @@ function surface(t, rep, o) {
 }
 const LIB = {};
 const lib = (k, f) => LIB[k] || (LIB[k] = f());
-const wallWood = () => lib('wallWood', () => texWood(3, { boards: 7 }));
-const postWood = () => lib('postWood', () => texWood(29, { boards: 0 }));
 
 function sweepPoly(points, profile) {
   const count = points.length, width = profile.length, position = [], uv = [], index = [];
@@ -1546,8 +1220,6 @@ function sweepPoly(points, profile) {
   const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geometry.setIndex(index); geometry.computeVertexNormals(); return geometry;
 }
-/* Giữ chữ ký cũ; mái mới là tấm kết cấu thẳng, không có góc mái uốn. */
-function roofGeo(A, B, R, Hr, thick, flare) { return new THREE.BoxGeometry(A * 2, Math.max(.08, thick), B * 2); }
 function mergeGeos(list) {
   if (!list.length) return new THREE.BufferGeometry();
   const position = [], normal = [], uv = [], index = []; let offset = 0;
@@ -1563,18 +1235,15 @@ function mergeGeos(list) {
   result.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3)); result.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); result.setIndex(index); return result;
 }
 const WORLD = {};
-const swayers = [];
-const PODIUM = 7.0;
-const STEPS = 40;
-const STAIR_Z0 = -18.0;
-const STAIR_RUN = .35;
-const STAIR_W = 8.4;
-const TEMPLE_Z = -44;
 const COURT_PLAN = Object.freeze({ width: 6.1, length: 13.4, singles: 5.18, shortService: 1.98, doublesBackOffset: .76, line: .04, netZ: -8.6 });
+/* Bố cục nhà thi đấu (mét). Sân chính ở giữa, hai sân phụ hai bên; mọi thứ phía sau sân đều thấp (băng LED cao .75 m)
+   hoặc treo cao (màn LED, giàn đèn), nên từ camera mở đầu nhìn xuyên được qua lưới tới cuối nhà thi đấu. */
+const HALL = Object.freeze({ wallX: 22, backZ: -32, height: 12.5, sideCourtX: 9.1, boardFarZ: -17.6, boardSideX: 4.55, boardH: .75,
+  screen: { x: 0, y: 6.5, z: -20.6, w: 10, h: 5.625 } });
 
-function addArenaMesh(parent, geometry, material, x, y, z) {
+function addArenaMesh(parent, geometry, material, x, y, z, shadow) {
   const mesh = new THREE.Mesh(geometry, material); mesh.position.set(x || 0, y || 0, z || 0);
-  mesh.castShadow = mesh.receiveShadow = true; parent.add(mesh); return mesh;
+  mesh.castShadow = shadow === undefined ? true : !!shadow; mesh.receiveShadow = true; parent.add(mesh); return mesh;
 }
 function arenaSegment(a, b, radius, material, parent) {
   const first = new THREE.Vector3(a[0], a[1], a[2]), second = new THREE.Vector3(b[0], b[1], b[2]);
@@ -1583,33 +1252,257 @@ function arenaSegment(a, b, radius, material, parent) {
   mesh.position.copy(first).add(second).multiplyScalar(.5); mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
   mesh.castShadow = true; parent.add(mesh); return mesh;
 }
-function buildShell() {
-  const groundMaterial = surface(lib('arenaGround', () => texStone(23)), [12, 12], { normal: .18, roughness: .68, metalness: .1 });
-  const floor = addArenaMesh(scene, new THREE.PlaneGeometry(150, 150), groundMaterial, 0, -.018, -20);
-  floor.rotation.x = -Math.PI / 2; floor.castShadow = false; WORLD.floor = floor; WORLD.floorMat = groundMaterial;
+
+/* ---- nhà thi đấu: sàn, sân chính + 2 sân phụ, tường */
+function buildArena() {
+  const groundMaterial = surface(lib('arenaGround', () => texStone(23)), [14, 14], { normal: .14, roughness: .58, metalness: .12 });
+  const floor = addArenaMesh(scene, new THREE.PlaneGeometry(90, 90), groundMaterial, 0, -.018, -12, false);
+  floor.rotation.x = -Math.PI / 2; WORLD.floor = floor;
   const courtTextures = texFloor();
-  const courtMaterial = new THREE.MeshStandardMaterial({ map: tx(courtTextures.map, { aniso: 16 }),
-    normalMap: tx(courtTextures.normal, { srgb: false }), normalScale: new THREE.Vector2(.08, .08),
-    roughness: .64, metalness: .06, emissive: brandColor('PRIMARY'), emissiveIntensity: .025 });
-  const court = addArenaMesh(scene, new THREE.PlaneGeometry(7.2, 14.5), courtMaterial, 0, .006, COURT_PLAN.netZ);
-  court.rotation.x = -Math.PI / 2; court.castShadow = false; court.name = 'san-cau-long'; court.userData.dimensions = COURT_PLAN; WORLD.court = court;
-  const sky = new THREE.Mesh(new THREE.PlaneGeometry(300, 165), new THREE.MeshBasicMaterial({ map: tx(texSky()), depthWrite: false, fog: false }));
-  sky.position.set(0, 42, -110); scene.add(sky); WORLD.sky = sky;
-  const wall = surface(lib('arenaWall', texWall), [5, 2], { normal: .25, roughness: .88 });
-  addArenaMesh(scene, new THREE.BoxGeometry(42, PODIUM, 24), wall, 0, PODIUM / 2, TEMPLE_Z);
-  const treads = [], rail = [], edge = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY'), roughness: .42, metalness: .55, emissive: brandColor('PRIMARY'), emissiveIntensity: .16 });
-  for (let i = 0; i < STEPS; i++) {
-    const rise = PODIUM / STEPS, y = (i + .5) * rise, z = STAIR_Z0 - (i + .5) * STAIR_RUN;
-    treads.push(new THREE.BoxGeometry(STAIR_W, rise, STAIR_RUN + .015).translate(0, y, z));
-    if (i % 4 === 0) rail.push(new THREE.BoxGeometry(STAIR_W - .12, .025, .035).translate(0, (i + 1) * rise + .008, z + STAIR_RUN / 2 - .04));
-  }
-  addArenaMesh(scene, mergeGeos(treads), wall, 0, 0, 0);
-  addArenaMesh(scene, mergeGeos(rail), edge, 0, 0, 0);
+  const courtMap = tx(courtTextures.map, { aniso: 16 }), courtNormal = tx(courtTextures.normal, { srgb: false });
+  const courtMaterial = new THREE.MeshStandardMaterial({ map: courtMap, normalMap: courtNormal, normalScale: new THREE.Vector2(.08, .08),
+    roughness: .6, metalness: .05, emissive: brandColor('PRIMARY'), emissiveIntensity: .03 });
+  const court = addArenaMesh(scene, new THREE.PlaneGeometry(7.2, 14.5), courtMaterial, 0, .006, COURT_PLAN.netZ, false);
+  court.rotation.x = -Math.PI / 2; court.name = 'san-chinh'; court.userData.dimensions = COURT_PLAN; WORLD.court = court;
+  /* sân phụ: cùng texture, tối hơn để mắt dồn về sân chính */
+  const sideMaterial = courtMaterial.clone(); sideMaterial.color = brandColor('TEXT_MAIN', .62); sideMaterial.emissiveIntensity = 0;
   [-1, 1].forEach(side => {
-    addArenaMesh(scene, new THREE.BoxGeometry(.12, .06, 14.8), edge, side * 3.9, .04, COURT_PLAN.netZ);
-    addArenaMesh(scene, new THREE.BoxGeometry(.15, 12, 56), wall, side * 26, 6, -26);
+    const c = addArenaMesh(scene, new THREE.PlaneGeometry(7.2, 14.5), sideMaterial, side * HALL.sideCourtX, .005, COURT_PLAN.netZ, false);
+    c.rotation.x = -Math.PI / 2; c.name = 'san-phu';
+    const net = buildNet(); net.position.set(side * HALL.sideCourtX, 0, COURT_PLAN.netZ);
+  });
+  const wall = surface(lib('arenaWall', texWall), [8, 2], { normal: .2, roughness: .9 });
+  addArenaMesh(scene, new THREE.BoxGeometry(HALL.wallX * 2, HALL.height, .4), wall, 0, HALL.height / 2, HALL.backZ, false);
+  [-1, 1].forEach(side => addArenaMesh(scene, new THREE.BoxGeometry(.4, HALL.height, 64), wall, side * HALL.wallX, HALL.height / 2, -2, false));
+  /* dải đèn dọc trên tường cuối: tạo chiều sâu, không phải vật chắn */
+  const strip = new THREE.MeshBasicMaterial({ color: brandColor('PRIMARY', .9), fog: true });
+  const strips = [];
+  for (let i = -6; i <= 6; i++) if (Math.abs(i) > 1) strips.push(new THREE.BoxGeometry(.07, 7.5, .05).translate(i * 3.1, 5.6, HALL.backZ + .24));
+  addArenaMesh(scene, mergeGeos(strips), strip, 0, 0, 0, false);
+}
+
+/* ---- lưới (cột + lưới + băng trắng mép trên), dùng cho sân chính và sân phụ */
+function buildNet() {
+  const net = new THREE.Group(); net.name = 'luoi-cau-long';
+  const postMaterial = lib('netPost', () => new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY'), metalness: .72, roughness: .4 }));
+  const trim = lib('netTrim', () => new THREE.MeshStandardMaterial({ color: brandColor('METAL'), metalness: .65, roughness: .5 }));
+  const tape = lib('netTape', () => new THREE.MeshStandardMaterial({ color: brandColor('TEXT_MAIN'), roughness: .9, metalness: 0, side: THREE.DoubleSide }));
+  [-1, 1].forEach(side => {
+    addArenaMesh(net, new THREE.CylinderGeometry(.027, .035, 1.55, 14), postMaterial, side * 3.085, .775, 0);
+    addArenaMesh(net, new THREE.CylinderGeometry(.033, .033, .04, 14), trim, side * 3.085, 1.53, 0);
+    addArenaMesh(net, new THREE.CylinderGeometry(.16, .2, .055, 16), postMaterial, side * 3.25, .028, 0);
+  });
+  const topAt = x => 1.524 + .026 * Math.pow(x / 3.05, 2);
+  const mesh = [];
+  for (let x = -3.05; x <= 3.051; x += .02) mesh.push(x, topAt(x) - .76, 0, x, topAt(x) - .075, 0);
+  for (let row = 0; row <= 35; row++) for (let segment = 0; segment < 61; segment++) {
+    const a = -3.05 + segment * .1, b = Math.min(3.05, a + .1);
+    mesh.push(a, topAt(a) - .075 - row * (.685 / 35), 0, b, topAt(b) - .075 - row * (.685 / 35), 0);
+  }
+  const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(mesh, 3));
+  net.add(new THREE.LineSegments(geometry, lib('netMesh', () => new THREE.LineBasicMaterial({ color: brandColor('TEXT_DIM', .28), transparent: true, opacity: .64 }))));
+  const path = [];
+  for (let i = 0; i <= 96; i++) { const x = lerp(-3.05, 3.05, i / 96); path.push(new THREE.Vector3(x, topAt(x) - .0375, 0)); }
+  net.add(new THREE.Mesh(sweepPoly(path, [[-.012, -.0375], [.012, -.0375], [.012, .0375], [-.012, .0375]]), tape));
+  net.position.z = COURT_PLAN.netZ; net.userData.width = 6.1; net.userData.postHeight = 1.55; net.userData.centreHeight = 1.524;
+  scene.add(net); return net;
+}
+
+/* ---- logo hãng: ảnh SVG gốc trong /images/brands, vẽ lên canvas cho băng LED */
+const LOGO = { yonex: '/images/brands/yonex.svg', lining: '/images/brands/lining.svg', victor: '/images/brands/victor.svg', mizuno: '/images/brands/mizuno.svg' };
+function loadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image(); img.decoding = 'async';
+    img.onload = () => resolve(img); img.onerror = () => resolve(null); img.src = src;
   });
 }
+function drawLogo(x, img, cx, cy, h, mono) {
+  if (!img || !img.width) return;
+  const w = h * img.width / img.height;
+  if (!mono) { x.drawImage(img, cx - w / 2, cy - h / 2, w, h); return; }
+  const t = cvs(w, h), tc = t.getContext('2d');
+  tc.drawImage(img, 0, 0, t.width, t.height);
+  tc.globalCompositeOperation = 'source-in'; tc.fillStyle = '#ffffff'; tc.fillRect(0, 0, t.width, t.height);
+  x.drawImage(t, cx - w / 2, cy - h / 2, w, h);
+}
+function ledGrid(x, W, H, step, alpha) {
+  x.fillStyle = 'rgba(0,0,0,' + alpha + ')';
+  for (let i = 0; i < W; i += step) x.fillRect(i, 0, 1, H);
+  for (let j = 0; j < H; j += step) x.fillRect(0, j, W, 1);
+}
+/* Một chu kỳ băng LED: 5 ô, mỗi ô một nền theo màu hãng (logo Yonex/Victor tự có khối màu, Li-Ning/Mizuno vẽ trắng). */
+function texBoard(logos) {
+  const CELL = 640, H = 200, W = CELL * 5, c = cvs(W, H), x = c.getContext('2d');
+  const cells = [
+    { bg: '#08251a', logo: logos.yonex, h: 104 },
+    { bg: BRAND_THEME.PRIMARY_DEEP.hex, text: BRAND_THEME.WORDMARK },
+    { bg: '#c9241a', logo: logos.lining, h: 128, mono: true },
+    { bg: '#0c3388', logo: logos.victor, h: 104 },
+    { bg: '#001489', logo: logos.mizuno, h: 132, mono: true }
+  ];
+  cells.forEach((cell, i) => {
+    const x0 = i * CELL;
+    x.fillStyle = cell.bg; x.fillRect(x0, 0, CELL, H);
+    const glow = x.createLinearGradient(0, 0, 0, H);
+    glow.addColorStop(0, 'rgba(255,255,255,.10)'); glow.addColorStop(.5, 'rgba(255,255,255,0)'); glow.addColorStop(1, 'rgba(0,0,0,.18)');
+    x.fillStyle = glow; x.fillRect(x0, 0, CELL, H);
+    if (cell.text) {
+      x.fillStyle = BRAND_THEME.TEXT_MAIN.hex; x.font = '700 104px ' + BRAND_THEME.FONT_HEAD;
+      x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(cell.text, x0 + CELL / 2, H / 2 + 6);
+      x.fillStyle = BRAND_THEME.ACCENT.hex; x.beginPath(); x.arc(x0 + 34, H / 2, 9, 0, TAU); x.fill();
+    } else drawLogo(x, cell.logo, x0 + CELL / 2, H / 2, cell.h, cell.mono);
+    x.fillStyle = 'rgba(0,0,0,.55)'; x.fillRect(x0, 0, 6, H);
+  });
+  ledGrid(x, W, H, 4, .22);
+  return c;
+}
+/* ---- băng LED quảng cáo quanh sân chính (và trước khán đài): thấp, chạy chậm */
+function buildLedBoards(logos) {
+  const map = new THREE.CanvasTexture(texBoard(logos));
+  map.encoding = THREE.sRGBEncoding; map.wrapS = THREE.RepeatWrapping; map.anisotropy = Math.min(8, maxAniso);
+  const frame = new THREE.MeshStandardMaterial({ color: brandColor('BG_DEEP'), roughness: .6, metalness: .4 });
+  WORLD.boards = [];
+  const strip = (length, x, z, rotY, speed) => {
+    const tex = map.clone(); tex.needsUpdate = true; tex.repeat.set(length / 12, 1);
+    const face = new THREE.MeshBasicMaterial({ map: tex, color: new THREE.Color(1.25, 1.25, 1.25), toneMapped: true });
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY;
+    addArenaMesh(g, new THREE.BoxGeometry(length, HALL.boardH + .06, .14), frame, 0, (HALL.boardH + .06) / 2, -.08);
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(length, HALL.boardH), face); screen.position.set(0, HALL.boardH / 2 + .03, .002);
+    g.add(screen); scene.add(g); WORLD.boards.push({ tex: tex, speed: speed });
+  };
+  strip(12, 0, HALL.boardFarZ, 0, .018);
+  strip(13, -HALL.boardSideX, COURT_PLAN.netZ - .4, Math.PI / 2, .014);
+  strip(13, HALL.boardSideX, COURT_PLAN.netZ - .4, -Math.PI / 2, .014);
+  strip(30, -13.4, -8, Math.PI / 2, .01);
+  strip(30, 13.4, -8, -Math.PI / 2, .01);
+}
+
+/* ---- màn LED treo cuối nhà thi đấu: chiếu banner sản phẩm thật, đổi theo chương (chuyển mềm) */
+const SCREEN = { imgs: [], cur: -1, next: -1, t: 1, canvas: null, ctx: null, tex: null };
+const MAN_LED = [
+  { src: '/trai-nghiem/anh/vot-nanoflare1000.webp', fx: .62, fy: .42 },
+  { src: '/trai-nghiem/anh/vot-astrox99.webp', fx: .58, fy: .5 },
+  { src: '/trai-nghiem/anh/giay-yonex.webp', fx: .56, fy: .5 },
+  { src: '/trai-nghiem/anh/vot-astrox99.webp', fx: .5, fy: .5 },
+  { src: '/trai-nghiem/anh/vot-nanoflare1000.webp', fx: .5, fy: .5 },
+  { src: '/trai-nghiem/anh/giay-yonex.webp', fx: .5, fy: .5 }
+];
+function coverDraw(x, img, W, H, fx, fy) {
+  const s = Math.max(W / img.width, H / img.height), dw = img.width * s, dh = img.height * s;
+  x.drawImage(img, (W - dw) * (fx === undefined ? .5 : fx), (H - dh) * (fy === undefined ? .5 : fy), dw, dh);
+}
+function paintScreen() {
+  const x = SCREEN.ctx, W = SCREEN.canvas.width, H = SCREEN.canvas.height;
+  x.globalAlpha = 1; x.fillStyle = '#020604'; x.fillRect(0, 0, W, H);
+  const draw = (i, a) => {
+    const d = MAN_LED[i], img = d && SCREEN.imgs[i];
+    if (!img || a <= 0) return; x.globalAlpha = a; coverDraw(x, img, W, H, d.fx, d.fy);
+  };
+  if (SCREEN.cur >= 0) draw(SCREEN.cur, 1);
+  if (SCREEN.next >= 0 && SCREEN.next !== SCREEN.cur) draw(SCREEN.next, smooth(0, 1, SCREEN.t));
+  x.globalAlpha = 1; ledGrid(x, W, H, 3, .16);
+  SCREEN.tex.needsUpdate = true;
+}
+function showScreen(i) {
+  if (!SCREEN.tex || i === SCREEN.next) return;
+  if (SCREEN.t < 1 && SCREEN.next >= 0) SCREEN.cur = SCREEN.next;
+  SCREEN.next = i; SCREEN.t = REDUCE ? 1 : 0;
+  if (REDUCE) { SCREEN.cur = i; paintScreen(); }
+}
+function buildScreen() {
+  const S = HALL.screen, group = new THREE.Group(); group.name = 'man-led'; group.position.set(S.x, S.y, S.z);
+  const metal = new THREE.MeshStandardMaterial({ color: brandColor('BG_DEEP'), roughness: .5, metalness: .6 });
+  addArenaMesh(group, new THREE.BoxGeometry(S.w + .36, S.h + .36, .32), metal, 0, 0, -.18, false);
+  SCREEN.canvas = cvs(1280, 720); SCREEN.ctx = SCREEN.canvas.getContext('2d');
+  SCREEN.tex = new THREE.CanvasTexture(SCREEN.canvas); SCREEN.tex.encoding = THREE.sRGBEncoding; SCREEN.tex.anisotropy = Math.min(8, maxAniso);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(S.w, S.h), new THREE.MeshBasicMaterial({ map: SCREEN.tex, color: new THREE.Color(1.15, 1.15, 1.15) }));
+  face.position.z = .005; group.add(face);
+  /* dải chữ chạy dưới màn hình */
+  const font = '700 58px ' + BRAND_THEME.FONT_HEAD, line = 'SHOP CẦU LÔNG  ·  VỢT  ·  GIÀY  ·  TRANG PHỤC  ·  PHỤ KIỆN  ·  ';
+  const measure = cvs(4, 4).getContext('2d'); measure.font = font;
+  const TW = Math.ceil(measure.measureText(line).width), ticker = cvs(TW, 96), tc = ticker.getContext('2d');
+  tc.fillStyle = '#04100b'; tc.fillRect(0, 0, TW, 96);
+  tc.font = font; tc.textBaseline = 'middle'; tc.fillStyle = BRAND_THEME.METAL.hex;
+  tc.fillText(line, 0, 50); ledGrid(tc, TW, 96, 3, .2);
+  const tickerTex = new THREE.CanvasTexture(ticker); tickerTex.encoding = THREE.sRGBEncoding; tickerTex.wrapS = THREE.RepeatWrapping;
+  tickerTex.repeat.set((S.w / .42) / (TW / 96), 1);
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(S.w, .42), new THREE.MeshBasicMaterial({ map: tickerTex }));
+  strip.position.set(0, -S.h / 2 - .48, .005); group.add(strip);
+  addArenaMesh(group, new THREE.BoxGeometry(S.w + .36, .62, .26), metal, 0, -S.h / 2 - .48, -.16, false);
+  WORLD.ticker = tickerTex;
+  [-1, 1].forEach(side => arenaSegment([side * (S.w / 2 - .6), S.h / 2 + .1, -.18], [side * (S.w / 2 - .6), HALL.height - S.y, -.18], .025, metal, group));
+  scene.add(group); WORLD.screen = group;
+  /* ánh màn hình hắt xuống sân */
+  const spill = new THREE.PointLight(brandColor('TEXT_DIM'), 1.1, 16, 2); spill.position.set(S.x, S.y - 1, S.z + 3); scene.add(spill);
+  return Promise.all(MAN_LED.map(d => loadImage(d.src))).then(list => {
+    SCREEN.imgs = list; SCREEN.cur = 0; SCREEN.next = 0; SCREEN.t = 1; paintScreen();
+  });
+}
+
+/* ---- giàn đèn trần: dầm, dãy đèn LED, vài cột sáng mờ rọi xuống sân chính.
+   Cột sáng là hình nón hở, mờ dần theo góc nhìn (mép nón trong suốt) và theo chiều cao, cộng sáng vào cảnh. */
+const SHAFT_VS = 'uniform float uH; varying float vF; varying float vH;\n' +
+  'void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vec3 n = normalize(normalMatrix * normal);\n' +
+  ' vF = abs(dot(n, normalize(-mv.xyz))); vH = clamp(-position.y / uH, 0.0, 1.0); gl_Position = projectionMatrix * mv; }';
+const SHAFT_FS = 'uniform float uOp; uniform vec3 uCol; varying float vF; varying float vH;\n' +
+  /* không dùng pow(): ANGLE/D3D tính pow(0, y) ra NaN, NaN lan qua bloom thành khối đen răng cưa */
+  'void main(){ float f = clamp(vF, 0.0, 1.0), h = clamp(vH, 0.0, 1.0); float a = uOp * f * f * (1.0 - h) * (1.0 - h * .55); gl_FragColor = vec4(uCol, a); }';
+function buildCeiling() {
+  const Y = HALL.height - 1.2;
+  const metal = new THREE.MeshStandardMaterial({ color: brandColor('BG_SURFACE', 1.4), roughness: .55, metalness: .6 });
+  const beams = [];
+  [-HALL.sideCourtX, 0, HALL.sideCourtX].forEach(x => {
+    beams.push(new THREE.BoxGeometry(.3, .3, 44).translate(x, Y, -10));
+    beams.push(new THREE.BoxGeometry(.06, .06, 44).translate(x, Y - .62, -10));
+  });
+  for (let z = -30; z <= 10; z += 5) beams.push(new THREE.BoxGeometry(HALL.wallX * 2, .22, .22).translate(0, Y + .1, z));
+  addArenaMesh(scene, mergeGeos(beams), metal, 0, 0, 0, false);
+  const lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.55, 1.42) }), lamps = [];
+  [-HALL.sideCourtX, 0, HALL.sideCourtX].forEach(x => {
+    for (let z = -15; z <= -2; z += 3.2) { lamps.push(new THREE.BoxGeometry(.55, .06, 1.2).translate(x - .75, Y - .7, z)); lamps.push(new THREE.BoxGeometry(.55, .06, 1.2).translate(x + .75, Y - .7, z)); }
+  });
+  addArenaMesh(scene, mergeGeos(lamps), lamp, 0, 0, 0, false);
+  if (LOW) return;
+  WORLD.shafts = [];
+  [[-.75, -12.6], [.75, -9.4], [-.75, -6.2], [.75, -3.0]].forEach((p, i) => {
+    const h = Y - .7;
+    const geo = new THREE.CylinderGeometry(.45, 2.5, h, 32, 1, true); geo.translate(0, -h / 2, 0);
+    const mat = new THREE.ShaderMaterial({ uniforms: { uH: { value: h }, uOp: { value: .12 }, uCol: { value: new THREE.Color(1, .97, .9) } },
+      vertexShader: SHAFT_VS, fragmentShader: SHAFT_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+    const cone = new THREE.Mesh(geo, mat); cone.position.set(p[0], Y - .7, p[1]); cone.renderOrder = 6;
+    cone.userData.base = .12; cone.userData.ph = i * 1.7;
+    scene.add(cone); WORLD.shafts.push(cone);
+  });
+}
+
+/* ---- khán đài thấp hai bên (instancing, không chi tiết) */
+function buildStands() {
+  const rows = 8, step = .95, rise = .46, z0 = -26, z1 = 6;
+  const concrete = new THREE.MeshStandardMaterial({ color: brandColor('BG_SURFACE', 1.1), roughness: .9, metalness: .05 });
+  const tiers = [];
+  [-1, 1].forEach(side => {
+    for (let i = 0; i < rows; i++) {
+      const h = rise * (i + 1);
+      tiers.push(new THREE.BoxGeometry(step, h, z1 - z0).translate(side * (14.2 + i * step + step / 2), h / 2, (z0 + z1) / 2));
+    }
+  });
+  addArenaMesh(scene, mergeGeos(tiers), concrete, 0, 0, 0, false);
+  const seat = new THREE.BoxGeometry(.44, .34, .42), per = Math.floor((z1 - z0 - 1) / .58);
+  const count = rows * per * 2, seats = new THREE.InstancedMesh(seat, new THREE.MeshStandardMaterial({ roughness: .7, metalness: .1 }), count);
+  const dummy = new THREE.Object3D(), color = new THREE.Color(), random = mulberry32(808);
+  const deep = brandColor('PRIMARY_DEEP', 1.3), green = brandColor('PRIMARY', .8);
+  let n = 0;
+  [-1, 1].forEach(side => {
+    for (let i = 0; i < rows; i++) for (let k = 0; k < per; k++) {
+      dummy.position.set(side * (14.2 + i * step + step * .62), rise * (i + 1) + .17, z0 + .8 + k * .58);
+      dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); seats.setMatrixAt(n, dummy.matrix);
+      seats.setColorAt(n, random() < .16 ? green : deep); n++;
+    }
+  });
+  seats.instanceMatrix.needsUpdate = true; if (seats.instanceColor) seats.instanceColor.needsUpdate = true;
+  seats.castShadow = false; seats.receiveShadow = true; scene.add(seats);
+}
+
 function createShowroomRacket() {
   const group = new THREE.Group(); group.name = 'vot-khop-chu-T';
   const carbon = surface(lib('racketCarbon', () => texWood(301)), [3, 2], { normal: .28, roughness: .56, metalness: .32 });
@@ -1643,267 +1536,111 @@ function createShowroomRacket() {
   addArenaMesh(group, new THREE.CylinderGeometry(.043, .065, .12, 10), trimMaterial, 0, -3.32, 0);
   group.userData.joint = 'T'; group.userData.frameRatio = 1.28; return group;
 }
+
+/* ---- quả cầu lông vũ: dựng theo ảnh images/pk_cau_thi_dau.jpg và số đo BWF (16 lông, dài 62–70 mm,
+   vòng ngọn 58–68 mm, đế 25–28 mm). Nửa dưới lông chỉ là cọng (vùng 2 vòng chỉ buộc); bản lông bắt đầu
+   sau vòng chỉ thứ hai, rộng dần, ngọn hình mũi giáo bo tròn, các lông xoay quanh cọng để gối mép lên nhau
+   thành một váy liền. Đơn vị: 1 = 37,7 mm, đế r = .35. */
+function texFeather() {
+  const W = 256, H = 512, c = cvs(W, H), x = c.getContext('2d');
+  /* v = 1 ở đỉnh canvas là ngọn lông; v = 0 ở đáy là chỗ bản lông mọc ra sau vòng chỉ */
+  x.beginPath();
+  x.moveTo(W / 2, 4);
+  x.bezierCurveTo(W * .66, 18, W * .985, 70, W - 3, 150);
+  x.lineTo(W * .64, H - 2); x.lineTo(W * .36, H - 2); x.lineTo(3, 150);
+  x.bezierCurveTo(W * .015, 70, W * .34, 18, W / 2, 4);
+  x.closePath();
+  const fill = x.createLinearGradient(0, 0, W, 0);
+  fill.addColorStop(0, '#e9e6dd'); fill.addColorStop(.5, '#fbfaf6'); fill.addColorStop(1, '#ecE9e0');
+  x.fillStyle = fill; x.fill();
+  x.save(); x.clip();
+  /* tơ lông mảnh, chéo về phía ngọn, tương phản thấp */
+  x.lineWidth = 1;
+  for (let y = -40; y < H + 60; y += 3.2) {
+    x.strokeStyle = 'rgba(120,112,96,' + (.05 + ((y * 7) % 5) * .008) + ')';
+    x.beginPath(); x.moveTo(W / 2, y); x.lineTo(2, y - 74); x.moveTo(W / 2, y); x.lineTo(W - 2, y - 74); x.stroke();
+  }
+  const edge = x.createRadialGradient(W / 2, H * .45, W * .2, W / 2, H * .45, W * .9);
+  edge.addColorStop(0, 'rgba(0,0,0,0)'); edge.addColorStop(1, 'rgba(90,84,70,.16)');
+  x.fillStyle = edge; x.fillRect(0, 0, W, H);
+  x.restore();
+  x.strokeStyle = '#efe7d4'; x.lineWidth = 7; x.beginPath(); x.moveTo(W / 2, H); x.lineTo(W / 2, 14); x.stroke();
+  x.strokeStyle = 'rgba(160,146,118,.45)'; x.lineWidth = 1.2; x.beginPath(); x.moveTo(W / 2 + 3, H); x.lineTo(W / 2 + 1, 16); x.stroke();
+  return c;
+}
 function createShowroomShuttle() {
   const group = new THREE.Group(); group.name = 'qua-cau-16-long';
-  const cork = new THREE.MeshStandardMaterial({ color: brandColor('METAL').lerp(brandColor('TEXT_MAIN'), .7), roughness: .96, metalness: 0 });
-  const base = addArenaMesh(group, new THREE.SphereGeometry(.35, 20, 14), cork, 0, 0, 0); base.scale.y = .9;
-  const seamMaterial = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY_DEEP'), roughness: .86 });
-  addArenaMesh(group, new THREE.CylinderGeometry(.28, .34, .14, 24), seamMaterial, 0, .23, 0);
-  const featherMaterial = new THREE.MeshStandardMaterial({ map: tx(texLeaf()), color: brandColor('TEXT_MAIN'), roughness: .96, metalness: 0, side: THREE.DoubleSide, alphaTest: .2 });
-  const shafts = new THREE.Group(), feathers = [];
-  const quillMaterial = new THREE.MeshStandardMaterial({ color: brandColor('TEXT_MAIN'), roughness: .92 });
-  for (let feather = 0; feather < 16; feather++) {
-    const angle = feather / 16 * TAU, position = [], uv = [], index = [];
-    for (let step = 0; step <= 10; step++) {
-      const t = step / 10, radius = lerp(.245, .9, t), height = lerp(.29, 2.12, t), halfWidth = Math.sin(Math.PI * t) * .16 + .014;
-      for (let side = -1; side <= 1; side += 2) {
-        position.push(Math.cos(angle) * radius - Math.sin(angle) * halfWidth * side, height,
-          Math.sin(angle) * radius + Math.cos(angle) * halfWidth * side); uv.push(side < 0 ? 0 : 1, t);
+  const N = 16, R0 = .27, Y0 = .27, R1 = .86, Y1 = 2.05, VANE0 = .44, SHINGLE = 19 * Math.PI / 180;
+  /* đế: chỏm cầu + thân trụ ngắn bọc da trắng, một băng màu xanh của shop sát chỗ cắm lông */
+  const leather = new THREE.MeshStandardMaterial({ color: new THREE.Color('#f4f2ea'), roughness: .78, metalness: 0 });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(.35, 32, 16, 0, TAU, Math.PI / 2, Math.PI / 2), leather);
+  dome.scale.y = .92; group.add(dome);
+  addArenaMesh(group, new THREE.CylinderGeometry(.345, .35, .2, 32, 1, true), leather, 0, .1, 0);
+  const band = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY_DEEP', 1.2), roughness: .45, metalness: .1 });
+  addArenaMesh(group, new THREE.CylinderGeometry(.349, .347, .085, 32, 1, true), band, 0, .23, 0);
+  addArenaMesh(group, new THREE.CylinderGeometry(.3, .346, .02, 32), leather, 0, .275, 0);
+  /* lông */
+  const featherMap = tx(texFeather(), { aniso: 8 });
+  const featherMaterial = new THREE.MeshStandardMaterial({ map: featherMap, alphaTest: .5, side: THREE.DoubleSide,
+    roughness: .66, metalness: 0, emissive: new THREE.Color('#2a2822'), emissiveIntensity: .35 });
+  const depthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: featherMap, alphaTest: .5 });
+  const quill = new THREE.MeshStandardMaterial({ color: new THREE.Color('#efe6d0'), roughness: .5 });
+  const vanes = [], shafts = new THREE.Group();
+  const ROWS = 14, COLS = 6, axis = new THREE.Vector3(), out = new THREE.Vector3(), tang = new THREE.Vector3(), side = new THREE.Vector3(), p = new THREE.Vector3();
+  for (let f = 0; f < N; f++) {
+    const a = f / N * TAU, ca = Math.cos(a), sa = Math.sin(a);
+    const base = new THREE.Vector3(ca * R0, Y0, sa * R0), tip = new THREE.Vector3(ca * R1, Y1, sa * R1);
+    axis.subVectors(tip, base); const len = axis.length(); axis.normalize();
+    tang.set(-sa, 0, ca);                                  /* tiếp tuyến vòng tròn */
+    out.crossVectors(axis, tang).normalize();               /* pháp tuyến hướng ra ngoài váy */
+    side.copy(tang).multiplyScalar(Math.cos(SHINGLE)).addScaledVector(out, Math.sin(SHINGLE));  /* xoay quanh cọng: gối mép */
+    const position = [], uv = [], index = [];
+    for (let r = 0; r <= ROWS; r++) {
+      const v = r / ROWS, t = lerp(VANE0, 1, v), radius = lerp(R0, R1, t);
+      const half = (TAU * radius / N) * .5 * 1.62;          /* rộng hơn khoảng chia 62%: các lông chồng lên nhau */
+      for (let k = 0; k <= COLS; k++) {
+        const u = k / COLS, s = u * 2 - 1;
+        p.copy(base).addScaledVector(axis, t * len).addScaledVector(side, s * half)
+          .addScaledVector(out, (1 - s * s) * .028 * Math.sin(Math.PI * v));   /* bản lông hơi khum */
+        position.push(p.x, p.y, p.z); uv.push(u, v);
+        if (r < ROWS && k < COLS) { const i0 = r * (COLS + 1) + k; index.push(i0, i0 + 1, i0 + COLS + 2, i0, i0 + COLS + 2, i0 + COLS + 1); }
       }
-      if (step < 10) { const start = step * 2; index.push(start, start + 1, start + 3, start, start + 3, start + 2); }
     }
-    const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
-    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geometry.setIndex(index); geometry.computeVertexNormals(); feathers.push(geometry);
-    arenaSegment([Math.cos(angle) * .245, .29, Math.sin(angle) * .245], [Math.cos(angle) * .9, 2.12, Math.sin(angle) * .9], .007, quillMaterial, shafts);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    geometry.setIndex(index); geometry.computeVertexNormals(); vanes.push(geometry);
+    const end = base.clone().addScaledVector(axis, len * .985);
+    arenaSegment([base.x, base.y, base.z], [end.x, end.y, end.z], .0085, quill, shafts);
   }
-  group.add(new THREE.Mesh(mergeGeos(feathers), featherMaterial)); group.add(shafts);
-  [.7, 1.02].forEach(y => {
-    const radius = lerp(.245, .9, (y - .29) / 1.83), band = new THREE.Mesh(new THREE.TorusGeometry(radius, .008, 5, 64), quillMaterial);
-    band.rotation.x = Math.PI / 2; band.position.y = y; group.add(band);
+  const skirt = new THREE.Mesh(mergeGeos(vanes), featherMaterial);
+  skirt.customDepthMaterial = depthMaterial; skirt.castShadow = true; skirt.receiveShadow = true; group.add(skirt); group.add(shafts);
+  /* hai vòng chỉ buộc màu kem, hơi bóng như có keo */
+  const thread = new THREE.MeshStandardMaterial({ color: new THREE.Color('#eadfc6'), roughness: .38, metalness: 0 });
+  [.17, .36].forEach(t => {
+    const y = lerp(Y0, Y1, t), radius = lerp(R0, R1, t) + .012;
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, .0115, 6, 96), thread);
+    ring.rotation.x = Math.PI / 2; ring.position.y = y; group.add(ring);
   });
-  group.userData.featherCount = 16; return group;
+  group.userData.featherCount = N; return group;
 }
-function buildTemple() {
-  const building = new THREE.Group(); building.name = 'nha-trung-bay-the-thao';
-  const cladding = surface(wallWood(), [5, 3], { normal: .3, roughness: .72, metalness: .24 });
-  const metal = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY_DEEP'), roughness: .45, metalness: .72 });
-  addArenaMesh(building, roofGeo(17, 9, 0, 0, .45, 0), metal, 0, PODIUM + 12, TEMPLE_Z);
-  addArenaMesh(building, new THREE.BoxGeometry(32, 11, .5), cladding, 0, PODIUM + 5.5, TEMPLE_Z - 7.5);
-  WORLD.paper = new THREE.MeshStandardMaterial({ color: brandColor('ACCENT', .9), emissive: brandColor('ACCENT', 2.3), roughness: .58, metalness: .08 });
-  const fins = [], slots = [];
-  for (let i = 0; i <= 16; i++) {
-    const x = -16 + i * 2; fins.push(new THREE.BoxGeometry(.11, 10.4, .35).translate(x, PODIUM + 5.2, TEMPLE_Z + 6));
-    if (i % 2 === 0) slots.push(new THREE.BoxGeometry(.045, 7.3, .08).translate(x + .22, PODIUM + 5.1, TEMPLE_Z - 7.1));
-  }
-  addArenaMesh(building, mergeGeos(fins), metal, 0, 0, 0); addArenaMesh(building, mergeGeos(slots), WORLD.paper, 0, 0, 0);
-  [-1, 1].forEach(side => {
-    addArenaMesh(building, new THREE.BoxGeometry(1.1, 12, 17), cladding, side * 16.4, PODIUM + 6, TEMPLE_Z);
-    addArenaMesh(building, new THREE.BoxGeometry(32, .055, .08), WORLD.paper, 0, PODIUM + 10.6, TEMPLE_Z + side * 7.2);
-  });
-  scene.add(building); WORLD.temple = building; WORLD.templeTop = PODIUM + 12.3;
-  const racket = createShowroomRacket(); racket.scale.setScalar(3.3); racket.position.set(1.8, 20, TEMPLE_Z + 7); racket.rotation.set(.08, -.12, 35 * Math.PI / 180);
-  scene.add(racket); WORLD.bigRacket = racket;
-  const shuttle = createShowroomShuttle(); shuttle.scale.setScalar(2.5); shuttle.position.set(-5.2, 12.2, TEMPLE_Z + 12); shuttle.rotation.set(.2, .3, -.35);
+
+/* ---- vợt và cầu khổng lồ lơ lửng trên lưới: nhân vật chính của cảnh */
+const PROPS = { racket: { x: 2.4, y: 3.9, z: -3.2, s: .8 }, shuttle: { x: 4.7, y: 4.7, z: -5.4, s: .5 } };
+function buildProps() {
+  const racket = createShowroomRacket(); racket.scale.setScalar(PROPS.racket.s);
+  racket.position.set(PROPS.racket.x, PROPS.racket.y, PROPS.racket.z); racket.rotation.set(.1, -.42, 30 * Math.PI / 180);
+  racket.userData.rot = racket.rotation.clone(); scene.add(racket); WORLD.bigRacket = racket;
+  const shuttle = createShowroomShuttle(); shuttle.scale.setScalar(PROPS.shuttle.s);
+  shuttle.position.set(PROPS.shuttle.x, PROPS.shuttle.y, PROPS.shuttle.z);
+  /* đầu cầu bay trước: trục +y (phía lông) hướng về vợt vừa đánh */
+  const toRacket = new THREE.Vector3(PROPS.racket.x - PROPS.shuttle.x, PROPS.racket.y - .8 - PROPS.shuttle.y, PROPS.racket.z - PROPS.shuttle.z).normalize();
+  shuttle.userData.aim = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), toRacket);
+  shuttle.userData.axis = toRacket; shuttle.quaternion.copy(shuttle.userData.aim);
   scene.add(shuttle); WORLD.shuttle = shuttle;
-  const halo = new THREE.Mesh(new THREE.PlaneGeometry(26, 15), new THREE.MeshBasicMaterial({
-    map: tx(texGlow(brandCss('ACCENT', .22), brandCss('PRIMARY', .07))), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: .2 }));
-  halo.position.set(0, PODIUM + 4, TEMPLE_Z + 6.5); scene.add(halo); WORLD.hallHalo = halo;
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), new THREE.MeshBasicMaterial({
+    map: tx(texGlow(brandCss('TEXT_MAIN', .16), brandCss('PRIMARY', .05))), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: .5 }));
+  glow.position.set(PROPS.racket.x + .6, PROPS.racket.y, PROPS.racket.z - 1.4); glow.renderOrder = 3; scene.add(glow); WORLD.propGlow = glow;
 }
-const MOON = { x: 2.4, y: 23, z: -62, r: 11 };
-function buildMoon() {
-  const arena = new THREE.Mesh(new THREE.PlaneGeometry(MOON.r * 2, MOON.r * 2), new THREE.MeshBasicMaterial({
-    map: tx(texMoon()), color: brandColor('TEXT_MAIN', 1.6), transparent: true, depthWrite: false, fog: false, toneMapped: false }));
-  arena.position.set(MOON.x, MOON.y, MOON.z); scene.add(arena); WORLD.moon = arena;
-  const halo = new THREE.Mesh(new THREE.PlaneGeometry(MOON.r * 4, MOON.r * 4), new THREE.MeshBasicMaterial({
-    map: tx(texGlow(brandCss('PRIMARY', .15), brandCss('ACCENT', .025))), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: .3 }));
-  halo.position.copy(arena.position); halo.position.z -= .2; scene.add(halo); WORLD.moonHalo = halo;
-}
-function placeMoon() {
-  if (!WORLD.moon) return;
-  const x = MOON.x * (1 - .4 * aspectFix()); WORLD.moon.position.x = x; WORLD.moonHalo.position.x = x;
-}
-function buildTorii() {
-  const net = new THREE.Group(); net.name = 'luoi-cau-long';
-  const postMaterial = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY'), metalness: .72, roughness: .4 });
-  const trim = new THREE.MeshStandardMaterial({ color: brandColor('METAL'), metalness: .65, roughness: .5 });
-  const tape = new THREE.MeshStandardMaterial({ color: brandColor('TEXT_MAIN'), roughness: .9, metalness: 0, side: THREE.DoubleSide });
-  [-1, 1].forEach(side => {
-    addArenaMesh(net, new THREE.CylinderGeometry(.027, .035, 1.55, 14), postMaterial, side * 3.085, .775, 0);
-    addArenaMesh(net, new THREE.CylinderGeometry(.033, .033, .04, 14), trim, side * 3.085, 1.53, 0);
-    addArenaMesh(net, new THREE.CylinderGeometry(.16, .2, .055, 16), postMaterial, side * 3.25, .028, 0);
-  });
-  const topAt = x => 1.524 + .026 * Math.pow(x / 3.05, 2);
-  const mesh = [];
-  for (let x = -3.05; x <= 3.051; x += .02) mesh.push(x, topAt(x) - .76, 0, x, topAt(x) - .075, 0);
-  for (let row = 0; row <= 35; row++) for (let segment = 0; segment < 61; segment++) {
-    const a = -3.05 + segment * .1, b = Math.min(3.05, a + .1);
-    mesh.push(a, topAt(a) - .075 - row * (.685 / 35), 0, b, topAt(b) - .075 - row * (.685 / 35), 0);
-  }
-  const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(mesh, 3));
-  net.add(new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: brandColor('TEXT_DIM', .28), transparent: true, opacity: .64 })));
-  const path = [];
-  for (let i = 0; i <= 96; i++) { const x = lerp(-3.05, 3.05, i / 96); path.push(new THREE.Vector3(x, topAt(x) - .0375, 0)); }
-  const edge = new THREE.Mesh(sweepPoly(path, [[-.012, -.0375], [.012, -.0375], [.012, .0375], [-.012, .0375]]), tape); net.add(edge);
-  net.position.z = COURT_PLAN.netZ; net.userData.width = 6.1; net.userData.postHeight = 1.55; net.userData.centreHeight = 1.524;
-  scene.add(net); WORLD.torii = net; WORLD.net = net;
-}
-function buildLantern(x, z, s, y) {
-  const group = new THREE.Group(); group.name = 'tru-den-led';
-  const shell = lib('ledShell', () => new THREE.MeshStandardMaterial({ color: brandColor('BG_SURFACE'), roughness: .54, metalness: .7 }));
-  const pane = lib('ledPane', () => new THREE.MeshStandardMaterial({ color: brandColor('ACCENT'), emissive: brandColor('ACCENT', 2.4), roughness: .55 }));
-  addArenaMesh(group, new THREE.CylinderGeometry(.28, .35, .12, 6), shell, 0, .06, 0);
-  addArenaMesh(group, new THREE.CylinderGeometry(.1, .14, 1.6, 6), shell, 0, .9, 0);
-  addArenaMesh(group, new THREE.CylinderGeometry(.115, .115, 1.1, 6), pane, 0, 1.05, 0); WORLD.lanternPane = pane;
-  addArenaMesh(group, new THREE.CylinderGeometry(.17, .17, .07, 6), shell, 0, 1.64, 0);
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3), new THREE.MeshBasicMaterial({ map: tx(texGlow(brandCss('ACCENT', .32), brandCss('ACCENT', .07))),
-    transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending, opacity: .3 }));
-  glow.position.y = 1.05; glow.userData.billboard = true; group.add(glow);
-  const light = new THREE.PointLight(brandColor('ACCENT'), 2.1, 7, 2); light.position.y = 1.05; group.add(light);
-  WORLD.lanternLights = WORLD.lanternLights || []; WORLD.lanternLights.push(light);
-  WORLD.lanternGlows = WORLD.lanternGlows || []; WORLD.lanternGlows.push(glow);
-  const onStair = z <= STAIR_Z0 && z >= STAIR_Z0 - STEPS * STAIR_RUN;
-  const baseY = y === undefined ? 0 : (onStair ? y : (z < STAIR_Z0 - STEPS * STAIR_RUN ? PODIUM : 0));
-  group.position.set(x, baseY, z); group.scale.setScalar(s || 1); scene.add(group); return group;
-}
-function buildMaple(seed, x, z, scale) {
-  const group = new THREE.Group(); group.name = 'cay-canh-sanh';
-  const pot = new THREE.MeshStandardMaterial({ color: brandColor('BG_SURFACE'), roughness: .88 });
-  const leaves = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY_DEEP'), roughness: .96, side: THREE.DoubleSide });
-  addArenaMesh(group, new THREE.CylinderGeometry(.6, .4, .7, 12), pot, 0, .35, 0);
-  const random = mulberry32(seed), shapes = [];
-  for (let i = 0; i < 12; i++) {
-    const angle = random() * TAU, height = .7 + random() * 1.2;
-    const geometry = new THREE.SphereGeometry(.34, 6, 5); geometry.scale(.38, height, .12); geometry.rotateZ((random() - .5) * .8); geometry.rotateY(angle);
-    geometry.translate(Math.cos(angle) * .25, .7 + height * .55, Math.sin(angle) * .25); shapes.push(geometry);
-  }
-  addArenaMesh(group, mergeGeos(shapes), leaves, 0, 0, 0); group.position.set(x, 0, z); group.scale.setScalar(scale || 1); scene.add(group); return group;
-}
-function buildRocks() {
-  const shell = new THREE.MeshStandardMaterial({ color: brandColor('BG_SURFACE'), roughness: .64, metalness: .25 });
-  const accent = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY'), roughness: .66, metalness: .12 });
-  [[-7.8, -2.8], [7.9, -12.8]].forEach(point => {
-    addArenaMesh(scene, new THREE.BoxGeometry(3.2, .18, .72), shell, point[0], .62, point[1]);
-    [-1, 1].forEach(side => addArenaMesh(scene, new THREE.BoxGeometry(.12, .6, .5), shell, point[0] + side * 1.2, .3, point[1]));
-    for (let i = 0; i < 3; i++) addArenaMesh(scene, new THREE.CylinderGeometry(.13, .13, 1.25, 14), accent, point[0] - .4 + i * .34, 1.33, point[1]);
-  });
-}
-function cutoutMaterial(canvasEl, sway) {
-  const map = canvasEl && canvasEl.isTexture ? canvasEl : tx(canvasEl, { aniso: 16 });
-  map.encoding = THREE.sRGBEncoding; map.anisotropy = Math.min(16, maxAniso);
-  if (map.image && typeof map.image.addEventListener === 'function' && !map.image.complete) {
-    map.image.addEventListener('load', () => { map.needsUpdate = true; }, { once: true });
-  }
-  const material = new THREE.MeshBasicMaterial({ map: map, transparent: true, depthWrite: false,
-    alphaTest: .02, side: THREE.DoubleSide, fog: true, color: brandColor('TEXT_MAIN') });
-  material.onBeforeCompile = shader => {
-    shader.uniforms.uT = WORLD.uT || { value: 0 }; shader.uniforms.uSway = { value: REDUCE ? 0 : (sway || .04) };
-    shader.vertexShader = 'uniform float uT;\nuniform float uSway;\n' + shader.vertexShader.replace('#include <begin_vertex>',
-      '#include <begin_vertex>\ntransformed.x += sin(uT*0.85+position.x*0.3)*uSway*uv.y*uv.y;\n');
-  };
-  material.customProgramCacheKey = () => 'arena-cutout-v1'; return material;
-}
-
-function taoAnhTienCanh(khoa, size) {
-  const c = document.createElement('canvas');
-  c.width = c.height = size || 768;
-  const x = c.getContext('2d'), T = window.BRAND_THEME;
-  x.clearRect(0, 0, c.width, c.height);
-  x.globalAlpha = .18;
-  x.filter = 'blur(' + Math.max(12, c.width / 34) + 'px)';
-  x.lineCap = 'round'; x.lineJoin = 'round';
-  const edge = (khoa === 'vot-goc' || khoa === 'luoi') ? -c.width * .18 : c.width * .68;
-  if (khoa === 'bokeh' || khoa === 'cau-bay') {
-    x.fillStyle = T.PRIMARY.hex;
-    for (let i = 0; i < 15; i++) {
-      const px = (i % 2 ? c.width * .88 : c.width * .08) + (i * 13) % 46;
-      const py = (i * 91) % c.height;
-      x.beginPath(); x.arc(px, py, 18 + (i % 4) * 13, 0, TAU); x.fill();
-    }
-  } else if (khoa === 'ong-cau') {
-    x.fillStyle = T.ACCENT.hex;
-    x.beginPath(); x.roundRect(edge, c.height * .08, c.width * .22, c.height * .84, c.width * .07); x.fill();
-  } else if (khoa === 'luoi') {
-    x.strokeStyle = T.TEXT_DIM.hex; x.lineWidth = c.width / 28;
-    for (let i = -c.width; i < c.width * 1.4; i += c.width / 8) {
-      x.beginPath(); x.moveTo(i, 0); x.lineTo(i + c.width, c.height); x.stroke();
-      x.beginPath(); x.moveTo(i + c.width, 0); x.lineTo(i, c.height); x.stroke();
-    }
-  } else {
-    x.strokeStyle = T.METAL.hex; x.lineWidth = c.width / 24;
-    x.beginPath(); x.ellipse(edge, c.height * .46, c.width * .35, c.height * .43, -.22, 0, TAU); x.stroke();
-    x.strokeStyle = T.PRIMARY.hex; x.lineWidth = c.width / 34;
-    x.beginPath(); x.moveTo(edge, c.height * .72); x.lineTo(edge + c.width * .16, c.height * 1.1); x.stroke();
-  }
-  x.filter = 'none'; x.globalAlpha = 1;
-  return c.toDataURL('image/png');
-}
-
-function buildForeground() {
-  const layers = [
-    ['grassFar', 'bokeh', -3.4, 2.85, -.4, 24, 12, .028],
-    ['rockLeft', 'ong-cau', -7.2, 2.55, 1.8, 17, 11.3, .012],
-    ['grassMid', 'luoi', 3.9, 2.86, 3.6, 15, 7.5, .035],
-    ['grassNear', 'cau-bay', -1.9, 2.92, 5.6, 12, 6, .042],
-    ['bough', 'bokeh', 4.6, 2.95, 6.4, 13, 8.7, .030],
-    ['rockNear', 'vot-goc', -6.6, 1.70, 6.0, 9, 6, .010]
-  ];
-  WORLD.fg = [];
-  layers.forEach(L => {
-    const img = new Image();
-    img.src = taoAnhTienCanh(L[1], 768);
-    const tex = new THREE.Texture(img);
-    tex.needsUpdate = true;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(L[5], L[6], 12, 12), cutoutMaterial(tex, L[7]));
-    m.position.set(L[2], L[3], L[4]);
-    m.renderOrder = 20 + WORLD.fg.length;
-    m.name = L[0]; m.frustumCulled = false;
-    scene.add(m); WORLD.fg.push(m);
-  });
-  $$('.fg-el > img').forEach(img => {
-    img.src = taoAnhTienCanh(img.dataset.fg || 'bokeh', 768);
-  });
-}
-const WORD_Z = 3.0;
-function buildWordmark() {
-  const draw = () => {
-  /* Ba cụm từ giữ đủ dấu tiếng Việt và hoàn thành nhịp reveal của phần C. */
-  const SZ = 240, TRACK = .24, PAD = 26;
-  const measureContext = cvs(4, 4).getContext('2d');
-  const font = '600 ' + SZ + 'px ' + BRAND_THEME.FONT_HEAD;
-  measureContext.font = font; measureContext.textBaseline = 'alphabetic';
-  const words = BRAND_THEME.WORDMARK.normalize('NFC').trim().split(/\s+/), glyphs = [];
-  let pen = 0, ascent = 0, descent = 0, left = Infinity, right = -Infinity;
-  words.forEach(word => {
-    const metrics = measureContext.measureText(word);
-    const glyph = { ch: word, pen: pen, adv: Math.max(1, metrics.width),
-      asc: Number.isFinite(metrics.actualBoundingBoxAscent) ? metrics.actualBoundingBoxAscent : SZ * .9,
-      desc: Number.isFinite(metrics.actualBoundingBoxDescent) ? Math.max(0, metrics.actualBoundingBoxDescent) : SZ * .14,
-      l: Number.isFinite(metrics.actualBoundingBoxLeft) ? metrics.actualBoundingBoxLeft : 0,
-      r: Number.isFinite(metrics.actualBoundingBoxRight) ? metrics.actualBoundingBoxRight : metrics.width };
-    glyphs.push(glyph); ascent = Math.max(ascent, glyph.asc); descent = Math.max(descent, glyph.desc);
-    left = Math.min(left, pen - glyph.l); right = Math.max(right, pen + glyph.r);
-    pen += glyph.adv + SZ * TRACK;
-  });
-  const group = new THREE.Group(); group.name = 'chu-shop-cau-long'; WORD.glyphs = [];
-  glyphs.forEach(glyph => {
-    const width = Math.max(1, Math.ceil(glyph.l + glyph.r)) + PAD * 2;
-    const height = Math.max(1, Math.ceil(glyph.asc + glyph.desc)) + PAD * 2;
-    const c = cvs(width, height), context = c.getContext('2d');
-    context.font = font; context.textBaseline = 'alphabetic'; context.textAlign = 'left';
-    const gradient = context.createLinearGradient(0, PAD, 0, height - PAD);
-    gradient.addColorStop(0, brandCss('TEXT_MAIN')); gradient.addColorStop(.55, brandCss('TEXT_MAIN'));
-    gradient.addColorStop(1, brandMixCss('TEXT_MAIN', 'TEXT_DIM', .52));
-    context.fillStyle = gradient; context.fillText(glyph.ch, PAD + glyph.l, PAD + glyph.asc);
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({
-      map: tx(c, { aniso: 16 }), transparent: true, depthWrite: false, side: THREE.DoubleSide, fog: true }));
-    mesh.position.set(glyph.pen + (glyph.r - glyph.l) / 2, (glyph.asc - glyph.desc) / 2, 0);
-    mesh.userData.baseY = mesh.position.y; mesh.renderOrder = 12; mesh.frustumCulled = false;
-    group.add(mesh); WORD.glyphs.push(mesh);
-  });
-  scene.add(group); WORD.group = group; WORD.group.position.z = WORD_Z;
-  WORD.ink = { xMin: left, xMax: right, cx: (left + right) / 2, w: Math.max(1, right - left), asc: Math.max(1, ascent), desc: descent };
-  };
-  if (!document.fonts || typeof document.fonts.load !== 'function') return draw();
-  let timer;
-  const fonts = Promise.all([
-    document.fonts.load('600 240px "Barlow Condensed"', BRAND_THEME.WORDMARK),
-    document.fonts.load('600 240px Inter', BRAND_THEME.WORDMARK)
-  ]).catch(() => []);
-  const timeout = new Promise(resolve => { timer = setTimeout(resolve, 1800); });
-  return Promise.race([fonts, timeout]).then(() => { clearTimeout(timer); draw(); });
-}
-const WORD = { glyphs: [], group: null, ink: null, reveal: 0 };
-
 function buildAtmosphere() {
   const random = mulberry32(66), hazeTexture = tx(texGlow(brandCss('TEXT_DIM', .12), brandCss('PRIMARY', .035)));
   WORLD.haze = [];
@@ -1942,54 +1679,6 @@ function buildAtmosphere() {
   embers.frustumCulled = false; embers.renderOrder = 5; scene.add(embers); WORLD.embers = embers;
   /* Giữ các handle mà render/resize của C sử dụng; không dựng mưa trong nhà. */
   WORLD.rain = null; WORLD.ripples = [];
-}
-
-const LEAF_AHEAD = 11, LEAF_SPREAD = 12, LEAF_R = 30;
-function buildLeafFall() {
-  const N = LOW ? 110 : 260;
-  const material = new THREE.MeshStandardMaterial({ map: tx(texLeaf()), alphaTest: .22, side: THREE.DoubleSide,
-    color: brandColor('TEXT_MAIN'), roughness: .95, metalness: 0,
-    emissive: brandColor('TEXT_DIM'), emissiveIntensity: .035 });
-  const instance = new THREE.InstancedMesh(new THREE.PlaneGeometry(.16, .48), material, N);
-  instance.frustumCulled = false; instance.renderOrder = 5; instance.castShadow = instance.receiveShadow = false;
-  const random = mulberry32(404), list = [];
-  for (let i = 0; i < N; i++) list.push({
-    x: (random() - .5) * 2 * LEAF_R, z: (random() - .5) * 2 * LEAF_R, y: random() * 26,
-    fall: .25 + random() * .6, sway: .4 + random(), swayPh: random() * TAU, swayAmp: .2 + random() * .6,
-    spin: (random() - .5) * 1.8, roll: random() * TAU, rollSp: .3 + random(), tilt: random() * TAU, s: .6 + random() * .7
-  });
-  scene.add(instance); WORLD.leaves = { mesh: instance, list: list, lastProgress: 0 };
-}
-const LEAF_M = new THREE.Matrix4(), LEAF_Q = new THREE.Quaternion();
-const LEAF_E = new THREE.Euler(), LEAF_P = new THREE.Vector3(), LEAF_S = new THREE.Vector3();
-const LEAF_F = new THREE.Vector3();
-function updateLeaves(dt) {
-  const LV = WORLD.leaves; if (!LV) return;
-  if (REDUCE && LV.seeded) return;
-  const cy = camera.position.y, list = LV.list, seed = !LV.seeded;
-  const scrollMotion = Math.min(1, Math.abs(RIG.prog - LV.lastProgress) * 24); LV.lastProgress = RIG.prog;
-  dt = REDUCE ? 0 : Math.min(.05, Math.max(0, dt)) * (.16 + scrollMotion * 1.6);
-  camera.getWorldDirection(LEAF_F); LEAF_F.y = 0;
-  if (LEAF_F.lengthSq() < 1e-6) LEAF_F.set(0, 0, -1); else LEAF_F.normalize();
-  const fx = camera.position.x + LEAF_F.x * LEAF_AHEAD, fz = camera.position.z + LEAF_F.z * LEAF_AHEAD;
-  LV.seeded = true;
-  for (let i = 0; i < list.length; i++) {
-    const feather = list[i]; feather.y -= feather.fall * dt; feather.roll += feather.rollSp * dt; feather.tilt += feather.spin * dt;
-    if (seed || feather.y < cy - 10) {
-      feather.y = seed ? cy - 10 + Math.random() * 26 : cy + 16;
-      const angle = Math.random() * TAU, radius = Math.sqrt(Math.random()) * LEAF_SPREAD;
-      feather.x = fx + Math.cos(angle) * radius; feather.z = fz + Math.sin(angle) * radius;
-    }
-    if (feather.x - camera.position.x > LEAF_R) feather.x -= 2 * LEAF_R;
-    else if (feather.x - camera.position.x < -LEAF_R) feather.x += 2 * LEAF_R;
-    if (feather.z - camera.position.z > LEAF_R) feather.z -= 2 * LEAF_R;
-    else if (feather.z - camera.position.z < -LEAF_R) feather.z += 2 * LEAF_R;
-    const flutter = REDUCE ? 0 : Math.sin(clock * feather.sway + feather.swayPh);
-    LEAF_P.set(feather.x + flutter * feather.swayAmp, feather.y, feather.z + flutter * feather.swayAmp * .5);
-    LEAF_E.set(feather.roll, feather.tilt, flutter * .35); LEAF_Q.setFromEuler(LEAF_E); LEAF_S.setScalar(feather.s);
-    LEAF_M.compose(LEAF_P, LEAF_Q, LEAF_S); LV.mesh.setMatrixAt(i, LEAF_M);
-  }
-  LV.mesh.instanceMatrix.needsUpdate = true;
 }
 
 const WISP_D = 3.4;
@@ -2506,118 +2195,72 @@ function createCloth(output, plate, options) {
            setEdge(v){ edgeTo = v; start(); } };
 }
 
-function renderBadmintonPoster(cardIndex, width, height) {
-  const c = cvs(Math.max(320, width | 0), Math.max(220, height | 0));
-  const x = c.getContext('2d'), T = window.BRAND_THEME;
-  const bg = x.createLinearGradient(0, 0, c.width, c.height);
-  bg.addColorStop(0, T.BG_SURFACE.hex); bg.addColorStop(1, T.BG_DEEP.hex);
-  x.fillStyle = bg; x.fillRect(0, 0, c.width, c.height);
-  x.globalAlpha = .20; x.strokeStyle = T.PRIMARY.hex; x.lineWidth = 2;
-  for (let i = 0; i < 10; i++) { x.beginPath(); x.arc(c.width * .72, c.height * .42, 30 + i * 22, 0, TAU); x.stroke(); }
-  x.globalAlpha = .48; x.strokeStyle = T.TEXT_DIM.hex; x.lineWidth = 1;
-  for (let i = 0; i < 9; i++) {
-    const yy = c.height * (.10 + i * .08);
-    x.beginPath(); x.moveTo(c.width * .06, yy); x.lineTo(c.width * .29, yy); x.stroke();
-  }
-  x.globalAlpha = 1; x.strokeStyle = T.METAL.hex; x.lineWidth = Math.max(3, c.width / 80);
-  if (cardIndex === 2) {
-    const sx = c.width * .25, sy = c.height * .40, sw = c.width * .50, sh = c.height * .28;
-    const shoe = x.createLinearGradient(sx, sy, sx + sw, sy + sh);
-    shoe.addColorStop(0, T.PRIMARY_DEEP.hex); shoe.addColorStop(1, T.PRIMARY.hex);
-    x.fillStyle = shoe; x.beginPath(); x.roundRect(sx, sy, sw, sh, 22); x.fill();
-    x.strokeStyle = T.ACCENT.hex; x.lineWidth = Math.max(5, c.width / 60); x.stroke();
-    x.strokeStyle = T.TEXT_MAIN.hex; x.lineWidth = 3;
-    for (let i = 0; i < 8; i++) { x.beginPath(); x.moveTo(c.width * (.30 + i * .06), c.height * .43); x.lineTo(c.width * (.34 + i * .05), c.height * .64); x.stroke(); }
-  } else {
-    x.beginPath(); x.ellipse(c.width * .50, c.height * .40, c.width * .22, c.height * .31, -.22, 0, TAU); x.stroke();
-    x.strokeStyle = 'rgba(' + T.TEXT_MAIN.rgb + ',.7)'; x.lineWidth = 2;
-    for (let i = 0; i < 9; i++) { x.beginPath(); x.moveTo(c.width * (.34 + i * .04), c.height * .17); x.lineTo(c.width * (.40 + i * .025), c.height * .63); x.stroke(); }
-    x.strokeStyle = 'rgba(' + T.TEXT_MAIN.rgb + ',.48)';
-    for (let i = 0; i < 8; i++) { x.beginPath(); x.moveTo(c.width * .30, c.height * (.24 + i * .045)); x.lineTo(c.width * .67, c.height * (.18 + i * .045)); x.stroke(); }
-    x.strokeStyle = cardIndex === 1 ? T.PRIMARY.hex : T.ACCENT.hex; x.lineWidth = Math.max(4, c.width / 70);
-    x.beginPath(); x.moveTo(c.width * .50, c.height * .68); x.lineTo(c.width * .62, c.height * .95); x.stroke();
-  }
-  x.fillStyle = T.TEXT_DIM.hex; x.font = '600 ' + Math.max(12, c.width / 34) + 'px ' + T.FONT_BODY;
-  x.fillText(cardIndex === 2 ? 'ĐẾ GIÀY · ĐỘ BÁM' : cardIndex === 1 ? 'KHUNG KHÍ ĐỘNG HỌC' : 'KHUNG VỢT · LƯỚI CƯỚC', c.width * .07, c.height * .88);
-  return c;
-}
-
-/* the plate: the card's own still, cover-cropped, carrying the two scrims the
-   CSS used to lay over it — baked in so they ripple with the cloth instead of
-   sitting flat on top of it */
-function clothPlate(img, w, h) {
+/* tấm vải của thẻ danh mục: ảnh banner thật cắt theo điểm lấy nét (--fx/--fy của thẻ), nướng sẵn lớp phủ tối ở đáy
+   như ::after của thẻ, để chữ nhãn vẫn đọc được khi vải gợn */
+function clothPlate(img, w, h, fx, fy) {
   const c = cvs(Math.max(1, w | 0), Math.max(1, h | 0)), x = c.getContext('2d');
-  const s = Math.max(c.width / img.width, c.height / img.height);
-  const dw = img.width * s, dh = img.height * s;
-  x.drawImage(img, (c.width - dw) / 2, (c.height - dh) / 2, dw, dh);
-  let g = x.createLinearGradient(0, 0, 0, c.height);
-  g.addColorStop(.36, 'rgba(3,6,9,.05)'); g.addColorStop(1, 'rgba(3,6,9,.73)');
-  x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
-  g = x.createLinearGradient(0, 0, 0, c.height);
-  g.addColorStop(.46, 'rgba(4,6,9,0)'); g.addColorStop(1, 'rgba(4,6,9,.80)');
+  coverDraw(x, img, c.width, c.height, fx, fy);
+  const g = x.createLinearGradient(0, 0, 0, c.height);
+  g.addColorStop(.44, 'rgba(7,19,15,0)'); g.addColorStop(1, 'rgba(7,19,15,.86)');
   x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
   return c;
 }
-
 function buildCardCloth() {
-  if (COARSE) return;                     /* no pointer to brush it with */
+  if (COARSE || REDUCE) return;                 /* không có con trỏ để gợn vải */
   $$('.cards .card-fr').forEach(fr => {
-    const card = fr.closest('.card') || fr;
-    const index = +(card.dataset.cardIndex || 0);
-    const poster = renderBadmintonPoster(index, 720, 520);
-    const posterUrl = poster.toDataURL('image/png');
-    document.documentElement.style.setProperty('--poster-' + index, 'url("' + posterUrl + '")');
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    let plate = null, pw = 0, ph = 0;
-    const get = () => {
-      const w = Math.round(fr.clientWidth * dpr), h = Math.round(fr.clientHeight * dpr);
-      if (!plate || w !== pw || h !== ph) { plate = clothPlate(poster, w, h); pw = w; ph = h; }
-      return plate;
-    };
-    const out = document.createElement('canvas');
-    out.className = 'cloth-out'; out.setAttribute('aria-hidden', 'true');
-    fr.appendChild(out);
-    const inst = createCloth(out, get, { wind: 3, speed: .5, amplitude: 30, drape: 40,
-      brush: 2.05, brushSize: 150, damping: 1, light: .5, sheen: .1, shadow: .25,
-      cornerRadius: 20, perspective: 1200, pin: 'top' });
-    if (!inst) { out.remove(); return; }
-    fr.classList.add('on-cloth');
-    card.addEventListener('pointerenter', () => inst.setEdge(.185), { passive: true });
-    card.addEventListener('pointerleave', () => inst.setEdge(.048), { passive: true });
+    const img = fr.querySelector('img'); if (!img) return;
+    const pct = name => { const v = parseFloat(img.style.getPropertyValue(name)); return Number.isFinite(v) ? v / 100 : .5; };
+    const fx = pct('--fx'), fy = pct('--fy');
+    const ready = img.complete && img.naturalWidth ? Promise.resolve()
+      : new Promise(resolve => { img.addEventListener('load', resolve, { once: true }); img.addEventListener('error', resolve, { once: true }); });
+    ready.then(() => {
+      if (!img.naturalWidth) return;
+      const card = fr.closest('.card') || fr;
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      let plate = null, pw = 0, ph = 0;
+      const get = () => {
+        const w = Math.round(fr.clientWidth * dpr), h = Math.round(fr.clientHeight * dpr);
+        if (!plate || w !== pw || h !== ph) { plate = clothPlate(img, w, h, fx, fy); pw = w; ph = h; }
+        return plate;
+      };
+      const out = document.createElement('canvas');
+      out.className = 'cloth-out'; out.setAttribute('aria-hidden', 'true');
+      fr.appendChild(out);
+      /* gió = 0: vải nằm yên, chỉ gợn dưới con trỏ rồi tự lặng (vòng lặp dừng khi hết năng lượng) */
+      const inst = createCloth(out, get, { wind: 0, speed: .5, amplitude: 26, drape: 16,
+        brush: 2.05, brushSize: 150, damping: 1.4, light: .5, sheen: .1, shadow: .25,
+        cornerRadius: 14, perspective: 1200, pin: 'top' });
+      if (!inst) { out.remove(); return; }
+      fr.classList.add('on-cloth');
+      card.addEventListener('pointerenter', () => inst.setEdge(.185), { passive: true });
+      card.addEventListener('pointerleave', () => inst.setEdge(.048), { passive: true });
+    });
   });
-  const heroPoster = renderBadmintonPoster(3, 900, 560);
-  document.documentElement.style.setProperty('--poster-3', 'url("' + heroPoster.toDataURL('image/png') + '")');
-  const peek = document.querySelector('.peek-fr');
-  if (peek) { peek.style.backgroundImage = 'var(--poster-3)'; peek.style.backgroundSize = 'cover'; }
 }
 
+/* Đèn nhà thi đấu: đèn chính rọi từ trần xuống sân (đổ bóng vợt, cầu, lưới), hai đèn điểm trên sân chính,
+   đèn dịu cho sân phụ, viền xanh từ cuối nhà, một đốm cam sát băng LED cuối sân. */
 function buildLights() {
-  scene.add(new THREE.HemisphereLight(brandColor('TEXT_DIM'), brandColor('BG_DEEP'), .22));
-  const key = new THREE.DirectionalLight(brandColor('TEXT_MAIN'), 1.65);
-  key.position.set(3.5, 27, 8); key.target.position.set(0, 7, -23); scene.add(key.target);
+  scene.add(new THREE.HemisphereLight(brandColor('TEXT_DIM'), brandColor('BG_DEEP'), .34));
+  const key = new THREE.DirectionalLight(brandColor('TEXT_MAIN'), 1.55);
+  key.position.set(2.5, 26, -5); key.target.position.set(0, 0, -9.4); scene.add(key.target);
   if (WANT_SHADOW) {
     key.castShadow = true; const resolution = LOW ? 1024 : 2048; key.shadow.mapSize.set(resolution, resolution);
-    const shadow = key.shadow.camera; shadow.left = -27; shadow.right = 27; shadow.top = 34; shadow.bottom = -20; shadow.near = 3; shadow.far = 100;
-    key.shadow.bias = -.0007; key.shadow.normalBias = .025; key.shadow.radius = 2.4;
+    const shadow = key.shadow.camera; shadow.left = -10; shadow.right = 10; shadow.top = 12; shadow.bottom = -12; shadow.near = 10; shadow.far = 40;
+    key.shadow.bias = -.0006; key.shadow.normalBias = .02; key.shadow.radius = 3;
   }
   scene.add(key); WORLD.key = key;
-  const moonKey = new THREE.DirectionalLight(brandColor('PRIMARY'), .8);
-  moonKey.position.set(-16, 28, -53); moonKey.target.position.set(0, 15, -37); scene.add(moonKey.target); scene.add(moonKey);
-  const hallL = new THREE.PointLight(brandColor('ACCENT'), 2.3, 19, 2);
-  hallL.position.set(0, PODIUM + 4, TEMPLE_Z + 7); scene.add(hallL); WORLD.hallLight = hallL;
-  [-1, 1].forEach(side => {
-    const light = new THREE.PointLight(brandColor('METAL'), 1.7, 12, 2);
-    light.position.set(side * 10, PODIUM + 6, TEMPLE_Z + 4); scene.add(light);
+  [-12.4, -4.8].forEach(z => {
+    const light = new THREE.PointLight(brandColor('TEXT_MAIN'), 1.25, 17, 2); light.position.set(0, 9.6, z); scene.add(light);
   });
-  const moonL = new THREE.PointLight(brandColor('PRIMARY'), 2.2, 42, 2);
-  moonL.position.set(-4, 22, -42); scene.add(moonL); WORLD.moonLight = moonL;
-  const fill = new THREE.PointLight(brandColor('TEXT_DIM'), 1.3, 36, 2);
-  fill.position.set(-9, 11, -23); scene.add(fill);
-  const stairL = new THREE.PointLight(brandColor('METAL'), 2.5, 19, 2);
-  stairL.position.set(0, 9, -26); scene.add(stairL);
+  [-1, 1].forEach(side => {
+    const light = new THREE.PointLight(brandColor('TEXT_MAIN'), .6, 14, 2); light.position.set(side * HALL.sideCourtX, 9.2, -8.6); scene.add(light);
+  });
+  const rim = new THREE.DirectionalLight(brandColor('PRIMARY'), .6);
+  rim.position.set(-12, 10, -30); rim.target.position.set(0, 2, -9); scene.add(rim.target); scene.add(rim);
+  const warm = new THREE.PointLight(brandColor('ACCENT'), .9, 9, 2); warm.position.set(0, 1.3, HALL.boardFarZ + 1.4); scene.add(warm);
+  const fill = new THREE.PointLight(brandColor('TEXT_DIM'), .55, 30, 2); fill.position.set(0, 6, 6); scene.add(fill);
 }
-
-
 const POST = { levels: [] };
 const QUAD_VS = 'varying vec2 vUv;\nvoid main(){ vUv = uv; gl_Position = vec4( position.xy, 0.0, 1.0 ); }';
 
@@ -2731,13 +2374,15 @@ function renderPost() {
 }
 
 
+/* 6 mốc camera khớp 6 khối [data-cam]: mở đầu nhìn qua lưới về màn LED, chương 01 cận vợt khổng lồ (khớp chữ T),
+   chương 02 hướng màn LED, chương 03 lướt băng LED cuối sân, chương 04 đứng ngang tầm lưới, chân trang nhìn toàn cảnh. */
 const CAM = [
-  { p: [0, 4.6, 14.6], t: [0, 10, -32], fov: 36 },
-  { p: [-5.5, 2.2, 3.6], t: [0, 1.7, -8.6], fov: 48 },
-  { p: [5.4, 4.5, -2], t: [0, 12, -34], fov: 46 },
-  { p: [4.8, 9.5, -18], t: [1, 16, -37], fov: 43 },
-  { p: [0, 12.5, -25], t: [-.6, 15.5, -38], fov: 48 },
-  { p: [0, 10.5, -19], t: [0, 12, -37], fov: 46 }
+  { p: [0, 5.4, 10.5], t: [.4, 3.0, -14], fov: 38 },
+  { p: [-1.2, 3.6, 3.4], t: [2.9, 3.7, -3.6], fov: 38 },
+  { p: [4.6, 3.8, -2.6], t: [-.6, 5.2, -20.6], fov: 46 },
+  { p: [-2.6, 2.4, -6.2], t: [4.55, 1.0, -12.4], fov: 46 },
+  { p: [.9, 1.6, -3.6], t: [0, 1.05, -16], fov: 50 },
+  { p: [0, 10.5, 8], t: [0, 1.4, -12], fov: 46 }
 ];
 const RIG = { prog: 0, smooth: 0, mx: 0, my: 0, tmx: 0, tmy: 0, intro: 0, focus: -1, focusAmt: 0 };
 let curveP, curveT, tmpCam;
@@ -2802,33 +2447,6 @@ function progressFor(y) {
   return Math.min(CAM.length - 1, anchors.length - 1);
 }
 
-function layoutWord() {
-  if (!WORD.group || !WORD.ink || !tmpCam) return;
-  const c = CAM[0];
-  const hp = new THREE.Vector3(c.p[0], c.p[1], c.p[2]);
-  const ht = new THREE.Vector3(c.t[0], c.t[1], c.t[2]);
-  tmpCam.fov = fitAspect(hp, ht, c.fov);
-  tmpCam.aspect = vpW() / vpH();
-  tmpCam.position.copy(hp);
-  tmpCam.lookAt(ht);
-  tmpCam.updateProjectionMatrix(); tmpCam.updateMatrixWorld(true);
-  const hit = (nx, ny) => {
-    const v = new THREE.Vector3(nx, ny, .5).unproject(tmpCam).sub(tmpCam.position).normalize();
-    return tmpCam.position.clone().addScaledVector(v, (WORD_Z - tmpCam.position.z) / v.z);
-  };
-  const L = hit(-1, 0), R = hit(1, 0);
-  
-  const narrow = vpW() / vpH() < 1.05;
-  
-  const fill = narrow ? .92 : .94;
-  const s = (R.x - L.x) * fill / WORD.ink.w;
-  
-  const base = hit(0, narrow ? -.16 : -.585);
-  WORD.group.scale.setScalar(s);
-  WORD.group.position.set(-WORD.ink.cx * s, base.y, WORD_Z);
-  WORD.rise = WORD.ink.asc * s * 1.25;
-}
-
 /* =================================================== 11 · page wiring */
 const $  = s => document.querySelector(s);
 const $$ = s => [].slice.call(document.querySelectorAll(s));
@@ -2884,88 +2502,11 @@ function splitHeadingWords() {
   });
 }
 
-/* Foreground PNGs are section-owned until their chapter is called. At that
-   point the active stage becomes a fixed lower viewport plane; its predecessor
-   remains there just long enough to blur and fade out before returning home.
-
-   While it holds that plane the stage is re-parented into #fg-sky, which lives
-   outside .page and so is not capped by its stacking context — that is the
-   only way a cut-out can pass in front of the nav and the chapter rail. The
-   move costs nothing in layout: the stage is position:fixed either way, and
-   its placement rules key off [data-fg], not off the section it came from. */
-function wireForegroundStages() {
-  const pairs = $$('.sec .fg, .foot .fg').map(stage => ({
-    section:stage.closest('.sec, .foot'), stage
-  })).filter(pair => pair.section);
-  if (!pairs.length) return;
-
-  const sky = $('#fg-sky');
-  const ratios = new Map(pairs.map(pair => [pair.section, 0]));
-  const homes = new WeakMap(pairs.map(pair => [pair.stage, pair.section]));
-  const timers = new WeakMap();
-  let activeStage = null;
-
-  const lift = stage => {
-    if (!sky || stage.parentNode === sky) return;
-    sky.appendChild(stage);
-    /* A re-inserted element has no previous computed style, so the entrance
-       would land already finished. Resolve the parked state in its new parent
-       first and the pieces have something to rise from. */
-    void stage.offsetWidth;
-  };
-  const park = stage => {
-    const home = homes.get(stage);
-    if (home && stage.parentNode !== home) home.insertBefore(stage, home.firstChild);
-  };
-
-  const retire = stage => {
-    if (!stage || stage === activeStage) return;
-    const pending = timers.get(stage);
-    if (pending) clearTimeout(pending);
-    stage.classList.remove('fg-active');
-    if (REDUCE) { park(stage); return; }
-    stage.classList.add('fg-retiring');
-    timers.set(stage, setTimeout(() => {
-      stage.classList.remove('fg-retiring');
-      timers.delete(stage);
-      park(stage);
-    }, 820));
-  };
-
-  const activate = stage => {
-    if (!stage || stage === activeStage) return;
-    const pending = timers.get(stage);
-    if (pending) clearTimeout(pending);
-    stage.classList.remove('fg-retiring');
-    lift(stage);
-    stage.classList.add('fg-active');
-    const prior = activeStage;
-    activeStage = stage;
-    retire(prior);
-  };
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => ratios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0));
-    const next = pairs.reduce((best, pair) =>
-      (ratios.get(pair.section) || 0) > (ratios.get(best.section) || 0) ? pair : best
-    );
-    const nextRatio = ratios.get(next.section) || 0;
-    if (nextRatio > 0) activate(next.stage);
-    else if (activeStage) {
-      const prior = activeStage;
-      activeStage = null;
-      retire(prior);
-    }
-  }, { rootMargin:'-12% 0px -12% 0px', threshold:[0, .12, .32, .55] });
-
-  pairs.forEach(pair => observer.observe(pair.section));
-}
-
 /* ------------------------------------------------------ leaving the hero
    Everything along the foot of the hero is spent the moment the walk starts:
    the cue has been read, the four chapters have been offered, the preview has
    been seen, and the scrim under them is only there to hold the type off the
-   sanctuary. Letting the block slide away together reads as the page moving;
+   court. Letting the block slide away together reads as the page moving;
    giving each piece its own window empties the foot one element at a time
    instead, which reads as the hero standing down.
 
@@ -2982,11 +2523,9 @@ function wireHeroExit() {
   const hero = $('#hero'); if (!hero) return;
   /* at = where in the exit it starts, span = how long it takes to go */
   const seq = [
-    { el: $('.peek'),      at: .00, span: .26, blur: 10 },
-    { el: $('.hero-cue'),  at: .10, span: .30, shift: true },
+    { el: $('.hero-cue'),  at: .00, span: .30, shift: true },
     ...$$('.chip').map((el, i) => ({ el: el, at: .20 + i * .10, span: .30, shift: true })),
-    { el: $('.chapters'),  at: .60, span: .30 },  /* shifting it carries the chips twice */
-    { el: $('.hero-side'), at: .70, span: .30 }   /* its transform is the centring -50% */
+    { el: $('.chapters'),  at: .60, span: .30 }   /* shifting it carries the chips twice */
   ].filter(o => o.el);
   let on = false;
   const apply = () => {
@@ -3020,11 +2559,11 @@ function wireHeroExit() {
 function wireNav() {
   let last = 0;
   const rail = $('#rail');
-  const names = ['The Hidden Gate', 'The Sanmon', 'Still Gardens', 'Sacred Craft', 'Afterlight', 'Colophon'];
+  const names = ['Mở đầu', 'Công nghệ', 'Danh mục', 'Vợt nổi bật', 'Ra sân', 'Chân trang'];
   SECS.forEach((s, i) => {
     const b = document.createElement('button');
     b.innerHTML = '<i></i>'; b.title = names[i] || '';
-    b.setAttribute('aria-label', names[i] || 'section');
+    b.setAttribute('aria-label', 'Tới phần ' + (names[i] || String(i + 1)));
     b.addEventListener('click', () => scrollTo({ top: anchors[i], behavior: REDUCE ? 'auto' : 'smooth' }));
     rail.appendChild(b);
   });
@@ -3060,7 +2599,7 @@ function wireNav() {
      one link per section in matching order. With five links over four chapters
      every entry past the third lit for its neighbour: standing in Afterlight
      highlighted Stories. Reading the destination cannot drift. */
-  const linkSec = links.map(l => SECS.indexOf(document.querySelector(l.getAttribute('href'))));
+  const linkSec = links.map(l => { const h = l.getAttribute('href') || ''; return h.startsWith('#') ? SECS.indexOf(document.querySelector(h)) : -2; });
   window.addEventListener('scroll', () => {
     const y = scrollY;
     nav.classList.toggle('stuck', y > 40);
@@ -3084,38 +2623,27 @@ function wireNav() {
   }));
 }
 
-function wireFocus() {
-  const set = i => { RIG.focus = i; };
-  $$('[data-chip]').forEach(el => {
-    el.addEventListener('mouseenter', () => { set(+el.dataset.chip); $$('[data-chip]').forEach(o => o.classList.toggle('on', o === el)); });
-    el.addEventListener('mouseleave', () => { set(-1); el.classList.remove('on'); });
-  });
-  $$('[data-les]').forEach(el => {
-    el.addEventListener('mouseenter', () => set(+el.dataset.les % 4));
-    el.addEventListener('mouseleave', () => set(-1));
-  });
-}
-
+/* Vòng con trỏ phụ: chỉ hiện sau lần rê chuột đầu tiên (không đứng giữa màn hình khi chưa có chuột);
+   phóng to khi rê lên phần tử bấm được, bắt bằng ủy quyền sự kiện nên cả phần tử thêm sau cũng nhận. */
 function wireCursor() {
   const dot = $('#cursor');
   if (COARSE) { dot.style.display = 'none'; return; }
-  let x = vpW() / 2, y = vpH() / 2, tx2 = x, ty = y;
+  let x = vpW() / 2, y = vpH() / 2, tx2 = x, ty = y, seen = false;
   addEventListener('pointermove', e => {
     tx2 = e.clientX; ty = e.clientY;
+    if (!seen) { seen = true; x = tx2; y = ty; dot.classList.add('live'); }
     RIG.tmx = (e.clientX / vpW()) * 2 - 1;
     RIG.tmy = -((e.clientY / vpH()) * 2 - 1);
   }, { passive: true });
-  $$('[data-cursor]').forEach(el => {
-    el.addEventListener('mouseenter', () => dot.classList.add('act'));
-    el.addEventListener('mouseleave', () => dot.classList.remove('act'));
-  });
+  const hit = t => t && t.closest && t.closest('[data-cursor], a[href], button');
+  document.addEventListener('pointerover', e => { if (hit(e.target)) dot.classList.add('act'); });
+  document.addEventListener('pointerout', e => { if (hit(e.target) && !hit(e.relatedTarget)) dot.classList.remove('act'); });
   (function tick() {
     x = lerp(x, tx2, .18); y = lerp(y, ty, .18);
     dot.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
     requestAnimationFrame(tick);
   })();
 }
-
 function makeGrain() {
   const S = 180, c = cvs(S, S), x = c.getContext('2d');
   const im = x.createImageData(S, S), d = im.data, r = mulberry32(9);
@@ -3125,133 +2653,6 @@ function makeGrain() {
   }
   x.putImageData(im, 0, 0);
   $('#grain').style.backgroundImage = 'url(' + c.toDataURL('image/png') + ')';
-}
-
-/* ============================================ 12 · the card viewports */
-const CARDS = [];
-function buildCards() {
-  const defs = [
-    { p: [-2.0, 1.60, -2.0], t: [0, 10.0, -34.0], fov: 40 },    /* the long climb */
-    { p: [4.2, 2.90, -9.5], t: [6.4, 2.90, -14.4], fov: 40 },   /* lantern court  */
-    { p: [3.4, 2.40, 2.0], t: [-1.0, -.60, -6.0], fov: 40 },    /* the wet court  */
-    { p: [0.6, 3.40, -12.0], t: [0, 12.0, -40.0], fov: 26 }     /* hero window    */
-  ];
-  $$('[data-view]').forEach(el => {
-    const d = defs[+el.dataset.view]; if (!d) return;
-    const c = new THREE.PerspectiveCamera(d.fov, 4 / 5, .3, 200);
-    c.position.set(d.p[0], d.p[1], d.p[2]);
-    c.lookAt(d.t[0], d.t[1], d.t[2]);
-    c.layers.set(0);
-    c.userData = { home: c.position.clone(), look: new THREE.Vector3(d.t[0], d.t[1], d.t[2]), push: 0, want: 0 };
-    CARDS.push({ cam: c, el: el.querySelector('[data-frame]') || el, rect: null });
-    el.addEventListener('mouseenter', () => c.userData.want = 1);
-    el.addEventListener('mouseleave', () => c.userData.want = 0);
-  });
-}
-/* A render target keeps its own viewport/scissor — renderer.setScissor()
-   only ever reaches the default framebuffer, so the region has to be set on
-   whichever surface we are actually drawing into, and re-bound to take. */
-const _push = new THREE.Vector3();
-function setRegion(rt, x, y, w, h) {
-  if (rt) {
-    const pr = renderer.getPixelRatio();
-    rt.viewport.set(x * pr, y * pr, w * pr, h * pr);
-    rt.scissor.set(x * pr, y * pr, w * pr, h * pr);
-    rt.scissorTest = true;
-    renderer.setRenderTarget(rt);
-  } else {
-    renderer.setViewport(x, y, w, h);
-    renderer.setScissor(x, y, w, h);
-    renderer.setScissorTest(true);
-  }
-}
-function clearRegion(rt) {
-  if (rt) {
-    rt.viewport.set(0, 0, rt.width, rt.height);
-    rt.scissor.set(0, 0, rt.width, rt.height);
-    rt.scissorTest = false;
-    renderer.setRenderTarget(rt);
-  } else {
-    renderer.setScissorTest(false);
-    renderer.setViewport(0, 0, vpW(), vpH());
-    renderer.setScissor(0, 0, vpW(), vpH());
-  }
-}
-function cardBuffer(C, w, h) {
-  const pr = Math.min(renderer.getPixelRatio(), 2);
-  const W = Math.max(8, Math.round(w * pr)), H = Math.max(8, Math.round(h * pr));
-  if (C.rt && C.rt.width === W && C.rt.height === H) return C.rt;
-  if (C.rt) C.rt.dispose();
-  C.rt = new THREE.WebGLRenderTarget(W, H, {
-    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
-    type: THREE.HalfFloatType, depthBuffer: true, stencilBuffer: false
-  });
-  C.dirty = true;
-  return C.rt;
-}
-function aimCard(C, aspect) {
-  const c = C.cam, u = c.userData;
-  c.aspect = aspect; c.updateProjectionMatrix();
-  _push.subVectors(u.look, u.home).normalize();
-  c.position.copy(u.home).addScaledVector(_push, u.push * .55);
-  c.lookAt(u.look);
-}
-/* Each viewport keeps its own buffer and only re-renders when it is moving
-   or when its slot in the refresh rota comes round — the views are static,
-   so paying for four scene traversals every frame buys nothing. */
-/* The blit lands in the composite at the element's screen rect, and the canvas
-   knows nothing about the DOM stacked over it — so a card the page has faded
-   goes on painting a live view into the frame with no card around it, which is
-   what put a second lit hall in the corner once the hero exit started dimming
-   the preview. Cull on the element's effective opacity, not just its rect.
-
-   Below full opacity is the right place to stop: the card's own still is
-   opaque, so the view behind it only ever shows through by (1 − alpha). At
-   alpha just under one that is nothing, and the cut is invisible. */
-function cardAlpha(el) {
-  let a = 1;
-  for (let n = el; n && n !== document.body; n = n.parentElement) {
-    const s = getComputedStyle(n);
-    if (s.display === 'none' || s.visibility === 'hidden') return 0;
-    a *= +s.opacity;
-    if (a < .001) return 0;
-  }
-  return a;
-}
-function renderCards(rt) {
-  if (!CARDS.length) return;
-  let drew = false;
-  for (let i = 0; i < CARDS.length; i++) {
-    const C = CARDS[i], r = C.el.getBoundingClientRect();
-    if (r.bottom < -40 || r.top > vpH() + 40 || r.width < 4) continue;
-    if (cardAlpha(C.el) < .995) continue;
-    /* a card carrying cloth has no background left of its own, so the blit
-       would show through the fabric's rounded corners and past its edges */
-    if (C.el.classList.contains('on-cloth')) continue;
-    if (!WANT_POST) {                              /* debug path: straight in */
-      setRegion(rt, r.left, vpH() - r.bottom, r.width, r.height);
-      renderer.clear(true, true, false);
-      aimCard(C, r.width / r.height);
-      renderer.render(scene, C.cam);
-      drew = true; continue;
-    }
-    const buf = cardBuffer(C, r.width, r.height);
-    const u = C.cam.userData;
-    if (C.dirty || Math.abs(u.push - u.want) > .002 || (FRAME + i * 7) % 24 === 0) {
-      aimCard(C, r.width / r.height);
-      renderer.setRenderTarget(buf);
-      renderer.clear(true, true, false);
-      renderer.render(scene, C.cam);
-      C.dirty = false;
-    }
-    setRegion(rt, r.left, vpH() - r.bottom, r.width, r.height);
-    POST.up.blending = THREE.NoBlending;
-    POST.up.uniforms.uAmt.value = 1;
-    POST.up.uniforms.tS.value = buf.texture;
-    pass(POST.up, rt);
-    drew = true;
-  }
-  if (drew) clearRegion(rt);
 }
 
 /* ==================================================== 13 · the machine */
@@ -3276,70 +2677,49 @@ function resize() {
     const want = (!LOW && PERF.scale > .78) ? 2 : 0;
     if (POST.scene.samples !== want) { POST.scene.samples = want; POST.scene.dispose(); }
   }
-  CARDS.forEach(C => { C.dirty = true; });
   if (WANT_SHADOW && WORLD.key) WORLD.key.shadow.needsUpdate = true;
   if (WORLD.embers) WORLD.embers.material.uniforms.uSize.value = h * renderer.getPixelRatio() * .5;
   if (WISP.mesh) WISP.mesh.material.uniforms.uPx.value = h * renderer.getPixelRatio();
-  placeMoon();
-  layoutWord();
   measure();
 }
 
+const SPIN = new THREE.Quaternion(), Y_AXIS = new THREE.Vector3(0, 1, 0);
 function updateWorld(dt) {
   WORLD.uT.value = clock;
-
-  /* the focused chapter warms the lanterns and swells the disc */
-  RIG.focusAmt = damp(RIG.focusAmt, RIG.focus >= 0 ? 1 : 0, 5, dt);
-  const pulse = Math.sin(clock * 1.9) * .5 + .5;
-  const f = RIG.focusAmt;
-  if (WORLD.hallHalo) WORLD.hallHalo.material.opacity = .30 + f * .14 + Math.sin(clock * .6) * .035;
-  if (WORLD.hallLight) WORLD.hallLight.intensity = 3.4 * (1 + f * .30) * (1 + Math.sin(clock * .43) * .045);
-  /* the moon only breathes — the haze in front of it is what actually moves */
-  if (WORLD.moonHalo) WORLD.moonHalo.material.opacity = .44 + f * .10 + Math.sin(clock * .34) * .05;
-  if (WORLD.lanternLights) WORLD.lanternLights.forEach((l, i) => {
-    l.intensity = 2.6 * (1 + f * .55) * (.86 + .22 * Math.sin(clock * (2.3 + i * .7) + i * 2.1) + .1 * pulse);
-  });
-  if (WORLD.lanternGlows) WORLD.lanternGlows.forEach(g => { g.quaternion.copy(camera.quaternion); });
-
-  /* haze slides across the courtyard */
+  const m = REDUCE ? 0 : 1;
+  /* sương trôi ngang nhà thi đấu */
   if (WORLD.haze) WORLD.haze.forEach(h => {
     h.position.x = h.userData.x0 + Math.sin(clock * h.userData.sp + h.userData.ph) * 5.5;
     h.quaternion.copy(camera.quaternion);
   });
-
-  /* ripples on the standing water */
-  if (WORLD.ripples) WORLD.ripples.forEach(r => {
-    const u = r.userData;
-    u.t += dt * u.sp;
-    if (u.t > 4) { u.t = 0; u.x = (Math.random() - .5) * 22; u.z = -8 + Math.random() * 22; }
-    const k = u.t / 4;
-    const s = .3 + k * 4.2;
-    r.scale.set(s, s, 1);
-    r.position.set(u.x, .02, u.z);
-    r.material.opacity = Math.sin(k * Math.PI) * .16;
-  });
-
-  /* the type rises from behind the grass, then dissolves as you close on it */
-  if (WORD.group) {
-    const near = smooth(0.02, 0.92, RIG.smooth);
-    WORD.glyphs.forEach((g, i) => {
-      const st = clamp((WORD.reveal - i * .075) / .62, 0, 1);
-      const e = easeOut(st);
-      g.position.y = g.userData.baseY - (1 - e) * (WORD.ink.asc * 1.15);
-      g.material.opacity = e * (1 - near * .96);
-      g.visible = g.material.opacity > .004;
-    });
+  /* vợt và cầu khổng lồ: lơ lửng nhẹ, cầu tự xoay quanh trục như khi bay */
+  const R = WORLD.bigRacket;
+  if (R) {
+    const base = R.userData.rot;
+    R.position.y = PROPS.racket.y + Math.sin(clock * .7) * .08 * m;
+    R.rotation.set(base.x, base.y + Math.sin(clock * .31) * .16 * m, base.z + Math.sin(clock * .5 + 1) * .03 * m);
   }
-  /* the cut-out layers dissolve as the camera reaches them, so the path can
-     walk straight through the garden instead of steering around the veil */
-  if (WORLD.fg) WORLD.fg.forEach(m => {
-    const a = smooth(.9, 4.6, camera.position.z - m.position.z);
-    m.material.opacity = a;
-    m.visible = a > .006;
+  const S = WORLD.shuttle;
+  if (S) {
+    S.position.y = PROPS.shuttle.y + Math.sin(clock * .9 + 2) * .1 * m;
+    SPIN.setFromAxisAngle(Y_AXIS, clock * .35 * m);
+    S.quaternion.copy(S.userData.aim).multiply(SPIN);
+  }
+  /* băng LED chạy chậm; dải chữ dưới màn hình */
+  if (WORLD.boards && m) WORLD.boards.forEach(b => { b.tex.offset.x = (b.tex.offset.x + b.speed * dt) % 1; });
+  if (WORLD.ticker && m) WORLD.ticker.offset.x = (WORLD.ticker.offset.x + .025 * dt) % 1;
+  /* màn LED đổi banner theo chương đang xem */
+  if (SCREEN.tex) {
+    showScreen(clamp(Math.round(RIG.prog), 0, MAN_LED.length - 1));
+    if (SCREEN.t < 1) {
+      SCREEN.t = Math.min(1, SCREEN.t + dt / .9); paintScreen();
+      if (SCREEN.t >= 1) SCREEN.cur = SCREEN.next;
+    }
+  }
+  if (WORLD.shafts) WORLD.shafts.forEach(s => {
+    s.material.uniforms.uOp.value = s.userData.base * (1 + .1 * Math.sin(clock * .6 + s.userData.ph) * m);
   });
-  updateLeaves(dt);
   updateWisps(dt);
-  if (CARDS.length) CARDS.forEach(C => { const u = C.cam.userData; u.push = damp(u.push, u.want, 3.4, dt); });
 }
 
 let FRAME = 0;
@@ -3348,7 +2728,6 @@ function render() {
   renderer.setRenderTarget(WANT_POST ? POST.scene : null);
   renderer.clear(true, true, false);
   renderer.render(scene, camera);
-  renderCards(WANT_POST ? POST.scene : null);
   renderer.setRenderTarget(null);
   if (WANT_POST) {
     POST.comp.uniforms.uT.value = clock;
@@ -3356,7 +2735,6 @@ function render() {
     renderPost();
   }
 }
-
 function frame(now) {
   if (!running) return;
   const raw = (now - tPrev) / 1000 || 0;
@@ -3379,7 +2757,6 @@ function frame(now) {
   if (INTRO.t0) {
     const el = (now - INTRO.t0) / 1000;
     RIG.intro = sat(el / 2.4);
-    WORD.reveal = Math.min(1.2, el / 1.5);
   }
 
   applyCamera();
@@ -3424,14 +2801,14 @@ function readGuestCart() {
       const token = typeof value.token === 'string' && /^[A-Za-z0-9_-]{16,64}$/.test(value.token) ? value.token : '';
       return { v: 1, dong: cleanGuestLines(value.dong), token, capNhat: Number(value.capNhat) || 0 };
     }
-  } catch (err) { console.warn('[kage] không đọc được giỏ khách', err); }
+  } catch (err) { console.warn('[trai-nghiem] không đọc được giỏ khách', err); }
   return { v: 1, dong: [], token: '', capNhat: 0 };
 }
 function writeGuestCart(cart) {
   const dong = cleanGuestLines(cart.dong);
   const next = { v: 1, dong, token: dong.length ? (cart.token || newGuestToken()) : '', capNhat: Date.now() };
   try { localStorage.setItem('shop-cl:gio-khach:v1', JSON.stringify(next)); return true; }
-  catch (err) { console.error('[kage] không ghi được giỏ khách', err); return false; }
+  catch (err) { console.error('[trai-nghiem] không ghi được giỏ khách', err); return false; }
 }
 function productType(product) { return String(product.loai?.tenLoai || '').toLowerCase(); }
 function inStock(product) { return Number(product.tongTonKho || 0) > 0; }
@@ -3466,27 +2843,82 @@ function updateBagCount() {
     if (count != null) setText('#bag-count', String(count));
   }).catch(() => setText('#bag-count', '0'));
 }
+/* Ảnh vợt đã duyệt bằng mắt: dựng đứng, không có dấu của cửa hàng khác (cùng danh sách ANH_SACH trong lib/landing-data.ts). */
+const ANH_SACH = ['astrox99pro.jpg'];
+const fileName = p => String(p || '').split('/').pop();
+/** Đường dẫn ảnh giống imgUrl trong lib/format.ts: ảnh tĩnh ở /images, ảnh upload đi qua /uploads. */
+function imgUrl(p) {
+  const path = p || 'default-product.jpg';
+  if (/^https?:\/\//i.test(path) || path.startsWith('/')) return path;
+  if (path.startsWith('uploads/') || path.startsWith('images/')) return '/' + path;
+  return '/images/' + path;
+}
+/** Tên hãng trong kho ("Lining", "Li-Ning", "YONEX"…) → khóa logo trong LOGO. */
+function brandKey(name) {
+  const k = String(name || '').toLowerCase().replace(/[^a-z]/g, '');
+  return k.includes('yonex') ? 'yonex' : k.includes('lining') ? 'lining' : k.includes('victor') ? 'victor' : k.includes('mizuno') ? 'mizuno' : '';
+}
+function logoImg(product) {
+  const key = brandKey(product?.hang?.tenHang);
+  if (!key) return null;
+  const img = document.createElement('img');
+  img.src = LOGO[key]; img.alt = product.hang.tenHang; img.decoding = 'async';
+  return img;
+}
+function categoryKey(product) {
+  const t = productType(product);
+  return t.includes('vợt') ? 'vot' : t.includes('giày') ? 'giay' : (t.includes('áo') || t.includes('quần')) ? 'aoquan' : t.includes('phụ kiện') ? 'phukien' : '';
+}
 function fillCatalog(products) {
   const rackets = products.filter(p => isRacket(p) && inStock(p));
   const tensions = rackets.map(p => parseTension(p.thongSoVot?.sucCang)).filter(t => t && t.unit);
   const weights = rackets.map(p => String(p.thongSoVot?.trongLuong || '').match(/(\d+)\s*U/i)).filter(Boolean);
-  const brands = new Set(rackets.map(p => p.hang?.tenHang).filter(Boolean));
   setText('[data-stat="soVot"]', String(rackets.length));
   setText('[data-stat="nheNhat"]', weights.length ? Math.max(...weights.map(m => Number(m[1]))) + 'U' : '—');
   setText('[data-stat="cangCaoNhat"]', tensions.length ? Math.round(Math.max(...tensions.map(tensionToLbs)) * 10) / 10 + ' lbs' : '—');
-  setText('[data-stat="soHang"]', String(brands.size));
-  const chosen = rackets.slice().sort((a, b) => Number(b.dangGiamGia) - Number(a.dangGiamGia) || Number(productPrice(b) || 0) - Number(productPrice(a) || 0)).slice(0, 5);
+
+  /* hàng logo: số vợt còn hàng của từng hãng, bấm vào lọc danh sách vợt theo hãng */
+  const byBrand = new Map();
+  rackets.forEach(p => {
+    const key = brandKey(p.hang?.tenHang); if (!key) return;
+    const entry = byBrand.get(key) || { n: 0, id: p.hang.id };
+    entry.n++; byBrand.set(key, entry);
+  });
+  setText('[data-stat="soHang"]', String(byBrand.size || '—'));
+  $$('#brand-list [data-hang]').forEach(tile => {
+    const entry = byBrand.get(tile.dataset.hang);
+    if (!entry) { tile.hidden = true; return; }
+    tile.querySelector('b').textContent = String(entry.n);
+    if (entry.id) tile.href = '/SanPham/Index?loai=Vot&hangs=' + encodeURIComponent(entry.id);
+  });
+
+  /* số mẫu còn hàng của từng danh mục, ghi dưới tên thẻ */
+  const count = {};
+  products.filter(inStock).forEach(p => { const key = categoryKey(p); if (key) count[key] = (count[key] || 0) + 1; });
+  const unit = { vot: 'mẫu vợt còn hàng', giay: 'mẫu giày còn hàng', aoquan: 'mẫu áo quần còn hàng', phukien: 'món còn hàng' };
+  $$('[data-dem]').forEach(el => { const n = count[el.dataset.dem]; if (n) el.textContent = n + ' ' + unit[el.dataset.dem]; });
+
+  /* 5 vợt nổi bật: mỗi hãng một cây trước (ảnh đã duyệt được ưu tiên, rồi đến tồn kho), thiếu thì bù theo tồn kho */
+  const score = p => (ANH_SACH.includes(fileName(p.hinhAnhDaiDien)) ? 1e6 : 0) + Number(p.tongTonKho || 0);
+  const sorted = rackets.slice().sort((a, b) => score(b) - score(a));
+  const chosen = [], seen = new Set();
+  sorted.forEach(p => {
+    const key = brandKey(p.hang?.tenHang) || p.id;
+    if (chosen.length < 5 && !seen.has(key)) { seen.add(key); chosen.push(p); }
+  });
+  sorted.forEach(p => { if (chosen.length < 5 && !chosen.includes(p)) chosen.push(p); });
   $$('.les[data-slot]').forEach((el, i) => {
-    const p = chosen[i], name = el.querySelector('[data-f="ten"]'), type = el.querySelector('[data-f="loai"]');
-    const spec = el.querySelector('[data-f="thongso"]'), price = el.querySelector('[data-f="gia"]');
-    if (!p) { if (name) name.textContent = 'Chưa có dữ liệu'; return; }
+    const p = chosen[i], name = el.querySelector('[data-f="ten"]'), logo = el.querySelector('[data-f="logo"]');
+    const spec = el.querySelector('[data-f="thongso"]'), price = el.querySelector('[data-f="gia"]'), img = el.querySelector('[data-f="anh"]');
+    if (!p) { el.hidden = true; return; }
     el.dataset.productId = p.id || '';
+    el.setAttribute('aria-label', 'Xem nhanh ' + productLabel(p));
     if (name) name.textContent = productLabel(p);
-    if (type) type.textContent = p.hang?.tenHang || p.loai?.tenLoai || 'Vợt';
+    if (logo) { logo.replaceChildren(); const l = logoImg(p); if (l) logo.appendChild(l); }
+    if (img) { img.src = imgUrl(p.hinhAnhDaiDien); img.alt = productLabel(p); }
     if (spec) spec.textContent = [p.thongSoVot?.doCanBang, p.thongSoVot?.doCung, p.thongSoVot?.trongLuong].filter(Boolean).join(' · ') || 'Đang cập nhật thông số';
     if (price) { price.textContent = formatPrice(productPrice(p)); if (p.dangGiamGia && p.giaGoc) price.title = 'Giá gốc ' + formatPrice(p.giaGoc); }
   });
-  document.documentElement.style.setProperty('--poster-3', document.documentElement.style.getPropertyValue('--poster-3'));
 }
 async function loadShopCatalog() {
   const response = await fetch('/api/san-pham/trang-chu', { credentials: 'include', headers: { Accept: 'application/json' } });
@@ -3545,7 +2977,9 @@ async function loadProductDetail(product, opener) {
   SHOP.current = product; SHOP.variant = null; SHOP.opener = opener; SHOP.drawerOpen = true;
   const drawer = $('#shop-drawer'); if (!drawer) return;
   drawer.hidden = false; document.documentElement.classList.add('shop-open'); setBackgroundInert(true);
-  setText('#sd-title', productLabel(product)); setText('#sd-brand', product.hang?.tenHang || 'Shop Cầu Lông');
+  setText('#sd-title', productLabel(product)); setText('#sd-brand-name', product.hang?.tenHang || 'Shop Cầu Lông');
+  const sdLogo = $('#sd-logo'); if (sdLogo) { sdLogo.replaceChildren(); const l = logoImg(product); if (l) sdLogo.appendChild(l); }
+  const sdImg = $('#sd-poster'); if (sdImg) { sdImg.src = imgUrl(product.hinhAnhDaiDien); sdImg.alt = productLabel(product); }
   setText('#sd-price', '—'); setText('#sd-stock', '—'); setText('#sd-msg', 'Đang tải phiên bản…');
   const add = $('#sd-add'); if (add) add.disabled = true;
   const range = $('#sd-tension-wrap'); if (range) range.hidden = true;
@@ -3565,14 +2999,12 @@ async function loadProductDetail(product, opener) {
     setVariant(list.find(v => Number(v.soLuongTon || 0) > 0) || list[0]);
     setText('#sd-msg', list.some(v => Number(v.soLuongTon || 0) > 0) ? '' : 'Sản phẩm đã hết hàng.');
     $('#sd-pdp').href = '/Home/ChiTietSanPham/' + encodeURIComponent(product.id) + '#tram-cang';
-    const poster = renderBadmintonPoster(Number(product.id || 0) % 3, 400, 250), canvas = $('#sd-poster');
-    if (canvas) canvas.getContext('2d').drawImage(poster, 0, 0, canvas.width, canvas.height);
   } catch (err) {
     if (!SHOP.drawerOpen || requestId !== SHOP.requestId || SHOP.current !== product) return;
     setText('#sd-msg', 'Không tải được phiên bản. Vui lòng thử lại.');
     const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'sd-chip'; retry.textContent = 'Thử lại';
     retry.addEventListener('click', () => loadProductDetail(product, opener)); variants.replaceChildren(retry);
-    console.error('[kage] chi tiết sản phẩm lỗi', err);
+    console.error('[trai-nghiem] chi tiết sản phẩm lỗi', err);
   }
 }
 async function addSelectedToCart() {
@@ -3614,7 +3046,7 @@ function readPlannedTension() {
     const raw = localStorage.getItem('cang-du-dinh:v1'), data = raw ? JSON.parse(raw) : { v: 1, muc: [] };
     if (!data || data.v !== 1 || !Array.isArray(data.muc)) return null;
     return data.muc.every(item => item && typeof item.bienTheId === 'string' && typeof item.sanPhamId === 'string' && Number.isFinite(Number(item.giaTri)) && (item.donVi === 'kg' || item.donVi === 'lbs') && Number.isFinite(Number(item.luc))) ? data : null;
-  } catch (err) { console.warn('[kage] dự định căng cước hỏng', err); return null; }
+  } catch (err) { console.warn('[trai-nghiem] dự định căng cước hỏng', err); return null; }
 }
 function savePlannedTension() {
   const t = parseTension(SHOP.variant?.thongSo?.sucCang), value = Number($('#sd-tension')?.value);
@@ -3624,7 +3056,7 @@ function savePlannedTension() {
   const productId = SHOP.current?.id;
   const next = { v: 1, muc: [{ bienTheId: SHOP.variant.id, sanPhamId: productId, giaTri: value, donVi: t.unit, luc: Date.now() }, ...old.muc.filter(item => item.bienTheId !== SHOP.variant.id)] };
   try { localStorage.setItem('cang-du-dinh:v1', JSON.stringify(next)); setText('#sd-msg', 'Đã lưu mức căng dự định cho phiên bản này.'); }
-  catch (err) { setText('#sd-msg', 'Không ghi được mức căng dự định.'); console.error('[kage] ghi dự định lỗi', err); }
+  catch (err) { setText('#sd-msg', 'Không ghi được mức căng dự định.'); console.error('[trai-nghiem] ghi dự định lỗi', err); }
 }
 async function refreshAuth() {
   if (SHOP.authPromise) return SHOP.authPromise;
@@ -3638,7 +3070,7 @@ async function refreshAuth() {
       if (SHOP.variant && add) add.disabled = Number(SHOP.variant.soLuongTon || 0) < 1;
       updateBagCount(); return { ok: true, user: SHOP.user };
     } catch (err) {
-      SHOP.authReady = false; console.warn('[kage] kiểm tra phiên lỗi', err); setText('#sd-msg', 'Chưa xác định được phiên. Hãy thử lại.');
+      SHOP.authReady = false; console.warn('[trai-nghiem] kiểm tra phiên lỗi', err); setText('#sd-msg', 'Chưa xác định được phiên. Hãy thử lại.');
       if (SHOP.variant && add) add.disabled = Number(SHOP.variant.soLuongTon || 0) < 1; // mở lại nút để người dùng bấm thử lại (lần bấm sẽ kiểm tra phiên lại)
       return { ok: false, user: null };
     } finally { SHOP.authChecking = false; SHOP.authPromise = null; }
@@ -3667,77 +3099,45 @@ function wireShopDrawer() {
   $('#nav-bag-btn').addEventListener('click', () => { location.href = '/Home/ViewCart'; });
   const saveButton = document.createElement('button'); saveButton.type = 'button'; saveButton.id = 'sd-save-tension'; saveButton.className = 'sd-chip'; saveButton.textContent = 'Lưu mức căng dự định'; saveButton.addEventListener('click', savePlannedTension); $('#sd-tension-note').after(saveButton);
   const openFor = (product, opener) => product && loadProductDetail(product, opener || document.activeElement);
-  const pick = line => {
-    const list = SHOP.products.filter(inStock);
-    if (line === 'giay') return list.find(p => productType(p).includes('giày')) || list[0];
-    if (line === 'toc') return list.find(p => isRacket(p) && /nhẹ|light/i.test(String(p.thongSoVot?.trongLuong || '') + String(p.thongSoVot?.doCanBang || ''))) || list.find(isRacket);
-    if (line === 'cuoc') return list.find(isRacket) || list[0];
-    return list.find(p => isRacket(p) && /đầm|head|nặng/i.test(String(p.thongSoVot?.doCanBang || '') + productLabel(p))) || list.find(isRacket);
-  };
-  const entries = $$('[data-line]').filter(el => el.matches('#chips [data-line], .card[data-line]')).concat($$('.les[data-slot]'));
+  /* chip ở hero và thẻ danh mục là liên kết thẳng tới cửa hàng; chỉ thẻ vợt nổi bật mở bảng mua nhanh */
+  const entries = $$('.les[data-slot]');
   entries.forEach(el => {
     if (el.tabIndex < 0) el.tabIndex = 0;
     el.setAttribute('role', 'button');
-    const activate = () => openFor(el.matches('.les') ? SHOP.products.find(p => p.id === el.dataset.productId) : pick(el.dataset.line), el);
+    const activate = () => openFor(SHOP.products.find(p => p.id === el.dataset.productId), el);
     el.addEventListener('click', activate);
     el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
   });
   const style = document.createElement('style'); style.textContent = '.shop-open{overflow:hidden}'; document.head.appendChild(style);
   refreshAuth(); addEventListener('visibilitychange', () => { if (!document.hidden) refreshAuth(); }); addEventListener('focus', refreshAuth);
-  loadShopCatalog().catch(err => { setText('#sd-msg', 'Không tải được dữ liệu cửa hàng. Hãy thử lại.'); console.error('[kage] tải catalog lỗi', err); });
+  loadShopCatalog().catch(err => { setText('#sd-msg', 'Không tải được dữ liệu cửa hàng. Hãy thử lại.'); console.error('[trai-nghiem] tải catalog lỗi', err); });
 }
 
 /* ======================================================== 14 · booting */
+/* Các bước dựng cảnh, chạy lần lượt sau màn tải. Bước trả về Promise (phông chữ, ảnh logo/banner) được chờ xong mới đi tiếp. */
 const JOBS = [
-  ['Reading the type', () => document.fonts && document.fonts.load('600 320px Wordmark')],
-  ['Pouring the ground', () => { initGL(); WORLD.uT = { value: 0 }; buildRig(); buildLights(); }],
-  ['Cutting the approach', () => buildShell()],
-  ['Raising the hall', () => buildTemple()],
-  ['Hanging the moon', () => buildMoon()],
-  ['Setting the gate', () => buildTorii()],
-  ['Placing the stones', () => {
-    buildRocks();
-    buildLantern(7.4, -7.0, 1.15); buildLantern(-7.6, -5.2, 1.0);
-    /* The pairs flanking the flight were given flat heights — 2 and PODIUM —
-       and the flight does not reach either at those depths, so both pairs hung
-       in the air. Solve the step under each one from the same constants the
-       treads and cheeks are built from, and they stand on the rail instead of
-       beside it. */
-    const stepAt   = z => Math.max(0, (STAIR_Z0 - z) / STAIR_RUN - .5);
-    const cheekTop = z => (stepAt(z) + 1) * (PODIUM / STEPS) + .45;
-    const cheekX   = z => (STAIR_W + (STEPS - stepAt(z)) * .052) / 2 + .45;
-    [-14.4, -23.5].forEach((z, i) => {
-      const sc = i ? .95 : .90;
-      buildLantern( cheekX(z), z, sc, cheekTop(z));
-      buildLantern(-cheekX(z), z, sc, cheekTop(z));
-    });
-  }],
-  ['Growing the maples', () => {
-    buildMaple(71, 12.6, -13.0, 1.05); buildMaple(72, -11.8, -9.4, .95);
-    buildMaple(73, 9.2, -19.0, .82);   buildMaple(74, -14.5, -17.5, 1.0);
-    buildMaple(75, 16.5, -6.0, .88);
-  }],
-  ['Painting the near grass', () => buildForeground()],
-  ['Cutting the word', () => buildWordmark()],
-  ['Raising the mist', () => { buildAtmosphere(); buildLeafFall(); buildWisps(); }],
-  ['Polishing the water', () => {
-    initPost(); buildCards(); buildCardCloth();
-    WORLD.fg.forEach(m => m.layers.set(1));
-    WORD.glyphs.forEach(m => m.layers.set(2));
-    if (WORLD.rain) WORLD.rain.layers.set(1);
-    /* the fall is all around the rig, including behind it — mirroring it
-       would drop leaves into the water that are nowhere near the water */
-    if (WORLD.leaves) WORLD.leaves.mesh.layers.set(1);
-    WORLD.ripples.forEach(r => r.layers.set(1));
-    layoutWord(); measure();
-    /* nothing that casts a shadow ever moves, so bake it once */
-    if (WANT_SHADOW && WORLD.key) { WORLD.key.shadow.autoUpdate = false; WORLD.key.shadow.needsUpdate = true; }
+  ['Tải phông chữ', () => document.fonts && Promise.race([
+    Promise.all([document.fonts.load('700 104px "Barlow Condensed"', BRAND_THEME.WORDMARK), document.fonts.load('400 16px Inter')]),
+    new Promise(resolve => setTimeout(resolve, 1800))
+  ]).catch(() => {})],
+  ['Khởi tạo WebGL', () => { initGL(); WORLD.uT = { value: 0 }; buildRig(); buildLights(); }],
+  ['Dựng nhà thi đấu', () => buildArena()],
+  ['Căng lưới', () => { WORLD.net = buildNet(); }],
+  ['Treo màn LED', () => buildScreen()],
+  ['Dựng băng LED', () => Promise.all(Object.keys(LOGO).map(k => loadImage(LOGO[k]).then(img => [k, img])))
+    .then(list => buildLedBoards(Object.fromEntries(list)))],
+  ['Lắp giàn đèn, khán đài', () => { buildCeiling(); buildStands(); }],
+  ['Đặt vợt và cầu', () => buildProps()],
+  ['Tạo bụi sáng', () => { buildAtmosphere(); buildWisps(); }],
+  ['Hậu kỳ', () => {
+    initPost(); buildCardCloth(); measure();
+    /* vợt và cầu lơ lửng có chuyển động nên bóng cập nhật mỗi khung; giảm chuyển động thì nướng một lần */
+    if (WANT_SHADOW && WORLD.key) { WORLD.key.shadow.autoUpdate = !REDUCE; WORLD.key.shadow.needsUpdate = true; }
   }]
 ];
-
 function boot() {
   makeGrain();
-  wireReveals(); wireForegroundStages(); wireNav(); wireHeroExit(); wireFocus(); wireCursor(); wireShopDrawer();
+  wireReveals(); wireNav(); wireHeroExit(); wireCursor(); wireShopDrawer();
   document.body.classList.add('is-locked');
   let i = 0;
   const step = () => {
@@ -3752,7 +3152,7 @@ function boot() {
     let r;
     try { r = j[1](); }
     catch (err) {
-      console.error('[kage] job "' + j[0] + '" failed', err);
+      console.error('[trai-nghiem] bước "' + j[0] + '" failed', err);
       if (i <= 1) return fallback(err);          /* no renderer, no scene */
     }
     (r && r.then) ? r.then(done, done) : done();
@@ -3766,7 +3166,7 @@ function fallback(err) {
   document.body.classList.remove('is-locked');
   preEl.classList.add('done');
   $$('[data-rv], .mask-line').forEach(e => e.classList.add('rv-in'));
-  window.__kage = window.__secret = { fallback: true, error: String(err && err.message || err) };
+  window.__sanTrungBay = { fallback: true, error: String(err && err.message || err) };
 }
 
 function start() {
@@ -3780,7 +3180,7 @@ function start() {
 
   const shot = Q.get('shot');
   if (shot !== null) {                       /* deterministic states for review */
-    RIG.intro = 1; WORD.reveal = 1.2; fadeIn = 1; INTRO.t0 = 0;
+    RIG.intro = 1; fadeIn = 1; INTRO.t0 = 0;
     const n = clamp(parseInt(shot, 10) || 0, 0, SECS.length - 1);
     scrollTo(0, anchors[n]);
     RIG.smooth = RIG.prog = progressFor(anchors[n]);
@@ -3798,7 +3198,7 @@ function start() {
   running = true; tPrev = performance.now();
   INTRO.t0 = shot !== null ? 0 : (REDUCE ? performance.now() - 4000 : performance.now());
   queue();
-  window.__kage = window.__secret = { RIG: RIG, WORLD: WORLD, WORD: WORD, CAM: CAM, POST: POST, renderer: renderer, scene: scene, camera: camera, anchors: () => anchors };
+  window.__sanTrungBay = { RIG: RIG, WORLD: WORLD, SCREEN: SCREEN, CAM: CAM, POST: POST, renderer: renderer, scene: scene, camera: camera, anchors: () => anchors };
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(boot, 0);
