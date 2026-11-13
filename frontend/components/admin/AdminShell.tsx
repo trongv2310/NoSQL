@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { giuFocusTrongVung } from "@/lib/bay-focus";
 import { apiPost } from "@/lib/api";
 import { imgUrl } from "@/lib/format";
 import { useApp } from "../AppProviders";
@@ -30,6 +31,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mo, setMo] = useState(false);
+  const nutMo = useRef<HTMLButtonElement>(null);
+  const thanhBen = useRef<HTMLElement>(null);
+  // Thanh bên (màn hình hẹp) mở: focus vào mục đầu; Escape ở bất cứ đâu đóng và trả focus về nút mở.
+  useEffect(() => {
+    if (!mo) return;
+    thanhBen.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const khiPhim = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setMo(false); nutMo.current?.focus(); }
+      else giuFocusTrongVung(e, thanhBen.current);
+    };
+    document.addEventListener("keydown", khiPhim);
+    return () => document.removeEventListener("keydown", khiPhim);
+  }, [mo]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -61,7 +75,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="admin-body">
-      <aside className={`admin-sidebar ${mo ? "open show" : ""}`}>
+      <aside id="admin-sidebar" ref={thanhBen} className={`admin-sidebar ${mo ? "open show" : ""}`}>
         <Link href="/admin" className="admin-brand">
           { }
           <img src={imgUrl(site.logo, "images/HUIT.jpg")} alt="Logo" />
@@ -84,11 +98,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <button type="button" className="admin-link danger" onClick={dangXuat}><i className="fa-solid fa-right-from-bracket" /> Đăng xuất</button>
         </div>
       </aside>
-      <div className={`admin-backdrop ${mo ? "show active" : ""}`} onClick={() => setMo(false)} />
+      <div className={`admin-backdrop ${mo ? "show active" : ""}`} onClick={() => { setMo(false); nutMo.current?.focus(); }} />
       <div className="admin-main">
         <header className="admin-topbar">
           <div className="d-flex align-items-center gap-3">
-            <button type="button" className="admin-toggle" aria-label="Mở menu" onClick={() => setMo((v) => !v)}><i className="fa-solid fa-bars" /></button>
+            <button ref={nutMo} type="button" className="admin-toggle" aria-label="Mở menu" aria-expanded={mo} aria-controls="admin-sidebar" onClick={() => setMo((v) => !v)}><i className="fa-solid fa-bars" /></button>
             <h1>{tieuDe}</h1>
           </div>
           <div className="admin-user">

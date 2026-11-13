@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { datHoSo, useHoSo } from "@/components/HoSoChoi";
+import { HoiNguoiBan } from "@/components/HoiNguoiBan";
+import { KhaySoSanh } from "@/components/so-sanh/KhaySoSanh";
 import { PageHero, ProductGridSkeleton } from "@/components/PageHero";
 import { ErrorBox, Empty, Page, Pagination, ProductCard } from "@/components/Ui";
+import { vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
+import { LOAI, khoaLoai } from "@/lib/landing-data";
+import { LOI_CHOI_HOP_LE, NHAN_LOI_CHOI, hoSoTrong, type LoiChoiKhoa } from "@/lib/ho-so-choi";
 import type { SanPhamV, Trang } from "@/lib/types";
 
 interface ListData extends Trang<SanPhamV> {
@@ -14,6 +20,7 @@ interface ListData extends Trang<SanPhamV> {
     dsHang: { id: string; tenHang: string }[];
     dsLoai: { id: string; tenLoai: string }[];
     khoangGiaGoiY: string[];
+    locThongSo?: { loiChoi: string[]; canBang: string[]; trongLuong: string[]; doCung: string[] };
     locGiaTu: number | null; locGiaDen: number | null; locHang: string[]; locKhoang: string | null; sapXep: string; dangLoc: boolean;
   };
 }
@@ -22,6 +29,30 @@ const NHAN_KHOANG: Record<string, string> = {
   "0-1000000": "Dưới 1 triệu", "1000000-2000000": "1 – 2 triệu", "2000000-3000000": "2 – 3 triệu",
   "3000000-5000000": "3 – 5 triệu", "5000000-": "Trên 5 triệu",
 };
+
+/** Nhóm thông số vợt lọc được ở backend (`vot-thong-so.ts`); nhãn nói rõ phân loại theo thông số ghi trong kho. */
+const FACET_VOT = [
+  { param: "can_bang", nhan: "Điểm cân bằng", giaTri: [["nang", "Nặng đầu"], ["can-bang", "Cân bằng"], ["nhe", "Nhẹ đầu"]] },
+  { param: "trong_luong", nhan: "Trọng lượng", giaTri: [["3u", "3U"], ["4u", "4U"], ["5u", "5U"]] },
+  { param: "do_cung", nhan: "Độ cứng thân", giaTri: [["mem", "Mềm"], ["vua", "Trung bình"], ["cung", "Cứng"]] },
+] as const;
+const NHAN_FACET: Record<string, string> = Object.fromEntries(FACET_VOT.flatMap((f) => f.giaTri.map(([k, v]) => [`${f.param}:${k}`, v])));
+const FACET_PARAMS = ["loi_choi", "can_bang", "trong_luong", "do_cung"];
+
+/** Tên loại để hiện trên chip: `loai` có thể là id hoặc slug (Vot, Giay…), tên "Vot" phải hiện là "Vợt". */
+function tenLoaiChip(loai: string, ds?: { id: string; tenLoai: string }[]): string {
+  const theoId = ds?.find((l) => l.id === loai)?.tenLoai;
+  if (theoId) return theoId;
+  const slug = Object.values(LOAI).find((l) => l.slug.toLowerCase() === loai.toLowerCase());
+  return slug ? slug.tenNgan : loai;
+}
+
+/** Chip khoảng giá đọc được ("Từ 4.500.000 đ", "Đến 1.000.000 đ") thay vì số thô; giá trị không phải số thì giữ nguyên. */
+function giaChip(tu: string | null, den: string | null): string {
+  const dinhDang = (v: string) => (Number.isFinite(Number(v)) ? vnd(Number(v)) : v);
+  if (tu && den) return `${dinhDang(tu)} – ${dinhDang(den)}`;
+  return tu ? `Từ ${dinhDang(tu)}` : `Đến ${dinhDang(den ?? "")}`;
+}
 
 /** Danh sách sản phẩm có bộ lọc; trạng thái lọc nằm hoàn toàn trên query string để chia sẻ/quay lại được. */
 export function ProductListing() {
@@ -32,6 +63,7 @@ export function ProductListing() {
   const [giaTu, setGiaTu] = useState(sp.get("gia_tu") ?? "");
   const [giaDen, setGiaDen] = useState(sp.get("gia_den") ?? "");
   const [moLoc, setMoLoc] = useState(false);
+  const hs = useHoSo();
 
   useEffect(() => {
     // Đồng bộ ô nhập giá khi URL đổi (ví dụ bấm "Xóa bộ lọc").
@@ -48,6 +80,17 @@ export function ProductListing() {
     router.push(`${path}?${q.toString()}`);
   };
   const dat = (k: string, v: string | null) => cap((q) => (v ? q.set(k, v) : q.delete(k)));
+  /** Bật/tắt một giá trị của nhóm lọc thông số (nhiều giá trị cùng nhóm = hoặc). Lối chơi đồng bộ về hồ sơ người chơi để header/trang chủ khớp. */
+  const datFacet = (k: string, v: string) => {
+    const hienTai = Array.from(new Set(sp.getAll(k).flatMap((x) => x.split(",")).map((x) => x.trim().toLowerCase()).filter(Boolean)));
+    const moi = hienTai.includes(v) ? hienTai.filter((x) => x !== v) : [...hienTai, v];
+    cap((q) => { q.delete(k); moi.forEach((x) => q.append(k, x)); });
+    if (k === "loi_choi") {
+      const mot = moi.filter((x): x is LoiChoiKhoa => (LOI_CHOI_HOP_LE as readonly string[]).includes(x));
+      datHoSo({ lc: mot.length === 1 ? mot[0] : null }, false);
+    }
+  };
+  const apDungHoSo = () => hs.lc && cap((q) => { q.set("loi_choi", hs.lc as string); });
   const hangs = sp.getAll("hangs");
   const boLoc = data?.boLoc;
   const hangDangChon = boLoc?.locHang ?? hangs;
@@ -55,12 +98,23 @@ export function ProductListing() {
   // Các bộ lọc đang áp dụng, hiện thành chip để gỡ từng cái mà không phải mở lại sidebar.
   const chips: { nhan: string; go: () => void }[] = [];
   const loaiId = sp.get("loai");
-  if (loaiId) chips.push({ nhan: boLoc?.dsLoai.find((l) => l.id === loaiId)?.tenLoai ?? loaiId, go: () => dat("loai", null) });
+  if (loaiId) chips.push({ nhan: tenLoaiChip(loaiId, boLoc?.dsLoai), go: () => dat("loai", null) });
   if (sp.get("keyword")) chips.push({ nhan: `“${sp.get("keyword")}”`, go: () => dat("keyword", null) });
   hangDangChon.forEach((id) => chips.push({ nhan: boLoc?.dsHang.find((h) => h.id === id)?.tenHang ?? id, go: () => cap((q) => { q.delete("hangs"); q.delete("hang"); hangDangChon.filter((x) => x !== id).forEach((x) => q.append("hangs", x)); }) }));
   const khoang = sp.get("khoang");
   if (khoang) chips.push({ nhan: NHAN_KHOANG[khoang] ?? khoang, go: () => dat("khoang", null) });
-  if (sp.get("gia_tu") || sp.get("gia_den")) chips.push({ nhan: `${sp.get("gia_tu") || "0"} – ${sp.get("gia_den") || "∞"} đ`, go: () => cap((q) => { q.delete("gia_tu"); q.delete("gia_den"); }) });
+  if (sp.get("gia_tu") || sp.get("gia_den")) chips.push({ nhan: giaChip(sp.get("gia_tu"), sp.get("gia_den")), go: () => cap((q) => { q.delete("gia_tu"); q.delete("gia_den"); }) });
+  const dsFacet = (k: string) => Array.from(new Set(sp.getAll(k).flatMap((v) => v.split(",")).map((v) => v.trim().toLowerCase()).filter(Boolean)));
+  const loiChoiChon = dsFacet("loi_choi").filter((v): v is LoiChoiKhoa => (LOI_CHOI_HOP_LE as readonly string[]).includes(v));
+  const laVot = (() => {
+    if (!loaiId) return false;
+    const ten = boLoc?.dsLoai.find((l) => l.id === loaiId)?.tenLoai ?? tenLoaiChip(loaiId);
+    return khoaLoai(ten) === "vot" || loaiId.toLowerCase() === LOAI.vot.slug.toLowerCase();
+  })();
+  const coFacet = FACET_PARAMS.some((k) => sp.has(k));
+  const hienFacet = laVot || coFacet;
+  loiChoiChon.forEach((v) => chips.push({ nhan: `Lối chơi ${NHAN_LOI_CHOI[v]}`, go: () => datFacet("loi_choi", v) }));
+  FACET_VOT.forEach((f) => dsFacet(f.param).forEach((v) => chips.push({ nhan: NHAN_FACET[`${f.param}:${v}`] ?? v, go: () => datFacet(f.param, v) })));
   const SAP_XEP = [["moi", "Mới nhất"], ["gia_tang", "Giá tăng"], ["gia_giam", "Giá giảm"], ["ten", "Tên A–Z"]] as const;
 
   return (
@@ -80,6 +134,13 @@ export function ProductListing() {
           {SAP_XEP.map(([k, nhan]) => <button type="button" key={k} aria-pressed={(sp.get("sap_xep") ?? "moi") === k} onClick={() => dat("sap_xep", k)}>{nhan}</button>)}
         </div>
       </div>
+      <KhaySoSanh />
+      {laVot && !hoSoTrong(hs) && hs.lc && !loiChoiChon.length && (
+        <div className="ls-profile" role="region" aria-label="Hồ sơ người chơi">
+          <span>Hồ sơ của bạn: lối chơi {NHAN_LOI_CHOI[hs.lc]}.</span>
+          <button type="button" onClick={apDungHoSo}>Lọc vợt hợp lối chơi này</button>
+        </div>
+      )}
       {chips.length > 0 && (
         <div className="ls-chips" aria-label="Bộ lọc đang áp dụng">
           {chips.map((c, i) => <button type="button" key={`${c.nhan}-${i}`} onClick={c.go} aria-label={`Bỏ lọc ${c.nhan}`}>{c.nhan} <i className="fa-solid fa-xmark" aria-hidden="true" /></button>)}
@@ -96,6 +157,25 @@ export function ProductListing() {
                 <button key={l.id} className={`btn btn-sm text-start ${sp.get("loai") === l.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => dat("loai", l.id)}>{l.tenLoai}</button>
               ))}
             </div>
+            {hienFacet && (
+              <div aria-label="Lọc theo thông số vợt">
+                <fieldset className="ls-facet">
+                  <legend>Lối chơi</legend>
+                  <div className="ls-facet-chips">
+                    {LOI_CHOI_HOP_LE.map((k) => <button type="button" key={k} aria-pressed={loiChoiChon.includes(k)} onClick={() => datFacet("loi_choi", k)}>{NHAN_LOI_CHOI[k]}</button>)}
+                  </div>
+                </fieldset>
+                {FACET_VOT.map((f) => (
+                  <fieldset className="ls-facet" key={f.param}>
+                    <legend>{f.nhan}</legend>
+                    <div className="ls-facet-chips">
+                      {f.giaTri.map(([k, nhan]) => <button type="button" key={k} aria-pressed={dsFacet(f.param).includes(k)} onClick={() => datFacet(f.param, k)}>{nhan}</button>)}
+                    </div>
+                  </fieldset>
+                ))}
+                <p className="small text-muted">Phân loại theo thông số ghi trong kho; vợt thiếu thông số sẽ không xuất hiện khi lọc.</p>
+              </div>
+            )}
             <h6 className="fw-bold">Khoảng giá</h6>
             <div className="d-flex flex-column gap-1 mb-2">
               {boLoc?.khoangGiaGoiY.map((k) => (
@@ -130,10 +210,20 @@ export function ProductListing() {
         </aside>
         <div className="col-lg-9">
           {loading && !data ? <ProductGridSkeleton n={9} /> : error ? <ErrorBox message={error} /> : data && data.items.length === 0 ? (
-            <Empty message="Không tìm thấy sản phẩm phù hợp." linkUrl="/SanPham/Index" linkText="Xem tất cả sản phẩm" />
+            <div>
+              <Empty message="Không tìm thấy sản phẩm phù hợp." linkUrl="/SanPham/Index" linkText="Xóa bộ lọc, xem tất cả sản phẩm" />
+              <div className="ls-empty-help">
+                <ul aria-label="Gợi ý khác">
+                  <li><Link href={`/#quay-tu-van`}>Chọn vợt theo lối chơi</Link></li>
+                  {chips.length > 0 && <li><Link href="/SanPham/Index">Bỏ hết bộ lọc</Link></li>}
+                </ul>
+                <HoiNguoiBan id="hoi-nguoi-ban-danh-sach" tieuDe="Không thấy món cần tìm? Hỏi người bán" mota="Mô tả món bạn cần, người bán gợi ý từ những gì đang có trong kho."
+                  goiY={[sp.get("keyword") ? `Shop có ${sp.get("keyword")} không?` : "Shop còn vợt nào trong tầm giá của mình?", "Mình nên chọn vợt thế nào?"]} />
+              </div>
+            </div>
           ) : data && (
             <>
-              <div className={`row g-3 ls-grid${loading ? " is-loading" : ""}`}>{data.items.map((s) => <div key={s.id} className="col-6 col-md-4"><ProductCard sp={s} /></div>)}</div>
+              <div className={`row g-3 ls-grid${loading ? " is-loading" : ""}`}>{data.items.map((s, i) => <div key={s.id} className="col-6 col-md-4"><ProductCard sp={s} uuTien={i < 2} /></div>)}</div>
               <Pagination trang={data} />
             </>
           )}

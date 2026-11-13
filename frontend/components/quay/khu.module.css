@@ -1,0 +1,42 @@
+/* Khung chung của các khu trang chủ sáng: nền xen kẽ (trắng, xám xanh, xanh sân đậm, cam nhạt), đầu khu có "kicker" nhỏ + tiêu đề + liên kết.
+   Màu: xanh sân #0b3b2b / #0f7550; cam chỉ làm điểm nhấn (#b83c0a trên nền sáng đạt tương phản chữ). */
+
+.khu { position: relative; padding: clamp(30px, 4.2vw, 60px) 0; background: #fff; }
+.xam { background: #f3f6f4; }
+.am { background: linear-gradient(180deg, #fff3ea 0%, #fff9f5 100%); }
+.toi { background: #0b3b2b; color: #e8f3ed; }
+.vienTren { border-top: 1px solid #e3e9e5; }
+
+.khuDau { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 24px; margin-bottom: clamp(16px, 2.2vw, 28px); }
+.khuDauTrai { min-width: 0; max-width: 46rem; }
+.kicker { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #0f7550; }
+.kicker::before { content: ""; width: 26px; height: 3px; border-radius: 2px; background: #b83c0a; }
+.toi .kicker { color: #8fe0bd; }
+.khuTieuDe { margin: 0; font-size: clamp(1.45rem, 2.6vw, 2.15rem); font-weight: 800; line-height: 1.2; letter-spacing: -0.01em; color: #0b3b2b; }
+.toi .khuTieuDe { color: #fff; }
+.khuMoTa { margin: 8px 0 0; max-width: 40rem; font-size: 0.98rem; line-height: 1.55; color: #3b4943; }
+.toi .khuMoTa { color: #c5dccf; }
+.khuLienKet { font-size: 0.92rem; font-weight: 700; color: #0f7550; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.khuLienKet:hover { color: #0b3b2b; }
+.toi .khuLienKet { color: #8fe0bd; }
+.toi .khuLienKet:hover { color: #fff; }
+.khuLienKet:focus-visible, .lienKetNut:focus-visible { outline: 3px solid #0f7550; outline-offset: 3px; border-radius: 4px; }
+.toi .khuLienKet:focus-visible { outline-color: #8fe0bd; }
+
+.luoi4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 18px); margin: 0; padding: 0; list-style: none; }
+.luoi4 > li { min-width: 0; }
+.khungCho { aspect-ratio: 3 / 5; border-radius: 18px; background: linear-gradient(100deg, #e9eeeb 30%, #f6f8f7 50%, #e9eeeb 70%) 0 0 / 220% 100%; animation: bong 1.4s linear infinite; }
+.khoiCho { min-height: 220px; border-radius: 18px; background: linear-gradient(100deg, #e9eeeb 30%, #f6f8f7 50%, #e9eeeb 70%) 0 0 / 220% 100%; animation: bong 1.4s linear infinite; }
+@keyframes bong { to { background-position: -120% 0; } }
+.trangThaiKhu { margin: 0; padding: 16px 18px; border: 1px dashed #9db3a9; border-radius: 14px; color: #3b4943; background: rgba(255, 255, 255, 0.7); }
+.toi .trangThaiKhu { color: #e8f3ed; border-color: #5d8a75; background: rgba(255, 255, 255, 0.06); }
+.lienKetNut { padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.trangThaiKhu a { color: inherit; font-weight: 700; text-decoration: underline; }
+
+@media (max-width: 991px) { .luoi4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575px) {
+  .khu { padding: 28px 0; }
+  .khuMoTa { font-size: 0.92rem; }
+  .luoi4 { gap: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .khungCho, .khoiCho { animation: none; } }

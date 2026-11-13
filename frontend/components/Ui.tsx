@@ -2,11 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Fragment } from "react";
-import { vnd, imgUrl } from "@/lib/format";
-import { ghiNhoAnhBam } from "@/lib/morph";
-import type { SanPhamV, Trang } from "@/lib/types";
+import { Fragment, useState } from "react";
+import type { Trang } from "@/lib/types";
 import { Shuttle } from "./PageHero";
+
+/**
+ * Ảnh sản phẩm. Khi ảnh không tải được thì nói thẳng "Chưa có ảnh" thay vì thay bằng ảnh giả
+ * (tệp /images/default-product.jpg hiện rỗng nên ảnh sẽ vỡ).
+ */
+export function AnhSanPham({ src, alt, loading = "lazy" }: { src: string; alt: string; loading?: "lazy" | "eager" }) {
+  const [loi, setLoi] = useState(false);
+  if (loi) return <span className="sf-no-image" role="img" aria-label={alt ? `${alt}: chưa có ảnh` : "Chưa có ảnh sản phẩm"}>Chưa có ảnh</span>;
+  return <img src={src} alt={alt} loading={loading} onError={() => setLoi(true)} />;
+}
 
 export function Stars({ value }: { value: number }) {
   return (
@@ -19,40 +27,8 @@ export function Stars({ value }: { value: number }) {
   );
 }
 
-export function ProductCard({ sp }: { sp: SanPhamV }) {
-  const giam = sp.dangGiamGia && sp.giaGoc > sp.giaSauKhuyenMai;
-  const pt = giam && sp.giaGoc > 0 ? Math.round((1 - sp.giaSauKhuyenMai / sp.giaGoc) * 100) : 0;
-  const hetHang = sp.tongTonKho === 0;
-  const conIt = sp.tongTonKho !== undefined && sp.tongTonKho > 0 && sp.tongTonKho <= 5;
-  const url = `/Home/ChiTietSanPham/${sp.id}`;
-  // Chỉ đặt tên chuyển tiếp cho ảnh vừa bấm: ảnh bay sang trang chi tiết (xem lib/morph.ts).
-  const nhoAnh = (e: React.MouseEvent<HTMLElement>) => ghiNhoAnhBam(sp.id, e.currentTarget.closest(".product-card")?.querySelector("img") ?? null);
-  return (
-    <div className="product-card sf-reveal">
-      {pt > 0 && <div className="badge-promo">-{pt}%</div>}
-      {hetHang ? <div className="badge-state is-out">Hết hàng</div> : conIt ? <div className="badge-state is-low">Còn {sp.tongTonKho} sản phẩm</div> : null}
-      <Link href={url} className="thumb" onClick={nhoAnh} aria-label={sp.tenSanPham}>
-        { }
-        <img src={imgUrl(sp.hinhAnhDaiDien)} alt={sp.tenSanPham} loading="lazy"
-          onError={(e) => { const img = e.currentTarget; if (!img.src.endsWith("/images/default-product.jpg")) img.src = "/images/default-product.jpg"; }} />
-        <span className="sf-thumb-cta" aria-hidden="true">Xem chi tiết <i className="fa-solid fa-arrow-right" /></span>
-      </Link>
-      <div className="body">
-        <div className="product-brand">{sp.hang?.tenHang ?? "Hãng khác"}</div>
-        <Link href={url} className="product-title" title={sp.tenSanPham} onClick={nhoAnh}>{sp.tenSanPham}</Link>
-        {sp.tongTonKho !== undefined && <span className={`product-availability ${hetHang ? "is-empty" : ""}`}>{hetHang ? "Tạm hết hàng" : "Còn hàng"}</span>}
-        <div className="product-footer">
-          <div>
-            <span className="product-price">{vnd(sp.giaSauKhuyenMai)}</span>
-            {giam ? <span className="price-small">{vnd(sp.giaGoc)}</span> : <span className="price-small is-placeholder" aria-hidden="true">&nbsp;</span>}
-          </div>
-        </div>
-        {giam ? <span className="product-saving"><i className="fa-solid fa-tag" aria-hidden="true" /> Tiết kiệm {vnd(sp.giaGoc - sp.giaSauKhuyenMai)}</span> : <span className="product-saving is-placeholder" aria-hidden="true">&nbsp;</span>}
-        <Link className="product-card-cta" href={url} onClick={nhoAnh}>Xem chi tiết <span aria-hidden="true">↗</span></Link>
-      </div>
-    </div>
-  );
-}
+/** Thẻ sản phẩm duy nhất của storefront (xem components/product/ProductCard.tsx); giữ tên xuất cũ cho các trang đang import từ đây. */
+export { ProductCard } from "./product/ProductCard";
 
 export function Empty({ message, linkUrl, linkText }: { message: string; linkUrl?: string; linkText?: string }) {
   return (

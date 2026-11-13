@@ -3,7 +3,9 @@ import Link from "next/link";
 import { khoaLoai, type KhoaLoai } from "@/lib/landing-data";
 import { layTrangChuSanPham } from "@/lib/server-api";
 import { fontTieuDe } from "./fonts";
+import { RacketLive } from "./RacketLive";
 import { RvHeading } from "./Words";
+import { SecHead } from "./SecHead";
 import s from "./landing.module.css";
 
 /**
@@ -28,13 +30,15 @@ export function Categories() {
   return (
     <section id="danh-muc" className={s.sheet} aria-labelledby="danh-muc-title">
       <div className="container">
+        <SecHead label="Danh mục" tag="Mua sắm" />
         <RvHeading id="danh-muc-title" className={`${s.sheetTitle} ${fontTieuDe.className}`} text="Bạn cần gì cho trận tới?" />
         <div className={s.tiles}>
           {DANH_MUC.map((d) => (
-            <Link key={d.khoa} href={`/SanPham/Index?loai=${d.slug}`} className={`${s.tile} ${s[`tile_${d.khoa}`]}`}>
+            <Link key={d.khoa} href={`/SanPham/Index?loai=${d.slug}`} className={`${s.tile} ${s[`tile_${d.khoa}`]}`} data-spot>
               <span className={s.tileMedia}>
                 <Image src={d.anh} alt="" fill sizes={d.sizes} className={s.tileImg} />
               </span>
+              {d.khoa === "vot" && <RacketLive fontFamily={fontTieuDe.style.fontFamily} />}
               <span className={s.tileBody}>
                 <span className={s.tileText}>
                   <span className={`${s.tileName} ${fontTieuDe.className}`}>{d.ten}</span>

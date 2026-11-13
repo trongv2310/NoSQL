@@ -12,12 +12,20 @@
   clip-path: inset(0);
   --cta: #f4691a;
   --cta-hover: #ff8a45;
+  /* Màu nhấn theo lối chơi khách chọn (xem phong-cach-store): mặc định là cam thương hiệu. */
+  --pc: var(--cta);
+  --pc-deep: #c44a09;
   --deep: #05241a;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-io: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 /* ───────────── Hero: phần dùng chung ───────────── */
+
+/* Lối chơi đã chọn đổi màu nhấn của cả trang (nút gọi hành động và logo giữ nguyên màu thương hiệu). */
+.root[data-pc="cong"] { --pc: #f4691a; --pc-deep: #c44a09; }
+.root[data-pc="toc"] { --pc: #33e0a8; --pc-deep: #0b8f66; }
+.root[data-pc="toan"] { --pc: #f1e6c8; --pc-deep: #8a7a45; }
 
 .hero {
   composes: grain;
@@ -29,7 +37,7 @@
   color: #fff;
   background: var(--deep);
   /* Không phụ thuộc chiều cao header (đo sau khi hydrate) để tránh nhảy bố cục. */
-  min-height: clamp(520px, 78svh, 740px);
+  min-height: clamp(560px, calc(100svh - 150px), 860px);
   padding-bottom: 72px; /* chỗ cho đoạn đè của khu danh mục */
 }
 
@@ -72,31 +80,32 @@
 }
 
 .copy {
-  max-width: 36rem;
+  max-width: 40rem;
 }
 
 .title {
   margin: 0;
   font-weight: 800;
   text-transform: uppercase;
-  font-size: clamp(3rem, 5.7vw, 5.75rem);
+  font-size: clamp(2.5rem, 5vw, 5rem);
   line-height: 1;
   letter-spacing: -0.005em;
   color: #fff;
 }
 
-/* Khung cắt chữ: chừa chỗ cho dấu tiếng Việt phía trên chữ hoa. */
+/* Khung cắt chữ: chừa chỗ cho dấu tiếng Việt phía trên (Â, Ắ, Ằ...) và dấu nặng/hỏi phía dưới (Ạ, Ậ, Ể...) của chữ hoa. */
 .line {
   display: block;
   overflow: hidden;
-  padding: 0.16em 0 0.14em;
-  margin: -0.16em 0 -0.14em;
+  padding: 0.28em 0 0.32em;
+  margin: -0.28em 0 -0.32em;
 }
 .line > span {
   display: inline-block;
 }
 .lineAccent {
-  color: var(--cta);
+  color: var(--pc, var(--cta));
+  transition: color 0.4s ease;
 }
 
 .rule {
@@ -104,7 +113,7 @@
   width: 88px;
   height: 4px;
   border-radius: 2px;
-  background: var(--cta);
+  background: var(--pc, var(--cta));
   margin: 24px 0 18px;
   transform-origin: left center;
 }
@@ -152,6 +161,8 @@
 }
 .btnGhost {
   border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: rgba(3, 20, 14, 0.5);
+  backdrop-filter: blur(6px);
   color: #fff;
 }
 .btnPrimary,
@@ -173,7 +184,7 @@
   outline-offset: 3px;
 }
 .sheet .tile:focus-visible {
-  outline-color: var(--brand-900);
+  outline-color: #fff;
 }
 @media (hover: hover) {
   .btnPrimary:hover {
@@ -201,8 +212,18 @@
   position: absolute;
   inset: 0;
   z-index: -2;
+  /* Ảnh tĩnh nhạt dần trước phần đệm cuối của hero (khối kế tiếp đè lên đó) để không lộ đường cắt ngang. */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 190px), transparent calc(100% - 72px));
+  mask-image: linear-gradient(180deg, #000 calc(100% - 190px), transparent calc(100% - 72px));
 }
 /* Khi thế giới 3D đã sẵn sàng: hero trong suốt để cảnh lộ ra, ảnh tĩnh mờ đi (vẫn là phương án dự phòng). */
+/* Lớp tối của ảnh tĩnh chỉ cần giữ chữ bên trái đọc được; cảnh 3D tự đã tối, để nguyên sẽ làm xám cả cảnh. */
+:global([data-gl="on"]) .courtShade {
+  background: linear-gradient(90deg, rgba(3, 20, 14, 0.68) 0%, rgba(3, 20, 14, 0.5) 30%, rgba(3, 20, 14, 0.2) 46%, rgba(3, 20, 14, 0) 62%);
+}
+:global([data-gl="on"]) .lede {
+  text-shadow: 0 1px 14px rgba(2, 14, 10, 0.7);
+}
 :global([data-gl="on"]) .hero {
   background: transparent;
 }
@@ -231,18 +252,29 @@
     linear-gradient(0deg, rgba(3, 26, 19, 0.65) 0%, rgba(3, 26, 19, 0) 38%);
 }
 
+/* Điện thoại: chữ nằm trên cả cảnh nên cần lớp tối đều hơn dải bên trái. */
+@media (max-width: 767px) {
+  /* Tối hơn hẳn ở dải đọc chữ (giữa) và quanh hai nút; nhả dần xuống chân hero để cảnh sân vẫn lộ. */
+  :global([data-gl="on"]) .courtShade {
+    background: linear-gradient(180deg, rgba(3, 20, 14, 0.66) 0%, rgba(3, 20, 14, 0.6) 40%, rgba(3, 20, 14, 0.8) 64%, rgba(3, 20, 14, 0.62) 80%, rgba(3, 20, 14, 0.18) 100%);
+  }
+}
+
 /* ───────────── Khu danh mục: tờ giấy đè lên hero ───────────── */
 
 .sheet {
   position: relative;
   z-index: 3;
-  margin-top: -72px;
-  padding: 64px 0 88px;
-  border-radius: 32px 32px 0 0;
-  background: var(--bg);
+  padding: 56px 0 72px;
+  color: #fff;
+  background: var(--deep);
   scroll-margin-top: 80px;
   /* Ô đang chờ trượt vào từ bên phải không được làm trang rộng ra. `clip` không tạo vùng cuộn mới. */
   overflow-x: clip;
+}
+/* Khối tối trong suốt: cảnh 3D hiện xuyên suốt; không có WebGL thì giữ nền xanh đậm. */
+:global([data-gl="on"]) .sheet {
+  background: transparent;
 }
 .sheetTitle {
   margin: 0 0 28px;
@@ -250,7 +282,7 @@
   font-weight: 800;
   line-height: 1.05;
   text-transform: uppercase;
-  color: var(--brand-900);
+  color: #fff;
 }
 
 .tiles {
@@ -447,7 +479,7 @@
     padding-bottom: 80px;
   }
   .heroInner {
-    padding-top: 40px;
+    padding-top: 24px;
   }
   .x1,
   .x2,
@@ -455,8 +487,15 @@
     transform: translate3d(0, calc(var(--e) * -16px), 0);
     filter: none;
   }
+  /* Nửa trên là chữ và hai nút; nửa dưới dành cho vợt và quả cầu 3D (bỏ đoạn giới thiệu, thông tin đó đã có ở các khối dưới). */
   .title {
-    font-size: clamp(2.9rem, 15vw, 3.8rem);
+    font-size: clamp(2rem, 8.6vw, 2.6rem);
+  }
+  .x2 {
+    display: none;
+  }
+  .x3 {
+    margin-top: 22px;
   }
   .rule {
     margin: 22px 0 18px;
@@ -483,9 +522,7 @@
   }
 
   .sheet {
-    margin-top: -64px;
-    padding: 44px 0 64px;
-    border-radius: 24px 24px 0 0;
+    padding: 44px 0 56px;
   }
   .tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -629,5 +666,205 @@
   .btnPrimary,
   .btnPrimary span {
     transition: none;
+  }
+}
+
+/* ───────────── Nhãn trên tiêu đề hero, gợi ý cuộn và nhãn đầu phần ───────────── */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+.eyebrowDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cta);
+}
+
+/* Chân hero chỉ hiện khi đủ chỗ (không chạm vào chữ và nút ở trên); rút đi cùng các lớp khác khi bắt đầu cuộn. */
+.heroFoot {
+  display: none;
+}
+@media (min-width: 1100px) and (min-height: 820px) {
+  .heroFoot {
+    --e: clamp(0, calc((var(--p, 0) - 0.12) / 0.3), 1);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 96px;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    pointer-events: none;
+    opacity: calc(1 - var(--e));
+    transform: translate3d(0, calc(var(--e) * -24px), 0);
+  }
+  .heroFoot > * {
+    pointer-events: auto;
+  }
+  .cue {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .cueTrack {
+    position: relative;
+    width: 56px;
+    height: 1px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.28);
+  }
+  .cueTrack i {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    transform: translateX(-100%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes cue-run {
+    to { transform: translateX(100%); }
+  }
+  .cueTrack i {
+    animation: cue-run 2.2s var(--ease-io) infinite;
+  }
+}
+
+.secHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+.secK {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.secK i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pc, var(--cta));
+  transition: background-color 0.4s ease;
+}
+.secRule {
+  flex: 0 1 clamp(60px, 14vw, 200px);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.28;
+}
+.secTag {
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+/* Đèn rọi theo con trỏ trên ô danh mục (LandingMotion ghi --sx/--sy khi rê chuột). */
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(320px circle at var(--sx, 50%) var(--sy, 50%), rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 62%);
+  mix-blend-mode: soft-light;
+  transition: opacity 0.35s ease;
+}
+@media (hover: hover) {
+  .tile:hover::after {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Dòng nhấn "Vào trận." có dải sáng chạy qua như kim loại bóng. */
+  @keyframes shine {
+    from { background-position: 120% 0; }
+    to { background-position: -120% 0; }
+  }
+  .lineAccent > span {
+    /* background-clip: text chỉ tô trong hộp của phần tử: hộp phải bao cả vùng dấu (trên và dưới) nếu không dấu bị mất ("LÀ CỦA BAN."). */
+    padding: 0.22em 0.04em 0.28em;
+    margin: -0.22em -0.04em -0.28em;
+    background: linear-gradient(100deg, #f4691a 0%, #f4691a 38%, #ffd2a8 50%, #f4691a 62%, #f4691a 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: line-up 0.85s var(--ease) 0.47s both, shine 5.5s linear 1.6s infinite;
+  }
+}
+
+/* Lớp phủ tối mờ dần ở hai đầu: chữ đọc được trên sàn sáng mà khối vẫn hòa vào khối kề bên. */
+:global([data-gl="on"]) .sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(3, 20, 14, 0) 0%, rgba(3, 20, 14, 0.66) 12%, rgba(3, 20, 14, 0.66) 88%, rgba(3, 20, 14, 0) 100%);
+}
+
+/* Ô Vợt cầu lông khi cây vợt 3D đã sẵn sàng (RacketLive đặt data-live="1"): nền kính tối ngả xanh ngọc, chữ trắng. */
+.live {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: calc(100% - 124px);
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+.tile_vot[data-live="1"] .live {
+  opacity: 1;
+}
+.tile_vot[data-live="1"] {
+  background:
+    radial-gradient(70% 55% at 78% 82%, rgba(244, 105, 26, 0.32), rgba(244, 105, 26, 0) 70%),
+    radial-gradient(120% 90% at 50% 30%, #146a4b 0%, #07281d 62%, #04170f 100%);
+}
+.tile_vot[data-live="1"],
+.tile_vot[data-live="1"]:hover,
+.tile_vot[data-live="1"]:focus-visible,
+.tile_vot[data-live="1"]:active {
+  color: #fff;
+}
+.tile_vot[data-live="1"] .tileMedia {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.tile_vot[data-live="1"] .tileBody {
+  background: linear-gradient(0deg, rgba(3, 20, 14, 0.92) 0%, rgba(3, 20, 14, 0.7) 60%, rgba(3, 20, 14, 0) 100%);
+  padding-top: 56px;
+}
+.tile_vot[data-live="1"] .tileCount {
+  color: #ffb07a;
+}
+@media (max-width: 767px) {
+  .live {
+    display: none;
   }
 }

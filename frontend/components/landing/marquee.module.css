@@ -1,0 +1,63 @@
+/* Dải chữ chạy ngang: một hàng thấp (chữ đặc / viền xen kẽ, khẩu hiệu màu cam). */
+
+.band {
+  position: relative;
+  z-index: 3;
+  overflow: hidden;
+  padding: 12px 0 14px;
+  color: #fff;
+  background: var(--deep);
+  border-block: 1px solid rgba(255, 255, 255, 0.08);
+  /* hai mép mờ dần để chữ không bị cắt thẳng */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+:global([data-gl="on"]) .band {
+  background: rgba(3, 20, 14, 0.5);
+}
+.track {
+  display: flex;
+  width: max-content;
+}
+.group {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+.item {
+  display: inline-flex;
+  align-items: center;
+}
+.word {
+  font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-right: 0.5em;
+}
+.solid {
+  color: rgba(255, 255, 255, 0.92);
+}
+.line {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.55);
+}
+.accent {
+  color: var(--cta);
+}
+.star {
+  padding-right: 0.7em;
+  font-size: 0.9rem;
+  color: rgba(244, 105, 26, 0.7);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes run {
+    to { transform: translateX(-50%); }
+  }
+  .track {
+    animation: run 60s linear infinite;
+  }
+}

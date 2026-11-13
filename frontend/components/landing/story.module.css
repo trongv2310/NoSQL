@@ -19,6 +19,10 @@
 :global([data-gl="on"]) .story {
   background: transparent;
 }
+/* Lớp che phủ đều cả khối (chữ bên trái và thẻ bài viết bên phải đều nằm trên sàn sáng của cảnh 3D). */
+:global([data-gl="on"]) .shade {
+  background: linear-gradient(90deg, rgba(3, 20, 14, 0.74), rgba(3, 20, 14, 0.66) 55%, rgba(3, 20, 14, 0.74));
+}
 :global([data-gl="on"]) .media {
   opacity: 0;
   transition: opacity 1s ease;
@@ -177,7 +181,7 @@
 /* Cảnh ghim theo cuộn (desktop + cho phép chuyển động). `--p` do HeroScroll ghi (mode="section"). */
 @media (min-width: 992px) and (prefers-reduced-motion: no-preference) {
   .story {
-    height: 250vh;
+    height: 160vh;
   }
   .stage {
     position: sticky;
@@ -189,13 +193,13 @@
     padding: var(--sf-header-h, 130px) 0 48px;
   }
   .beats span {
-    opacity: clamp(0.16, calc((var(--p, 0) - var(--t, 0)) * 7), 1);
+    opacity: clamp(0.16, calc((var(--p, 0) - var(--t, 0)) * 9), 1);
   }
-  .beats span:nth-child(1) { --t: 0.02; }
-  .beats span:nth-child(2) { --t: 0.2; }
-  .beats span:nth-child(3) { --t: 0.38; }
+  .beats span:nth-child(1) { --t: 0; }
+  .beats span:nth-child(2) { --t: 0.14; }
+  .beats span:nth-child(3) { --t: 0.28; }
   .side {
-    --a: clamp(0, calc((var(--p, 0) - 0.5) * 6), 1);
+    --a: clamp(0, calc((var(--p, 0) - 0.34) * 7), 1);
     opacity: var(--a);
     translate: 0 calc((1 - var(--a)) * 48px);
   }
@@ -204,4 +208,38 @@
     opacity: 1;
     translate: none;
   }
+}
+
+/* Thẻ bài viết: kính tối cùng tông với các khối khác. */
+.article {
+  background: rgba(5, 28, 21, 0.94);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+}
+.articleThumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+.meta {
+  color: #ffb07a;
+}
+.articleTitle a {
+  color: #fff;
+}
+.summary {
+  color: rgba(255, 255, 255, 0.76);
+}
+.more {
+  border-top-color: rgba(255, 255, 255, 0.16);
+}
+.more a,
+.all {
+  color: #ffb07a;
+}
+.all:hover {
+  color: #ffd0ad;
+}
+.article a:focus-visible {
+  outline-color: #fff;
 }

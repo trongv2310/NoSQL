@@ -63,10 +63,22 @@ export function LandingMotion() {
     };
     goc.addEventListener("click", khiBam);
 
+    // Đèn rọi theo con trỏ trên các ô có data-spot (chỉ chuột thật; CSS tự ẩn khi không hover).
+    const khiDiChuot = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const o = (e.target as Element | null)?.closest?.<HTMLElement>("[data-spot]");
+      if (!o) return;
+      const r = o.getBoundingClientRect();
+      o.style.setProperty("--sx", `${e.clientX - r.left}px`);
+      o.style.setProperty("--sy", `${e.clientY - r.top}px`);
+    };
+    goc.addEventListener("pointermove", khiDiChuot, { passive: true });
+
     return () => {
       io.disconnect();
       hen.forEach((t) => window.clearTimeout(t));
       goc.removeEventListener("click", khiBam);
+      goc.removeEventListener("pointermove", khiDiChuot);
     };
   }, []);
   return null;

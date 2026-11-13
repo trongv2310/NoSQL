@@ -9,10 +9,21 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { TEN_ANH_MORPH, anhDaBam } from "@/lib/morph";
 import { InlineReviewForm } from "@/components/InlineReviewForm";
 import { ProductPurchaseInfo } from "@/components/ProductPurchaseInfo";
+import { HoiNguoiBan } from "@/components/HoiNguoiBan";
+import { ComboQuanCan } from "@/components/product/ComboQuanCan";
+import { TramCangCuoc } from "@/components/product/TramCangCuoc";
+import { Vot3D } from "@/components/product/Vot3D";
+import { KhaySoSanh } from "@/components/so-sanh/KhaySoSanh";
+import { NutSoSanh } from "@/components/so-sanh/NutSoSanh";
+import { useHoSo } from "@/components/HoSoChoi";
+import { NHAN_LOI_CHOI } from "@/lib/ho-so-choi";
+import { khoaLoai } from "@/lib/landing-data";
 import { useApp } from "@/components/AppProviders";
 import { ErrorBox, Loading, Page, Stars } from "@/components/Ui";
 import { api, apiPost, loiTuApi } from "@/lib/api";
+import { THONG_BAO_DOI_TAI_KHOAN, laLoiSaiTaiKhoan } from "@/components/product/useThemBienThe";
 import { imgUrl, ngay, vnd } from "@/lib/format";
+import { soLuongTrongGio, layGio, themVaoGio as themVaoGioKhach } from "@/lib/gio-khach";
 import { useApi } from "@/lib/hooks";
 import type { BienTheV, SanPhamV } from "@/lib/types";
 
@@ -26,7 +37,8 @@ interface ChiTiet {
   sizes: { id: string; tenSize: string; loaiSize: string }[];
   thongSoVot: BienTheV["thongSo"];
   danhGias: { id: string; noiDung: string; danhGia: number; ngayPhanHoi: string; tenKhachHang: string }[];
-  trungBinhDanhGia: number;
+  /** null khi chưa có đánh giá đã xác minh. */
+  trungBinhDanhGia: number | null;
   soDanhGia: number;
   giaBanThucTe: number;
 }
@@ -34,7 +46,8 @@ interface ChiTiet {
 export default function ChiTietSanPhamPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user, setCartCount, flash } = useApp();
+  const { user, ready, setCartCount, flash, taiKhoanHienTai, refreshUser } = useApp();
+  const hoSo = useHoSo();
   const { data, error, loading } = useApi<ChiTiet>(`/san-pham/${id}`);
   const [mauId, setMauId] = useState<string | null>(null);
   const [sizeId, setSizeId] = useState<string | null>(null);
@@ -42,6 +55,8 @@ export default function ChiTietSanPhamPage() {
   const anhSanPham = useRef<HTMLImageElement>(null);
   const nutThem = useRef<HTMLButtonElement>(null);
   const [dangThem, setDangThem] = useState(false);
+  const khuMua = useRef<HTMLDivElement>(null);
+  const [hienThanhMua, setHienThanhMua] = useState(false);
   const [tab, setTab] = useState<TabSanPham>("mo-ta");
   const nutTab = useRef<(HTMLButtonElement | null)[]>([]);
   const [anhXem, setAnhXem] = useState<{ sanPhamId: string; bienTheId?: string; url: string } | null>(null);
@@ -70,6 +85,21 @@ export default function ChiTietSanPhamPage() {
     window.addEventListener("hashchange", docHash);
     return () => window.removeEventListener("hashchange", docHash);
   }, [id]);
+
+  // Thanh mua dính (chỉ hiện ở màn hình hẹp, xem storefront-shop.css): hiện khi cụm nút mua chính không nằm trong khung nhìn.
+  // Đặt thuộc tính trên <body> để nút chat nâng lên khỏi thanh này thay vì đè lên nút mua.
+  useEffect(() => {
+    const el = khuMua.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const quanSat = new IntersectionObserver(([e]) => setHienThanhMua(!e.isIntersecting));
+    quanSat.observe(el);
+    return () => quanSat.disconnect();
+  }, [data]);
+  useEffect(() => {
+    if (hienThanhMua) document.body.dataset.stickyBuy = "1";
+    else delete document.body.dataset.stickyBuy;
+    return () => { delete document.body.dataset.stickyBuy; };
+  }, [hienThanhMua]);
 
   if (loading) {
     // Dựng sẵn khung ảnh từ thẻ vừa bấm để ảnh "bay" sang đây (View Transitions) thay vì nháy trắng.
@@ -101,10 +131,12 @@ export default function ChiTietSanPhamPage() {
   const anhHienThi = anhXem?.sanPhamId === id && anhXem.bienTheId === bienThe?.id ? anhXem.url : anh;
   const cacAnh = [...new Set([imgUrl(sp.hinhAnhDaiDien), ...data.bienThes.map((b) => imgUrl(b.hinhAnh || sp.hinhAnhDaiDien))])];
   const chonTab = (moi: TabSanPham) => setTab(moi);
+  const laVot = !!sp.thongSoVot || Object.keys(sp.thongSoKhacNhau ?? {}).length > 0 || data.bienThes.some((b) => !!b.thongSo);
+  const nhanPhienBan = [bienThe?.mau?.tenMau, bienThe?.size?.tenSize].filter(Boolean).join(" / ") || "tiêu chuẩn";
 
   const themVaoGio = async (muaNgay: boolean) => {
-    if (!user) {
-      router.push(`/TaiKhoan/DangNhap?returnUrl=${encodeURIComponent(`/Home/ChiTietSanPham/${id}`)}`);
+    if (!ready) {
+      flash("danger", "Đang kiểm tra phiên đăng nhập, vui lòng thử lại sau giây lát.");
       return;
     }
     if (!bienThe) {
@@ -115,15 +147,38 @@ export default function ChiTietSanPhamPage() {
       flash("danger", "Số lượng đã chọn vượt quá tồn kho của phiên bản này.");
       return;
     }
+    if (!user) {
+      // Khách chưa đăng nhập: giữ giỏ trên trình duyệt (chỉ id biến thể + số lượng); giá và tồn kho do server tính lại ở giỏ hàng.
+      if (soLuongTrongGio(layGio(), bienThe.id) + soLuong > Math.min(100, bienThe.soLuongTon)) {
+        flash("danger", `Giỏ hàng đã có ${soLuongTrongGio(layGio(), bienThe.id)} sản phẩm này, thêm ${soLuong} nữa sẽ vượt tồn kho hoặc giới hạn 100.`);
+        return;
+      }
+      const kq = themVaoGioKhach(bienThe.id, soLuong);
+      if (!kq.ok) {
+        flash("danger", kq.lyDo === "tran-dong" ? "Giỏ hàng chưa đăng nhập chỉ chứa tối đa 50 sản phẩm khác nhau." : "Không thêm được sản phẩm này vào giỏ hàng.");
+        return;
+      }
+      if (!muaNgay) await bayVaoGio(anhSanPham.current && anhSanPham.current.getBoundingClientRect().bottom > 0 ? anhSanPham.current : nutThem.current, anhHienThi);
+      flash("success", "Đã thêm sản phẩm vào giỏ hàng.");
+      if (muaNgay) router.push("/Home/ViewCart");
+      return;
+    }
     setDangThem(true);
+    // Danh tính đọc đồng bộ lúc bấm và gửi kèm: máy chủ từ chối 403 trước khi ghi nếu phiên đã đổi sang tài khoản khác (đăng nhập ở thẻ khác).
+    const nguoi = taiKhoanHienTai() ?? user.id;
     try {
-      const r = await apiPost<{ message: string; cartCount: number }>("/gio-hang", { chiTietId: bienThe.id, quantity: soLuong });
+      const r = await apiPost<{ message: string; cartCount: number }>("/gio-hang", { chiTietId: bienThe.id, quantity: soLuong, taiKhoanDuKien: nguoi });
+      if (taiKhoanHienTai() !== nguoi) {
+        flash("danger", "Tài khoản đăng nhập đã đổi trong lúc thêm. Sản phẩm vừa rồi nằm trong giỏ của tài khoản trước, không phải tài khoản hiện tại.");
+        return;
+      }
       if (!muaNgay) await bayVaoGio(anhSanPham.current && anhSanPham.current.getBoundingClientRect().bottom > 0 ? anhSanPham.current : nutThem.current, anhHienThi);
       setCartCount(r.cartCount);
       flash("success", r.message);
       if (muaNgay) router.push("/Home/ViewCart");
     } catch (e) {
-      flash("danger", loiTuApi(e));
+      if (laLoiSaiTaiKhoan(e)) { void refreshUser(); flash("danger", THONG_BAO_DOI_TAI_KHOAN); }
+      else flash("danger", loiTuApi(e));
     } finally {
       setDangThem(false);
     }
@@ -144,7 +199,7 @@ export default function ChiTietSanPhamPage() {
           <div className="text-muted text-uppercase small">{sp.hang?.tenHang ?? "Hãng khác"}</div>
           <h1 className="h3">{sp.tenSanPham}</h1>
           <div className="pdp-meta"><span className={`pdp-stock ${conHang ? "" : "is-empty"}`}><i className={`fa-solid ${conHang ? "fa-circle-check" : "fa-circle-xmark"}`} aria-hidden="true" /> {conHang ? "Còn hàng" : bienThe ? "Hết hàng" : "Chọn phiên bản"}</span><span className="pdp-sku">SKU: {bienThe?.sku ?? "—"}</span></div>
-          <div className="d-flex align-items-center gap-2 mb-2 pdp-rating"><Stars value={phanHoi.soDanhGia ? phanHoi.trungBinhDanhGia : 0} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>
+          {phanHoi.soDanhGia > 0 && phanHoi.trungBinhDanhGia !== null && <div className="d-flex align-items-center gap-2 mb-2 pdp-rating"><Stars value={phanHoi.trungBinhDanhGia} /><span className="text-muted small">({phanHoi.soDanhGia} đánh giá)</span></div>}
           <div className="mb-3 product-detail-price">
             <span className="h3 text-danger me-2">{vnd(gia)}</span>
             {coGiam && <><span className="text-muted text-decoration-line-through me-2">{vnd(giaGocHienThi)}</span><span className="badge bg-danger">-{Math.round((giaGocHienThi - gia) / giaGocHienThi * 100)}%</span></>}
@@ -184,16 +239,27 @@ export default function ChiTietSanPhamPage() {
             <span>Tạm tính · {soLuong} sản phẩm</span><strong>{bienThe ? vnd(gia * soLuong) : "—"}</strong>
             {coGiam && bienThe && <small>Tiết kiệm {vnd((giaGocHienThi - gia) * soLuong)}</small>}
           </div>
-          <div className="product-purchase-actions">
+          <div className="product-purchase-actions" ref={khuMua}>
             <div className="pdp-quantity"><button type="button" aria-label="Giảm số lượng" disabled={soLuong <= 1 || dangThem || !conHang} onClick={() => setSoLuong((v) => Math.max(1, v - 1))}>−</button><input type="number" min={1} max={Math.min(100, bienThe?.soLuongTon || 100)} value={soLuong} disabled={dangThem || !conHang}
               onChange={(e) => setSoLuong(Math.max(1, Math.min(100, Math.floor(Number(e.target.value)) || 1)))} aria-label="Số lượng" /><button type="button" aria-label="Tăng số lượng" disabled={soLuong >= Math.min(100, bienThe?.soLuongTon || 100) || dangThem || !conHang} onClick={() => setSoLuong((v) => Math.min(100, bienThe?.soLuongTon || 100, v + 1))}>+</button></div>
-            <button ref={nutThem} className="btn product-add-btn pdp-add-to-cart" aria-busy={dangThem} disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
-            <button className="btn pdp-buy-now" disabled={!conHang || vuotTon || dangThem} onClick={() => themVaoGio(true)}>Mua ngay</button>
+            <button ref={nutThem} className="btn product-add-btn pdp-add-to-cart" aria-busy={dangThem} disabled={!conHang || vuotTon || dangThem || !ready} onClick={() => themVaoGio(false)}><i className={`fa-solid ${dangThem ? "fa-spinner fa-spin" : "fa-cart-plus"}`} aria-hidden="true" /> {dangThem ? "Đang thêm…" : "Thêm vào giỏ"}</button>
+            <button className="btn pdp-buy-now" disabled={!conHang || vuotTon || dangThem || !ready} onClick={() => themVaoGio(true)}>Mua ngay</button>
           </div>
           <div className="product-purchase-support">
             <div><i className="fa-solid fa-wallet" aria-hidden="true" /><span><strong>COD hoặc MoMo</strong>Chọn phương thức ở bước thanh toán</span></div>
             <Link href="/Home/Contact"><i className="fa-regular fa-comments" aria-hidden="true" /><span><strong>Cần tư vấn thêm?</strong>Liên hệ để chọn size / phiên bản</span><span aria-hidden="true">↗</span></Link>
           </div>
+          {laVot && (
+            <div className="pdp-tools" role="group" aria-label="Công cụ cho vợt">
+              <NutSoSanh sanPhamId={sp.id} ten={sp.tenSanPham} bienTheId={bienThe?.id ?? null} kieu="chu" />
+              <Link href={`/tu-vot?them=${sp.id}${bienThe ? `&bien=${bienThe.id}` : ""}`} className="pdp-tool-link"><i className="fa-solid fa-box-archive" aria-hidden="true" /> Thêm vào tủ vợt</Link>
+            </div>
+          )}
+          {laVot && <KhaySoSanh />}
+          <p className="pdp-policy-links">
+            <Link href="/ChinhSach/bao-hanh">Bảo hành</Link><Link href="/ChinhSach/doi-tra">Đổi trả</Link><Link href="/ChinhSach/giao-hang">Giao hàng</Link>
+            <small>Nội dung chính sách đang được cửa hàng cập nhật.</small>
+          </p>
           </div>
         </div>
       </div>
@@ -217,7 +283,7 @@ export default function ChiTietSanPhamPage() {
         </section>
       </div>
       <div id="panel-thong-so" role="tabpanel" aria-labelledby="tab-thong-so" hidden={tab !== "thong-so"} tabIndex={0}>
-        <ProductPurchaseInfo bienThe={bienThe} />
+        <ProductPurchaseInfo bienThe={bienThe} khacNhau={sp.thongSoKhacNhau} />
       </div>
       <div id="panel-danh-gia" role="tabpanel" aria-labelledby="tab-danh-gia" hidden={tab !== "danh-gia"} tabIndex={0}>
       <section id="product-reviews" className="product-reviews product-section-card" aria-labelledby="product-reviews-title">
@@ -230,8 +296,8 @@ export default function ChiTietSanPhamPage() {
         </div>
         <div className="product-review-layout">
           <div className="product-rating-summary">
-            <strong>{phanHoi.soDanhGia > 0 ? phanHoi.trungBinhDanhGia.toFixed(1) : "—"}<small>/ 5</small></strong>
-            <Stars value={phanHoi.soDanhGia ? phanHoi.trungBinhDanhGia : 0} />
+            <strong>{phanHoi.soDanhGia > 0 && phanHoi.trungBinhDanhGia !== null ? phanHoi.trungBinhDanhGia.toFixed(1) : "—"}{phanHoi.soDanhGia > 0 && <small>/ 5</small>}</strong>
+            {phanHoi.soDanhGia > 0 && phanHoi.trungBinhDanhGia !== null && <Stars value={phanHoi.trungBinhDanhGia} />}
             <p>{phanHoi.soDanhGia > 0 ? `Từ ${phanHoi.soDanhGia} đánh giá` : "Chưa có đánh giá"}</p>
           </div>
           <div className="product-review-list">
@@ -246,7 +312,38 @@ export default function ChiTietSanPhamPage() {
         </div>
       </section>
       </div>
+      {laVot && (
+        <div className="pdp-cong-cu">
+          <section id="tram-cang" className="product-section-card" aria-labelledby="tram-cang-tieu-de">
+            <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-solid fa-ruler-horizontal" /></span><div><h2 id="tram-cang-tieu-de">Trạm căng cước</h2><p className="product-section-caption">Chọn mức căng trong khoảng nhà sản xuất ghi · tham khảo</p></div></div>
+            <TramCangCuoc bienThe={bienThe} tenVot={sp.tenSanPham} />
+          </section>
+          <section id="combo-quan-can" className="product-section-card" aria-labelledby="combo-tieu-de">
+            <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-solid fa-bag-shopping" /></span><div><h2 id="combo-tieu-de">Vợt + quấn cán</h2><p className="product-section-caption">Hai món đang bán, thêm vào giỏ cùng lúc</p></div></div>
+            <ComboQuanCan bienVot={bienThe} tenVot={sp.tenSanPham} />
+          </section>
+          <section id="vot-3d" className="product-section-card" aria-labelledby="vot-3d-tieu-de">
+            <div className="product-card-heading"><span className="product-heading-icon" aria-hidden="true"><i className="fa-solid fa-cube" /></span><div><h2 id="vot-3d-tieu-de">Xem vợt 3D</h2><p className="product-section-caption">Mô hình minh họa, chỉ tải khi bạn mở</p></div></div>
+            <Vot3D ts={bienThe?.thongSo} nhanPhienBan={nhanPhienBan} />
+          </section>
+        </div>
+      )}
+      <HoiNguoiBan id="hoi-nguoi-ban" tieuDe="Hỏi người bán về sản phẩm này"
+        mota={`Hỏi về ${sp.tenSanPham}: phiên bản, tồn kho, giao hàng hay có hợp với bạn không. Người bán trả lời dựa trên dữ liệu cửa hàng.`}
+        goiY={[
+          khoaLoai(sp.loai?.tenLoai) === "vot" && hoSo.lc ? `${sp.tenSanPham} có hợp lối chơi ${NHAN_LOI_CHOI[hoSo.lc]} không?` : `${sp.tenSanPham} phù hợp với ai?`,
+          "Phiên bản nào đang còn hàng?",
+          "Phí giao hàng và đổi trả thế nào?",
+        ]} />
       {sp.loai && <RelatedProducts key={sp.id} sanPhamId={sp.id} loai={sp.loai} />}
+      <div className={`pdp-sticky-buy${hienThanhMua ? " is-on" : ""}`} role="region" aria-label="Mua nhanh" hidden={!hienThanhMua}>
+        <div className="pdp-sticky-price">
+          <strong>{bienThe ? vnd(gia * soLuong) : vnd(data.giaBanThucTe)}</strong>
+          <small>{bienThe ? [bienThe.mau?.tenMau, bienThe.size?.tenSize].filter(Boolean).join(" · ") || sp.tenSanPham : "Chọn phiên bản"}</small>
+        </div>
+        <button type="button" className="btn pdp-sticky-add" disabled={!conHang || vuotTon || dangThem || !ready} onClick={() => themVaoGio(false)}><i className="fa-solid fa-cart-plus" aria-hidden="true" /> Thêm vào giỏ</button>
+        <button type="button" className="btn pdp-sticky-now" disabled={!conHang || vuotTon || dangThem || !ready} onClick={() => themVaoGio(true)}>Mua ngay</button>
+      </div>
     </Page>
   );
 }

@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { giuFocusTrongVung } from "@/lib/bay-focus";
 import { apiPost } from "@/lib/api";
 import { imgUrl } from "@/lib/format";
 import { useApp } from "./AppProviders";
+import { HoSoChip } from "./HoSoChoi";
+import { useSoSanh } from "./so-sanh/so-sanh-store";
+import { useSoVotDenHan } from "./tu-vot/tu-vot-store";
 
 const LOAI = [
   { khoa: "Vot", ten: "VỢT CẦU LÔNG", tenThuong: "Vợt cầu lông" },
@@ -25,6 +29,15 @@ const HANG_THEO_LOAI: Record<string, { hang: string; dong: string[] }[]> = {
   AoQuan: [{ hang: "Yonex", dong: [] }, { hang: "Lining", dong: [] }, { hang: "Victor", dong: [] }, { hang: "Mizuno", dong: [] }],
 };
 
+/** Trang hỗ trợ khách; nội dung ở app/(site)/ChinhSach. Chính sách chưa được chủ cửa hàng cung cấp thì trang nói rõ là đang cập nhật. */
+const CHINH_SACH = [
+  { slug: "huong-dan-mua-hang", ten: "Hướng dẫn mua hàng" },
+  { slug: "bao-hanh", ten: "Chính sách bảo hành" },
+  { slug: "doi-tra", ten: "Chính sách đổi trả" },
+  { slug: "giao-hang", ten: "Chính sách giao hàng" },
+  { slug: "cau-hoi-thuong-gap", ten: "Câu hỏi thường gặp" },
+];
+
 const GOI_Y_TIM = ["Vợt Yonex", "Giày Victor", "Áo Lining", "Quả cầu lông", "Quấn cán"];
 
 const spUrl = (p: Record<string, string>) => `/SanPham/Index?${new URLSearchParams(p).toString()}`;
@@ -35,10 +48,26 @@ export function Header() {
   const pathname = usePathname();
   const [keyword, setKeyword] = useState("");
   const [moMenu, setMoMenu] = useState(false);
+  const nutMoMenu = useRef<HTMLButtonElement>(null);
+  const nutDongMenu = useRef<HTMLButtonElement>(null);
+  const nganKeo = useRef<HTMLElement>(null);
+  const dongMenu = () => { setMoMenu(false); nutMoMenu.current?.focus(); };
   const [moUser, setMoUser] = useState(false);
   const [loaiActive, setLoaiActive] = useState("Vot");
   const [moSub, setMoSub] = useState(false);
   const [menuDong, setMenuDong] = useState(false);
+
+  // Menu di động mở: đưa focus vào menu; Escape ở bất cứ đâu trên trang đóng menu và trả focus về nút mở.
+  useEffect(() => {
+    if (!moMenu) return;
+    nutDongMenu.current?.focus();
+    const khiPhim = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setMoMenu(false); nutMoMenu.current?.focus(); }
+      else giuFocusTrongVung(e, nganKeo.current);
+    };
+    document.addEventListener("keydown", khiPhim);
+    return () => document.removeEventListener("keydown", khiPhim);
+  }, [moMenu]);
 
   // Đóng menu di động mỗi khi chuyển trang.
   useEffect(() => {
@@ -75,6 +104,8 @@ export function Header() {
         : [];
 
   const logo = imgUrl(site.logo, "images/HUIT.jpg");
+  const { muc: dsSoSanh } = useSoSanh();
+  const votDenHan = useSoVotDenHan();
   const act = (p: string) => ((p === "/" ? pathname === "/" : pathname.startsWith(p)) ? "active" : "");
 
   return (
@@ -83,8 +114,10 @@ export function Header() {
         <div className="sf-topbar">
           <div className="container sf-topbar-in">
             <div className="sf-topbar-left">
-              <span><i className="fa-solid fa-phone-volume" aria-hidden="true" /> Hotline <a href="tel:0123456789">0123456789</a></span>
-              <span className="d-none d-lg-inline-flex"><i className="fa-solid fa-truck-fast" aria-hidden="true" /> Giao hàng tận nơi</span>
+              {site.lienHe?.dienThoai
+                ? <span><i className="fa-solid fa-phone-volume" aria-hidden="true" /> Hotline <a href={`tel:${site.lienHe.dienThoai.replace(/[^0-9+]/g, "")}`}>{site.lienHe.dienThoai}</a></span>
+                : <span><i className="fa-solid fa-phone-volume" aria-hidden="true" /> <Link href="/Home/Contact">Liên hệ cửa hàng</Link></span>}
+              <span className="d-none d-lg-inline-flex"><i className="fa-solid fa-truck-fast" aria-hidden="true" /> Đặt online, theo dõi đơn</span>
               <span className="d-none d-xl-inline-flex"><i className="fa-solid fa-wallet" aria-hidden="true" /> Thanh toán COD hoặc MoMo</span>
             </div>
             <div className="sf-topbar-right">
@@ -95,21 +128,23 @@ export function Header() {
         </div>
         <div className="header-top">
           <div className="header-brand-wrap">
-            <button className="mobile-toggle-btn" type="button" aria-label="Mở menu" aria-expanded={moMenu} onClick={() => setMoMenu(true)}>
+            <button ref={nutMoMenu} className="mobile-toggle-btn" type="button" aria-label="Mở menu" aria-expanded={moMenu} aria-controls="mobile-nav-drawer" onClick={() => setMoMenu(true)}>
               <i className="fa-solid fa-bars" />
             </button>
             <div className="logo">
-              <Link href="/" className="sf-brand">{ }<img src={logo} alt="Logo Cửa Hàng Cầu Lông" /><span className="sf-brand-text"><b>{site.tenSite}</b><small>Dụng cụ cầu lông chính hãng</small></span></Link>
+              <Link href="/" className="sf-brand">{ }<img src={logo} alt="Logo Cửa Hàng Cầu Lông" /><span className="sf-brand-text"><b>{site.tenSite}</b><small>Dụng cụ cầu lông</small></span></Link>
             </div>
           </div>
           <form className="search-form search-absolute" onSubmit={(e) => { e.preventDefault(); if (keyword.trim()) router.push(`/SanPham/TimKiem?keyword=${encodeURIComponent(keyword.trim())}`); }}>
-            <input type="text" name="keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm kiếm sản phẩm..." className="search-input" />
+            <label htmlFor="sf-tim-kiem" className="visually-hidden">Tìm kiếm sản phẩm</label>
+            <input id="sf-tim-kiem" type="search" name="keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm kiếm sản phẩm..." className="search-input" autoComplete="off" enterKeyHint="search" />
             <button type="submit" className="search-btn" aria-label="Tìm kiếm"><i className="fa-solid fa-magnifying-glass" /></button>
             <div className="sf-suggest" aria-label="Gợi ý tìm kiếm">
               <span>Tìm nhiều</span>
               {GOI_Y_TIM.map((t) => <Link key={t} href={`/SanPham/TimKiem?keyword=${encodeURIComponent(t)}`}><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /> {t}</Link>)}
             </div>
           </form>
+          <HoSoChip />
           <div className="header-actions">
             <div className="account-section">
               {!user ? (
@@ -184,20 +219,24 @@ export function Header() {
             <li className={`${act("/KhuyenMai")} nav-hot`}><Link href="/KhuyenMai/Index">KHUYẾN MÃI</Link></li>
             <li className={act("/BangTin")}><Link href="/BangTin">BẢNG TIN</Link></li>
             <li className={act("/DonHang")}><Link href="/DonHang/Index">ĐƠN HÀNG</Link></li>
+            <li className={act("/so-sanh")}><Link href="/so-sanh" aria-label={dsSoSanh.length ? `SO SÁNH, đã chọn ${dsSoSanh.length} vợt` : "SO SÁNH"}><span className="nav-co-dem">SO SÁNH{dsSoSanh.length > 0 && <b className="nav-dem" aria-hidden="true">{dsSoSanh.length}</b>}</span></Link></li>
+            {/* Landing 3D là trang HTML tĩnh ngoài React nên dùng <a> (tải trang đầy đủ), không dùng Link */}
+            <li className={act("/trai-nghiem")}><a href="/trai-nghiem">TRẢI NGHIỆM 3D</a></li>
+            <li className={act("/tu-vot")}><Link href="/tu-vot" aria-label={votDenHan ? `TỦ VỢT, ${votDenHan} vợt đến lịch nhắc` : "TỦ VỢT"}><span className="nav-co-dem">TỦ VỢT{votDenHan > 0 && <b className="nav-dem nav-dem-nhac" aria-hidden="true">{votDenHan}</b>}</span></Link></li>
             <li className={act("/Home/Contact")}><Link href="/Home/Contact">LIÊN HỆ</Link></li>
           </ul>
         </nav>
       </header>
 
-      <div className={`mobile-nav-backdrop ${moMenu ? "show active open" : ""}`} onClick={() => setMoMenu(false)} />
-      <aside className={`mobile-nav-drawer ${moMenu ? "show active open" : ""}`} aria-label="Menu di động">
+      <div className={`mobile-nav-backdrop ${moMenu ? "show active open" : ""}`} onClick={dongMenu} />
+      <aside id="mobile-nav-drawer" ref={nganKeo} className={`mobile-nav-drawer ${moMenu ? "show active open" : ""}`} aria-label="Menu di động">
         <div className="mobile-nav-header">
           <div className="d-flex align-items-center gap-2">
             { }
             <img src={logo} alt="Logo" className="mobile-nav-logo" />
             <strong className="text-truncate" style={{ maxWidth: 180 }}>{site.tenSite}</strong>
           </div>
-          <button className="mobile-nav-close" type="button" aria-label="Đóng menu" onClick={() => setMoMenu(false)}><i className="fa-solid fa-xmark" /></button>
+          <button ref={nutDongMenu} className="mobile-nav-close" type="button" aria-label="Đóng menu" onClick={dongMenu}><i className="fa-solid fa-xmark" /></button>
         </div>
         <div className="mobile-nav-body">
           <ul className="mobile-nav-list">
@@ -214,6 +253,9 @@ export function Header() {
             <li><Link href="/KhuyenMai/Index" className="mobile-nav-link"><i className="fa-solid fa-tags" /><span>Khuyến mãi</span></Link></li>
             <li><Link href="/BangTin" className="mobile-nav-link"><i className="fa-solid fa-newspaper" /><span>Bảng tin</span></Link></li>
             <li><Link href="/DonHang/Index" className="mobile-nav-link"><i className="fa-solid fa-clipboard-list" /><span>Đơn hàng</span></Link></li>
+            <li><Link href="/so-sanh" className="mobile-nav-link"><i className="fa-solid fa-code-compare" /><span>So sánh vợt{dsSoSanh.length > 0 ? ` (${dsSoSanh.length})` : ""}</span></Link></li>
+            <li><a href="/trai-nghiem" className="mobile-nav-link"><i className="fa-solid fa-cube" /><span>Trải nghiệm 3D</span></a></li>
+            <li><Link href="/tu-vot" className="mobile-nav-link"><i className="fa-solid fa-box-archive" /><span>Tủ vợt{votDenHan > 0 ? ` (${votDenHan} đến lịch nhắc)` : ""}</span></Link></li>
             <li><Link href="/Home/Contact" className="mobile-nav-link"><i className="fa-solid fa-phone" /><span>Liên hệ</span></Link></li>
             <li><Link href="/Home/ViewCart" className="mobile-nav-link"><i className="fa-solid fa-cart-shopping" /><span>Giỏ hàng ({cartCount})</span></Link></li>
           </ul>
@@ -243,13 +285,16 @@ export function Header() {
 }
 
 export function Footer() {
+  const { site } = useApp();
+  const lh = site.lienHe;
+  const coLienHe = !!(lh?.diaChi || lh?.dienThoai || lh?.email || lh?.gioMoCua);
   return (
     <>
     <div className="sf-trust-wrap">
         <ul className="sf-trust" aria-label="Cam kết của cửa hàng">
           {[
-            ["fa-medal", "Hàng chính hãng", "Sản phẩm từ Yonex, Li-Ning, Victor, Mizuno"],
-            ["fa-truck-fast", "Giao hàng tận nơi", "Đặt online, theo dõi trạng thái đơn"],
+            ["fa-medal", "Thương hiệu trong cửa hàng", "Yonex, Li-Ning, Victor, Mizuno"],
+            ["fa-truck-fast", "Đặt online", "Theo dõi trạng thái đơn sau khi đặt"],
             ["fa-wallet", "Thanh toán linh hoạt", "Trả khi nhận hàng (COD) hoặc ví MoMo"],
             ["fa-robot", "Trợ lý AI tư vấn", "Gợi ý vợt, giày theo ngân sách của bạn"],
           ].map(([icon, ten, mota]) => (
@@ -261,15 +306,17 @@ export function Footer() {
       <div className="footer-content">
         <div className="footer-section footer-brand">
           <h4>CỬA HÀNG CẦU LÔNG</h4>
-          <p className="footer-about">Dụng cụ, trang phục và phụ kiện cầu lông chính hãng. Chọn theo ngân sách, theo lối chơi — và có người đồng hành tư vấn.</p>
+          <p className="footer-about">Dụng cụ, trang phục và phụ kiện cầu lông. Chọn theo ngân sách, theo lối chơi — và có người đồng hành tư vấn.</p>
           <div className="footer-pay"><span>Thanh toán</span><b>COD</b>{ }<img src="/images/momo-logo.png" alt="MoMo" height={22} /></div>
         </div>
         <div className="footer-section">
           <h4>THÔNG TIN LIÊN HỆ</h4>
-          <p><i className="fa-solid fa-location-dot" /> 140 Lê Trọng Tấn, Tây Thạnh, Tân Phú, TP.HCM</p>
-          <p><i className="fa-solid fa-phone" /> 0123456789</p>
-          <p><i className="fa-solid fa-envelope" /> HUIT@gmail.com</p>
-          <p><i className="fa-solid fa-clock" /> 8:00 – 21:00 mỗi ngày</p>
+          {lh?.diaChi && <p><i className="fa-solid fa-location-dot" aria-hidden="true" /> {lh.diaChi}</p>}
+          {lh?.dienThoai && <p><i className="fa-solid fa-phone" aria-hidden="true" /> <a href={`tel:${lh.dienThoai.replace(/[^0-9+]/g, "")}`}>{lh.dienThoai}</a></p>}
+          {lh?.email && <p><i className="fa-solid fa-envelope" aria-hidden="true" /> <a href={`mailto:${lh.email}`}>{lh.email}</a></p>}
+          {lh?.gioMoCua && <p><i className="fa-solid fa-clock" aria-hidden="true" /> {lh.gioMoCua}</p>}
+          {!coLienHe && <p>Thông tin liên hệ đang được cập nhật.</p>}
+          <Link href="/Home/Contact">Trang liên hệ</Link>
         </div>
         <div className="footer-section">
           <h4>DANH MỤC SẢN PHẨM</h4>
@@ -278,7 +325,7 @@ export function Footer() {
         </div>
         <div className="footer-section">
           <h4>HỖ TRỢ KHÁCH HÀNG</h4>
-          {["Hướng dẫn mua hàng", "Chính sách bảo hành", "Chính sách đổi trả", "Câu hỏi thường gặp"].map((t) => <Link key={t} href="/">{t}</Link>)}
+          {CHINH_SACH.map((c) => <Link key={c.slug} href={`/ChinhSach/${c.slug}`}>{c.ten}</Link>)}
           <Link href="/DonHang/Index">Theo dõi đơn hàng</Link>
         </div>
       </div>
