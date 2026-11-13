@@ -3,17 +3,26 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { AuthRequest } from './auth.types';
-import { Quyen } from '../schemas';
+import { Quyen, TaiKhoan } from '../schemas';
 
 export const COOKIE_TOKEN = 'token';
 
-/** Guard toàn cục: nếu có token hợp lệ thì gắn req.user, không bao giờ chặn request. */
+/**
+ * Guard toàn cục: nếu có token hợp lệ thì gắn req.user, không bao giờ chặn request.
+ * Quyền lấy từ DB mỗi lần (M5A-03), không tin `maQuyen` trong token: tài khoản bị xóa thì mất phiên, bị hạ/nâng quyền thì có hiệu lực ngay,
+ * dù token cũ còn hạn. Không đọc được DB thì coi như chưa đăng nhập (đóng thay vì mở).
+ */
 @Injectable()
 export class ParseTokenGuard implements CanActivate {
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    @InjectModel(TaiKhoan.name) private readonly taiKhoanModel: Model<TaiKhoan>,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<AuthRequest>();
     const bearer = req.headers.authorization?.startsWith('Bearer ')
       ? req.headers.authorization.slice(7)
@@ -22,7 +31,8 @@ export class ParseTokenGuard implements CanActivate {
     if (token) {
       try {
         const p = this.jwt.verify<{ sub: string; tenDangNhap: string; maQuyen: number }>(token);
-        req.user = { id: p.sub, tenDangNhap: p.tenDangNhap, maQuyen: p.maQuyen };
+        const tk = await this.taiKhoanModel.findById(p.sub).select('tenDangNhap maQuyen').lean();
+        req.user = tk ? { id: p.sub, tenDangNhap: tk.tenDangNhap, maQuyen: tk.maQuyen } : undefined;
       } catch {
         req.user = undefined;
       }

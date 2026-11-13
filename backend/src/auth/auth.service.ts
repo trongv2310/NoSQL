@@ -6,6 +6,9 @@ import { Model, Types } from 'mongoose';
 import { DangKyDto, DangNhapDto, DoiMatKhauDto } from './auth.dto';
 import { GioHang, KhachHang, Quyen, TaiKhoan, TaiKhoanDocument } from '../schemas';
 
+/** Chuỗi băm bcrypt ($2a$/$2b$/$2y$ + cost + 53 ký tự). */
+const DANG_BCRYPT = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,7 +27,8 @@ export class AuthService {
     if (await bcrypt.compare(matKhau, tk.matKhau).catch(() => false)) {
       return true;
     }
-    if (tk.matKhau === matKhau) {
+    // Chỉ bản ghi plaintext cũ mới được so bằng nhau; một chuỗi bcrypt đã lưu KHÔNG được dùng chính nó làm mật khẩu (M5A-05).
+    if (!DANG_BCRYPT.test(tk.matKhau) && tk.matKhau === matKhau) {
       tk.matKhau = await bcrypt.hash(matKhau, 10);
       await tk.save();
       return true;
@@ -48,7 +52,7 @@ export class AuthService {
 
   private async tongSoLuongGio(khachHangId: string): Promise<number> {
     const r = await this.gioHangModel.aggregate<{ t: number }>([
-      { $match: { khachHang: new Types.ObjectId(khachHangId) } },
+      { $match: { khachHang: new Types.ObjectId(khachHangId), daXoa: { $ne: true } } },
       { $group: { _id: null, t: { $sum: '$soLuong' } } },
     ]);
     return r[0]?.t ?? 0;

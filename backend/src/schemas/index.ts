@@ -10,7 +10,7 @@ import {
   PhanHoi, PhanHoiSchema, SanPham, SanPhamSchema,
 } from './san-pham.schema';
 import {
-  Counter, CounterSchema, DonHang, DonHangSchema, GioHang, GioHangSchema,
+  Counter, CounterSchema, DonHang, DonHangSchema, GioHang, GioHangDongBo, GioHangDongBoDong, GioHangDongBoDongSchema, GioHangDongBoSchema, GioHangSchema,
   LogLoiGiaoTac, LogLoiGiaoTacSchema,
 } from './don-hang.schema';
 import { CauHinh, CauHinhSchema, TinTuc, TinTucSchema, TranDau, TranDauSchema } from './ban-tin.schema';
@@ -37,6 +37,8 @@ export const ALL_MODELS: ModelDefinition[] = [
   { name: PhanHoi.name, schema: PhanHoiSchema },
   { name: DonHang.name, schema: DonHangSchema },
   { name: GioHang.name, schema: GioHangSchema },
+  { name: GioHangDongBo.name, schema: GioHangDongBoSchema },
+  { name: GioHangDongBoDong.name, schema: GioHangDongBoDongSchema },
   { name: Counter.name, schema: CounterSchema },
   { name: LogLoiGiaoTac.name, schema: LogLoiGiaoTacSchema },
   { name: TranDau.name, schema: TranDauSchema },

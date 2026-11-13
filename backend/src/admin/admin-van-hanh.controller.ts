@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { Roles } from '../auth/auth.guards';
 import { donHangView } from '../don-hang/don-hang.controller';
 import { OrderService } from '../don-hang/order.service';
-import { TRANG_THAI_LOAI_TRU } from '../don-hang/trang-thai';
+import { TRANG_THAI_KHONG_TINH_DOANH_THU } from '../don-hang/trang-thai';
 import { likeRegex, phanTrang } from '../common/helpers';
 import { idOf } from '../common/mappers';
 import { DonHang, KhachHang, PhanHoi, Quyen, SanPham } from '../schemas';
@@ -100,7 +100,7 @@ export class AdminVanHanhController {
     }
     const tu = new Date(nam, 0, 1);
     const den = new Date(nam + 1, 0, 1);
-    const hopLe = { ngayDat: { $gte: tu, $lt: den }, trangThai: { $nin: TRANG_THAI_LOAI_TRU } };
+    const hopLe = { ngayDat: { $gte: tu, $lt: den }, trangThai: { $nin: TRANG_THAI_KHONG_TINH_DOANH_THU } };
 
     const [theoThang, banChay, tongSanPham, soCanhBao] = await Promise.all([
       this.donModel.aggregate<{ _id: number; soLuongDon: number; tongDoanhThu: number }>([

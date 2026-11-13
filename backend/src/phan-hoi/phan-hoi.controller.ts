@@ -48,6 +48,8 @@ export class PhanHoiController {
       sanPham: dto.sanPhamId,
       danhGia: dto.danhGia,
       noiDung: dto.noiDung,
+      // Gửi qua tài khoản khách hàng thật trên hệ thống nên được tính là đã xác minh (khác dữ liệu mẫu/import).
+      daXacMinh: true,
     });
     return { message: 'Gửi đánh giá thành công!' };
   }

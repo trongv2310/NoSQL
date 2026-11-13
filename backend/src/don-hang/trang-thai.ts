@@ -19,6 +19,9 @@ export const KHACH_DUOC_HUY: string[] = [
 /** Trạng thái không tính vào doanh thu. */
 export const TRANG_THAI_LOAI_TRU: string[] = [TRANG_THAI.DaHuy, TRANG_THAI.DaHuyThanhToanThatBai];
 
+/** Trạng thái không tính vào doanh thu/"đã bán": ngoài các đơn hủy còn có đơn MoMo CHƯA thanh toán (tiền chưa về, khách có thể bỏ cổng). */
+export const TRANG_THAI_KHONG_TINH_DOANH_THU: string[] = [...TRANG_THAI_LOAI_TRU, TRANG_THAI.ChoThanhToanMomo];
+
 export function coTheChuyen(tu: string, den: string): boolean {
   return (CHUYEN_TRANG_THAI[tu] ?? []).includes(den);
 }

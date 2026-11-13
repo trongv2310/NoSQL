@@ -101,6 +101,11 @@ export class PhanHoi {
   @Prop({ maxlength: 255 }) noiDung?: string;
   @Prop({ default: () => new Date(), index: true }) ngayPhanHoi: Date;
   @Prop({ default: 5, min: 1, max: 5, index: true }) danhGia: number;
+  /**
+   * true = đánh giá do khách gửi qua tài khoản trên hệ thống. Dữ liệu mẫu/import cũ không có cờ này nên bị coi là chưa xác minh:
+   * vẫn nằm trong DB (không xóa) nhưng không được hiển thị công khai hay tính vào điểm trung bình.
+   */
+  @Prop({ default: false, index: true }) daXacMinh: boolean;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang' }) khachHang?: Types.ObjectId;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'SanPham', index: true }) sanPham: Types.ObjectId;
 }

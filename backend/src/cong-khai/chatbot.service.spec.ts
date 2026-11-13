@@ -134,8 +134,28 @@ describe('ChatbotService – chế độ tra cứu (không có GEMINI_API_KEY)',
     expect(tt.reply).toMatch(/MoMo/);
     const bh = await chat('bảo hành mấy tháng');
     expect(bh.reply).toMatch(/chưa có thông tin/);
-    expect(bh.reply).toContain('0123456789');
     expect(bh.reply).not.toMatch(/\d+ tháng/);
+  });
+
+  describe('thông tin liên hệ', () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    it('chưa cấu hình thì nói đang cập nhật, không dùng số điện thoại/email/địa chỉ mẫu', async () => {
+      for (const k of ['SHOP_HOTLINE', 'SHOP_EMAIL', 'SHOP_DIA_CHI', 'SHOP_GIO_MO_CUA']) vi.stubEnv(k, '');
+      for (const cau of ['bảo hành mấy tháng', 'địa chỉ cửa hàng ở đâu', 'cho mình xin số điện thoại cửa hàng']) {
+        const r = await phien(taoService())(cau);
+        expect(r.reply).toMatch(/đang được cập nhật/);
+        expect(r.reply).not.toMatch(/0123456789|HUIT@gmail|Lê Trọng Tấn|8:00/i);
+      }
+    });
+
+    it('có cấu hình thì chỉ nêu đúng các mục đã cấu hình', async () => {
+      vi.stubEnv('SHOP_HOTLINE', '0901 234 567');
+      for (const k of ['SHOP_EMAIL', 'SHOP_DIA_CHI', 'SHOP_GIO_MO_CUA']) vi.stubEnv(k, '');
+      const r = await phien(taoService())('địa chỉ cửa hàng ở đâu');
+      expect(r.reply).toContain('0901 234 567');
+      expect(r.reply).not.toMatch(/Email|Địa chỉ|Giờ mở cửa/);
+    });
   });
 
   it('không bịa: không tìm thấy thì nói không tìm thấy', async () => {

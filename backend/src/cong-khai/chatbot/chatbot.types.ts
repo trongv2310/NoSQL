@@ -1,3 +1,4 @@
+import { docLienHe, type LienHe } from '../../common/lien-he';
 import { NguCanh, YDinh } from './nlu';
 
 /** Thẻ sản phẩm trả về cho giao diện chat (ảnh, giá, tình trạng kho, lý do gợi ý). */
@@ -57,8 +58,20 @@ export interface PhanHoiChatbot {
 
 export const THONG_TIN_CUA_HANG = {
   ten: 'Cửa hàng Cầu Lông HUIT',
-  diaChi: '140 Lê Trọng Tấn, Tây Thạnh, Tân Phú, TP.HCM',
-  dienThoai: '0123456789',
-  email: 'HUIT@gmail.com',
-  gioMoCua: '8:00 – 21:00 mỗi ngày',
 } as const;
+
+/**
+ * Câu mô tả cách liên hệ cửa hàng, chỉ gồm thông tin đã được cấu hình (xem common/lien-he.ts).
+ * Chưa cấu hình gì thì nói thẳng là đang cập nhật, không dùng số điện thoại/địa chỉ mẫu.
+ */
+export function lienHeCuaHang(lh: LienHe = docLienHe()): string {
+  const phan = [
+    lh.diaChi && `địa chỉ ${lh.diaChi}`,
+    lh.dienThoai && `điện thoại ${lh.dienThoai}`,
+    lh.email && `email ${lh.email}`,
+    lh.gioMoCua && `giờ mở cửa ${lh.gioMoCua}`,
+  ].filter((x): x is string => !!x);
+  return phan.length
+    ? `${THONG_TIN_CUA_HANG.ten}: ${phan.join(', ')}.`
+    : 'Thông tin liên hệ của cửa hàng (địa chỉ, điện thoại, email, giờ mở cửa) đang được cập nhật.';
+}

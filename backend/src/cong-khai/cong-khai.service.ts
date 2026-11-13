@@ -2,13 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CatalogService } from '../catalog/catalog.service';
+import { LOC_PHAN_HOI_CONG_KHAI } from '../common/danh-gia';
+import { lamSachHtmlTin } from '../common/lam-sach-html';
 import { idOf, sanPhamView } from '../common/mappers';
 import { dangGiamGia, giaSauKhuyenMai, khuyenMaiConHieuLuc } from '../common/pricing';
 import { likeRegex, parseObjectId, phanTrang } from '../common/helpers';
 import {
   DonHang, Hang, KhuyenMai, LOAI_TIN, LoaiSanPham, PhanHoi, SanPham, TinTuc, TranDau, TRANG_THAI,
 } from '../schemas';
-import { TRANG_THAI_LOAI_TRU } from '../don-hang/trang-thai';
+import { TRANG_THAI_KHONG_TINH_DOANH_THU } from '../don-hang/trang-thai';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const NGAN_SACH: [string, string, number, number | null][] = [
@@ -26,7 +28,7 @@ export function tinView(t: any) {
     id: idOf(t),
     tieuDe: t.tieuDe,
     tomTat: t.tomTat ?? null,
-    noiDung: t.noiDung,
+    noiDung: lamSachHtmlTin(t.noiDung),
     loaiTin: t.loaiTin,
     nhanLoai: nhan,
     iconLoai: icon,
@@ -112,7 +114,7 @@ export class CongKhaiService {
         { $group: { _id: '$loai', n: { $sum: 1 } } },
       ]),
       this.phanHoiModel
-        .find({ danhGia: { $gte: 4 }, noiDung: { $nin: [null, ''] } })
+        .find({ danhGia: { $gte: 4 }, noiDung: { $nin: [null, ''] }, ...LOC_PHAN_HOI_CONG_KHAI })
         .populate('khachHang sanPham')
         .sort({ ngayPhanHoi: -1 })
         .limit(3)
@@ -195,7 +197,7 @@ export class CongKhaiService {
 
   private async sanPhamHot(soLuong: number): Promise<any[]> {
     const top = await this.donHangModel.aggregate<{ _id: Types.ObjectId; t: number }>([
-      { $match: { trangThai: { $nin: TRANG_THAI_LOAI_TRU } } },
+      { $match: { trangThai: { $nin: TRANG_THAI_KHONG_TINH_DOANH_THU } } },
       { $unwind: '$chiTiet' },
       { $group: { _id: '$chiTiet.sanPham', t: { $sum: '$chiTiet.soLuong' } } },
       { $sort: { t: -1 } },
@@ -233,11 +235,12 @@ export class CongKhaiService {
       filter.$or = [{ tieuDe: re }, { tomTat: re }, { noiDung: re }];
     }
     let dsNoiBat: any[] = [];
-    if (!loai && !keyword && page === 1) {
-      dsNoiBat = (await this.tinQuery(this.daDang({ noiBat: true })).sort({ thuTu: 1, ngayDang: -1, _id: -1 }).lean()) as any[];
-      if (dsNoiBat.length) {
-        filter._id = { $nin: dsNoiBat.map((t) => t._id) };
+    if (!loai && !keyword) {
+      const noiBatTatCa = (await this.tinQuery(this.daDang({ noiBat: true })).sort({ thuTu: 1, ngayDang: -1, _id: -1 }).lean()) as any[];
+      if (noiBatTatCa.length) {
+        filter._id = { $nin: noiBatTatCa.map((t) => t._id) }; // cùng tập cho mọi trang để total/offset không đổi giữa trang 1 và trang 2
       }
+      if (page === 1) dsNoiBat = noiBatTatCa;
     }
     const [danhSach, demLoai, luotXem, soTran]: [any[], any[], any[], number] = await Promise.all([
       this.tinQuery(filter).sort({ ngayDang: -1, _id: -1 }).lean() as Promise<any[]>,
@@ -267,7 +270,10 @@ export class CongKhaiService {
 
   async chiTietTin(id: string, daXem: boolean) {
     const oid = parseObjectId(id, 'Mã tin');
-    const tin: any = await this.tinQuery({ ...this.daDang(), _id: oid })
+    const tin: any = await this.tinModel
+      .findOne({ ...this.daDang(), _id: oid })
+      .populate({ path: 'sanPham', populate: 'khuyenMai' })
+      .populate('tranDau')
       .populate('tacGia', 'tenDangNhap')
       .lean();
     if (!tin) {

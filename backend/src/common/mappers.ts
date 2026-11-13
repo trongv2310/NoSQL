@@ -40,7 +40,9 @@ export function sanPhamView(sp: any) {
     khuyenMai: khuyenMaiView(km),
     coSize: !!sp.coSize,
     coMau: !!sp.coMau,
-    trungBinhDanhGia: Number(sp.trungBinhDanhGia ?? 5),
+    // null = chưa có đánh giá đã xác minh (không tự điền 5 sao).
+    trungBinhDanhGia: sp.trungBinhDanhGia == null ? null : Number(sp.trungBinhDanhGia),
+    soDanhGia: Number(sp.soDanhGia ?? 0),
     ngayTao: sp.ngayTao,
   };
 }

@@ -14,9 +14,20 @@ import { cauHinhApp } from '../src/app.setup';
 import { ALL_MODELS } from '../src/schemas';
 
 /** Model giả: đủ để Nest khởi tạo DI; test này chỉ kiểm tra định tuyến, guard và validation (không chạm DB). */
+/** Tài khoản giả cho ParseTokenGuard (quyền lấy từ DB, không từ token): id → bản ghi. Id lạ = tài khoản đã bị xóa. */
+export const TAI_KHOAN_GIA: Record<string, { tenDangNhap: string; maQuyen: number }> = {
+  '64b000000000000000000001': { tenDangNhap: 'khach', maQuyen: 3 },
+  '64b000000000000000000002': { tenDangNhap: 'nv', maQuyen: 2 },
+  '64b000000000000000000003': { tenDangNhap: 'admin', maQuyen: 1 },
+  '64b000000000000000000004': { tenDangNhap: 'bi-ha-quyen', maQuyen: 3 }, // token ghi maQuyen=1 nhưng DB đã hạ xuống khách
+};
+const taiKhoanGia = {
+  findById: (id: string) => ({ select: () => ({ lean: () => Promise.resolve(TAI_KHOAN_GIA[id] ?? null) }) }),
+};
+
 @Global()
 @Module({
-  providers: ALL_MODELS.map((m) => ({ provide: getModelToken(m.name), useValue: {} })),
+  providers: ALL_MODELS.map((m) => ({ provide: getModelToken(m.name), useValue: m.name === 'TaiKhoan' ? taiKhoanGia : {} })),
   exports: ALL_MODELS.map((m) => getModelToken(m.name)),
 })
 class DatabaseGiaModule {}
@@ -105,6 +116,61 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
       .expect(400);
   });
 
+  it('thêm giỏ hàng cho tài khoản dự kiến khác với phiên đăng nhập bị 403 sai_tai_khoan trước khi chạm DB (M3-QA1-02)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/gio-hang')
+      .set('Cookie', `token=${tokenKhach}`)
+      .send({ chiTietId: 'a'.repeat(24), quantity: 1, taiKhoanDuKien: '64b0000000000000000000ff' })
+      .expect(403);
+    expect(res.body).toMatchObject({ maLoi: 'sai_tai_khoan' });
+    // taiKhoanDuKien sai định dạng bị từ chối ở bước kiểm tra body, không bao giờ được dùng để chọn giỏ
+    await request(app.getHttpServer())
+      .post('/api/gio-hang')
+      .set('Cookie', `token=${tokenKhach}`)
+      .send({ chiTietId: 'a'.repeat(24), taiKhoanDuKien: 'khong-phai-id' })
+      .expect(400);
+  });
+
+  describe('giỏ hàng khách chưa đăng nhập', () => {
+    const ID = 'a'.repeat(24);
+    const SYNC = 'sync-aaaaaaaaaaaaaaaa';
+
+    it('báo giá là API công khai nhưng từ chối body sai trước khi chạm DB', async () => {
+      const gui = (body: unknown) => request(app.getHttpServer()).post('/api/gio-hang/tinh').send(body as object);
+      await gui({}).expect(400);
+      await gui({ dong: [{ chiTietId: 'abc', soLuong: 1 }] }).expect(400);
+      await gui({ dong: [{ chiTietId: ID, soLuong: 0 }] }).expect(400);
+      await gui({ dong: [{ chiTietId: ID, soLuong: 101 }] }).expect(400);
+      await gui({ dong: [{ chiTietId: ID, soLuong: '2' }] }).expect(400);
+      await gui({ dong: Array.from({ length: 101 }, () => ({ chiTietId: ID, soLuong: 1 })) }).expect(400);
+    });
+
+    it('báo giá giỏ rỗng không cần đăng nhập và không cần DB', async () => {
+      const res = await request(app.getHttpServer()).post('/api/gio-hang/tinh').send({ dong: [] }).expect(200);
+      expect(res.body).toEqual({ items: [], tongTien: 0, tongSoLuong: 0 });
+    });
+
+    it('đồng bộ giỏ cần đăng nhập (401) và kiểm tra syncId/dòng (400)', async () => {
+      await request(app.getHttpServer()).post('/api/gio-hang/dong-bo').send({ syncId: SYNC, dong: [] }).expect(401);
+      const dangNhap = (body: unknown) =>
+        request(app.getHttpServer()).post('/api/gio-hang/dong-bo').set('Cookie', `token=${tokenKhach}`).send(body as object);
+      const TK = '64b000000000000000000001'; // trùng với sub của tokenKhach
+      await dangNhap({ taiKhoanId: TK, dong: [{ chiTietId: ID, soLuong: 1 }] }).expect(400);
+      await dangNhap({ taiKhoanId: TK, syncId: 'ngan', dong: [{ chiTietId: ID, soLuong: 1 }] }).expect(400);
+      await dangNhap({ taiKhoanId: TK, syncId: SYNC, dong: [{ chiTietId: 'abc', soLuong: 1 }] }).expect(400);
+      await dangNhap({ syncId: SYNC, dong: [{ chiTietId: ID, soLuong: 1 }] }).expect(400); // thiếu taiKhoanId
+    });
+
+    it('đồng bộ cho tài khoản khác với phiên đăng nhập bị 403 kèm maLoi trước khi chạm DB (M1-R1-03)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/gio-hang/dong-bo')
+        .set('Cookie', `token=${tokenKhach}`)
+        .send({ taiKhoanId: '64b0000000000000000000ff', syncId: SYNC, dong: [{ chiTietId: ID, soLuong: 1 }] })
+        .expect(403);
+      expect(res.body).toMatchObject({ maLoi: 'sai_tai_khoan' });
+    });
+  });
+
   it('thanh toán với số điện thoại sai bị từ chối', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/don-hang/checkout')
@@ -161,5 +227,33 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
       .send({ tenGiaiDau: 'G', vong: 'V', noiDung: 'N', doiA: 'X', doiB: 'X', ngayThiDau: '2026-06-01' })
       .expect(400);
     expect(JSON.stringify(res.body.message)).toContain('Hai bên thi đấu phải khác nhau.');
+  });
+
+  it('quyền lấy từ DB, không tin token: token ghi admin nhưng tài khoản đã bị hạ quyền → 403 (M5A-03)', async () => {
+    const jwt = app.get(JwtService);
+    const tokenCu = jwt.sign({ sub: '64b000000000000000000004', tenDangNhap: 'bi-ha-quyen', maQuyen: 1 });
+    await request(app.getHttpServer()).post('/api/admin/tran-dau').set('Cookie', `token=${tokenCu}`).send({}).expect(403);
+  });
+
+  it('token của tài khoản đã bị xóa không còn đăng nhập được: /auth/me trả null, API admin 401 (M5A-03)', async () => {
+    const jwt = app.get(JwtService);
+    const tokenXoa = jwt.sign({ sub: '64b0000000000000000000ff', tenDangNhap: 'da-xoa', maQuyen: 1 });
+    const me = await request(app.getHttpServer()).get('/api/auth/me').set('Cookie', `token=${tokenXoa}`).expect(200);
+    expect(me.body).toEqual({ user: null });
+    await request(app.getHttpServer()).post('/api/admin/tran-dau').set('Cookie', `token=${tokenXoa}`).send({}).expect(401);
+  });
+
+  it('cổng MoMo giả lập yêu cầu đăng nhập: khách chưa đăng nhập bị 401 ở cả hai route (M5A-01)', async () => {
+    await request(app.getHttpServer()).get('/api/don-hang/momo/mock/1').expect(401);
+    await request(app.getHttpServer()).post('/api/don-hang/momo/mock/xu-ly').send({ orderId: 1 }).expect(401);
+  });
+
+  it('thanh toán: họ tên người nhận toàn khoảng trắng bị từ chối 400 trước khi chạm DB (M5R1-N03)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/don-hang/checkout')
+      .set('Cookie', `token=${tokenKhach}`)
+      .send({ hoTenNhan: '    ', soDienThoaiNhan: '0912345678', diaChiGiao: '1 Đường A' })
+      .expect(400);
+    expect(JSON.stringify(res.body.message)).toContain('Vui lòng nhập họ tên người nhận.');
   });
 });

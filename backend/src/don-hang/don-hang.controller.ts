@@ -1,5 +1,6 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, Logger, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 import { Model } from 'mongoose';
 import { CurrentUser } from '../auth/auth.decorators';
@@ -14,6 +15,7 @@ import { OrderService } from './order.service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class CheckoutDto {
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString() @IsNotEmpty({ message: 'Vui lòng nhập họ tên người nhận.' }) @MaxLength(100)
   hoTenNhan: string;
 
@@ -36,6 +38,7 @@ export function donHangView(don: any, chiTietDayDu = true) {
     tongTien: don.tongTien,
     tongTienSauGiam: don.tongTienSauGiam,
     tienGiam: don.tienGiam,
+    hoTenNhan: don.hoTenNhan ?? null,
     diaChiGiaoHang: don.diaChiGiaoHang,
     soDienThoaiNhanHang: don.soDienThoaiNhanHang,
     ghiChu: don.ghiChu,
@@ -92,7 +95,7 @@ export class DonHangController {
     const { kh, dongs } = await this.gioKhongRong(user);
     const don = await this.orders.createOrder(
       kh,
-      { diaChiGiaoHang: dto.diaChiGiao, soDienThoaiNhanHang: dto.soDienThoaiNhan, ghiChu: dto.ghiChu ?? '' },
+      { hoTenNhan: dto.hoTenNhan.trim(), diaChiGiaoHang: dto.diaChiGiao, soDienThoaiNhanHang: dto.soDienThoaiNhan, ghiChu: dto.ghiChu ?? '' },
       dongs,
       TRANG_THAI.DangXuLy,
     );
@@ -107,6 +110,7 @@ export class DonHangController {
     const don = await this.orders.createOrder(
       kh,
       {
+        hoTenNhan: dto.hoTenNhan.trim(),
         diaChiGiaoHang: dto.diaChiGiao,
         soDienThoaiNhanHang: dto.soDienThoaiNhan,
         ghiChu: `${dto.ghiChu ?? ''} (Thanh toán qua MoMo)`,
@@ -168,23 +172,37 @@ export class DonHangController {
     }
   }
 
-  @Get('momo/mock/:soDonHang')
-  async thongTinMock(@Param('soDonHang', ParseIntPipe) soDonHang: number) {
+  /**
+   * Cổng MoMo giả lập (M5A-01): chỉ tồn tại khi MOMO_MOCK bật (tắt thì 404 như chưa có route), chỉ CHỦ ĐƠN đã đăng nhập mới xem/xử lý được đơn của mình,
+   * để người ngoài không lấy được kết quả đã ký của một đơn bất kỳ.
+   */
+  private async donMockCuaToi(soDonHang: number, user: NguoiDung): Promise<any> {
+    if (!this.momo.laMock) throw new NotFoundException('Không tìm thấy trang.');
     const don: any = await this.donHangModel.findOne({ soDonHang }).populate('khachHang').lean();
     if (!don || don.trangThai !== TRANG_THAI.ChoThanhToanMomo) {
       throw new BadRequestException('Đơn hàng không tồn tại hoặc đã được xử lý.');
     }
+    const kh = await this.gioHang.khachHangId(user.id);
+    if (String(idOf(don.khachHang) ?? don.khachHang) !== String(kh)) {
+      throw new ForbiddenException('Bạn không có quyền xử lý đơn hàng này.');
+    }
+    return don;
+  }
+
+  @Get('momo/mock/:soDonHang')
+  @CanDangNhap()
+  async thongTinMock(@Param('soDonHang', ParseIntPipe) soDonHang: number, @CurrentUser() user: NguoiDung) {
+    const don = await this.donMockCuaToi(soDonHang, user);
     return { soDonHang, tongTien: don.tongTien, hoTen: don.khachHang?.hoTen ?? null };
   }
 
   @Post('momo/mock/xu-ly')
   @HttpCode(200)
-  async xuLyMock(@Body() body: { orderId: number | string; action?: string }) {
+  @CanDangNhap()
+  async xuLyMock(@Body() body: { orderId: number | string; action?: string }, @CurrentUser() user: NguoiDung) {
     const soDonHang = Number(body.orderId);
-    const don = await this.donHangModel.findOne({ soDonHang }).lean();
-    if (!don || don.trangThai !== TRANG_THAI.ChoThanhToanMomo) {
-      throw new BadRequestException('Đơn hàng không tồn tại hoặc đã được xử lý.');
-    }
+    if (!Number.isInteger(soDonHang)) throw new BadRequestException('Mã đơn hàng không hợp lệ.');
+    const don = await this.donMockCuaToi(soDonHang, user);
     return this.momo.taoKetQuaMock(soDonHang, don.tongTien, (body.action ?? 'success') === 'success');
   }
 

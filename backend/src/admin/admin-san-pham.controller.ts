@@ -55,6 +55,13 @@ export class BienTheDto {
   @IsOptional() @IsString() doCung?: string;
   @IsOptional() @IsString() chieuDai?: string;
   @IsOptional() @IsString() sucCang?: string;
+
+  /**
+   * Tồn kho ở thời điểm form được tải (M5A-07). Có thì: form không đổi tồn → giữ NGUYÊN tồn hiện tại (đơn mới có thể đã trừ);
+   * form đổi tồn mà tồn hiện tại khác giá trị đã tải → 409, không ghi đè.
+   */
+  @EMPTY_TO_UNDEF() @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(100000)
+  soLuongTonDaTai?: number;
 }
 
 @Roles(Quyen.Admin)
@@ -223,6 +230,11 @@ export class AdminSanPhamController {
     return Object.values(t).some((v) => v) ? t : undefined;
   }
 
+  /** Có gửi bất kỳ ô thông số nào không (kể cả chuỗi rỗng = admin chủ động xóa)? Không gửi gì thì giữ nguyên thông số cũ. */
+  private coGuiThongSo(dto: BienTheDto): boolean {
+    return [dto.doCanBang, dto.trongLuong, dto.doCung, dto.chieuDai, dto.sucCang].some((v) => v !== undefined);
+  }
+
   @Post('san-pham/:id/bien-the')
   @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'bt'))
   async themBienThe(@Param('id') id: string, @Body() dto: BienTheDto, @UploadedFile() file?: Express.Multer.File) {
@@ -256,23 +268,33 @@ export class AdminSanPhamController {
     await this.kiemTraSku(dto.sku, bt._id);
     const giaCu = bt.giaBan;
     const anhCu = bt.hinhAnh;
-    bt.set({ mau: dto.mau ?? null, size: dto.size ?? null, giaBan: dto.giaBan, soLuongTon: dto.soLuongTon, sku: dto.sku });
+    // Một lệnh cập nhật DUY NHẤT cho cả tồn và metadata, có điều kiện theo tồn lúc mở form (CAS): hai yêu cầu đồng thời hoặc một đơn chen giữa không bị ghi đè,
+    // và lỗi ghi (trùng SKU...) thì KHÔNG có phần nào được lưu (không còn "tồn đã đổi nhưng giá/SKU chưa").
+    if (dto.soLuongTonDaTai === undefined) {
+      throw new BadRequestException('Thiếu số lượng tồn lúc mở form (soLuongTonDaTai). Hãy tải lại trang rồi lưu lại.');
+    }
+    const doiTon = dto.soLuongTon !== dto.soLuongTonDaTai;
+    const dat: Record<string, unknown> = { mau: dto.mau ?? null, size: dto.size ?? null, giaBan: dto.giaBan, sku: dto.sku };
+    if (doiTon) dat.soLuongTon = dto.soLuongTon; // không đổi tồn thì KHÔNG đặt trường này: số đã đổi do bán hàng được giữ nguyên
     const anhMoi = duongDanTuongDoi('sanpham', file);
-    if (anhMoi) {
-      bt.hinhAnh = anhMoi;
-    }
+    if (anhMoi) dat.hinhAnh = anhMoi;
     const ts = this.thongSo(dto);
-    if (ts) {
-      bt.thongSo = ts;
+    const capNhat: Record<string, unknown> = { $set: dat };
+    if (ts) dat.thongSo = ts;
+    else if (this.coGuiThongSo(dto)) capNhat.$unset = { thongSo: '' }; // admin xóa hết ô thông số: bỏ cả bộ
+    const kq = await this.ctModel.updateOne({ _id: bt._id, ...(doiTon ? { soLuongTon: dto.soLuongTonDaTai } : {}) }, capNhat);
+    if (kq.matchedCount === 0) {
+      const hienTai: any = await this.ctModel.findById(bt._id).select('soLuongTon').lean();
+      if (!hienTai) throw new NotFoundException('Không tìm thấy biến thể.');
+      throw new ConflictException(`Tồn kho vừa thay đổi (hiện còn ${hienTai.soLuongTon}, lúc mở form là ${dto.soLuongTonDaTai}). Hãy tải lại trang rồi nhập lại số lượng.`);
     }
-    await bt.save();
     if (anhMoi) {
       xoaAnhUpload(anhCu);
     }
     if (giaCu !== undefined && giaCu !== dto.giaBan) {
       await this.lichSuModel.create({ chiTiet: bt._id, giaCu, giaMoi: dto.giaBan, nguoiThayDoi: user.tenDangNhap });
     }
-    return { sanPhamId: idOf(bt.sanPham), message: `Cập nhật biến thể SKU "${bt.sku}" thành công!` };
+    return { sanPhamId: idOf(bt.sanPham), message: `Cập nhật biến thể SKU "${dto.sku}" thành công!` };
   }
 
   @Delete('bien-the/:maChiTiet')

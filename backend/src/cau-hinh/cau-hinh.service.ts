@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { docLienHe } from '../common/lien-he';
 import { CauHinh } from '../schemas';
 
 export const LOGO_MAC_DINH = 'images/HUIT.jpg';
@@ -29,8 +30,10 @@ export class CauHinhService {
   async thongTinSite() {
     return {
       tenSite: (await this.get('site_name', 'Shop Cầu Lông')) as string,
-      moTaSite: (await this.get('site_description', 'Cửa hàng dụng cụ và phụ kiện cầu lông chính hãng')) as string,
+      moTaSite: (await this.get('site_description', 'Cửa hàng dụng cụ và phụ kiện cầu lông')) as string,
       logo: (await this.get('logo_url', LOGO_MAC_DINH)) || LOGO_MAC_DINH,
+      // Từng mục là null khi chủ cửa hàng chưa cấu hình (SHOP_HOTLINE, SHOP_EMAIL, SHOP_DIA_CHI, SHOP_GIO_MO_CUA).
+      lienHe: docLienHe(),
     };
   }
 }

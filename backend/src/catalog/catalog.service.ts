@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { bienTheView, idOf, khuyenMaiView, sanPhamView } from '../common/mappers';
-import { dangGiamGia, giaSauKhuyenMai, khuyenMaiConHieuLuc } from '../common/pricing';
+import { LOC_PHAN_HOI_CONG_KHAI, tongKetDanhGia } from '../common/danh-gia';
+import { bienTheView, idOf, sanPhamView } from '../common/mappers';
+import { dangGiamGia, giaSauKhuyenMai } from '../common/pricing';
 import { parseObjectId, phanTrang } from '../common/helpers';
-import { ghepTrangChu } from './trang-chu';
+import { locKhuyenMaiDangChay } from './khuyen-mai';
+import { ghepTrangChu, gomThongSoTheoSanPham } from './trang-chu';
+import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, bienTheKhopBoLoc, coBoLocThongSo, gopThongSoBienThe } from './vot-thong-so';
 import {
   ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, PhanHoi, SanPham,
 } from '../schemas';
@@ -20,6 +23,18 @@ export const KHOANG_GIA: Record<string, [number, number | null]> = {
 
 const chuThuong = (s: unknown) => String(s ?? '').trim().toLocaleLowerCase('vi');
 const chua = (nguon: unknown, tu: string) => chuThuong(nguon).includes(chuThuong(tu));
+
+/** Giá trị hợp lệ của từng nhóm lọc thông số; giá trị lạ bị bỏ (không làm hỏng truy vấn). Nhiều giá trị lặp khóa hoặc cách nhau bằng dấu phẩy. */
+export function boLocThongSoTuQuery(q: Record<string, any>): BoLocThongSo {
+  const lay = (k: string, hopLe: readonly string[]) =>
+    mangTuQuery(q[k]).flatMap((v) => String(v).split(',')).map((v) => v.trim().toLowerCase()).filter((v) => hopLe.includes(v));
+  return {
+    loiChoi: lay('loi_choi', LOI_CHOI_KHOA),
+    canBang: lay('can_bang', NHOM_CAN_BANG),
+    trongLuong: lay('trong_luong', ['3u', '4u', '5u', '6u', '2u']),
+    doCung: lay('do_cung', NHOM_DO_CUNG),
+  };
+}
 
 export function mangTuQuery(v: unknown): string[] {
   if (v === undefined || v === null || v === '') {
@@ -47,10 +62,17 @@ export class CatalogService {
         .populate('loai hang khuyenMai nhaCungCap')
         .sort({ ngayTao: -1, _id: -1 })
         .lean() as Promise<any[]>,
-      this.phanHoiModel.aggregate<{ _id: any; tb: number }>([{ $group: { _id: '$sanPham', tb: { $avg: '$danhGia' } } }]),
+      // Chỉ tính đánh giá đã xác minh; sản phẩm chưa có thì điểm là null (không mặc định 5 sao).
+      this.phanHoiModel.aggregate<{ _id: any; tb: number; so: number }>([
+        { $match: LOC_PHAN_HOI_CONG_KHAI },
+        { $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } },
+      ]),
     ]);
-    const diemMap = new Map(diem.map((d) => [String(d._id), Math.round(d.tb * 10) / 10]));
-    return ds.map((sp) => ({ ...sp, trungBinhDanhGia: diemMap.get(String(sp._id)) ?? 5 }));
+    const diemMap = new Map(diem.map((d) => [String(d._id), { tb: Math.round(d.tb * 10) / 10, so: d.so }]));
+    return ds.map((sp) => {
+      const d = diemMap.get(String(sp._id));
+      return { ...sp, trungBinhDanhGia: d?.tb ?? null, soDanhGia: d?.so ?? 0 };
+    });
   }
 
   async tonKhoTheoSanPham(): Promise<Map<string, number>> {
@@ -60,7 +82,7 @@ export class CatalogService {
     return new Map(r.map((x) => [String(x._id), x.t]));
   }
 
-  private loc(ds: any[], q: Record<string, any>, tonKho: Map<string, number>): any[] {
+  private loc(ds: any[], q: Record<string, any>, tonKho: Map<string, number>, thongSoTheoSp: Map<string, any[]> = new Map()): any[] {
     let r = ds;
     const loai = q.loai || q.maLoai;
     if (loai) {
@@ -100,6 +122,11 @@ export class CatalogService {
     if (den !== null && den > 0) {
       r = r.filter((sp) => giaSauKhuyenMai(sp.giaGoc, sp.khuyenMai) <= den);
     }
+    // Lọc theo thông số vợt: một sản phẩm khớp khi CÓ MỘT phiên bản thỏa mọi nhóm đã chọn (không lấy phiên bản đầu đại diện cho cả sản phẩm).
+    const boLocThongSo = boLocThongSoTuQuery(q);
+    if (coBoLocThongSo(boLocThongSo)) {
+      r = r.filter((sp) => (thongSoTheoSp.get(String(sp._id)) ?? []).some((ts) => bienTheKhopBoLoc(ts, boLocThongSo)));
+    }
     const hangIds = mangTuQuery(q.hangs ?? q['hangs[]']);
     if (hangIds.length) {
       r = r.filter((sp) => hangIds.includes(idOf(sp.hang) ?? ''));
@@ -134,7 +161,7 @@ export class CatalogService {
     let tu = q.gia_tu !== undefined && q.gia_tu !== '' && !isNaN(Number(q.gia_tu)) && Number(q.gia_tu) >= 0 ? Number(q.gia_tu) : null;
     let den = q.gia_den !== undefined && q.gia_den !== '' && !isNaN(Number(q.gia_den)) && Number(q.gia_den) > 0 ? Number(q.gia_den) : null;
     if (tu === null && den === null) {
-      const preset = KHOANG_GIA[String(q.khoang)];
+      const preset = Object.hasOwn(KHOANG_GIA, String(q.khoang)) ? KHOANG_GIA[String(q.khoang)] : undefined;
       if (preset) {
         [tu, den] = preset;
       }
@@ -146,13 +173,15 @@ export class CatalogService {
   }
 
   async danhSach(q: Record<string, any>) {
-    const [all, tonKho, dsHang, dsLoai] = await Promise.all([
+    const [all, tonKho, dsHang, dsLoai, bienThes] = await Promise.all([
       this.tatCaSanPham(),
       this.tonKhoTheoSanPham(),
       this.hangModel.find().sort({ tenHang: 1 }).lean(),
       this.loaiModel.find().sort({ _id: 1 }).lean(),
+      this.chiTietModel.find({ thongSo: { $ne: null } }, { sanPham: 1, thongSo: 1 }).sort({ _id: 1 }).lean(),
     ]);
-    const khop = this.loc(all, q, tonKho);
+    const thongSoTheoSp = gomThongSoTheoSanPham(bienThes);
+    const khop = this.loc(all, q, tonKho, thongSoTheoSp);
     const trang = phanTrang(khop, Number(q.page) || 1, 12);
     const [tu, den] = this.khoangGia(q);
     let hangDangChon = mangTuQuery(q.hangs ?? q['hangs[]']);
@@ -163,7 +192,10 @@ export class CatalogService {
     const bool = (v: any) => ['1', 'true', 'on'].includes(String(v));
     return {
       ...trang,
-      items: trang.items.map(sanPhamView),
+      items: trang.items.map((sp: any) => {
+        const g = gopThongSoBienThe(thongSoTheoSp.get(String(sp._id)) ?? []);
+        return { ...sanPhamView(sp), tongTonKho: tonKho.get(String(sp._id)) ?? 0, thongSoVot: g.thongSoVot, thongSoKhacNhau: g.khacNhau };
+      }),
       tieuDe: q.keyword ? `Kết quả tìm kiếm cho '${String(q.keyword).trim()}'` : 'Danh sách sản phẩm',
       boLoc: {
         dsHang: dsHang.map((h) => ({ id: idOf(h), tenHang: h.tenHang })),
@@ -173,6 +205,7 @@ export class CatalogService {
         locGiaDen: den,
         locHang: hangDangChon,
         locKhoang: q.khoang ?? null,
+        locThongSo: boLocThongSoTuQuery(q),
         sapXep: q.sap_xep ?? 'moi',
         dangLoc: tu !== null || den !== null || hangDangChon.length > 0 || bool(q.giam_gia) || bool(q.con_hang),
       },
@@ -204,22 +237,20 @@ export class CatalogService {
     }
     const [bienThes, danhGias]: [any[], any[]] = await Promise.all([
       this.chiTietModel.find({ sanPham: oid }).populate('mau size').sort({ _id: 1 }).lean(),
-      this.phanHoiModel.find({ sanPham: oid }).populate('khachHang').sort({ ngayPhanHoi: -1 }).lean(),
+      this.phanHoiModel.find({ sanPham: oid, ...LOC_PHAN_HOI_CONG_KHAI }).populate('khachHang').sort({ ngayPhanHoi: -1 }).lean(),
     ]);
     const duyNhat = <T extends { id: string | null }>(ds: (T | null)[]): T[] => {
       const seen = new Set<string>();
       return ds.filter((x): x is T => !!x && !seen.has(x.id ?? '') && !!seen.add(x.id ?? ''));
     };
     const views = bienThes.map((b) => bienTheView(b, sp));
-    const trungBinh = danhGias.length
-      ? Math.round((danhGias.reduce((t, r) => t + r.danhGia, 0) / danhGias.length) * 10) / 10
-      : 5;
+    const tongKet = tongKetDanhGia(danhGias);
     return {
-      sanPham: sanPhamView(sp),
+      sanPham: sanPhamView({ ...sp, trungBinhDanhGia: tongKet.trungBinh, soDanhGia: tongKet.so }),
       bienThes: views,
       mauSacs: duyNhat(views.map((v) => v.mau)),
       sizes: duyNhat(views.map((v) => v.size)),
-      thongSoVot: views.find((v) => v.thongSo)?.thongSo ?? null,
+      ...(({ thongSoVot, khacNhau }) => ({ thongSoVot, thongSoKhacNhau: khacNhau }))(gopThongSoBienThe(views.map((v) => v.thongSo))),
       danhGias: danhGias.map((r) => ({
         id: idOf(r),
         noiDung: r.noiDung,
@@ -227,8 +258,8 @@ export class CatalogService {
         ngayPhanHoi: r.ngayPhanHoi,
         tenKhachHang: r.khachHang?.hoTen ?? 'Khách hàng',
       })),
-      trungBinhDanhGia: trungBinh,
-      soDanhGia: danhGias.length,
+      trungBinhDanhGia: tongKet.trungBinh,
+      soDanhGia: tongKet.so,
       giaBanThucTe: giaSauKhuyenMai(sp.giaGoc, sp.khuyenMai),
     };
   }
@@ -238,12 +269,6 @@ export class CatalogService {
       this.khuyenMaiModel.find().lean(),
       this.tatCaSanPham(),
     ]);
-    const conHieuLuc = kms.filter((k) => khuyenMaiConHieuLuc(k));
-    const ids = new Set(conHieuLuc.map((k) => String(k._id)));
-    const sanPhams = sps.filter((sp) => sp.khuyenMai && ids.has(idOf(sp.khuyenMai) ?? ''));
-    return {
-      khuyenMais: conHieuLuc.map(khuyenMaiView),
-      sanPhams: sanPhams.map(sanPhamView),
-    };
+    return locKhuyenMaiDangChay(kms, sps);
   }
 }
