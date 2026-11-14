@@ -37,8 +37,12 @@
   --gold-rgb:255, 201, 138;
   --bone-rgb:242, 239, 230;
   --bone-dim-rgb:169, 197, 184;
-  --font-head:'Barlow Condensed', 'Inter', system-ui, sans-serif;
+  --font-head:'Barlow Condensed', 'Inter', system-ui, sans-serif;   /* như web: chỉ dùng cho số, giá, bảng LED */
   --font-body:'Inter', system-ui, sans-serif;
+  --font-display:'Inter', 'Segoe UI', system-ui, sans-serif;          /* tiêu đề: Inter đậm, viết thường như trang chủ */
+  --brand-hi:#5fd3a0;     /* xanh brand sáng hơn cho chữ nhỏ trên nền tối */
+  --cta:#c2410c;          /* nút hành động chính, cùng màu nút "Thêm vào giỏ" của web */
+  --cta-hover:#a8380a;
   --pad:clamp(20px, 3.4vw, 56px);
   --nav-h:84px;
   --ease:cubic-bezier(.22,.61,.36,1);
@@ -77,17 +81,21 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .page{ position:relative; z-index:10; }
 
 /* ============================================================= type */
+/* nhãn nhỏ kiểu "— QUẦY TƯ VẤN" của web: gạch cam + chữ in hoa giãn */
 .eyebrow{
-  font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase;
-  color:var(--bone-dim); text-shadow:0 1px 16px rgba(var(--ink-rgb),.9);
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--brand-hi); text-shadow:0 1px 16px rgba(var(--ink-rgb),.9);
 }
-h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacing:.01em; }
+.eyebrow::before{ content:''; flex:0 0 auto; width:26px; height:3px; border-radius:2px; background:var(--ember); }
+h1,h2,h3{ font-family:var(--font-display); font-weight:700; margin:0; letter-spacing:-.01em; }
 .display{
-  font-family:var(--font-head); text-transform:uppercase; line-height:1.14; letter-spacing:.02em;
+  font-family:var(--font-display); line-height:1.2; letter-spacing:-.018em;
   font-weight:700; text-shadow:0 2px 34px rgba(var(--ink-rgb),.72);
 }
-.h-hero{ font-size:clamp(28px,3.8vw,52px); }
-.h-sec{ font-size:clamp(32px,4.5vw,64px); }
+.display .hl, .display .word.hl{ color:var(--metal); }
+.h-hero{ font-size:clamp(30px,3.4vw,50px); }
+.h-sec{ font-size:clamp(28px,3.1vw,46px); }
 .body-lg{ font-size:clamp(14px,1.02vw,17px); line-height:1.72; color:#d1ded7; font-weight:300; text-shadow:0 1px 20px rgba(var(--ink-rgb),.88); }
 .body{ font-size:14px; line-height:1.68; color:var(--bone-dim); font-weight:300; text-shadow:0 1px 18px rgba(var(--ink-rgb),.85); }
 .num{ font-family:var(--font-head); font-size:clamp(26px,2.5vw,36px); font-weight:700; letter-spacing:-.02em; color:var(--bone); font-variant-numeric:tabular-nums; }
@@ -113,21 +121,29 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .word-reveal.rv-in .word{ opacity:1; transform:none; }
 
 /* ============================================================= preloader */
+/* Nền đen hẳn: màn tải tan vào nhà thi đấu còn tối, rồi đèn mới bật. --p là tiến độ 0..1 do boot() ghi. */
 #pre{
+  --p:0;
   position:fixed; inset:0; z-index:100; background:var(--ink);
   display:flex; align-items:center; justify-content:center;
-  transition:opacity .8s var(--ease), visibility .8s;
+  transition:opacity .55s var(--ease), visibility .55s;
 }
 #pre.done{ opacity:0; visibility:hidden; pointer-events:none; }
-.pre-in{ width:min(440px,78vw); text-align:center; }
-.pre-mark{ margin:0 auto 24px; width:48px; height:48px; opacity:.95; }
-.pre-mark svg{ width:100%; height:100%; display:block; }
-.pre-name{ font-size:12px; letter-spacing:.42em; text-transform:uppercase; color:var(--metal); margin-bottom:20px; font-weight:500; }
-.pre-bar{ position:relative; height:2px; background:rgba(var(--bone-rgb),.14); overflow:hidden; }
-.pre-bar i{ position:absolute; inset:0 100% 0 0; background:var(--primary); transition:right .35s linear; }
-.pre-meta{ display:flex; justify-content:space-between; margin-top:14px;
-  font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--bone-dim); }
-.pre-meta b{ font-weight:600; color:var(--bone); font-variant-numeric:tabular-nums; }
+.pre-in{ width:min(440px,78vw); text-align:center; transition:transform .55s var(--ease-out); }
+#pre.done .pre-in{ transform:scale(1.05); }
+.pre-racket{ display:block; margin:0 auto 6px; height:clamp(150px,26vh,230px); width:auto; overflow:visible; transform:rotate(18deg); transform-origin:50% 60%; }
+.pre-racket path{ stroke-linecap:round; stroke-linejoin:round; }
+.pre-ghost{ stroke:rgba(var(--bone-rgb),.1); stroke-width:2.4; }
+.pre-draw{ stroke:var(--primary); stroke-width:2.6; stroke-dasharray:1; stroke-dashoffset:calc(1 - var(--p));
+  filter:drop-shadow(0 0 6px rgba(var(--primary-rgb),.55)); }
+.pre-grip{ stroke:var(--bone); stroke-width:6; stroke-dasharray:1; stroke-dashoffset:calc(1 - min(1, var(--p) * 4)); }
+.pre-strings{ stroke:rgba(var(--bone-rgb),.42); stroke-width:.7; opacity:calc((var(--p) - .55) * 3); }
+.pre-shuttle{ fill:var(--ember); opacity:calc((var(--p) - .85) * 8); }
+.pre-num{ font-family:var(--font-head); font-size:clamp(56px,8.6vh,84px); font-weight:700; line-height:1; letter-spacing:-.02em; color:var(--bone);
+  font-variant-numeric:tabular-nums; }
+.pre-num i{ font-style:normal; font-size:.36em; font-weight:600; color:var(--metal); margin-left:4px; vertical-align:.95em; letter-spacing:0; }
+.pre-name{ font-size:12px; letter-spacing:.42em; text-transform:uppercase; color:var(--metal); margin-top:14px; font-weight:500; }
+.pre-meta{ margin-top:10px; min-height:1.4em; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--bone-dim); }
 
 /* ============================================================= nav */
 .nav{
@@ -148,44 +164,43 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 }
 .nav.stuck::after{ opacity:1; }
 .nav.hide{ transform:translate3d(0,-101%,0); }
+/* thanh điều hướng theo header web: logo + tên shop, nhóm liên kết dạng viên thuốc, nút xanh "Vào cửa hàng", nút viền "Trang chủ", ô giỏ có số đếm cam */
 .brand{ display:flex; align-items:center; gap:11px; flex:0 0 auto; }
-.brand svg{ width:34px; height:34px; display:block; }
-.brand-tx{ display:flex; flex-direction:column; line-height:1; gap:4px; }
-.brand-tx b{ font-family:var(--font-head); font-size:14px; font-weight:700; letter-spacing:.18em; color:var(--bone); }
-.brand-tx i{ font-style:normal; font-size:8px; letter-spacing:.28em; color:var(--metal); }
-.nav-links{ display:flex; gap:clamp(14px,2.2vw,36px); margin-left:auto; align-items:center; }
+.brand-logo{ width:40px; height:40px; flex:0 0 auto; border-radius:10px; object-fit:cover; background:#fff; box-shadow:0 0 0 1px rgba(var(--bone-rgb),.18); }
+.brand-tx{ display:flex; flex-direction:column; line-height:1.15; gap:2px; }
+.brand-tx b{ font-size:16px; font-weight:700; letter-spacing:-.01em; color:var(--bone); }
+.brand-tx i{ font-style:normal; font-size:12px; color:var(--bone-dim); }
+.nav-links{ display:flex; gap:2px; margin-left:auto; align-items:center; padding:4px;
+  border:1px solid var(--line); border-radius:999px; background:rgba(var(--ink-rgb),.42); }
 .nav-link{
-  position:relative; font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--bone-dim); display:block; height:15px; line-height:15px; overflow:hidden;
+  position:relative; display:block; padding:8px 15px; border-radius:999px;
+  font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; line-height:1.2;
+  color:var(--bone-dim); transition:color .3s, background .3s;
 }
-.nav-link span{ display:block; height:15px; line-height:15px; transition:color .3s; }
-.nav-link:hover{ color:var(--metal); }
-.nav-link.on{ color:var(--bone); }
+.nav-link:hover{ color:var(--bone); background:rgba(var(--bone-rgb),.07); }
+.nav-link.on{ color:#fff; background:var(--primary); }
 .nav-link.m-only{ display:none; }
-.nav-link.on::after{ content:''; position:absolute; left:0; bottom:0; width:100%; height:1.5px; background:var(--primary); }
 
-.nav-actions{ display:flex; align-items:center; gap:12px; }
+.nav-actions{ display:flex; align-items:center; gap:10px; }
 .nav-bag-btn{
-  display:inline-flex; align-items:center; gap:6px; padding:7px 14px;
-  border:1px solid var(--line); border-radius:20px; font-family:var(--font-head);
-  font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--bone); background:rgba(var(--ink2-rgb),.5); transition:all .3s var(--ease);
+  position:relative; display:grid; place-items:center; width:44px; height:44px; border-radius:12px;
+  color:var(--brand-hi); background:rgba(var(--primary-rgb),.16); border:1px solid rgba(var(--primary-rgb),.5);
+  transition:background .3s, border-color .3s, color .3s;
 }
-.nav-bag-btn:hover{ border-color:var(--ember); color:var(--ember); background:rgba(var(--accent-rgb),.1); }
-.nav-bag-btn #bag-count{ min-width:18px; padding:1px 5px; border-radius:9px; text-align:center; color:var(--ink); background:var(--metal); font-variant-numeric:tabular-nums; letter-spacing:0; }
-.nav-bag-btn svg{ width:14px; height:14px; flex:0 0 auto; }
-.nav-shop-btn{
-  display:inline-flex; align-items:center; padding:7px 14px;
-  border-radius:20px; font-family:var(--font-head); font-size:11px; font-weight:700;
-  letter-spacing:.16em; text-transform:uppercase; color:#fff; background:var(--primary);
-  transition:all .3s var(--ease);
+.nav-bag-btn:hover{ background:rgba(var(--primary-rgb),.3); color:#fff; }
+.nav-bag-btn .tx{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.nav-bag-btn #bag-count{ position:absolute; top:-7px; right:-7px; min-width:20px; height:20px; padding:0 5px; border-radius:10px;
+  font-size:11px; font-weight:700; line-height:20px; text-align:center; color:#fff; background:var(--cta);
+  box-shadow:0 0 0 2px var(--ink); font-variant-numeric:tabular-nums; }
+.nav-bag-btn svg{ width:20px; height:20px; }
+.nav-shop-btn, .nav-back-home{
+  display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:999px;
+  font-size:14px; font-weight:600; line-height:1.2; transition:background .3s, border-color .3s, color .3s;
 }
-.nav-shop-btn:hover{ background:var(--ember); color:var(--ink); }
-.nav-back-home{
-  font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--bone-dim); transition:color .3s;
-}
-.nav-back-home:hover{ color:var(--bone); }
+.nav-shop-btn{ color:#fff; background:var(--primary); border:1px solid var(--primary); }
+.nav-shop-btn:hover{ background:#1fa56f; border-color:#1fa56f; }
+.nav-back-home{ color:var(--bone); border:1px solid rgba(var(--bone-rgb),.3); }
+.nav-back-home:hover{ border-color:var(--bone); }
 
 .nav-burger{ margin-left:12px; width:26px; height:16px; position:relative; flex:0 0 auto; display:none; }
 .nav-burger i{ position:absolute; right:0; height:1.5px; background:var(--bone); transition:width .45s var(--ease-out), transform .45s var(--ease-out); }
@@ -199,17 +214,45 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .hero::before{ content:''; position:absolute; left:0; right:0; top:0; height:46%; pointer-events:none;
   background:linear-gradient(rgba(var(--ink-rgb),.72), rgba(var(--ink-rgb),.34) 46%, transparent); }
 .hero-top{ padding-top:calc(var(--nav-h) + clamp(12px,2.6vh,34px)); max-width:min(560px,46vw); position:relative; z-index:2; }
-.hero-top .eyebrow{ display:flex; align-items:center; gap:10px; margin-bottom:20px; }
-.hero-top .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--ember); box-shadow:0 0 10px var(--ember); }
+.hero-top .eyebrow{ margin-bottom:18px; }
 .hero h1{ margin-bottom:18px; }
-.hero-sub{ max-width:340px; text-shadow:0 1px 26px rgba(var(--ink-rgb),.95); line-height:1.75; }
-.hero-spacer{ flex:1 1 auto; min-height:clamp(140px,26vh,300px); }
+.hero-sub{ max-width:400px; font-size:15px; text-shadow:0 1px 26px rgba(var(--ink-rgb),.95); line-height:1.7; color:#c4d6cd; }
+.hero-cta{ display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+
+/* nút theo web: cam đặc như "Thêm vào giỏ" / "Hỏi người bán", nút phụ viền sáng */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:13px 22px; border-radius:10px;
+  font-family:var(--font-body); font-size:15px; font-weight:700; line-height:1.2; letter-spacing:0;
+  transition:background .25s, border-color .25s, color .25s, transform .25s var(--ease-out), box-shadow .25s; }
+.btn svg{ width:14px; height:14px; flex:0 0 auto; }
+.btn-cam{ color:#fff; background:var(--cta); border:1px solid var(--cta); box-shadow:0 8px 22px -10px rgba(var(--accent-rgb),.7); }
+.btn-cam:hover{ background:var(--cta-hover); border-color:var(--cta-hover); transform:translate3d(0,-1px,0); }
+.btn-vien{ color:var(--bone); background:rgba(var(--ink-rgb),.45); border:1px solid rgba(var(--bone-rgb),.36); }
+.btn-vien:hover{ border-color:var(--bone); background:rgba(var(--bone-rgb),.08); }
+.btn:focus-visible{ outline:2px solid var(--metal); outline-offset:3px; }
+.hero-spacer{ flex:1 1 auto; min-height:clamp(24px,6vh,120px); }
 .hero-foot{ padding-bottom:clamp(22px,4.2vh,42px); position:relative; z-index:2; }
 .hero-cue{ display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-bottom:14px;
   font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); }
 .hero-cue .track{ width:54px; height:1px; background:var(--line); position:relative; overflow:hidden; }
 .hero-cue .track i{ position:absolute; inset:0; background:var(--bone); transform-origin:left;
   animation:cue 2.8s var(--ease-io) infinite; }
+/* gợi ý "bấm vào sân để đập cầu": góc phải dưới của màn mở đầu (cạnh cây vợt); màn hẹp thì nằm ngay trên dãy lối chơi */
+.smash-hint{ position:absolute; right:calc(100% - (var(--vw,100vw) - var(--pad) * 2)); bottom:clamp(22px,4.2vh,42px);
+  display:inline-flex; align-items:center; gap:10px; padding:9px 16px 9px 12px; border-radius:999px; white-space:nowrap;
+  border:1px solid rgba(var(--bone-rgb),.22); background:rgba(var(--ink-rgb),.6); color:var(--bone);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  font-family:var(--font-body); font-size:12.5px; font-weight:600; line-height:1.2; cursor:pointer;
+  opacity:0; visibility:hidden; transform:translate3d(0,8px,0);
+  transition:opacity .5s var(--ease-out), transform .6s var(--ease-out), visibility .5s, border-color .25s, background .25s; }
+.smash-hint[hidden]{ display:none; }
+.smash-hint.on{ opacity:1; visibility:visible; transform:none; }
+.smash-hint:hover{ border-color:var(--ember); background:rgba(var(--ink-rgb),.78); }
+.smash-hint:focus-visible{ outline:2px solid var(--metal); outline-offset:3px; }
+.smash-hint i{ position:relative; flex:0 0 auto; width:10px; height:10px; border-radius:50%; background:var(--ember); }
+.smash-hint i::after{ content:''; position:absolute; inset:-5px; border-radius:50%; border:1.5px solid var(--ember); opacity:0; animation:hint-ping 2.2s var(--ease-out) infinite; }
+@keyframes hint-ping{ 0%{ transform:scale(.5); opacity:.9 } 70%,100%{ transform:scale(1.5); opacity:0 } }
+@media (max-width:1080px){ .smash-hint{ position:relative; right:auto; bottom:auto; margin-bottom:14px; } }
+@media (prefers-reduced-motion:reduce){ .smash-hint i::after{ animation:none; } }
 .chapters{
   display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(14px,2.4vw,40px);
   border-top:1px solid var(--line-soft); padding-top:18px;
@@ -217,10 +260,12 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .chip{ display:flex; gap:14px; align-items:flex-start; cursor:pointer; }
 .chip .num{ line-height:1; flex:0 0 auto; transition:color .4s, transform .5s var(--ease-out); color:var(--bone-dim); }
 .chip .tx{ min-width:0; padding-top:3px; }
-.chip b{ display:block; font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--bone); margin-bottom:6px; transition:color .4s;
+.chip b{ display:flex; align-items:baseline; gap:8px; font-size:15px; font-weight:700; letter-spacing:-.005em;
+  color:var(--bone); margin-bottom:5px; transition:color .4s;
   text-shadow:0 1px 16px rgba(var(--ink-rgb),.9); }
-.chip p{ margin:0; font-size:11.5px; line-height:1.5; color:#b3c7bd; max-width:26ch;
+.chip b em{ font-style:normal; font-size:11px; font-weight:600; color:var(--brand-hi); white-space:nowrap; }
+.chip b em:empty{ display:none; }
+.chip p{ margin:0; font-size:12.5px; line-height:1.5; color:#b3c7bd; max-width:28ch;
   text-shadow:0 1px 14px rgba(var(--ink-rgb),.95); transition:color .4s; }
 .chip:focus-visible{ outline:2px solid var(--metal); outline-offset:6px; border-radius:4px; }
 .hero::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:38%; pointer-events:none; z-index:1;
@@ -249,37 +294,85 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
   background:linear-gradient(rgba(var(--ink-rgb),.55), rgba(var(--ink-rgb),.94) 40%, rgba(var(--ink-rgb),.98));
 }
 .sec-head{ display:flex; align-items:baseline; gap:16px; margin-bottom:clamp(30px,5vh,66px); }
-.sec-head .k{ font-size:11px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:#8fae9f; }
-.sec-head .k b{ color:var(--primary); font-weight:700; }
+.sec-head .k{ display:inline-flex; align-items:center; gap:10px; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#a9c5b8; }
+.sec-head .k:first-child::before{ content:''; width:26px; height:3px; border-radius:2px; background:var(--ember); }
+.sec-head .k b{ color:var(--brand-hi); font-weight:700; }
 .rule{ flex:1 1 auto; height:1px; background:var(--line-soft); }
 
-/* — chapter I: the gate */
-.gate-grid{ display:grid; grid-template-columns:minmax(0,1.02fr) minmax(0,1fr); gap:clamp(28px,5vw,90px); align-items:start; }
-.gate-grid h2{ max-width:13ch; }
-.gate-copy{ padding-top:6px; }
-.gate-copy .lead{ font-size:clamp(15px,1.16vw,19px); line-height:1.66; color:#d1ded7; text-shadow:0 1px 20px rgba(var(--ink-rgb),.9); }
-.gate-copy .lead + p{ margin-top:20px; }
-.arrowlink{ display:inline-flex; align-items:center; gap:12px; margin-top:34px;
-  font-family:var(--font-head); font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--bone); }
+/* — chương 01: kết cấu vợt. Cột trái là chữ, nửa phải để trống cho cây vợt 3D; bốn chú thích bám theo vợt
+     (JS chiếu điểm trên mô hình ra màn hình). Điện thoại / không WebGL: chú thích thành lưới thẻ tĩnh. */
+.gate-grid{ position:relative; display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:clamp(28px,4vw,72px);
+  align-items:center; min-height:min(70vh,660px); }
+.gate-copy h2{ max-width:15ch; margin-bottom:22px; }
+.gate-copy .lead{ font-size:clamp(15px,1.12vw,18px); line-height:1.66; color:#d1ded7; text-shadow:0 1px 20px rgba(var(--ink-rgb),.9); max-width:46ch; }
+.gate-copy .lead + p{ margin-top:16px; max-width:48ch; }
+.arrowlink{ display:inline-flex; align-items:center; gap:12px; margin-top:30px;
+  font-size:14px; font-weight:600; color:var(--bone); }
 .arrowlink .ar{ width:34px; height:34px; border:1px solid var(--line); border-radius:50%;
   display:grid; place-items:center; transition:background .45s var(--ease), border-color .45s, transform .5s var(--ease-out); }
 .arrowlink .ar svg{ width:13px; height:13px; transition:transform .5s var(--ease-out); }
+.arrowlink:hover{ color:var(--brand-hi); }
 .arrowlink:hover .ar{ background:var(--bone); border-color:var(--bone); }
 .arrowlink:hover .ar svg{ transform:translate3d(2px,-2px,0); }
 .arrowlink:hover .ar svg path{ stroke:var(--ink); }
-.gate-stats{ display:flex; gap:clamp(24px,4vw,62px); margin-top:clamp(46px,8vh,96px); border-top:1px solid var(--line-soft); padding-top:24px; }
-.gate-stats div b{ display:block; font-family:var(--font-head); font-size:clamp(22px,2.1vw,32px); font-weight:700; letter-spacing:-.02em; color:var(--metal); }
-.gate-stats div span{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
 
-/* — chương 01: hàng thương hiệu (logo màu gốc đặt trên ô sáng: logo Yonex/Victor là chữ trắng trên khối màu, đổi sang trắng sẽ thành khối đặc) */
-.brand-row{ margin-top:clamp(22px,3.4vh,40px); display:grid; grid-template-columns:minmax(120px,.38fr) minmax(0,1.96fr); gap:clamp(20px,3vw,54px); align-items:center; }
-.brand-row h3{ font-family:var(--font-body); font-size:10px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); line-height:1.6; }
-.brand-list{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
-.brand-tile{ display:flex; align-items:center; gap:14px; padding:12px 14px; border:1px solid var(--line-soft); border-radius:10px;
-  background:rgba(var(--ink2-rgb),.78); transition:border-color .35s var(--ease), transform .45s var(--ease-out); }
-.brand-tile:hover{ border-color:rgba(var(--metal-rgb),.55); transform:translate3d(0,-2px,0); }
-.brand-tile b{ display:block; font-family:var(--font-head); font-size:22px; font-weight:700; line-height:1; color:var(--metal); font-variant-numeric:tabular-nums; }
-.brand-tile span{ display:block; margin-top:4px; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.anat{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-self:end; }
+.anat-card{ padding:14px 16px 15px; border-radius:12px; border:1px solid rgba(var(--bone-rgb),.12);
+  background:rgba(var(--ink2-rgb),.84); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.anat-card b{ display:flex; align-items:center; gap:9px; font-size:14px; font-weight:700; color:var(--bone); }
+.anat-card b i{ display:grid; place-items:center; flex:0 0 auto; width:20px; height:20px; border-radius:50%;
+  font-style:normal; font-size:11px; font-weight:700; color:#fff; background:var(--cta); }
+.anat-card p{ margin:6px 0 0; font-size:12.5px; line-height:1.5; color:#b9ccc3; }
+.anat-card em{ display:block; margin-top:8px; padding-top:8px; border-top:1px solid var(--line-soft);
+  font-style:normal; font-size:12px; font-weight:600; line-height:1.45; color:var(--metal); }
+.anat-card em:empty{ display:none; }
+.anat-dot, .anat-svg{ display:none; }
+.anat-svg.live{ display:block; position:absolute; left:0; top:0; width:1px; height:1px; overflow:visible; pointer-events:none; z-index:3; transition:opacity .35s linear; }
+/* bám vợt 3D: JS gắn .live, đặt --cx/--cy cho thẻ, --ax/--ay cho chấm, vẽ đường dẫn trong svg */
+.anat.live{ position:absolute; inset:0; display:block; pointer-events:none; z-index:3; transition:opacity .35s linear; }
+.anat.live .anat-pt{ position:absolute; left:0; top:0; }
+.anat.live .anat-card{ position:absolute; left:0; top:0; width:min(236px,19vw); transform:translate3d(var(--cx,0),var(--cy,0),0); }
+.anat.live .anat-dot{ display:block; position:absolute; left:-8px; top:-8px; width:16px; height:16px; border-radius:50%;
+  border:2px solid var(--ember); background:rgba(var(--ink-rgb),.55); box-shadow:0 0 0 5px rgba(var(--accent-rgb),.16);
+  transform:translate3d(var(--ax,0),var(--ay,0),0); }
+.anat.tight .anat-card p{ display:none; }
+.anat-svg path{ fill:none; stroke:rgba(var(--bone-rgb),.55); stroke-width:1.2; }
+
+.gate-stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:clamp(36px,6vh,72px); border-top:1px solid var(--line-soft); }
+.gate-stats div{ min-height:96px; padding:18px; border-left:1px solid var(--line-soft); background:rgba(var(--ink-rgb),.42); }
+.gate-stats div:last-child{ border-right:1px solid var(--line-soft); }
+.gate-stats div b{ display:block; font-family:var(--font-head); font-size:clamp(24px,2.2vw,34px); font-weight:700; letter-spacing:-.01em; line-height:1.1; color:var(--metal); }
+.gate-stats div span{ display:block; margin-top:6px; font-size:12.5px; color:#a9bcb3; }
+
+/* — chương 01: bốn hãng đang bán, mỗi hãng một thẻ có số liệu kho (logo màu gốc đặt trên ô sáng: logo Yonex/Victor
+     là chữ trắng trên khối màu, đổi sang trắng sẽ thành khối đặc) */
+.brand-row{ margin-top:clamp(30px,5vh,56px); }
+.brand-row-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px 24px; flex-wrap:wrap; margin-bottom:16px; }
+.brand-row h3{ font-size:clamp(18px,1.5vw,22px); font-weight:700; color:var(--bone); }
+.brand-row h3 span{ color:var(--metal); }
+.brand-row-head p{ margin:0; font-size:13px; color:#a9bcb3; }
+.brand-list{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.brand-card{ --bc:var(--primary); position:relative; display:flex; flex-direction:column; gap:10px; min-width:0; padding:18px 18px 16px;
+  border-radius:16px; border:1px solid var(--line-soft); background:rgba(var(--ink2-rgb),.88); overflow:hidden;
+  transition:border-color .35s var(--ease), transform .45s var(--ease-out); }
+.brand-card::before{ content:''; position:absolute; left:0; right:0; top:0; height:3px; background:var(--bc); }
+.brand-card[data-hang="yonex"]{ --bc:#00905a; }
+.brand-card[data-hang="lining"]{ --bc:#d7261e; }
+.brand-card[data-hang="victor"]{ --bc:#1d4fb8; }
+.brand-card[data-hang="mizuno"]{ --bc:#1b3a8f; }
+.brand-card:hover, .brand-card:focus-visible{ border-color:rgba(var(--bone-rgb),.3); transform:translate3d(0,-3px,0); }
+.brand-card .logo-chip{ width:100%; height:62px; padding:12px 20px; border-radius:10px; }
+.bc-origin{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8fae9f; }
+.bc-series{ font-size:14px; font-weight:600; line-height:1.45; color:var(--bone); }
+.bc-counts{ display:flex; flex-wrap:wrap; gap:4px 14px; font-size:12.5px; color:var(--bone-dim); }
+.bc-counts span{ white-space:nowrap; }
+.bc-counts b{ font-family:var(--font-head); font-size:22px; font-weight:700; line-height:1; color:var(--metal); margin-right:4px; font-variant-numeric:tabular-nums; }
+.bc-price{ font-size:12.5px; color:#a9bcb3; }
+.bc-price:empty{ display:none; }
+.bc-go{ display:inline-flex; align-items:center; gap:6px; margin-top:auto; padding-top:10px; border-top:1px solid var(--line-soft);
+  font-size:13px; font-weight:600; color:var(--brand-hi); }
+.bc-go svg{ width:12px; height:12px; transition:transform .4s var(--ease-out); }
+.brand-card:hover .bc-go svg{ transform:translate3d(3px,0,0); }
 .logo-chip{ display:grid; place-items:center; flex:0 0 auto; width:96px; height:42px; padding:7px 11px; border-radius:6px; background:#f6f4ee; }
 .logo-chip img{ display:block; width:100%; height:100%; min-height:0; object-fit:contain; }
 .logo-chip.sm{ width:74px; height:30px; padding:5px 8px; border-radius:5px; }
@@ -306,16 +399,15 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .on-cloth > img, .on-cloth::after{ visibility:hidden; }
 .card-lab{ position:absolute; left:20px; right:20px; bottom:18px; z-index:2; pointer-events:none;
   display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
-.card-lab b{ display:block; font-family:var(--font-head); font-size:clamp(20px,2vw,30px); font-weight:700; letter-spacing:.03em;
-  text-transform:uppercase; color:var(--bone); text-shadow:0 2px 18px rgba(0,0,0,.75); }
-.card-lab small{ display:block; margin-top:5px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#cfe0d8;
+.card-lab b{ display:block; font-size:clamp(19px,1.7vw,26px); font-weight:700; letter-spacing:-.01em; line-height:1.2;
+  color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.75); }
+.card-lab small{ display:block; margin-top:6px; font-size:13px; font-weight:500; color:#d6e6de;
   text-shadow:0 1px 12px rgba(0,0,0,.8); }
-.card-ar{ position:absolute; top:16px; right:16px; z-index:2; width:34px; height:34px; border-radius:50%;
-  display:grid; place-items:center; background:rgba(var(--ink-rgb),.55); border:1px solid rgba(var(--bone-rgb),.22);
-  opacity:0; transform:translate3d(-4px,4px,0); transition:.5s var(--ease-out); }
-.card-ar svg{ width:13px; height:13px; }
-.card:hover .card-ar, .card:focus-visible .card-ar{ opacity:1; transform:none; }
-.card-meta{ margin-top:10px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.card-lab .go{ flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px;
+  font-size:13px; font-weight:600; color:#fff; background:rgba(var(--primary-rgb),.9); box-shadow:0 6px 18px -8px rgba(0,0,0,.6);
+  opacity:0; transform:translate3d(0,6px,0); transition:opacity .4s, transform .5s var(--ease-out); }
+.card:hover .card-lab .go, .card:focus-visible .card-lab .go{ opacity:1; transform:none; }
+.card-meta{ margin-top:8px; font-size:11px; color:var(--muted); }
 
 .no-webgl .card-fr{ background:var(--ink-2); }
 .word-fb{ display:none; }
@@ -335,72 +427,66 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
   pointer-events:none; background:linear-gradient(transparent, rgba(var(--ink-rgb),.72) 52%, rgba(var(--ink-rgb),.96)); }
 .no-webgl .sec::before, .no-webgl #pathways::before, .no-webgl #eternity::before{ background:none; }
 
-/* — chương 03: vợt nổi bật, có ảnh sản phẩm và logo hãng */
-.cur-head{ display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.1fr); gap:clamp(28px,5vw,90px); align-items:end; margin-bottom:clamp(30px,5vh,60px); }
-.cur-head h2{ max-width:14ch; }
-.cur-note{ margin-top:10px; font-size:12px; color:var(--muted); }
-.cur{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }
-.les{ position:relative; grid-column:span 2; display:grid; grid-template-rows:auto 1fr; gap:16px; min-width:0;
-  padding:16px 16px 20px; border:1px solid var(--line-soft); border-radius:14px; background:rgba(var(--ink2-rgb),.9);
-  cursor:pointer; overflow:hidden; transition:border-color .4s var(--ease), transform .5s var(--ease-out); }
-.les:nth-child(-n+2){ grid-column:span 3; grid-template-rows:none; grid-template-columns:minmax(150px,.82fr) minmax(0,1fr); align-items:stretch; }
-.les:hover, .les:focus-visible{ border-color:rgba(var(--metal-rgb),.45); transform:translate3d(0,-3px,0); }
-.les-img{ position:relative; display:grid; place-items:center; min-height:170px; padding:14px; border-radius:10px; background:#f4f2ec; overflow:hidden; }
-.les:nth-child(-n+2) .les-img{ min-height:220px; }
-.les-img img{ width:100%; height:100%; max-height:200px; object-fit:contain; mix-blend-mode:multiply; transition:transform .8s var(--ease-out); }
-.les:nth-child(-n+2) .les-img img{ max-height:240px; }
+/* — chương 03: vợt nổi bật, thẻ sản phẩm cùng kiểu thẻ ở trang chủ / danh sách của web: nền sáng, hãng in hoa,
+     tên 2 dòng, giá chữ hẹp, giá cũ gạch, "Tiết kiệm", nhãn -%, dải thông số và nút cam "Thêm vào giỏ" */
+.cur-head{ display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.1fr); gap:clamp(28px,5vw,90px); align-items:end; margin-bottom:clamp(26px,4.5vh,52px); }
+.cur-head h2{ max-width:15ch; }
+.cur-note{ margin-top:10px; font-size:12.5px; color:#8fae9f; }
+.cur{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; }
+.les{ position:relative; display:flex; flex-direction:column; min-width:0; border-radius:18px; overflow:hidden; cursor:pointer;
+  background:#fff; border:1px solid #e3e9e5; color:#17211c;
+  transition:border-color .2s, box-shadow .25s, transform .35s var(--ease-out); }
+.les:hover, .les:focus-visible{ border-color:#b7d3c6; box-shadow:0 18px 36px -18px rgba(0,0,0,.6); transform:translate3d(0,-3px,0); }
+.les:focus-visible{ outline:3px solid var(--metal); outline-offset:2px; }
+.les-img{ position:relative; aspect-ratio:1 / 1; display:grid; place-items:center; background:#f3f6f4; overflow:hidden; }
+.les-img img{ width:100%; height:100%; padding:7%; object-fit:contain; mix-blend-mode:multiply; transition:transform .8s var(--ease-out); }
 .les:hover .les-img img{ transform:scale(1.04); }
 .les-img img:not([src]), .les-img img[src=""]{ visibility:hidden; }
-.les-tx{ display:flex; flex-direction:column; gap:10px; min-width:0; }
-.les-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.les .k{ font-family:var(--font-head); font-size:12px; letter-spacing:.16em; color:var(--muted); font-variant-numeric:tabular-nums; transition:color .4s; }
-.les:hover .k{ color:var(--ember); }
-.les h3{ font-family:var(--font-head); font-size:clamp(18px,1.6vw,24px); font-weight:700; letter-spacing:.02em; line-height:1.18; }
-.les:nth-child(-n+2) h3{ font-size:clamp(20px,1.9vw,28px); }
-.les p{ margin:0; font-size:13px; line-height:1.6; color:#a9bcb3; }
-.les .t{ margin-top:auto; display:flex; align-items:baseline; justify-content:space-between; gap:10px;
-  font-family:var(--font-head); font-size:18px; font-weight:700; letter-spacing:.02em; color:var(--metal); font-variant-numeric:tabular-nums; }
-.les .t small{ font-family:var(--font-body); font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--bone-dim); }
-.les .bar{ position:absolute; left:0; bottom:0; height:2px; width:100%; background:var(--primary);
-  transform:scaleX(0); transform-origin:left; transition:transform .7s var(--ease-out); }
-.les:hover .bar{ transform:scaleX(1); }
+.les-off{ position:absolute; z-index:2; top:10px; left:10px; padding:3px 9px; border-radius:999px; font-size:12px; font-weight:700; line-height:1.3; color:#fff; background:#c2410c; }
+.les-off[hidden]{ display:none; }
+.les-logo{ position:absolute; z-index:2; top:10px; right:10px; }
+.les-tx{ display:flex; flex:1 1 auto; flex-direction:column; gap:6px; min-width:0; padding:12px 14px 14px; }
+.les-brand{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#55645d; }
+.les h3{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:2.7em;
+  font-size:15px; font-weight:600; line-height:1.35; letter-spacing:0; color:#17211c; }
+.les:hover h3{ color:#0f7550; }
+.les-gia{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin-top:auto; padding-top:4px; }
+.les-gia b{ font-family:var(--font-head); font-size:24px; font-weight:700; line-height:1.1; color:#0b3b2b; font-variant-numeric:tabular-nums; }
+.les-gia s{ font-size:13px; color:#55645d; }
+.les-gia s:empty{ display:none; }
+.les-save{ font-size:12px; font-weight:600; color:#8a2c08; }
+.les-save:empty{ display:none; }
+.les-spec{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:4px 0 0; padding:8px 0 0; border-top:1px solid #e3e9e5; }
+.les-spec div{ min-width:0; }
+.les-spec dt{ font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#66756e; }
+.les-spec dd{ margin:2px 0 0; font-size:12px; font-weight:600; line-height:1.3; color:#17211c; overflow-wrap:anywhere; }
+.les-btn{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; padding:11px 12px; border-radius:10px;
+  font-size:14px; font-weight:700; color:#fff; background:var(--cta); transition:background .25s; }
+.les:hover .les-btn{ background:var(--cta-hover); }
+.les-btn svg{ width:16px; height:16px; }
 
 /* — chương 04: ra sân */
 .fin{ min-height:100svh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .fin .eyebrow{ margin-bottom:22px; }
-.fin h2{ font-family:var(--font-head); font-size:clamp(40px,6.6vw,108px); line-height:1; letter-spacing:.01em; text-transform:uppercase; }
-.fin p{ max-width:46ch; margin:24px auto 0; }
-.fin-actions{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:34px; }
-.cta{
-  position:relative; display:inline-flex; align-items:center; gap:14px;
-  padding:17px 30px; border:1px solid var(--line); border-radius:100px; overflow:hidden; isolation:isolate;
-  font-family:var(--font-head); font-size:13px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
-  transition:color .45s var(--ease), border-color .45s;
-}
-.cta i{ position:absolute; inset:0; background:var(--bone); transform:translate3d(0,101%,0);
-  transition:transform .62s var(--ease-out); z-index:-1; }
-.cta span,.cta svg{ position:relative; z-index:1; }
-.cta:hover{ color:var(--ink); border-color:var(--bone); }
-.cta:hover i{ transform:none; }
-.cta:hover svg path{ stroke:var(--ink); }
-.cta-main{ background:var(--ember); border-color:var(--ember); color:var(--ink); }
-.cta-main svg path{ stroke:var(--ink); }
-.cta-sub{ border-color:rgba(var(--bone-rgb),.42); color:var(--bone); background:rgba(var(--ink-rgb),.45); }
-.cta-sub:hover{ color:var(--ink); border-color:var(--bone); }
+.fin h2{ font-size:clamp(36px,5vw,76px); line-height:1.12; letter-spacing:-.025em; }
+.fin p{ max-width:50ch; margin:22px auto 0; }
+.fin-actions{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:32px; }
+.fin-actions .btn{ padding:15px 26px; font-size:16px; }
 
 /* — footer */
 .foot{ position:relative; padding:clamp(50px,8vh,96px) var(--pad) clamp(26px,4vh,40px);
   border-top:1px solid var(--line-soft); }
 .foot-grid,.foot-base{ position:relative; }
 .foot-grid{ display:grid; grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,.6fr)); gap:clamp(22px,4vw,60px); }
-.foot h4{ margin:0 0 16px; font-family:var(--font-head); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--metal); }
+.foot h4{ margin:0 0 16px; font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--metal); }
 .foot ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
-.foot li a{ font-size:13px; color:var(--bone-dim); transition:color .35s; }
+.foot li a{ font-size:14px; color:var(--bone-dim); transition:color .35s; }
 .foot li a:hover{ color:var(--bone); }
 .foot-brand p{ margin:16px 0 0; max-width:34ch; font-size:13px; color:#8faaa0; line-height:1.6; }
+.foot-brand .brand-logo{ width:54px; height:54px; border-radius:14px; }
 .foot-base{ display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
   margin-top:clamp(38px,6vh,74px); padding-top:20px; border-top:1px solid var(--line-soft);
-  font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  font-size:12px; color:var(--muted); }
 .sec, .foot{ overflow-x:clip; }
 .sec > *, .foot > *{ position:relative; z-index:2; }
 
@@ -420,32 +506,21 @@ h1,h2,h3{ font-family:var(--font-head); font-weight:700; margin:0; letter-spacin
 .cur-dot.act{ width:52px; height:52px; margin:-26px 0 0 -26px; background:rgba(var(--bone-rgb),.07); border-color:rgba(var(--bone-rgb),.6); }
 @media (hover:hover) and (pointer:fine){ .cur-dot.live{ opacity:1 } }
 
-/* ================================================== bố cục B (hero, chương 01, chân trang) */
+/* ================================================== bố cục B (hero, chân trang) */
 body[data-layout-hero="b"] .hero-top{ margin-left:0; max-width:min(590px,46vw); }
-body[data-layout-hero="b"] .hero-foot{ width:min(820px,64vw); margin-left:0; }
+body[data-layout-hero="b"] .hero-foot{ width:min(860px,64vw); margin-left:0; }
 body[data-layout-hero="b"] .hero-cue{ justify-content:flex-start; }
 body[data-layout-hero="b"] .chapters{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
 body[data-layout-hero="b"] .chip{ flex-direction:column; gap:8px; }
 body[data-layout-hero="b"] .chip .num{ font-size:clamp(20px,1.7vw,26px); }
 
-body[data-layout-story="b"] .gate-grid{
-  grid-template-columns:minmax(120px,.38fr) minmax(0,1.08fr) minmax(280px,.88fr);
-  gap:clamp(20px,3vw,54px);
-}
-body[data-layout-story="b"] .gate-grid h2{ grid-column:1 / 3; max-width:13ch; }
-body[data-layout-story="b"] .gate-copy{ grid-column:3; }
-body[data-layout-story="b"] .gate-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; }
-body[data-layout-story="b"] .gate-stats div{ min-height:104px; padding:18px; border-left:1px solid var(--line-soft); background:rgba(var(--ink-rgb),.42); }
-body[data-layout-story="b"] .gate-stats div:last-child{ border-right:1px solid var(--line-soft); }
-
 body[data-layout-footer="b"] .foot-grid{ grid-template-columns:repeat(3,1fr); }
 body[data-layout-footer="b"] .foot-brand{
-  grid-column:1 / -1; display:grid; grid-template-columns:70px minmax(0,1fr); align-items:center;
+  grid-column:1 / -1; display:grid; grid-template-columns:76px minmax(0,1fr); align-items:center;
   padding-bottom:34px; margin-bottom:8px; border-bottom:1px solid var(--line-soft);
 }
-body[data-layout-footer="b"] .foot-brand svg{ width:54px; height:54px; }
 body[data-layout-footer="b"] .foot-brand p{
-  margin:0; max-width:48ch; font-size:clamp(18px,2vw,30px); line-height:1.35; color:var(--bone-dim);
+  margin:0; max-width:48ch; font-size:clamp(18px,1.8vw,26px); line-height:1.4; color:var(--bone-dim);
 }
 body[data-layout-footer="b"] .foot-grid > div:nth-child(n+3){
   padding-left:clamp(18px,2.2vw,34px); border-left:1px solid var(--line-soft);
@@ -454,31 +529,30 @@ body[data-layout-footer="b"] .foot-base{ display:grid; grid-template-columns:1fr
 body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 
 /* ============================================================= responsive */
+@media (max-width:1240px){
+  .nav-back-home{ display:none; }
+  .cur{ grid-template-columns:repeat(6,minmax(0,1fr)); }
+  .les{ grid-column:span 2; }
+  .les:nth-child(n+4){ grid-column:span 3; }
+}
 @media (max-width:1080px){
   .hero-top{ max-width:none; }
-  .gate-grid{ grid-template-columns:1fr; gap:26px; }
+  .nav-link{ padding:8px 11px; letter-spacing:.03em; }
+  .gate-grid{ grid-template-columns:1fr; gap:26px; min-height:0; }
   .cur-head{ grid-template-columns:1fr; gap:18px; }
-  .cur{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .les, .les:nth-child(-n+2){ grid-column:auto; grid-template-columns:none; grid-template-rows:auto 1fr; }
-  .les:last-child{ grid-column:1 / -1; }
-  .les:nth-child(-n+2) .les-img{ min-height:170px; }
-  .brand-row{ grid-template-columns:1fr; gap:14px; }
   .brand-list{ grid-template-columns:repeat(2,minmax(0,1fr)); }
   .foot-grid{ grid-template-columns:1fr 1fr; }
   body[data-layout-hero="b"] .hero-foot{ width:100%; }
-  body[data-layout-story="b"] .gate-grid{ grid-template-columns:1fr; }
-  body[data-layout-story="b"] .gate-grid h2,
-  body[data-layout-story="b"] .gate-copy{ grid-column:auto; }
-  body[data-layout-story="b"] .gate-grid h2{ max-width:16ch; }
 }
 @media (max-width:820px){
   :root{ --nav-h:68px; }
   .nav{ gap:12px; }
   .brand-tx i{ display:none; }
+  .brand-logo{ width:36px; height:36px; }
   .nav-links{
     display:flex; position:fixed; top:0; right:0; bottom:0; width:min(84vw,360px);
     padding:calc(var(--nav-h) + 28px) var(--pad) 34px; flex-direction:column; align-items:flex-start; gap:0;
-    background:rgba(var(--ink-rgb),.98); border-left:1px solid var(--line-soft);
+    background:rgba(var(--ink-rgb),.98); border:0; border-left:1px solid var(--line-soft); border-radius:0;
     transform:translate3d(100%,0,0); opacity:0; visibility:hidden; pointer-events:none;
     transition:transform .65s var(--ease-out), opacity .4s, visibility 0s linear .65s;
   }
@@ -486,14 +560,13 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
     transform:none; opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s;
   }
   .nav-links .nav-link, .nav-links .nav-link.m-only{
-    display:block; width:100%; height:auto; padding:17px 0; overflow:visible; border-bottom:1px solid var(--line-soft);
-    font-size:17px; line-height:1.2;
+    display:block; width:100%; padding:17px 0; border-radius:0; border-bottom:1px solid var(--line-soft);
+    font-size:16px; letter-spacing:.04em; background:none;
   }
-  .nav-links .nav-link span{ height:auto; line-height:1.2; }
+  .nav-links .nav-link.on{ color:var(--brand-hi); background:none; }
   .nav-actions{ margin-left:auto; gap:8px; }
   .nav-shop-btn, .nav-back-home{ display:none; }
-  .nav-bag-btn{ padding:8px 12px; }
-  .nav-bag-btn .tx{ display:none; }
+  .nav-bag-btn{ width:40px; height:40px; }
   .nav.menu-open{ transform:none; transition:none; }
   .nav-burger{ display:block; margin-left:6px; }
   .nav-burger.active i:nth-child(1){ top:7px; width:26px; transform:rotate(45deg); }
@@ -501,28 +574,34 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
   html.nav-open,html.nav-open body{ overflow:hidden; }
   .rail{ display:none; }
   .hero-cue{ display:none; }
-  .gate-stats{ flex-wrap:wrap; gap:20px 34px; }
+  .hero-cta .btn{ padding:12px 18px; font-size:14px; }
   body[data-layout-hero="b"] .hero-top{ margin-left:0; max-width:none; }
   body[data-layout-hero="b"] .chapters{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 14px; }
-  body[data-layout-story="b"] .gate-stats{ grid-template-columns:1fr 1fr 1fr; }
-  body[data-layout-story="b"] .gate-stats div{ min-height:86px; padding:12px; }
+  .gate-stats div{ min-height:86px; padding:12px; }
   .gate-stats div b{ font-size:22px; }
+  .gate-stats div span{ font-size:11.5px; }
+  .anat{ grid-template-columns:1fr; }
   .cards{ grid-template-columns:1fr 1fr; grid-template-rows:none; height:auto; min-height:0; gap:12px; }
   .card[data-cat]{ grid-column:auto; grid-row:auto; }
-  .card[data-cat="vot"]{ grid-column:1 / -1; }
+  .card[data-cat="vot"], .card[data-cat="phukien"]{ grid-column:1 / -1; }
   .card-fr{ flex:0 0 auto; aspect-ratio:4 / 5; }
-  .card[data-cat="vot"] .card-fr{ aspect-ratio:16 / 9; }
+  .card[data-cat="vot"] .card-fr, .card[data-cat="phukien"] .card-fr{ aspect-ratio:16 / 9; }
+  .sec-head .k + .rule + .k{ display:none; }
+  .hero::before{ height:72%; background:linear-gradient(rgba(var(--ink-rgb),.84), rgba(var(--ink-rgb),.6) 55%, transparent); }
   .card-lab{ left:14px; right:14px; bottom:12px; }
-  .card-lab b{ font-size:18px; }
-  .card-lab small{ font-size:10px; letter-spacing:.1em; }
-  .cur{ grid-template-columns:1fr; }
-  .les:last-child{ grid-column:auto; }
-  .les, .les:nth-child(-n+2){ grid-template-rows:none; grid-template-columns:110px minmax(0,1fr); gap:14px; padding:12px; }
-  .les-img, .les:nth-child(-n+2) .les-img{ min-height:0; height:130px; padding:8px; }
-  .les-img img{ max-height:114px; }
-  .les p{ font-size:12px; }
-  .brand-tile{ padding:10px; gap:10px; }
-  .logo-chip{ width:78px; height:34px; }
+  .card-lab b{ font-size:17px; }
+  .card-lab small{ font-size:12px; }
+  .card-lab .go{ display:none; }
+  .cur{ grid-template-columns:1fr; gap:12px; }
+  .les, .les:nth-child(n+4){ grid-column:auto; display:grid; grid-template-columns:38% minmax(0,1fr); }
+  .les-img{ aspect-ratio:auto; min-height:100%; }
+  .les-tx{ padding:12px; }
+  .les h3{ font-size:14px; min-height:0; }
+  .les-gia b{ font-size:21px; }
+  .les-btn{ padding:9px 10px; font-size:13px; }
+  .brand-list{ gap:10px; }
+  .brand-card{ padding:14px; }
+  .brand-card .logo-chip{ height:52px; padding:10px 14px; }
   .foot-grid{ grid-template-columns:1fr; }
   body[data-layout-footer="b"] .foot-grid{ grid-template-columns:1fr; }
   body[data-layout-footer="b"] .foot-brand{ grid-column:auto; grid-template-columns:minmax(0,1fr); row-gap:16px; }
@@ -532,8 +611,10 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 }
 @media (max-width:560px){
   body[data-layout-hero="b"] .chip .num{ font-size:20px; }
-  .brand-list{ gap:8px; }
-  .brand-tile{ flex-direction:column; align-items:flex-start; }
+  .chip b{ font-size:14px; flex-wrap:wrap; gap:2px 8px; }
+  .gate-stats{ grid-template-columns:1fr; }
+  .gate-stats div{ border-right:1px solid var(--line-soft); min-height:0; }
+  .brand-list{ grid-template-columns:1fr; }
 }
 /* ============================================================= shop drawer */
 #shop-drawer{
@@ -559,7 +640,7 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
   display:flex; align-items:center; justify-content:space-between;
   padding:20px 24px; border-bottom:1px solid var(--line-soft);
 }
-.sd-brand{ font-family:var(--font-head); font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--bone-dim); }
+.sd-brand{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--bone-dim); }
 .sd-close{
   width:32px; height:32px; display:grid; place-items:center; border-radius:50%;
   border:1px solid var(--line-soft); color:var(--bone); transition:all .3s;
@@ -573,12 +654,12 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 }
 .sd-poster{ width:100%; height:100%; object-fit:contain; display:block; mix-blend-mode:multiply; }
 .sd-poster:not([src]){ visibility:hidden; }
-.sd-title{ font-family:var(--font-head); font-size:24px; line-height:1.2; letter-spacing:.02em; margin:0; color:var(--bone); }
+.sd-title{ font-size:20px; font-weight:700; line-height:1.3; letter-spacing:-.01em; margin:0; color:var(--bone); }
 .sd-price-row{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
-.sd-price{ font-family:var(--font-head); font-size:24px; font-weight:700; color:var(--ember); letter-spacing:-.01em; }
+.sd-price{ font-family:var(--font-head); font-size:28px; font-weight:700; color:var(--metal); letter-spacing:.005em; }
 .sd-stock{ font-size:12px; color:var(--bone-dim); letter-spacing:.05em; }
 .sd-field{ display:flex; flex-direction:column; gap:8px; }
-.sd-label{ font-family:var(--font-head); font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--bone-dim); }
+.sd-label{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--bone-dim); }
 .sd-label-row{ display:flex; justify-content:space-between; align-items:center; }
 .sd-variants{ display:flex; flex-wrap:wrap; gap:8px; }
 .sd-chip{
@@ -609,17 +690,17 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 .sd-msg.ok{ color:var(--primary); }
 .sd-actions{ display:flex; flex-direction:column; gap:12px; margin-top:8px; }
 .sd-add-btn{
-  width:100%; padding:15px; border-radius:4px; border:0;
-  background:var(--ember); color:var(--ink); font-family:var(--font-head); font-size:13px; font-weight:800;
-  letter-spacing:.18em; text-transform:uppercase; cursor:pointer;
+  width:100%; padding:14px; border-radius:10px; border:0;
+  background:var(--cta); color:#fff; font-family:var(--font-body); font-size:15px; font-weight:700;
+  letter-spacing:0; cursor:pointer;
   transition:background .3s, transform .2s, color .3s;
 }
-.sd-add-btn:hover:not(:disabled){ background:#ff7d30; color:var(--ink); transform:translate3d(0,-1px,0); box-shadow:0 6px 20px rgba(var(--accent-rgb),.35); }
+.sd-add-btn:hover:not(:disabled){ background:var(--cta-hover); color:#fff; transform:translate3d(0,-1px,0); box-shadow:0 6px 20px rgba(var(--accent-rgb),.35); }
 .sd-add-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 .sd-add-btn:disabled{ opacity:.45; cursor:not-allowed; }
 .sd-pdp-link{
-  text-align:center; font-family:var(--font-head); font-size:12px; font-weight:700;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--bone-dim); padding:8px; transition:color .3s;
+  text-align:center; font-size:14px; font-weight:600; text-decoration:underline; text-underline-offset:3px;
+  color:var(--brand-hi); padding:8px; transition:color .3s;
 }
 .sd-pdp-link:hover{ color:var(--bone); }
 @media (max-width:820px){
@@ -642,52 +723,48 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 <div class="cur-dot" id="cursor"></div>
 
 <!-- ============================================================ màn tải -->
-<div id="pre">
+<!-- Cây vợt được vẽ dần theo tiến độ dựng cảnh (biến --p, 0 tới 1): cán, thân, vành, rồi mặt cước và quả cầu. -->
+<div id="pre" role="status" aria-live="polite">
   <div class="pre-in">
-    <div class="pre-mark">
-      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <ellipse cx="24" cy="20" rx="14" ry="17" stroke="var(--primary)" stroke-width="1.8"/>
-        <path d="M14 20h20M24 6v28M17 10l14 20M31 10 17 30" stroke="var(--bone)" stroke-width="0.8" stroke-opacity=".5"/>
-        <path d="M24 37v7M21 44h6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="24" cy="20" r="4" fill="var(--ember)"/>
-      </svg>
-    </div>
+    <svg class="pre-racket" viewBox="0 0 120 204" fill="none" aria-hidden="true">
+      <defs><clipPath id="pre-head"><path d="M60 110C37 110 22 88 22 57C22 27 37 8 60 8C83 8 98 27 98 57C98 88 83 110 60 110Z"/></clipPath></defs>
+      <path class="pre-ghost" d="M60 198V110C37 110 22 88 22 57C22 27 37 8 60 8C83 8 98 27 98 57C98 88 83 110 60 110"/>
+      <g class="pre-strings" clip-path="url(#pre-head)">
+        <path d="M30 0V120M40 0V120M50 0V120M60 0V120M70 0V120M80 0V120M90 0V120M0 20H120M0 30H120M0 40H120M0 50H120M0 60H120M0 70H120M0 80H120M0 90H120M0 100H120"/>
+      </g>
+      <path class="pre-draw" pathLength="1" d="M60 198V110C37 110 22 88 22 57C22 27 37 8 60 8C83 8 98 27 98 57C98 88 83 110 60 110"/>
+      <path class="pre-grip" pathLength="1" d="M60 198V154"/>
+      <g class="pre-shuttle"><path d="M52 48L68 48L64 62H56Z"/><path d="M56 64h8a4 4 0 0 1-8 0Z"/></g>
+    </svg>
+    <div class="pre-num"><span id="pre-pct">0</span><i>%</i></div>
     <div class="pre-name">Shop Cầu Lông</div>
-    <div class="pre-bar"><i id="pre-fill"></i></div>
-    <div class="pre-meta">
-      <span>Đang dựng nhà thi đấu</span><b><span id="pre-pct">0</span>%</b>
-    </div>
+    <div class="pre-meta"><span id="pre-job">Đang dựng nhà thi đấu</span></div>
   </div>
 </div>
 
 <!-- ============================================================ điều hướng -->
 <header class="nav" id="nav">
   <a class="brand" href="#top" data-cursor>
-    <svg viewBox="0 0 44 44" fill="none" aria-hidden="true">
-      <ellipse cx="22" cy="18" rx="12" ry="15" stroke="var(--primary)" stroke-width="1.8"/>
-      <path d="M14 18h16M22 6v24" stroke="var(--bone)" stroke-width="0.8" stroke-opacity=".6"/>
-      <path d="M22 33v8M19 41h6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="22" cy="18" r="3.5" fill="var(--ember)"/>
-    </svg>
-    <span class="brand-tx"><b>SHOP CẦU LÔNG</b><i>SÂN TRƯNG BÀY 3D</i></span>
+    <img class="brand-logo" data-site="logo" src="/images/HUIT.jpg" alt="" width="40" height="40">
+    <span class="brand-tx"><b data-site="ten">Shop Cầu Lông</b><i>Trải nghiệm 3D</i></span>
   </a>
   <nav class="nav-links" id="navlinks" aria-label="Các chương">
-    <a class="nav-link" href="#gate" data-cursor><span>Công nghệ</span></a>
-    <a class="nav-link" href="#pathways" data-cursor><span>Danh mục</span></a>
-    <a class="nav-link" href="#lessons" data-cursor><span>Vợt nổi bật</span></a>
-    <a class="nav-link" href="#eternity" data-cursor><span>Ra sân</span></a>
-    <a class="nav-link m-only" href="/SanPham/Index?loai=Vot"><span>Vào cửa hàng</span></a>
-    <a class="nav-link m-only" href="/"><span>Trang chủ</span></a>
+    <a class="nav-link" href="#gate" data-cursor>Kết cấu vợt</a>
+    <a class="nav-link" href="#pathways" data-cursor>Danh mục</a>
+    <a class="nav-link" href="#lessons" data-cursor>Vợt nổi bật</a>
+    <a class="nav-link" href="#eternity" data-cursor>Ra sân</a>
+    <a class="nav-link m-only" href="/SanPham/Index?loai=Vot">Vào cửa hàng</a>
+    <a class="nav-link m-only" href="/">Trang chủ</a>
   </nav>
   <div class="nav-actions">
+    <a class="nav-back-home" href="/" data-cursor>Trang chủ</a>
+    <a id="nav-shop" class="nav-shop-btn" href="/SanPham/Index?loai=Vot" data-cursor>Vào cửa hàng</a>
     <button id="nav-bag-btn" class="nav-bag-btn" data-cursor type="button" aria-label="Giỏ hàng">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true">
-        <path d="M2.5 5.5h11l-1 8h-9z"/><path d="M5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 4h2.2l2.1 10.2a1.6 1.6 0 0 0 1.6 1.3h8.4a1.6 1.6 0 0 0 1.6-1.2L20.5 8H6.1"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>
       </svg>
       <span class="tx">Giỏ hàng</span><span id="bag-count">0</span>
     </button>
-    <a id="nav-shop" class="nav-shop-btn" href="/SanPham/Index?loai=Vot" data-cursor><span>Vào cửa hàng</span></a>
-    <a class="nav-back-home" href="/" data-cursor><span>Trang chủ</span></a>
   </div>
   <button class="nav-burger" type="button" aria-label="Mở menu" data-cursor><i></i><i></i></button>
 </header>
@@ -697,28 +774,34 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 <!-- ============================================================ mở đầu -->
 <section class="hero" id="hero" data-cam="0">
   <div class="hero-top">
-    <div class="eyebrow" data-rv="fade"><span class="dot"></span> Chương 00 — Nhà thi đấu 3D</div>
+    <div class="eyebrow" data-rv="fade">Nhà thi đấu 3D</div>
     <h1 class="display h-hero">
       <span class="mask-line"><span>Mỗi cú đập cầu</span></span>
       <span class="mask-line"><span>khởi đầu từ</span></span>
-      <span class="mask-line"><span>sự chuẩn xác.</span></span>
+      <span class="mask-line"><span class="hl">sự chuẩn xác.</span></span>
     </h1>
-    <p class="hero-sub body" data-rv="up">Khám phá kết cấu khung carbon, điểm cân bằng và cảm giác vung của từng cây vợt, trong một nhà thi đấu dựng bằng 3D.</p>
+    <p class="hero-sub body" data-rv="up">Đi một vòng nhà thi đấu để xem cấu tạo cây vợt, bốn hãng đang bán và những mẫu còn hàng. Giá và tồn kho lấy thẳng từ cửa hàng.</p>
+    <div class="hero-cta" data-rv="up">
+      <a class="btn btn-cam" href="/SanPham/Index?loai=Vot" data-cursor>Xem vợt đang bán
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn-vien" href="/so-sanh" data-cursor>So sánh vợt</a>
+    </div>
   </div>
 
   <div class="hero-spacer"></div>
 
   <div class="hero-foot">
+    <button class="smash-hint" id="smash-hint" type="button" data-cursor hidden><i aria-hidden="true"></i><span class="tx">Bấm vào sân để đập cầu</span></button>
     <div class="hero-cue" data-rv="fade"><span>Cuộn để khám phá</span><span class="track"><i></i></span></div>
     <nav class="chapters" id="chips" aria-label="Chọn vợt theo lối chơi">
       <a class="chip" href="/SanPham/Index?loai=Vot&amp;loi_choi=cong" data-rv="up" data-cursor><span class="num">01</span>
-        <span class="tx"><b>Vợt tấn công</b><p>Đầu nặng, thân cứng, dồn lực cho cú đập.</p></span></a>
+        <span class="tx"><b>Uy lực <em data-lc="cong"></em></b><p>Đập cầu, dồn điểm. Vợt nặng đầu, thân cứng.</p></span></a>
       <a class="chip" href="/SanPham/Index?loai=Vot&amp;loi_choi=toc" data-rv="up" data-cursor><span class="num">02</span>
-        <span class="tx"><b>Vợt phản tạt</b><p>Nhẹ đầu, vung nhanh, hợp đánh đôi và phòng thủ.</p></span></a>
+        <span class="tx"><b>Tốc độ <em data-lc="toc"></em></b><p>Vung nhanh, phản tạt, đổi hướng liên tục. Vợt nhẹ đầu.</p></span></a>
       <a class="chip" href="/SanPham/Index?loai=Vot&amp;loi_choi=toan" data-rv="up" data-cursor><span class="num">03</span>
-        <span class="tx"><b>Vợt cân bằng</b><p>Dễ điều cầu, hợp người đang lên trình.</p></span></a>
+        <span class="tx"><b>Kiểm soát <em data-lc="toan"></em></b><p>Đặt cầu chính xác, linh hoạt công thủ. Vợt cân bằng.</p></span></a>
       <a class="chip" href="/SanPham/Index?loai=Giay" data-rv="up" data-cursor><span class="num">04</span>
-        <span class="tx"><b>Giày bám sân</b><p>Đế cao su bám sàn, đệm êm khi đổi hướng.</p></span></a>
+        <span class="tx"><b>Giày cầu lông <em data-dem-chip="giay"></em></b><p>Đế cao su bám sân, đệm êm khi đổi hướng.</p></span></a>
     </nav>
   </div>
 
@@ -726,33 +809,74 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 </section>
 
 <!-- ============================================================ chương 01 -->
-<section class="sec" id="gate" data-cam="1">
+<section class="sec" id="gate" data-cam="1" data-cam-at=".gate-grid">
   <div class="sec-head" data-rv="fade">
-    <span class="k"><b>01</b> — Kết cấu &amp; vật liệu</span><span class="rule"></span>
+    <span class="k"><b>01</b> Kết cấu &amp; vật liệu</span><span class="rule"></span>
   </div>
   <div class="gate-grid">
-    <h2 class="display h-sec" data-rv="up">Sợi carbon đa trục, khớp chữ T, khung chịu lực.</h2>
     <div class="gate-copy">
-      <p class="lead" data-rv="up">Khung vợt hiện đại thường được tạo từ những lớp sợi carbon xếp theo nhiều hướng chịu lực, giúp giảm rung và truyền lực tốt hơn khi vung.</p>
-      <p class="body" data-rv="up">Khớp nối chữ T giữa thân và khung giữ mặt vợt ổn định hơn khi đánh lệch tâm, tùy cấu trúc từng mẫu.</p>
-      <a class="arrowlink" href="#pathways" data-rv="fade" data-cursor>
-        <span>Xem các danh mục</span>
+      <h2 class="display h-sec" data-rv="up">Bên trong một cây vợt <span class="hl">có gì?</span></h2>
+      <p class="lead" data-rv="up">Khung, khớp chữ T, thân và cán: bốn phần quyết định cây vợt nặng đầu hay nhẹ đầu, dẻo hay cứng, và đánh có chắc tay không.</p>
+      <p class="body" data-rv="up">Số liệu ở từng phần được đếm từ những cây vợt đang còn hàng trong shop.</p>
+      <a class="arrowlink" href="/so-sanh" data-rv="fade" data-cursor>
+        <span>So sánh thông số vợt</span>
         <span class="ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
       </a>
     </div>
+    <ol class="anat" id="anat" aria-label="Cấu tạo vợt cầu lông">
+      <li class="anat-pt" data-pt="khung"><span class="anat-dot"></span>
+        <div class="anat-card"><b><i>1</i>Khung vợt</b><p>Ống carbon rỗng, xếp nhiều lớp sợi theo các hướng chịu lực. Khung vuông vai (isometric) cho điểm ngọt rộng hơn.</p><em data-anat="khung"></em></div></li>
+      <li class="anat-pt" data-pt="khop"><span class="anat-dot"></span>
+        <div class="anat-card"><b><i>2</i>Khớp chữ T</b><p>Nối khung với thân, giữ mặt vợt ít xoắn khi đánh lệch tâm.</p><em data-anat="khop"></em></div></li>
+      <li class="anat-pt" data-pt="than"><span class="anat-dot"></span>
+        <div class="anat-card"><b><i>3</i>Thân vợt</b><p>Độ cứng quyết định độ trả cầu: thân cứng phản hồi nhanh, thân dẻo trợ lực cho cổ tay.</p><em data-anat="than"></em></div></li>
+      <li class="anat-pt" data-pt="can"><span class="anat-dot"></span>
+        <div class="anat-card"><b><i>4</i>Cán và trọng lượng</b><p>Ký hiệu U càng lớn, vợt càng nhẹ, xoay cổ tay càng nhanh.</p><em data-anat="can"></em></div></li>
+    </ol>
   </div>
   <div class="gate-stats" data-rv="up">
-    <div><b data-stat="soVot">—</b><span>Vợt đang còn hàng</span></div>
+    <div><b data-stat="soVot">—</b><span>Cây vợt đang còn hàng</span></div>
     <div><b data-stat="nheNhat">—</b><span>Hạng vợt nhẹ nhất trong kho</span></div>
     <div><b data-stat="cangCaoNhat">—</b><span>Mức căng tối đa cao nhất</span></div>
   </div>
   <div class="brand-row" data-rv="up">
-    <h3><span data-stat="soHang">4</span> thương hiệu đang bán</h3>
+    <div class="brand-row-head">
+      <h3><span data-stat="soHang">4</span> hãng chính hãng đang bán</h3>
+      <p>Bấm vào một hãng để xem toàn bộ sản phẩm của hãng đó.</p>
+    </div>
     <div class="brand-list" id="brand-list">
-      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="yonex" data-cursor><span class="logo-chip"><img src="/images/brands/yonex.svg" alt="Yonex" width="120" height="33"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
-      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="lining" data-cursor><span class="logo-chip"><img src="/images/brands/lining.svg" alt="Li-Ning" width="120" height="48"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
-      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="victor" data-cursor><span class="logo-chip"><img src="/images/brands/victor.svg" alt="Victor" width="120" height="34"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
-      <a class="brand-tile" href="/SanPham/Index?loai=Vot" data-hang="mizuno" data-cursor><span class="logo-chip"><img src="/images/brands/mizuno.svg" alt="Mizuno" width="120" height="56"></span><span><b>—</b><span>vợt còn hàng</span></span></a>
+      <a class="brand-card" href="/SanPham/Index" data-hang="yonex" data-cursor>
+        <span class="logo-chip"><img src="/images/brands/yonex.svg" alt="Yonex" width="120" height="33"></span>
+        <span class="bc-origin">Nhật Bản · từ 1946</span>
+        <span class="bc-series" data-f="dong">Astrox · Nanoflare · Arcsaber</span>
+        <span class="bc-counts" data-f="dem"></span>
+        <span class="bc-price" data-f="gia"></span>
+        <span class="bc-go">Xem hàng Yonex <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="brand-card" href="/SanPham/Index" data-hang="lining" data-cursor>
+        <span class="logo-chip"><img src="/images/brands/lining.svg" alt="Li-Ning" width="120" height="48"></span>
+        <span class="bc-origin">Trung Quốc · từ 1990</span>
+        <span class="bc-series" data-f="dong">Axforce · Aeronaut · Tectonic</span>
+        <span class="bc-counts" data-f="dem"></span>
+        <span class="bc-price" data-f="gia"></span>
+        <span class="bc-go">Xem hàng Li-Ning <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="brand-card" href="/SanPham/Index" data-hang="victor" data-cursor>
+        <span class="logo-chip"><img src="/images/brands/victor.svg" alt="Victor" width="120" height="34"></span>
+        <span class="bc-origin">Đài Loan · từ 1968</span>
+        <span class="bc-series" data-f="dong">Thruster · Auraspeed · Jetspeed</span>
+        <span class="bc-counts" data-f="dem"></span>
+        <span class="bc-price" data-f="gia"></span>
+        <span class="bc-go">Xem hàng Victor <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="brand-card" href="/SanPham/Index" data-hang="mizuno" data-cursor>
+        <span class="logo-chip"><img src="/images/brands/mizuno.svg" alt="Mizuno" width="120" height="56"></span>
+        <span class="bc-origin">Nhật Bản · từ 1906</span>
+        <span class="bc-series" data-f="dong">Fortius · Altius · JPX</span>
+        <span class="bc-counts" data-f="dem"></span>
+        <span class="bc-price" data-f="gia"></span>
+        <span class="bc-go">Xem hàng Mizuno <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
     </div>
   </div>
 </section>
@@ -760,40 +884,36 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 <!-- ============================================================ chương 02 -->
 <section class="sec" id="pathways" data-cam="2">
   <div class="sec-head" data-rv="fade">
-    <span class="k"><b>02</b> — Danh mục</span><span class="rule"></span><span class="k">Bấm để vào cửa hàng</span>
+    <span class="k"><b>02</b> Danh mục</span><span class="rule"></span><span class="k">Bấm để vào cửa hàng</span>
   </div>
   <div class="cards" id="cards">
     <a class="card" data-cat="vot" href="/SanPham/Index?loai=Vot" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
         <img src="/trai-nghiem/anh/vot-astrox99.webp" alt="Banner vợt Yonex Astrox 99" width="1600" height="595" decoding="async" style="--fx:62%; --fy:50%">
-        <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <div class="card-lab"><span><b>Vợt cầu lông</b><small data-dem="vot">Tấn công · Phản tạt · Cân bằng</small></span></div>
+        <div class="card-lab"><span><b>Vợt cầu lông</b><small data-dem="vot">Uy lực · Tốc độ · Kiểm soát</small></span><span class="go">Xem tất cả</span></div>
       </div>
       <div class="card-meta">Ảnh: Yonex Astrox 99</div>
     </a>
     <a class="card" data-cat="giay" href="/SanPham/Index?loai=Giay" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
         <img src="/trai-nghiem/anh/giay-lining.webp" alt="Banner giày cầu lông Li-Ning" width="720" height="926" loading="lazy" decoding="async" style="--fx:56%; --fy:44%">
-        <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <div class="card-lab"><span><b>Giày cầu lông</b><small data-dem="giay">Bám sân · Đệm giảm chấn</small></span></div>
+        <div class="card-lab"><span><b>Giày cầu lông</b><small data-dem="giay">Bám sân · Đệm giảm chấn</small></span><span class="go">Xem tất cả</span></div>
       </div>
       <div class="card-meta">Ảnh: giày Li-Ning</div>
     </a>
     <a class="card" data-cat="aoquan" href="/SanPham/Index?loai=AoQuan" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
-        <img src="/trai-nghiem/anh/trang-phuc.webp" alt="Áo thi đấu Yonex" width="720" height="999" loading="lazy" decoding="async" style="--fx:45%; --fy:26%">
-        <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <div class="card-lab"><span><b>Trang phục</b><small data-dem="aoquan">Áo, quần thi đấu</small></span></div>
+        <img src="/trai-nghiem/anh/trang-phuc.webp" alt="Áo thi đấu Yonex" width="1038" height="1440" loading="lazy" decoding="async" style="--fx:45%; --fy:20%">
+        <div class="card-lab"><span><b>Áo quần thể thao</b><small data-dem="aoquan">Áo, quần thi đấu</small></span><span class="go">Xem tất cả</span></div>
       </div>
       <div class="card-meta">Ảnh: áo thi đấu Yonex</div>
     </a>
     <a class="card" data-cat="phukien" href="/SanPham/Index?loai=PhuKien" data-rv="up" data-cursor>
       <div class="card-fr" data-frame>
-        <img src="/trai-nghiem/anh/phu-kien.webp" alt="Quả cầu lông" width="600" height="750" loading="lazy" decoding="async" style="--fx:50%; --fy:58%">
-        <span class="card-ar"><svg viewBox="0 0 14 14" fill="none"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg></span>
-        <div class="card-lab"><span><b>Phụ kiện</b><small data-dem="phukien">Cầu, dây cuốn cán</small></span></div>
+        <img src="/trai-nghiem/anh/phu-kien.webp" alt="Quả cầu lông lông vũ" width="1000" height="750" loading="lazy" decoding="async" style="--fx:54%; --fy:52%">
+        <div class="card-lab"><span><b>Phụ kiện cầu lông</b><small data-dem="phukien">Cầu, quấn cán</small></span><span class="go">Xem tất cả</span></div>
       </div>
-      <div class="card-meta">Ảnh: quả cầu lông</div>
+      <div class="card-meta">Ảnh: cầu lông vũ thi đấu</div>
     </a>
   </div>
 </section>
@@ -801,83 +921,83 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 <!-- ============================================================ chương 03 -->
 <section class="sec" id="lessons" data-cam="3">
   <div class="sec-head" data-rv="fade">
-    <span class="k"><b>03</b> — Vợt nổi bật</span><span class="rule"></span>
+    <span class="k"><b>03</b> Vợt nổi bật</span><span class="rule"></span>
   </div>
   <div class="cur-head">
-    <h2 class="display h-sec" data-rv="up">Vợt nổi bật, đang có hàng.</h2>
+    <h2 class="display h-sec" data-rv="up">Mỗi hãng một cây, <span class="hl">đang có hàng.</span></h2>
     <div>
-      <p class="body-lg" data-rv="up">Mỗi hãng một cây tiêu biểu, ưu tiên mẫu còn nhiều hàng. Bấm vào thẻ để chọn phiên bản, xem mức căng ghi trong kho và thêm vào giỏ ngay tại đây.</p>
+      <p class="body-lg" data-rv="up">Ưu tiên mẫu còn nhiều hàng. Bấm vào thẻ để chọn phiên bản, xem mức căng ghi trong kho và thêm vào giỏ ngay tại đây.</p>
       <p class="cur-note" data-rv="up">Giá và tồn kho cập nhật từ cửa hàng khi bạn mở trang.</p>
     </div>
   </div>
   <div class="cur" id="cur">
-    <div class="les" data-les="0" data-slot="0" data-cursor>
-      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+    <article class="les" data-les="0" data-slot="0" data-cursor>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"><span class="les-off" data-f="giam" hidden></span></div>
       <div class="les-tx">
-        <div class="les-top"><span class="k">01</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <span class="les-brand" data-f="hang">&nbsp;</span>
         <h3 data-f="ten">Đang tải…</h3>
-        <p data-f="thongso">Đang lấy thông số từ kho…</p>
-        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+        <div class="les-gia"><b data-f="gia">—</b><s data-f="giacu"></s></div>
+        <span class="les-save" data-f="tietkiem"></span>
+        <dl class="les-spec"><div><dt>Cân bằng</dt><dd data-f="canbang">—</dd></div><div><dt>Độ cứng</dt><dd data-f="docung">—</dd></div><div><dt>Trọng lượng</dt><dd data-f="trongluong">—</dd></div></dl>
+        <span class="les-btn">Thêm vào giỏ</span>
       </div>
-      <i class="bar"></i>
-    </div>
-    <div class="les" data-les="1" data-slot="1" data-cursor>
-      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+    </article>
+    <article class="les" data-les="1" data-slot="1" data-cursor>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"><span class="les-off" data-f="giam" hidden></span></div>
       <div class="les-tx">
-        <div class="les-top"><span class="k">02</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <span class="les-brand" data-f="hang">&nbsp;</span>
         <h3 data-f="ten">Đang tải…</h3>
-        <p data-f="thongso">Đang lấy thông số từ kho…</p>
-        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+        <div class="les-gia"><b data-f="gia">—</b><s data-f="giacu"></s></div>
+        <span class="les-save" data-f="tietkiem"></span>
+        <dl class="les-spec"><div><dt>Cân bằng</dt><dd data-f="canbang">—</dd></div><div><dt>Độ cứng</dt><dd data-f="docung">—</dd></div><div><dt>Trọng lượng</dt><dd data-f="trongluong">—</dd></div></dl>
+        <span class="les-btn">Thêm vào giỏ</span>
       </div>
-      <i class="bar"></i>
-    </div>
-    <div class="les" data-les="2" data-slot="2" data-cursor>
-      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+    </article>
+    <article class="les" data-les="2" data-slot="2" data-cursor>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"><span class="les-off" data-f="giam" hidden></span></div>
       <div class="les-tx">
-        <div class="les-top"><span class="k">03</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <span class="les-brand" data-f="hang">&nbsp;</span>
         <h3 data-f="ten">Đang tải…</h3>
-        <p data-f="thongso">Đang lấy thông số từ kho…</p>
-        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+        <div class="les-gia"><b data-f="gia">—</b><s data-f="giacu"></s></div>
+        <span class="les-save" data-f="tietkiem"></span>
+        <dl class="les-spec"><div><dt>Cân bằng</dt><dd data-f="canbang">—</dd></div><div><dt>Độ cứng</dt><dd data-f="docung">—</dd></div><div><dt>Trọng lượng</dt><dd data-f="trongluong">—</dd></div></dl>
+        <span class="les-btn">Thêm vào giỏ</span>
       </div>
-      <i class="bar"></i>
-    </div>
-    <div class="les" data-les="3" data-slot="3" data-cursor>
-      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+    </article>
+    <article class="les" data-les="3" data-slot="3" data-cursor>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"><span class="les-off" data-f="giam" hidden></span></div>
       <div class="les-tx">
-        <div class="les-top"><span class="k">04</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <span class="les-brand" data-f="hang">&nbsp;</span>
         <h3 data-f="ten">Đang tải…</h3>
-        <p data-f="thongso">Đang lấy thông số từ kho…</p>
-        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+        <div class="les-gia"><b data-f="gia">—</b><s data-f="giacu"></s></div>
+        <span class="les-save" data-f="tietkiem"></span>
+        <dl class="les-spec"><div><dt>Cân bằng</dt><dd data-f="canbang">—</dd></div><div><dt>Độ cứng</dt><dd data-f="docung">—</dd></div><div><dt>Trọng lượng</dt><dd data-f="trongluong">—</dd></div></dl>
+        <span class="les-btn">Thêm vào giỏ</span>
       </div>
-      <i class="bar"></i>
-    </div>
-    <div class="les" data-les="4" data-slot="4" data-cursor>
-      <div class="les-img"><img data-f="anh" alt="" decoding="async"></div>
+    </article>
+    <article class="les" data-les="4" data-slot="4" data-cursor>
+      <div class="les-img"><img data-f="anh" alt="" decoding="async"><span class="les-off" data-f="giam" hidden></span></div>
       <div class="les-tx">
-        <div class="les-top"><span class="k">05</span><span class="logo-chip sm" data-f="logo"></span></div>
+        <span class="les-brand" data-f="hang">&nbsp;</span>
         <h3 data-f="ten">Đang tải…</h3>
-        <p data-f="thongso">Đang lấy thông số từ kho…</p>
-        <span class="t"><span data-f="gia">—</span><small>Xem nhanh</small></span>
+        <div class="les-gia"><b data-f="gia">—</b><s data-f="giacu"></s></div>
+        <span class="les-save" data-f="tietkiem"></span>
+        <dl class="les-spec"><div><dt>Cân bằng</dt><dd data-f="canbang">—</dd></div><div><dt>Độ cứng</dt><dd data-f="docung">—</dd></div><div><dt>Trọng lượng</dt><dd data-f="trongluong">—</dd></div></dl>
+        <span class="les-btn">Thêm vào giỏ</span>
       </div>
-      <i class="bar"></i>
-    </div>
+    </article>
   </div>
 </section>
 
 <!-- ============================================================ chương 04 -->
 <section class="sec fin" id="eternity" data-cam="4">
-  <div class="eyebrow" data-rv="fade">Chương 04 — Sẵn sàng ra sân</div>
-  <h2 class="display" data-rv="up">Bước vào trận đấu</h2>
+  <div class="eyebrow" data-rv="fade">Sẵn sàng ra sân</div>
+  <h2 class="display" data-rv="up">Bước vào <span class="hl">trận đấu.</span></h2>
   <p class="body-lg" data-rv="up">Mỗi cây vợt chỉ phát huy hết khi được căng đúng mức và vừa tay cầm. Ghé quầy tư vấn hoặc trang chi tiết sản phẩm để chọn mức căng cước phù hợp.</p>
   <div class="fin-actions">
-    <a class="cta cta-main" href="/SanPham/Index?loai=Vot" data-rv="fade" data-cursor>
-      <i></i><span>Vào cửa hàng</span>
-      <svg viewBox="0 0 14 14" fill="none" width="13" height="13"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg>
-    </a>
-    <a class="cta cta-sub" href="/so-sanh" data-rv="fade" data-cursor>
-      <i></i><span>So sánh vợt</span>
-      <svg viewBox="0 0 14 14" fill="none" width="13" height="13"><path d="M3 11 11 3M5 3h6v6" stroke="#f2efe6" stroke-width="1.3"/></svg>
-    </a>
+    <a class="btn btn-cam" href="/SanPham/Index?loai=Vot" data-rv="fade" data-cursor>Vào cửa hàng
+      <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="btn btn-vien" href="/" data-rv="fade" data-cursor>Hỏi quầy tư vấn</a>
   </div>
 </section>
 
@@ -885,16 +1005,11 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
 <footer class="foot" data-cam="5">
   <div class="foot-grid">
     <div class="foot-brand">
-      <svg viewBox="0 0 44 44" fill="none" width="40" height="40" aria-hidden="true">
-        <ellipse cx="22" cy="18" rx="12" ry="15" stroke="var(--primary)" stroke-width="1.8"/>
-        <path d="M14 18h16M22 6v24" stroke="var(--bone)" stroke-width="0.8" stroke-opacity=".6"/>
-        <path d="M22 33v8M19 41h6" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="22" cy="18" r="3.5" fill="var(--ember)"/>
-      </svg>
-      <p>Sân trưng bày 3D của Shop Cầu Lông. Giá, tồn kho và thông số trên trang lấy thẳng từ cửa hàng.</p>
+      <img class="brand-logo" data-site="logo" src="/images/HUIT.jpg" alt="" width="54" height="54">
+      <p>Nhà thi đấu 3D của <span data-site="ten">Shop Cầu Lông</span>. Giá, tồn kho và thông số trên trang lấy thẳng từ cửa hàng.</p>
     </div>
     <div><h4>Khám phá</h4><ul>
-      <li><a href="#gate" data-cursor>Công nghệ khung vợt</a></li>
+      <li><a href="#gate" data-cursor>Kết cấu vợt</a></li>
       <li><a href="#pathways" data-cursor>Danh mục sản phẩm</a></li>
       <li><a href="#lessons" data-cursor>Vợt nổi bật</a></li>
       <li><a href="#eternity" data-cursor>Ra sân</a></li>
@@ -913,7 +1028,7 @@ body[data-layout-footer="b"] .foot-base span:last-child{ text-align:right; }
     </ul></div>
   </div>
   <div class="foot-base">
-    <span>© 2026 Shop Cầu Lông</span>
+    <span>© 2026 <span data-site="ten">Shop Cầu Lông</span></span>
     <span>Chuẩn xác từng đường cầu</span>
     <span>Ảnh banner thuộc các hãng</span>
   </div>
@@ -1235,6 +1350,12 @@ function mergeGeos(list) {
   result.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3)); result.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); result.setIndex(index); return result;
 }
 const WORLD = {};
+/* Bàn điều khiển ánh sáng: mỗi kênh là hệ số 0..1 nhân vào cường độ gốc của đèn và vật liệu phát sáng.
+   Màn mở đầu bật từng kênh (dãy đèn trần từ xa tới gần, màn LED, băng LED, đèn rọi vợt); ngoài mở đầu mọi kênh bằng 1. */
+const SHOW = { hall: 1, lamp: 1, rows: [1, 1, 1, 1, 1], screen: 1, board: 1, crowd: 1, spot: 1 };
+const DIMMERS = [];
+const dimmer = fn => { DIMMERS.push(fn); };
+function applyShow() { for (let i = 0; i < DIMMERS.length; i++) DIMMERS[i](SHOW); }
 const COURT_PLAN = Object.freeze({ width: 6.1, length: 13.4, singles: 5.18, shortService: 1.98, doublesBackOffset: .76, line: .04, netZ: -8.6 });
 /* Bố cục nhà thi đấu (mét). Sân chính ở giữa, hai sân phụ hai bên; mọi thứ phía sau sân đều thấp (băng LED cao .75 m)
    hoặc treo cao (màn LED, giàn đèn), nên từ camera mở đầu nhìn xuyên được qua lưới tới cuối nhà thi đấu. */
@@ -1265,13 +1386,13 @@ function buildArena() {
   const court = addArenaMesh(scene, new THREE.PlaneGeometry(7.2, 14.5), courtMaterial, 0, .006, COURT_PLAN.netZ, false);
   court.rotation.x = -Math.PI / 2; court.name = 'san-chinh'; court.userData.dimensions = COURT_PLAN; WORLD.court = court;
   /* sân phụ: cùng texture, tối hơn để mắt dồn về sân chính */
-  const sideMaterial = courtMaterial.clone(); sideMaterial.color = brandColor('TEXT_MAIN', .62); sideMaterial.emissiveIntensity = 0;
+  const sideMaterial = courtMaterial.clone(); sideMaterial.color = brandColor('TEXT_MAIN', .5); sideMaterial.emissiveIntensity = 0;
   [-1, 1].forEach(side => {
     const c = addArenaMesh(scene, new THREE.PlaneGeometry(7.2, 14.5), sideMaterial, side * HALL.sideCourtX, .005, COURT_PLAN.netZ, false);
     c.rotation.x = -Math.PI / 2; c.name = 'san-phu';
     const net = buildNet(); net.position.set(side * HALL.sideCourtX, 0, COURT_PLAN.netZ);
   });
-  const wall = surface(lib('arenaWall', texWall), [8, 2], { normal: .2, roughness: .9 });
+  const wall = surface(lib('arenaWall', texWall), [8, 2], { normal: .2, roughness: .9, color: brandColor('TEXT_MAIN', .6) });
   addArenaMesh(scene, new THREE.BoxGeometry(HALL.wallX * 2, HALL.height, .4), wall, 0, HALL.height / 2, HALL.backZ, false);
   [-1, 1].forEach(side => addArenaMesh(scene, new THREE.BoxGeometry(.4, HALL.height, 64), wall, side * HALL.wallX, HALL.height / 2, -2, false));
   /* dải đèn dọc trên tường cuối: tạo chiều sâu, không phải vật chắn */
@@ -1279,6 +1400,8 @@ function buildArena() {
   const strips = [];
   for (let i = -6; i <= 6; i++) if (Math.abs(i) > 1) strips.push(new THREE.BoxGeometry(.07, 7.5, .05).translate(i * 3.1, 5.6, HALL.backZ + .24));
   addArenaMesh(scene, mergeGeos(strips), strip, 0, 0, 0, false);
+  const stripBase = strip.color.clone();
+  dimmer(s => strip.color.copy(stripBase).multiplyScalar(.12 + .88 * s.hall));
 }
 
 /* ---- lưới (cột + lưới + băng trắng mép trên), dùng cho sân chính và sân phụ */
@@ -1300,7 +1423,12 @@ function buildNet() {
     mesh.push(a, topAt(a) - .075 - row * (.685 / 35), 0, b, topAt(b) - .075 - row * (.685 / 35), 0);
   }
   const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(mesh, 3));
-  net.add(new THREE.LineSegments(geometry, lib('netMesh', () => new THREE.LineBasicMaterial({ color: brandColor('TEXT_DIM', .28), transparent: true, opacity: .64 }))));
+  /* sợi lưới là vật liệu không nhận sáng: phải tự tối theo đèn nhà thi đấu, nếu không sẽ thành dải trắng lúc chưa bật đèn */
+  net.add(new THREE.LineSegments(geometry, lib('netMesh', () => {
+    const material = new THREE.LineBasicMaterial({ color: brandColor('TEXT_DIM', .28), transparent: true, opacity: .64 }), base = material.color.clone();
+    dimmer(s => material.color.copy(base).multiplyScalar(.04 + .96 * s.hall * s.hall));
+    return material;
+  })));
   const path = [];
   for (let i = 0; i <= 96; i++) { const x = lerp(-3.05, 3.05, i / 96); path.push(new THREE.Vector3(x, topAt(x) - .0375, 0)); }
   net.add(new THREE.Mesh(sweepPoly(path, [[-.012, -.0375], [.012, -.0375], [.012, .0375], [-.012, .0375]]), tape));
@@ -1368,13 +1496,91 @@ function buildLedBoards(logos) {
     const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rotY;
     addArenaMesh(g, new THREE.BoxGeometry(length, HALL.boardH + .06, .14), frame, 0, (HALL.boardH + .06) / 2, -.08);
     const screen = new THREE.Mesh(new THREE.PlaneGeometry(length, HALL.boardH), face); screen.position.set(0, HALL.boardH / 2 + .03, .002);
-    g.add(screen); scene.add(g); WORLD.boards.push({ tex: tex, speed: speed });
+    g.add(screen); scene.add(g); WORLD.boards.push({ tex: tex, speed: speed, face: face });
   };
+  dimmer(s => WORLD.boards.forEach(b => b.face.color.setScalar(1.25 * s.board)));
   strip(12, 0, HALL.boardFarZ, 0, .018);
   strip(13, -HALL.boardSideX, COURT_PLAN.netZ - .4, Math.PI / 2, .014);
   strip(13, HALL.boardSideX, COURT_PLAN.netZ - .4, -Math.PI / 2, .014);
   strip(30, -13.4, -8, Math.PI / 2, .01);
   strip(30, 13.4, -8, -Math.PI / 2, .01);
+}
+
+/* ---- băng rôn vải treo từ giàn trần, phía trên khán đài: mỗi hãng một băng (màu hãng, logo, các dòng vợt shop đang bán)
+   và một băng của shop. Bên phải treo sâu về cuối nhà để lấp góc trên phải của cảnh mở đầu; bên trái treo gần camera
+   (ngoài khung hình mở đầu) để không nằm sau tiêu đề, chỉ hiện khi camera quay sang ở các chương sau. */
+const BANNERS = [
+  { side: 1, z: -14, kind: 'yonex' }, { side: 1, z: -20, kind: 'lining' }, { side: 1, z: -26, kind: 'victor' },
+  { side: -1, z: -6, kind: 'mizuno' }, { side: -1, z: 1, kind: 'shop' }
+];
+const BANNER_STYLE = {
+  yonex: { bg: ['#0b7a4e', '#043a26'], logo: 'yonex', chip: true, lines: ['ASTROX', 'NANOFLARE', 'ARCSABER'] },
+  lining: { bg: ['#d7261e', '#7e100e'], logo: 'lining', lines: ['AXFORCE', 'AERONAUT', 'TECTONIC'] },
+  victor: { bg: ['#1d4fb8', '#0a2464'], logo: 'victor', chip: true, lines: ['THRUSTER', 'AURASPEED', 'JETSPEED'] },
+  mizuno: { bg: ['#1b3a8f', '#0a1a4a'], logo: 'mizuno', lines: ['FORTIUS', 'ALTIUS', 'JPX'] },
+  shop: { bg: ['#148f5f', '#0b3b2b'] }
+};
+function roundRectPath(x, l, t, w, h, r) {
+  x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r);
+  x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath();
+}
+function fitText(x, text, maxW, size, weight) {
+  let s = size; x.font = weight + ' ' + s + 'px ' + BRAND_THEME.FONT_HEAD;
+  while (s > 18 && x.measureText(text).width > maxW) { s -= 2; x.font = weight + ' ' + s + 'px ' + BRAND_THEME.FONT_HEAD; }
+}
+function texBanner(style, logos) {
+  const W = 320, H = 960, c = cvs(W, H), x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, style.bg[0]); g.addColorStop(1, style.bg[1]);
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.save(); x.globalAlpha = .07; x.strokeStyle = '#ffffff'; x.lineWidth = 16;
+  for (let i = -H; i < W + H; i += 60) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + H * .45, H); x.stroke(); }
+  x.restore();
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  if (style.logo) {
+    const img = logos[style.logo];
+    if (style.chip) { x.fillStyle = '#f6f4ee'; roundRectPath(x, 34, 70, W - 68, 124, 16); x.fill(); drawLogo(x, img, W / 2, 132, 78, false); }
+    else drawLogo(x, img, W / 2, 132, 112, true);
+    x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(W / 2 - 40, 262, 80, 4);
+    style.lines.forEach((line, i) => {
+      fitText(x, line, W - 56, 56, 700); x.fillStyle = i ? 'rgba(255,255,255,.86)' : '#ffffff';
+      x.fillText(line, W / 2, 352 + i * 92);
+    });
+    fitText(x, BRAND_THEME.WORDMARK, W - 70, 34, 700); x.fillStyle = BRAND_THEME.METAL.hex; x.fillText(BRAND_THEME.WORDMARK, W / 2, H - 170);
+  } else {
+    x.save(); x.translate(W / 2, H / 2 - 30); x.rotate(-Math.PI / 2);
+    fitText(x, BRAND_THEME.WORDMARK, H - 220, 128, 700); x.fillStyle = BRAND_THEME.TEXT_MAIN.hex; x.fillText(BRAND_THEME.WORDMARK, 0, 6);
+    x.restore();
+    x.fillStyle = BRAND_THEME.ACCENT.hex; x.beginPath(); x.arc(W / 2, 92, 16, 0, TAU); x.fill();
+    fitText(x, 'TRẢI NGHIỆM 3D', W - 70, 34, 700); x.fillStyle = BRAND_THEME.METAL.hex; x.fillText('TRẢI NGHIỆM 3D', W / 2, H - 170);
+  }
+  /* đuôi én: khoét tam giác ở mép dưới */
+  x.globalCompositeOperation = 'destination-out';
+  x.beginPath(); x.moveTo(0, H + 1); x.lineTo(W / 2, H - 78); x.lineTo(W, H + 1); x.closePath(); x.fill();
+  return c;
+}
+function buildBanners(logos) {
+  const BW = 2.0, BH = 6.0, TOP = HALL.height - 1.85, X = 11.2;
+  const rod = new THREE.MeshStandardMaterial({ color: brandColor('BG_SURFACE', 1.6), roughness: .45, metalness: .7 });
+  WORLD.banners = [];
+  BANNERS.forEach((b, i) => {
+    const map = tx(texBanner(BANNER_STYLE[b.kind], logos), { aniso: 8 });
+    const cloth = new THREE.MeshStandardMaterial({ map, emissive: new THREE.Color(1, 1, 1), emissiveMap: map, emissiveIntensity: .42,
+      roughness: .92, metalness: 0, alphaTest: .5, side: THREE.DoubleSide });
+    const geo = new THREE.PlaneGeometry(BW, BH, 6, 12), pos = geo.getAttribute('position');
+    for (let k = 0; k < pos.count; k++) {                     /* vải hơi võng giữa và gợn dọc */
+      const px = pos.getX(k), py = pos.getY(k);
+      pos.setZ(k, Math.cos(px / BW * Math.PI) * .07 + Math.sin(py * 1.3 + px * 2) * .025);
+    }
+    geo.computeVertexNormals();
+    const group = new THREE.Group(), x = b.side * X;
+    group.position.set(x, TOP, b.z);
+    group.rotation.y = Math.atan2(0 - x, 6 - b.z);              /* quay mặt về phía khán giả ở đầu sân */
+    const face = new THREE.Mesh(geo, cloth); face.position.y = -BH / 2 - .06; face.receiveShadow = false; group.add(face);
+    addArenaMesh(group, new THREE.CylinderGeometry(.035, .035, BW + .3, 8).rotateZ(Math.PI / 2), rod, 0, 0, 0, false);
+    [-1, 1].forEach(s => arenaSegment([s * (BW / 2 - .1), 0, 0], [s * (BW / 2 - .1), HALL.height - 1.2 - TOP, 0], .008, rod, group));
+    scene.add(group);
+    WORLD.banners.push({ group, face, ph: i * 1.9, rot: group.rotation.y });
+  });
 }
 
 /* ---- màn LED treo cuối nhà thi đấu: chiếu banner sản phẩm thật, đổi theo chương (chuyển mềm) */
@@ -1387,8 +1593,11 @@ const MAN_LED = [
   { src: '/trai-nghiem/anh/vot-nanoflare1000.webp', fx: .5, fy: .5 },
   { src: '/trai-nghiem/anh/giay-yonex.webp', fx: .5, fy: .5 }
 ];
+/* Cắt kiểu object-fit: cover. Phải lấy kích thước GỐC: với <img> đang nằm trên trang, img.width/height là cỡ hiển thị
+   (bằng cỡ thẻ), dùng nó thì cả tấm ảnh dọc bị ép vào khung ngang, ảnh trang phục, phụ kiện bị kéo giãn. */
 function coverDraw(x, img, W, H, fx, fy) {
-  const s = Math.max(W / img.width, H / img.height), dw = img.width * s, dh = img.height * s;
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const s = Math.max(W / iw, H / ih), dw = iw * s, dh = ih * s;
   x.drawImage(img, (W - dw) * (fx === undefined ? .5 : fx), (H - dh) * (fy === undefined ? .5 : fy), dw, dh);
 }
 function paintScreen() {
@@ -1418,7 +1627,7 @@ function buildScreen() {
   const face = new THREE.Mesh(new THREE.PlaneGeometry(S.w, S.h), new THREE.MeshBasicMaterial({ map: SCREEN.tex, color: new THREE.Color(1.15, 1.15, 1.15) }));
   face.position.z = .005; group.add(face);
   /* dải chữ chạy dưới màn hình */
-  const font = '700 58px ' + BRAND_THEME.FONT_HEAD, line = 'SHOP CẦU LÔNG  ·  VỢT  ·  GIÀY  ·  TRANG PHỤC  ·  PHỤ KIỆN  ·  ';
+  const font = '700 58px ' + BRAND_THEME.FONT_HEAD, line = 'SHOP CẦU LÔNG  ·  VỢT CẦU LÔNG  ·  GIÀY CẦU LÔNG  ·  ÁO QUẦN THỂ THAO  ·  PHỤ KIỆN  ·  ';
   const measure = cvs(4, 4).getContext('2d'); measure.font = font;
   const TW = Math.ceil(measure.measureText(line).width), ticker = cvs(TW, 96), tc = ticker.getContext('2d');
   tc.fillStyle = '#04100b'; tc.fillRect(0, 0, TW, 96);
@@ -1434,6 +1643,7 @@ function buildScreen() {
   scene.add(group); WORLD.screen = group;
   /* ánh màn hình hắt xuống sân */
   const spill = new THREE.PointLight(brandColor('TEXT_DIM'), 1.1, 16, 2); spill.position.set(S.x, S.y - 1, S.z + 3); scene.add(spill);
+  dimmer(s => { face.material.color.setScalar(1.15 * s.screen); strip.material.color.setScalar(s.screen); spill.intensity = 1.1 * s.screen; });
   return Promise.all(MAN_LED.map(d => loadImage(d.src))).then(list => {
     SCREEN.imgs = list; SCREEN.cur = 0; SCREEN.next = 0; SCREEN.t = 1; paintScreen();
   });
@@ -1457,11 +1667,17 @@ function buildCeiling() {
   });
   for (let z = -30; z <= 10; z += 5) beams.push(new THREE.BoxGeometry(HALL.wallX * 2, .22, .22).translate(0, Y + .1, z));
   addArenaMesh(scene, mergeGeos(beams), metal, 0, 0, 0, false);
-  const lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.55, 1.42) }), lamps = [];
-  [-HALL.sideCourtX, 0, HALL.sideCourtX].forEach(x => {
-    for (let z = -15; z <= -2; z += 3.2) { lamps.push(new THREE.BoxGeometry(.55, .06, 1.2).translate(x - .75, Y - .7, z)); lamps.push(new THREE.BoxGeometry(.55, .06, 1.2).translate(x + .75, Y - .7, z)); }
-  });
-  addArenaMesh(scene, mergeGeos(lamps), lamp, 0, 0, 0, false);
+  /* mỗi dãy đèn (theo chiều sâu) một vật liệu riêng: màn mở đầu bật từng dãy, từ cuối nhà thi đấu về phía camera */
+  const lampOn = new THREE.Color(1.6, 1.55, 1.42), lampRows = [];
+  for (let z = -15, k = 0; z <= -2; z += 3.2, k++) {
+    const lamps = [];
+    [-HALL.sideCourtX, 0, HALL.sideCourtX].forEach(x => {
+      lamps.push(new THREE.BoxGeometry(.55, .06, 1.2).translate(x - .75, Y - .7, z)); lamps.push(new THREE.BoxGeometry(.55, .06, 1.2).translate(x + .75, Y - .7, z));
+    });
+    const material = new THREE.MeshBasicMaterial({ color: lampOn.clone() });
+    addArenaMesh(scene, mergeGeos(lamps), material, 0, 0, 0, false); lampRows.push(material);
+  }
+  dimmer(s => lampRows.forEach((material, k) => material.color.copy(lampOn).multiplyScalar(.02 + .98 * s.rows[k])));
   if (LOW) return;
   WORLD.shafts = [];
   [[-.75, -12.6], [.75, -9.4], [-.75, -6.2], [.75, -3.0]].forEach((p, i) => {
@@ -1490,50 +1706,397 @@ function buildStands() {
   const seat = new THREE.BoxGeometry(.44, .34, .42), per = Math.floor((z1 - z0 - 1) / .58);
   const count = rows * per * 2, seats = new THREE.InstancedMesh(seat, new THREE.MeshStandardMaterial({ roughness: .7, metalness: .1 }), count);
   const dummy = new THREE.Object3D(), color = new THREE.Color(), random = mulberry32(808);
-  const deep = brandColor('PRIMARY_DEEP', 1.3), green = brandColor('PRIMARY', .8);
+  /* ghế tối, ít bão hoà: khán đài là nền, không tranh sáng với sân */
+  const deep = brandColor('BG_SURFACE', 1.3), green = brandColor('PRIMARY_DEEP', 1.05);
   let n = 0;
+  const places = [];
   [-1, 1].forEach(side => {
     for (let i = 0; i < rows; i++) for (let k = 0; k < per; k++) {
       dummy.position.set(side * (14.2 + i * step + step * .62), rise * (i + 1) + .17, z0 + .8 + k * .58);
       dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); seats.setMatrixAt(n, dummy.matrix);
       seats.setColorAt(n, random() < .16 ? green : deep); n++;
+      places.push({ side, row: i, x: dummy.position.x, y: dummy.position.y + .17, z: dummy.position.z });
     }
   });
   seats.instanceMatrix.needsUpdate = true; if (seats.instanceColor) seats.instanceColor.needsUpdate = true;
   seats.castShadow = false; seats.receiveShadow = true; scene.add(seats);
+  buildCrowd(places);
 }
 
+/* ---- khán giả trong đêm thi đấu: bóng người ngồi trong khán đài tối, được ánh sân hắt lên và viền sáng tách khỏi nền.
+   Một InstancedMesh duy nhất; mỗi người mang màu áo, da, tóc, quần và 4 số ngẫu nhiên riêng. Mọi cử động (lắc lư,
+   nhổm dậy vung tay khi có pha đập cầu) tính trong vertex shader nên CPU không phải cập nhật ma trận mỗi khung.
+   Hệ toạ độ một người: y = 0 là mặt ghế, +z là hướng nhìn (về phía sân). */
+function crowdFigure() {
+  const parts = [];   /* [hình, mã phần]: 0 áo · 1 da · 2 tóc, giày · 3 quần · 4 tay áo (vung được) · 5 bàn tay (vung được) */
+  const add = (geometry, part) => parts.push([geometry, part]);
+  const Y = new THREE.Vector3(0, 1, 0), q = new THREE.Quaternion(), d = new THREE.Vector3();
+  const limb = (a, b, r0, r1, seg) => {
+    d.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]); const len = d.length(); q.setFromUnitVectors(Y, d.normalize());
+    return new THREE.CylinderGeometry(r1, r0, len, seg).applyQuaternion(q).translate((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+  };
+  const lean = .14;   /* người xem hơi chồm về phía sân */
+  add(new THREE.BoxGeometry(.3, .13, .2).translate(0, .065, -.01), 3);
+  [-1, 1].forEach(s => {
+    add(limb([s * .085, .07, .04], [s * .09, .078, .38], .068, .056, 6), 3);            /* đùi */
+    add(limb([s * .09, .078, .37], [s * .09, -.32, .35], .052, .042, 5), 3);            /* ống chân */
+    add(new THREE.BoxGeometry(.075, .05, .17).translate(s * .09, -.315, .39), 2);       /* giày */
+  });
+  add(new THREE.CylinderGeometry(.19, .15, .42, 8, 1, true).scale(1, 1, .66).translate(0, .21, 0).rotateX(lean).translate(0, .1, 0), 0);
+  add(new THREE.SphereGeometry(.19, 8, 3, 0, TAU, 0, Math.PI / 2).scale(1, .32, .66).translate(0, .42, 0).rotateX(lean).translate(0, .1, 0), 0);
+  const shoulder = [.215, .47, .05], elbow = [.235, .27, .13], hand = [.11, .15, .3];   /* vai là tâm quay khi vung tay (xem CROWD_VS) */
+  [-1, 1].forEach(s => {
+    add(limb([s * shoulder[0], shoulder[1], shoulder[2]], [s * elbow[0], elbow[1], elbow[2]], .06, .05, 6), 4);
+    add(limb([s * elbow[0], elbow[1], elbow[2]], [s * hand[0], hand[1], hand[2]], .05, .04, 6), 4);
+    add(new THREE.SphereGeometry(.046, 6, 4).translate(s * hand[0], hand[1], hand[2]), 5);
+  });
+  add(new THREE.CylinderGeometry(.048, .056, .09, 6, 1, true).translate(0, .545, .065), 1);
+  add(new THREE.SphereGeometry(.108, 10, 7).scale(.9, 1.1, 1).translate(0, .675, .08), 1);
+  /* tóc: chỏm cầu ngả ra sau, mép trước là đường chân tóc trên trán, mép sau xuống tới gáy */
+  add(new THREE.SphereGeometry(.115, 10, 5, 0, TAU, 0, Math.PI * .54).scale(.92, 1.08, 1.02).rotateX(-.8).translate(0, .68, .07), 2);
+  const position = [], normal = [], part = [], index = []; let offset = 0;
+  parts.forEach(entry => {
+    const geometry = entry[0], p = geometry.getAttribute('position'), n = geometry.getAttribute('normal');
+    for (let i = 0; i < p.count; i++) { position.push(p.getX(i), p.getY(i), p.getZ(i)); normal.push(n.getX(i), n.getY(i), n.getZ(i)); part.push(entry[1]); }
+    for (let i = 0; i < geometry.index.count; i++) index.push(offset + geometry.index.getX(i));
+    offset += p.count; geometry.dispose();
+  });
+  const figure = new THREE.BufferGeometry();
+  figure.setAttribute('position', new THREE.Float32BufferAttribute(position, 3)); figure.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3));
+  figure.setAttribute('aPart', new THREE.Float32BufferAttribute(part, 1)); figure.setIndex(index); return figure;
+}
+const CROWD_VS = [
+  'attribute float aPart; attribute vec3 iShirt; attribute vec3 iSkin; attribute vec3 iHair; attribute vec3 iPants; attribute vec4 iSeed;',
+  'uniform float uT; uniform float uCheer; uniform float uMotion;',
+  'varying vec3 vCol; varying vec3 vN; varying vec3 vW; varying float vDepth; varying float vAo;',
+  'void main(){',
+  ' vec3 p = position; vec3 n = normal; float ph = iSeed.x * 6.2832;',
+  /* chân và lòng người nằm trong bóng của hàng ghế trước */
+  ' vAo = 0.3 + 0.7 * smoothstep(-0.3, 0.5, p.y);',
+  /* reo hò: khoảng 60% khán giả nhổm dậy vung tay theo uCheer; vài người lúc nào cũng vẫy.
+     Lúc ngồi yên mỗi người để tay một kiểu (iSeed.w): đặt trên đùi, khoanh hờ hoặc nâng điện thoại. */
+  ' float cheer = uCheer * step(iSeed.y, 0.6) * uMotion;',
+  ' float wave = step(0.94, iSeed.z) * uMotion;',
+  ' float raise = max(cheer * (0.72 + 0.28 * sin(uT * 9.0 + ph)), wave * (0.55 + 0.45 * sin(uT * 2.4 + ph)));',
+  ' raise = max(raise, iSeed.w * iSeed.w * 0.3);',
+  ' if (aPart > 3.5) {',
+  '  float a = -2.25 * raise; float c = cos(a); float s = sin(a); vec2 o = vec2(0.47, 0.05);',
+  '  vec2 r = p.yz - o; p.yz = o + vec2(r.x * c - r.y * s, r.x * s + r.y * c);',
+  '  n.yz = vec2(n.y * c - n.z * s, n.y * s + n.z * c);',
+  ' }',
+  /* dáng ngồi: người chồm tới, người ngả ra sau (xoay phần thân trên quanh hông) */
+  ' float up = smoothstep(0.02, 0.6, p.y);',
+  ' float tilt = (iSeed.z - 0.45) * 0.34 * smoothstep(0.08, 0.2, p.y); float ct = cos(tilt); float st = sin(tilt);',
+  ' vec2 h = p.yz - vec2(0.1, 0.0); p.yz = vec2(0.1, 0.0) + vec2(h.x * ct - h.y * st, h.x * st + h.y * ct);',
+  ' n.yz = vec2(n.y * ct - n.z * st, n.y * st + n.z * ct);',
+  ' p.x += sin(uT * 0.8 + ph) * 0.014 * up * uMotion; p.z += sin(uT * 0.55 + ph * 1.7) * 0.012 * up * uMotion;',
+  ' p.y += cheer * (0.09 + 0.06 * abs(sin(uT * 6.5 + ph))) * smoothstep(0.0, 0.14, p.y);',
+  ' vCol = aPart < 0.5 ? iShirt : aPart < 1.5 ? iSkin : aPart < 2.5 ? iHair : aPart < 3.5 ? iPants : aPart < 4.5 ? iShirt : iSkin;',
+  ' vec4 w = modelMatrix * instanceMatrix * vec4(p, 1.0); vW = w.xyz;',
+  ' vN = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * n);',
+  ' vec4 mv = viewMatrix * w; vDepth = -mv.z; gl_Position = projectionMatrix * mv; }'
+].join('\n');
+/* Ánh sáng tính tay: ánh sân hắt lên (yếu dần theo khoảng cách tới sân chính) + ánh nền lạnh + viền sáng ở mép người.
+   Không dùng pow() (xem ghi chú ở SHAFT_FS). */
+const CROWD_FS = [
+  'uniform vec3 uCourt; uniform vec3 uCourtCol; uniform vec3 uAmb; uniform vec3 uRim; uniform float uLit; uniform vec3 uFogCol; uniform float uFogDen;',
+  'varying vec3 vCol; varying vec3 vN; varying vec3 vW; varying float vDepth; varying float vAo;',
+  'void main(){',
+  ' vec3 n = normalize(vN); vec3 toCourt = uCourt - vW; float dist = length(toCourt); vec3 L = toCourt / max(dist, 0.001);',
+  ' float nl = dot(n, L); float att = clamp(1.3 - dist * 0.036, 0.22, 1.0);',
+  ' vec3 V = normalize(cameraPosition - vW); float fr = 1.0 - max(dot(n, V), 0.0); fr = fr * fr * fr;',
+  ' float facing = smoothstep(-0.3, 0.6, nl * 0.6 + n.y * 0.5);',
+  ' vec3 col = vCol * (uAmb * max(0.45 + 0.55 * n.y, 0.1) * (0.3 + 0.7 * uLit) + uCourtCol * max(nl, 0.0) * att * uLit) * vAo',
+  '  + uRim * fr * facing * att * vAo * (0.2 + 0.8 * uLit);',
+  ' float fog = 1.0 - exp(-uFogDen * uFogDen * vDepth * vDepth); col = mix(col, uFogCol, fog);',
+  ' gl_FragColor = vec4(col, 1.0);',
+  ' #include <tonemapping_fragment>',
+  ' #include <encodings_fragment>',
+  '}'
+].join('\n');
+const PHONE_VS = [
+  'attribute float aSeed; attribute float aKind; attribute vec3 aTint;',
+  'uniform float uT; uniform float uSize; uniform float uBurst; uniform float uOn; uniform float uMotion;',
+  'varying vec3 vC;',
+  'void main(){',
+  ' vec3 p = position; float t = uT * uMotion; float ph = aSeed * 6.2832; float a; float k;',
+  ' if (aKind < 0.5) {',
+  /* đèn flash: mỗi máy một chu kỳ riêng, chỉ sáng trong một khoảnh khắc ngắn; uBurst nới khoảnh khắc đó ra */
+  '  float w = 0.035 + uBurst * 0.2; float cyc = fract(t * (0.05 + aSeed * 0.07) + aSeed * 17.0);',
+  '  a = (1.0 - smoothstep(w * 0.35, w, cyc)) * 3.4; k = 1.5;',
+  ' } else {',
+  '  p.z += sin(t * 1.3 + ph) * 0.06; p.y += sin(t * 1.3 + ph + 1.6) * 0.03 + uBurst * 0.2;',
+  '  a = 1.5 + 0.5 * sin(t * 2.1 + ph * 3.0); k = 0.9;',
+  ' }',
+  ' vec4 mv = modelViewMatrix * vec4(p, 1.0); vC = aTint * a * uOn;',
+  ' gl_PointSize = clamp(uSize * k / max(-mv.z, 0.6), 2.0, 64.0); gl_Position = projectionMatrix * mv; }'
+].join('\n');
+/* lõi nhỏ rất sáng + quầng rộng mờ */
+const PHONE_FS = [
+  'varying vec3 vC;',
+  'void main(){ float d = length(gl_PointCoord - 0.5) * 2.0; float g = max(1.0 - d, 0.0); float core = max(1.0 - d * 3.5, 0.0);',
+  ' gl_FragColor = vec4(vC * (g * g * g * 0.35 + core * core), 1.0); }'
+].join('\n');
+function buildCrowd(places) {
+  const random = mulberry32(2024), figure = crowdFigure();
+  const colors = list => list.map(hex => new THREE.Color(hex).convertSRGBToLinear());
+  /* áo trầm là chủ đạo; khoảng 8% mặc áo sáng (trắng ngà, xanh và cam của shop) để khán đài không thành một khối xám */
+  const shirts = colors(['#22302b', '#2a313b', '#3d2c25', '#33404a', '#463a30', '#1d4a3d', '#5a3824', '#5f5c55', '#2c3150', '#4c282b', '#3a3a3a', '#27433a']);
+  const bright = colors(['#c9c4b6', '#1f8a60', '#c85f22', '#d6b184']);
+  const skins = colors(['#6b4a36', '#8a6248', '#a57a5c', '#4a3226', '#c39673']);
+  const hairs = colors(['#0c0b0a', '#15110e', '#22170f', '#101214', '#2c2019']);
+  const pants = colors(['#14181c', '#1b2230', '#231f1c', '#10201b', '#2a2a2e']);
+  const people = places.filter(() => random() < .78), count = people.length;
+  const instanced = (name, size) => { const a = new THREE.InstancedBufferAttribute(new Float32Array(count * size), size); figure.setAttribute(name, a); return a; };
+  const iShirt = instanced('iShirt', 3), iSkin = instanced('iSkin', 3), iHair = instanced('iHair', 3), iPants = instanced('iPants', 3), iSeed = instanced('iSeed', 4);
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uT: WORLD.uT, uCheer: { value: 0 }, uMotion: { value: REDUCE ? 0 : 1 }, uLit: { value: 1 },
+      uCourt: { value: new THREE.Vector3(0, 1.2, COURT_PLAN.netZ) }, uCourtCol: { value: hdr(.78, .98, .84) },
+      uAmb: { value: hdr(.13, .17, .19) }, uRim: { value: hdr(.3, .42, .36) },
+      uFogCol: { value: scene.fog.color }, uFogDen: { value: scene.fog.density }
+    },
+    vertexShader: CROWD_VS, fragmentShader: CROWD_FS
+  });
+  const mesh = new THREE.InstancedMesh(figure, material, count);
+  const dummy = new THREE.Object3D(), pick = list => list[(random() * list.length) | 0], phones = [];
+  people.forEach((p, i) => {
+    /* ai cũng quay mặt về sân chính, người ngồi xa hai đầu khán đài hơi xoay vào giữa; cỡ người và bề ngang vai lệch nhau */
+    const s = .9 + random() * .2, zt = lerp(p.z, COURT_PLAN.netZ, .3), yaw = Math.atan2(-p.x, zt - p.z) + (random() - .5) * .45;
+    const x = p.x + (random() - .5) * .06, z = p.z + (random() - .5) * .1;
+    dummy.position.set(x, p.y, z); dummy.rotation.set(0, yaw, 0); dummy.scale.set(s * (.92 + random() * .2), s, s); dummy.updateMatrix();
+    mesh.setMatrixAt(i, dummy.matrix);
+    (random() < .08 ? pick(bright) : pick(shirts)).toArray(iShirt.array, i * 3);
+    pick(skins).toArray(iSkin.array, i * 3); pick(hairs).toArray(iHair.array, i * 3); pick(pants).toArray(iPants.array, i * 3);
+    iSeed.setXYZW(i, random(), random(), random(), random());
+    /* khoảng một phần ba khán giả giơ điện thoại: đèn nằm trước ngực, ngang tầm mắt */
+    if (random() < .36) phones.push(x + Math.sin(yaw) * .24 * s, p.y + .6 * s, z + Math.cos(yaw) * .24 * s);
+  });
+  mesh.instanceMatrix.needsUpdate = true; mesh.frustumCulled = false; mesh.castShadow = false; mesh.receiveShadow = false; scene.add(mesh);
+
+  /* đèn điện thoại: phần lớn là đèn flash chớp ngắn (dày lên khi có pha đập cầu), số còn lại bật đèn pin đung đưa,
+     vài que sáng màu thương hiệu. Điểm sáng cộng màu, đủ sáng để ăn bloom. */
+  const N = phones.length / 3, seed = new Float32Array(N), kind = new Float32Array(N), tint = new Float32Array(N * 3);
+  const flash = hdr(1, .97, .92), torch = hdr(1, .86, .62), sticks = [brandColor('PRIMARY', 1.5), brandColor('ACCENT', 1.1)];
+  for (let i = 0; i < N; i++) {
+    const r = random(); seed[i] = random(); kind[i] = r < .7 ? 0 : 1;
+    (r < .7 ? flash : r < .92 ? torch : pick(sticks)).toArray(tint, i * 3);
+  }
+  const dots = new THREE.BufferGeometry();
+  dots.setAttribute('position', new THREE.Float32BufferAttribute(phones, 3)); dots.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  dots.setAttribute('aKind', new THREE.BufferAttribute(kind, 1)); dots.setAttribute('aTint', new THREE.BufferAttribute(tint, 3));
+  const lights = new THREE.Points(dots, new THREE.ShaderMaterial({
+    uniforms: { uT: WORLD.uT, uSize: { value: vpH() * .5 }, uBurst: { value: 0 }, uOn: { value: 1 }, uMotion: { value: REDUCE ? 0 : 1 } },
+    vertexShader: PHONE_VS, fragmentShader: PHONE_FS, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  lights.frustumCulled = false; lights.renderOrder = 5; scene.add(lights);
+  /* cheer: mức reo hò mong muốn (0..1) do pha đập cầu đặt; updateWorld đưa uniform tiến dần tới đó */
+  WORLD.crowd = { mesh: mesh, u: material.uniforms, lights: lights, lu: lights.material.uniforms, cheer: 0 };
+}
+
+/* ---- vợt trưng bày. Hệ toạ độ cục bộ giữ nguyên để chú thích cấu tạo (chương 01) bám đúng: tâm mặt vợt ở gốc,
+   bán trục ngang 1, dọc 1.28, mặt vợt nhìn về +z, khớp chữ T ở y ≈ -1.27, đuôi cán ở y ≈ -4.58. 1 đơn vị ≈ 100 mm. */
+/* Đường viền đầu vợt isometric: nửa trên vuông dần (siêu elip), nửa dưới là elip. Trả về các điểm [x, y] ngược chiều
+   kim đồng hồ, bắt đầu ở vị trí 3 giờ; inset > 0 lùi vào trong theo pháp tuyến. */
+function racketLoop(count, inset) {
+  const points = [];
+  for (let i = 0; i < count; i++) {
+    const a = i / count * TAU, c = Math.cos(a), s = Math.sin(a), e = 2 / (2 + .75 * smooth(-.25, .55, s));
+    points.push([Math.sign(c) * Math.pow(Math.abs(c), e), 1.28 * Math.sign(s) * Math.pow(Math.abs(s), e)]);
+  }
+  if (!inset) return points;
+  return points.map((p, i) => {
+    const a = points[(i + count - 1) % count], b = points[(i + 1) % count], dx = b[0] - a[0], dy = b[1] - a[1], length = Math.hypot(dx, dy) || 1;
+    return [p[0] - dy / length * inset, p[1] + dx / length * inset];
+  });
+}
+/* Kéo một tiết diện dọc theo đường nằm trong mặt phẳng xy. profile: các điểm [u, w] ngược chiều kim đồng hồ,
+   u dọc pháp tuyến hướng ra ngoài, w dọc trục z. Mỗi mặt của tiết diện giữ pháp tuyến riêng (cạnh sắc), dọc đường thì mượt. */
+function sweepLoop(points, profile, closed, ring) {
+  const count = points.length, rings = closed ? count + 1 : count, m = ring === false ? profile.length - 1 : profile.length;
+  const position = [], normal = [], uv = [], index = [], run = [0];
+  let total = 0;
+  for (let k = 0; k < m; k++) { const p = profile[k], q = profile[(k + 1) % profile.length]; total += Math.hypot(q[0] - p[0], q[1] - p[1]); run.push(total); }
+  for (let i = 0; i < rings; i++) {
+    const j = i % count;
+    const a = points[closed ? (j + count - 1) % count : Math.max(0, j - 1)], b = points[closed ? (j + 1) % count : Math.min(count - 1, j + 1)];
+    const dx = b[0] - a[0], dy = b[1] - a[1], length = Math.hypot(dx, dy) || 1, ox = dy / length, oy = -dx / length;
+    for (let k = 0; k < m; k++) {
+      const p = profile[k], q = profile[(k + 1) % profile.length], du = q[0] - p[0], dw = q[1] - p[1], l = Math.hypot(du, dw) || 1;
+      const nu = dw / l, nw = -du / l;
+      position.push(points[j][0] + ox * p[0], points[j][1] + oy * p[0], p[1], points[j][0] + ox * q[0], points[j][1] + oy * q[0], q[1]);
+      normal.push(ox * nu, oy * nu, nw, ox * nu, oy * nu, nw);
+      uv.push(i / (rings - 1), run[k] / total, i / (rings - 1), run[k + 1] / total);
+      if (i < rings - 1) { const v0 = (i * m + k) * 2, v2 = v0 + m * 2; index.push(v0, v2, v0 + 1, v0 + 1, v2, v2 + 1); }
+    }
+  }
+  const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normal, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setIndex(index); return geometry;
+}
+/* Thân tròn xoay tiết diện elip dọc trục y. rings: [y, bán kính x, bán kính z] từ trên xuống; đường nối nằm ở mặt sau. */
+function loftY(rings, seg) {
+  const position = [], uv = [], index = [];
+  rings.forEach((ring, i) => {
+    for (let j = 0; j <= seg; j++) { const a = j / seg * TAU; position.push(-Math.sin(a) * ring[1], ring[0], -Math.cos(a) * ring[2]); uv.push(j / seg, 1 - i / (rings.length - 1)); }
+  });
+  for (let i = 0; i < rings.length - 1; i++) for (let j = 0; j < seg; j++) { const a = i * (seg + 1) + j, b = a + seg + 1; index.push(a, b, a + 1, b, b + 1, a + 1); }
+  const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geometry.setIndex(index); geometry.computeVertexNormals();
+  const n = geometry.getAttribute('normal');
+  for (let i = 0; i < rings.length; i++) {
+    const a = i * (seg + 1), b = a + seg, x = n.getX(a) + n.getX(b), y = n.getY(a) + n.getY(b), z = n.getZ(a) + n.getZ(b), length = Math.hypot(x, y, z) || 1;
+    n.setXYZ(a, x / length, y / length, z / length); n.setXYZ(b, x / length, y / length, z / length);
+  }
+  return geometry;
+}
+/* Sơn khung: u chạy quanh đầu vợt (u = .25 là đỉnh 12 giờ, u = .75 là khớp chữ T), đối xứng trái phải. Đỉnh vợt xanh thương hiệu,
+   chỉ vàng kim, ba vạch chéo cam, hai bên đen carbon có chỉ mảnh, cổ vợt xanh trở lại. */
+function texRacketPaint() {
+  const W = 2048, H = 128, half = cvs(W / 2, H), h = half.getContext('2d'), X = a => a * W;
+  h.fillStyle = '#0a0d0c'; h.fillRect(0, 0, W / 2, H);
+  const top = h.createLinearGradient(0, 0, X(.14), 0); top.addColorStop(0, brandCss('PRIMARY')); top.addColorStop(1, brandCss('PRIMARY_DEEP'));
+  h.fillStyle = top; h.fillRect(0, 0, X(.14), H);
+  h.fillStyle = brandCss('METAL'); h.fillRect(X(.14), 0, X(.005), H);
+  h.fillStyle = brandCss('ACCENT');
+  for (let i = 0; i < 3; i++) {
+    const x0 = X(.153 + i * .017);
+    h.beginPath(); h.moveTo(x0, H); h.lineTo(x0 + X(.008), H); h.lineTo(x0 + X(.017), 0); h.lineTo(x0 + X(.009), 0); h.closePath(); h.fill();
+  }
+  /* chỉ vàng kim chạy dọc mặt trước (v ≈ .30) và mặt sau (v ≈ .81) của tiết diện */
+  h.fillStyle = brandCss('METAL', .85); h.fillRect(X(.212), H * .7 - 1, X(.176), 2.5); h.fillRect(X(.212), H * .19 - 1, X(.176), 2.5);
+  h.fillStyle = brandCss('METAL'); h.fillRect(X(.4), 0, X(.005), H);
+  const throat = h.createLinearGradient(X(.405), 0, X(.5), 0); throat.addColorStop(0, brandCss('PRIMARY_DEEP')); throat.addColorStop(1, brandCss('PRIMARY'));
+  h.fillStyle = throat; h.fillRect(X(.405), 0, X(.095), H);
+  h.fillStyle = brandCss('ACCENT'); h.fillRect(X(.462), 0, X(.007), H);
+  const c = cvs(W, H), x = c.getContext('2d');
+  [0, W].forEach(dx => {
+    x.drawImage(half, dx + W * .25, 0);
+    x.save(); x.translate(dx + W * .25, 0); x.scale(-1, 1); x.drawImage(half, 0, 0); x.restore();
+  });
+  return c;
+}
+/* Sơn khớp chữ T, thân vợt và nón cán: v theo chiều cao, y = -3.44 (chân nón) tới y = -1.2 (trong khung). */
+const SHAFT_Y0 = -3.44, SHAFT_Y1 = -1.2;
+function texRacketShaft() {
+  const W = 32, H = 1024, c = cvs(W, H), x = c.getContext('2d'), Y = y => (1 - (y - SHAFT_Y0) / (SHAFT_Y1 - SHAFT_Y0)) * H;
+  const band = (y1, y0, fill) => { x.fillStyle = fill; x.fillRect(0, Y(y1), W, Y(y0) - Y(y1)); };
+  const fade = (y1, y0, from, to) => { const g = x.createLinearGradient(0, Y(y1), 0, Y(y0)); g.addColorStop(0, from); g.addColorStop(1, to); band(y1, y0, g); };
+  band(SHAFT_Y1, SHAFT_Y0, '#0a0d0c');
+  fade(-1.2, -1.42, brandCss('PRIMARY'), brandCss('PRIMARY_DEEP'));
+  band(-1.42, -1.436, brandCss('METAL'));
+  fade(-1.436, -1.64, brandCss('PRIMARY_DEEP'), '#0a0d0c');
+  band(-2.0, -2.014, brandCss('METAL'));
+  fade(-2.06, -2.5, brandCss('PRIMARY'), brandCss('PRIMARY_DEEP'));
+  band(-2.26, -2.3, brandCss('ACCENT'));
+  band(-2.56, -2.574, brandCss('METAL'));
+  fade(-3.2, -3.44, brandCss('PRIMARY_DEEP'), brandCss('PRIMARY'));
+  band(-3.2, -3.216, brandCss('METAL'));
+  band(-3.39, -3.42, brandCss('ACCENT'));
+  return c;
+}
+function uvByHeight(geometry) {
+  const p = geometry.getAttribute('position'), uv = geometry.getAttribute('uv');
+  for (let i = 0; i < p.count; i++) uv.setY(i, (p.getY(i) - SHAFT_Y0) / (SHAFT_Y1 - SHAFT_Y0));
+  return geometry;
+}
+/* Quấn cán: băng quấn chéo, mép sau chồng lên mép trước nên có gờ. Trả về ảnh màu và bản đồ pháp tuyến. */
+function texGrip() {
+  const W = 128, H = 512, map = cvs(W, H), height = cvs(W, H), mx = map.getContext('2d'), hx = height.getContext('2d');
+  const colour = mx.createImageData(W, H), relief = hx.createImageData(W, H), turns = 9;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const f = ((y / H * turns - x / W) % 1 + 1) % 1, o = (y * W + x) * 4;
+    const shade = (.78 + .22 * f) * (f < .05 ? .42 : 1), bump = f < .05 ? f / .05 * .3 : .3 + .7 * f;
+    colour.data[o] = 216 * shade; colour.data[o + 1] = 212 * shade; colour.data[o + 2] = 200 * shade; colour.data[o + 3] = 255;
+    relief.data[o] = relief.data[o + 1] = relief.data[o + 2] = bump * 255; relief.data[o + 3] = 255;
+  }
+  mx.putImageData(colour, 0, 0); hx.putImageData(relief, 0, 0);
+  return { map: map, normal: normalFromHeight(height, 3.2) };
+}
+/* Mặt cước: cước trắng ngà, giữa mặt vợt in stencil hình quả cầu màu cam (ảnh phủ phẳng lên cả mặt vợt). */
+function texStringBed() {
+  const W = 256, H = 320, c = cvs(W, H), x = c.getContext('2d'), cx = W / 2, cy = H * .5;
+  x.fillStyle = '#eeeae0'; x.fillRect(0, 0, W, H);
+  x.fillStyle = brandCss('ACCENT');
+  x.beginPath(); x.moveTo(cx - 21, cy + 30); x.lineTo(cx + 21, cy + 30); x.lineTo(cx + 54, cy - 62); x.lineTo(cx - 54, cy - 62); x.closePath(); x.fill();
+  x.beginPath(); x.rect(cx - 23, cy + 38, 46, 14); x.arc(cx, cy + 52, 23, 0, Math.PI); x.fill();
+  return c;
+}
+/* Phòng chụp thu nhỏ cho lớp sơn bóng: nền tối, một hộp sáng lớn phía trên sau lưng camera, một dải sáng bên, sàn hắt xanh,
+   một đốm cam. Ảnh equirect: u = .75 là hướng về phía camera (+z), u = .25 là phía sau vợt. */
+function texStudio() {
+  const W = 512, H = 256, c = cvs(W, H), x = c.getContext('2d');
+  x.fillStyle = '#040605'; x.fillRect(0, 0, W, H);
+  const floor = x.createLinearGradient(0, H * .6, 0, H); floor.addColorStop(0, brandCss('PRIMARY', 0)); floor.addColorStop(1, brandCss('PRIMARY', .55));
+  x.fillStyle = floor; x.fillRect(0, H * .6, W, H * .4);
+  const box = (px, py, w, h, colour, blur) => { x.shadowColor = colour; x.shadowBlur = blur; x.fillStyle = colour; x.fillRect(px, py, w, h); };
+  box(300, 18, 150, 46, '#fff8ec', 28);
+  box(474, 70, 20, 112, '#eaf5ef', 18);
+  box(112, 40, 16, 150, brandCss('TEXT_MAIN', .7), 20);
+  box(248, 104, 30, 24, brandCss('ACCENT', .9), 16);
+  x.shadowBlur = 0; x.shadowColor = 'transparent'; return c;
+}
 function createShowroomRacket() {
   const group = new THREE.Group(); group.name = 'vot-khop-chu-T';
-  const carbon = surface(lib('racketCarbon', () => texWood(301)), [3, 2], { normal: .28, roughness: .56, metalness: .32 });
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(1, .043, 10, LOW ? 72 : 112), carbon); rim.scale.y = 1.28; group.add(rim);
-  const trimMaterial = new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY'), roughness: .5, metalness: .45, emissive: brandColor('PRIMARY'), emissiveIntensity: .12 });
-  const trim = new THREE.Mesh(new THREE.TorusGeometry(1.005, .008, 6, 96), trimMaterial); trim.scale.y = 1.28; trim.position.z = .028; group.add(trim);
-  const strings = [], radiusX = .944, radiusY = 1.205;
-  for (let i = -9; i <= 9; i++) {
-    const x = i * .097, half = radiusY * Math.sqrt(Math.max(0, 1 - x * x / (radiusX * radiusX)));
-    strings.push(x, -half, .008, x, half, .008);
+  const studio = tx(texStudio(), { aniso: 1 }); studio.mapping = THREE.EquirectangularReflectionMapping;
+  /* sơn bóng phủ clearcoat, phản chiếu phòng chụp riêng; userData.spot: sáng theo kênh đèn rọi vợt */
+  const lacquer = map => {
+    const material = new THREE.MeshPhysicalMaterial({ map: map, roughness: .36, metalness: .28, clearcoat: 1, clearcoatRoughness: .08, envMap: studio, envMapIntensity: 1.5 });
+    material.userData.spot = true; return material;
+  };
+  const matte = new THREE.MeshStandardMaterial({ color: new THREE.Color('#0b0d0c'), roughness: .8, metalness: .05 });
+  const add = (geometry, material, shadow) => { const mesh = new THREE.Mesh(geometry, material); mesh.castShadow = shadow !== false; mesh.receiveShadow = true; group.add(mesh); return mesh; };
+  const N = LOW ? 96 : 180, outline = racketLoop(N, 0);
+  /* khung: tiết diện hộp vát tám cạnh, dẹt theo hướng vung */
+  add(sweepLoop(outline, [[.05, -.02], [.05, .02], [.03, .056], [-.026, .056], [-.046, .024], [-.046, -.024], [-.026, -.056], [.03, -.056]], true),
+    lacquer(tx(texRacketPaint(), { aniso: 8 })));
+  /* dải gen nhựa đen ôm nửa trên đầu vợt */
+  const from = Math.round(22 / 360 * N), to = Math.round(158 / 360 * N);
+  add(sweepLoop(outline.slice(from, to + 1), [[.046, -.036], [.066, -.027], [.066, .027], [.046, .036]], false, false), matte, false);
+  /* cước: 22 sợi dọc, 22 sợi ngang là hình khối thật, cắt đúng theo mép trong của khung; lỗ gen là mấu nhỏ ngoài vành */
+  const inner = racketLoop(N, .04), outer = racketLoop(N, -.054), bars = [], nubs = [], T = .0115;
+  const span = (loop, axis, value) => {
+    let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < N; i++) {
+      const p = loop[i], q = loop[(i + 1) % N], d = q[axis] - p[axis];
+      if (!d || (p[axis] - value) * (q[axis] - value) > 0) continue;
+      const o = p[1 - axis] + (value - p[axis]) / d * (q[1 - axis] - p[1 - axis]); lo = Math.min(lo, o); hi = Math.max(hi, o);
+    }
+    return hi > lo ? [lo, hi] : null;
+  };
+  const nub = (x, y) => { const g = new THREE.BoxGeometry(.03, .03, .034); g.translate(x, y, 0); nubs.push(g); };
+  for (let i = 0; i < 22; i++) {
+    const x = (i - 10.5) * .086, s = span(inner, 0, x), e = span(outer, 0, x); if (!s) continue;
+    const bar = new THREE.BoxGeometry(T, s[1] - s[0], T); bar.translate(x, (s[0] + s[1]) / 2, .006); bars.push(bar);
+    if (e && !LOW) { nub(x, e[0]); nub(x, e[1]); }
   }
-  for (let i = -12; i <= 12; i++) {
-    const y = i * .094, half = radiusX * Math.sqrt(Math.max(0, 1 - y * y / (radiusY * radiusY)));
-    strings.push(-half, y, -.008, half, y, -.008);
+  for (let j = 0; j < 22; j++) {
+    const y = -1.05 + j * .1, s = span(inner, 1, y), e = span(outer, 1, y); if (!s) continue;
+    const bar = new THREE.BoxGeometry(s[1] - s[0], T, T); bar.translate((s[0] + s[1]) / 2, y, -.006); bars.push(bar);
+    if (e && !LOW) { nub(e[0], y); nub(e[1], y); }
   }
-  const stringGeometry = new THREE.BufferGeometry(); stringGeometry.setAttribute('position', new THREE.Float32BufferAttribute(strings, 3));
-  group.add(new THREE.LineSegments(stringGeometry, new THREE.LineBasicMaterial({ color: brandColor('TEXT_MAIN', .62), transparent: true, opacity: .84 })));
-  const grommet = new THREE.InstancedMesh(new THREE.SphereGeometry(.024, 5, 4), new THREE.MeshStandardMaterial({ color: brandColor('BG_DEEP'), roughness: .9 }), 40);
-  const dummy = new THREE.Object3D();
-  for (let i = 0; i < 40; i++) { const angle = i / 40 * TAU; dummy.position.set(Math.cos(angle), Math.sin(angle) * 1.28, .021); dummy.scale.set(1, 1, .6); dummy.updateMatrix(); grommet.setMatrixAt(i, dummy.matrix); }
-  group.add(grommet);
-  arenaSegment([0, -1.28, 0], [0, -3.35, 0], .021, carbon, group);
-  /* Trục cắm thẳng vào mặt vợt: khớp T ngắn, không có hai nhánh chữ V. */
-  addArenaMesh(group, new THREE.BoxGeometry(.23, .055, .07), carbon, 0, -1.27, 0);
-  const grip = new THREE.MeshStandardMaterial({ color: brandColor('BG_DEEP'), roughness: .94, metalness: .015 });
-  addArenaMesh(group, new THREE.CylinderGeometry(.077, .098, 1.15, 8), grip, 0, -3.94, 0);
-  const helix = [];
-  for (let i = 0; i <= 220; i++) { const t = i / 220, angle = t * TAU * 11; helix.push(new THREE.Vector3(Math.cos(angle) * .095, -3.38 - t * 1.12, Math.sin(angle) * .095)); }
-  group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(helix), 220, .005, 4, false), new THREE.MeshStandardMaterial({ color: brandColor('TEXT_DIM', .5), roughness: .9 })));
-  addArenaMesh(group, new THREE.CylinderGeometry(.105, .112, .075, 8), trimMaterial, 0, -4.54, 0);
-  addArenaMesh(group, new THREE.CylinderGeometry(.043, .065, .12, 10), trimMaterial, 0, -3.32, 0);
+  const bed = mergeGeos(bars), bp = bed.getAttribute('position'), buv = bed.getAttribute('uv');
+  for (let i = 0; i < bp.count; i++) buv.setXY(i, (bp.getX(i) + 1) / 2, (bp.getY(i) + 1.28) / 2.56);
+  const stencil = tx(texStringBed(), { aniso: 4 });
+  const strings = new THREE.MeshStandardMaterial({ map: stencil, roughness: .42, metalness: 0, emissive: new THREE.Color(1, 1, 1), emissiveMap: stencil, emissiveIntensity: .1 });
+  dimmer(s => { strings.emissiveIntensity = .1 * s.spot; });
+  add(bed, strings, false);
+  if (nubs.length) add(mergeGeos(nubs), matte, false);
+  /* khớp chữ T vuốt liền vào thân, thân vợt, nón cán: chung một lớp sơn chạy theo chiều cao */
+  const joint = loftY([[-1.24, .001, .001], [-1.24, .19, .05], [-1.3, .2, .058], [-1.34, .14, .058], [-1.4, .08, .05], [-1.5, .05, .042], [-1.64, .037, .037]], 20);
+  const shaft = new THREE.CylinderGeometry(.036, .036, 1.62, 14, 1, true); shaft.translate(0, -2.41, 0);
+  const cone = loftY([[-3.2, .036, .036], [-3.25, .052, .052], [-3.34, .086, .086], [-3.44, .11, .11]], 20);
+  add(uvByHeight(mergeGeos([joint, shaft, cone])), lacquer(tx(texRacketShaft(), { aniso: 4 })));
+  /* cán quấn chéo có gờ, băng kết thúc màu xanh, nắp đuôi */
+  const wrap = texGrip(), R = THREE.RepeatWrapping;
+  const grip = new THREE.MeshStandardMaterial({ map: tx(wrap.map, { wrap: R, aniso: 4 }), normalMap: tx(wrap.normal, { wrap: R, srgb: false, aniso: 4 }),
+    normalScale: new THREE.Vector2(.9, .9), roughness: .86, metalness: 0 });
+  const handle = new THREE.CylinderGeometry(.104, .114, 1.06, 18, 1, true); handle.translate(0, -3.97, 0); add(handle, grip);
+  const tape = new THREE.CylinderGeometry(.111, .108, .075, 18, 1, true); tape.translate(0, -3.478, 0);
+  add(tape, new THREE.MeshStandardMaterial({ color: brandColor('PRIMARY'), roughness: .55, metalness: .1 }), false);
+  const cap = new THREE.CylinderGeometry(.12, .126, .085, 18); cap.translate(0, -4.54, 0); add(cap, matte);
+  const badge = new THREE.CircleGeometry(.075, 24); badge.rotateX(Math.PI / 2); badge.translate(0, -4.5835, 0);
+  add(badge, new THREE.MeshStandardMaterial({ color: brandColor('METAL'), roughness: .35, metalness: .8 }), false);
   group.userData.joint = 'T'; group.userData.frameRatio = 1.28; return group;
 }
 
@@ -1583,6 +2146,7 @@ function createShowroomShuttle() {
   const featherMap = tx(texFeather(), { aniso: 8 });
   const featherMaterial = new THREE.MeshStandardMaterial({ map: featherMap, alphaTest: .5, side: THREE.DoubleSide,
     roughness: .66, metalness: 0, emissive: new THREE.Color('#2a2822'), emissiveIntensity: .35 });
+  dimmer(s => { featherMaterial.emissiveIntensity = .35 * (.08 + .92 * s.spot); });
   const depthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: featherMap, alphaTest: .5 });
   const quill = new THREE.MeshStandardMaterial({ color: new THREE.Color('#efe6d0'), roughness: .5 });
   const vanes = [], shafts = new THREE.Group();
@@ -1624,22 +2188,154 @@ function createShowroomShuttle() {
   group.userData.featherCount = N; return group;
 }
 
-/* ---- vợt và cầu khổng lồ lơ lửng trên lưới: nhân vật chính của cảnh */
-const PROPS = { racket: { x: 2.4, y: 3.9, z: -3.2, s: .8 }, shuttle: { x: 4.7, y: 4.7, z: -5.4, s: .5 } };
+/* ---- vợt và cầu khổng lồ: nhân vật chính của cảnh.
+   hero: tư thế ở màn mở đầu (gần camera, lệch phải, sẵn sàng đập cầu; nx/ny/nz: dịch về giữa trên màn hình dọc; h*: chỗ quả cầu chờ so với vợt).
+   racket, shuttle: tư thế trưng bày trên lưới từ chương 01 trở đi (chú thích cấu tạo bám theo tư thế này). */
+const PROPS = {
+  hero: { x: 1.9, y: 5.5, z: 1.0, rx: -.3, ry: -.25, rz: .6, nx: 1.5, ny: .2, nz: 0, hx: .6, hy: 1.28, hz: -1.3 },
+  racket: { x: 2.4, y: 3.9, z: -3.2, s: .8, rx: .1, ry: -.42, rz: 30 * Math.PI / 180 },
+  shuttle: { x: 4.7, y: 4.7, z: -5.4, s: .5 }
+};
+function texStreak() {
+  const W = 256, H = 64, c = cvs(W, H), x = c.getContext('2d');
+  const along = x.createLinearGradient(0, 0, W, 0); along.addColorStop(0, '#000'); along.addColorStop(.14, '#4a4a4a'); along.addColorStop(.6, '#8c8c8c'); along.addColorStop(1, '#fff');
+  x.fillStyle = along; x.fillRect(0, 0, W, H);
+  x.globalCompositeOperation = 'multiply';
+  const across = x.createLinearGradient(0, 0, 0, H); across.addColorStop(0, '#000'); across.addColorStop(.5, '#fff'); across.addColorStop(1, '#000');
+  x.fillStyle = across; x.fillRect(0, 0, W, H); x.globalCompositeOperation = 'source-over'; return c;
+}
 function buildProps() {
+  const Y = new THREE.Vector3(0, 1, 0), additive = o => new THREE.MeshBasicMaterial(Object.assign({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }, o));
   const racket = createShowroomRacket(); racket.scale.setScalar(PROPS.racket.s);
-  racket.position.set(PROPS.racket.x, PROPS.racket.y, PROPS.racket.z); racket.rotation.set(.1, -.42, 30 * Math.PI / 180);
-  racket.userData.rot = racket.rotation.clone(); scene.add(racket); WORLD.bigRacket = racket;
+  racket.position.set(PROPS.racket.x, PROPS.racket.y, PROPS.racket.z); racket.rotation.set(PROPS.racket.rx, PROPS.racket.ry, PROPS.racket.rz);
+  scene.add(racket); WORLD.bigRacket = racket;
   const shuttle = createShowroomShuttle(); shuttle.scale.setScalar(PROPS.shuttle.s);
   shuttle.position.set(PROPS.shuttle.x, PROPS.shuttle.y, PROPS.shuttle.z);
-  /* đầu cầu bay trước: trục +y (phía lông) hướng về vợt vừa đánh */
+  /* trưng bày: đầu cầu bay trước, trục +y (phía lông) hướng về vợt vừa đánh. Mở đầu: cầu đang rơi về mặt vợt, lông hướng ra xa vợt. */
   const toRacket = new THREE.Vector3(PROPS.racket.x - PROPS.shuttle.x, PROPS.racket.y - .8 - PROPS.shuttle.y, PROPS.racket.z - PROPS.shuttle.z).normalize();
-  shuttle.userData.aim = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), toRacket);
-  shuttle.userData.axis = toRacket; shuttle.quaternion.copy(shuttle.userData.aim);
+  shuttle.userData.aim = new THREE.Quaternion().setFromUnitVectors(Y, toRacket);
+  shuttle.userData.heroAim = new THREE.Quaternion().setFromUnitVectors(Y, new THREE.Vector3(PROPS.hero.hx, PROPS.hero.hy, PROPS.hero.hz).normalize());
+  shuttle.quaternion.copy(shuttle.userData.aim);
   scene.add(shuttle); WORLD.shuttle = shuttle;
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), new THREE.MeshBasicMaterial({
-    map: tx(texGlow(brandCss('TEXT_MAIN', .16), brandCss('PRIMARY', .05))), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: .5 }));
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(7, 5), additive({ map: tx(texGlow(brandCss('TEXT_MAIN', .16), brandCss('PRIMARY', .05))), opacity: .5 }));
   glow.position.set(PROPS.racket.x + .6, PROPS.racket.y, PROPS.racket.z - 1.4); glow.renderOrder = 3; scene.add(glow); WORLD.propGlow = glow;
+  /* đèn rọi riêng đi theo cây vợt: bật sau cùng trong màn mở đầu (kênh SHOW.spot) */
+  const light = new THREE.PointLight(brandColor('TEXT_MAIN'), 1.5, 8, 2); scene.add(light); WORLD.propLight = light;
+  dimmer(s => { light.intensity = 1.5 * s.spot; glow.material.opacity = .5 * s.spot; });
+  /* hiệu ứng pha đập cầu: vệt sáng uốn theo đường bay sau quả cầu, chớp sáng lúc chạm cước và lúc chạm sân, vòng sáng lan trên mặt sân */
+  const streakGeometry = new THREE.BufferGeometry(), streakUv = new Float32Array((TRAIL_N + 1) * 4), streakIndex = [];
+  for (let i = 0; i <= TRAIL_N; i++) {
+    streakUv.set([i / TRAIL_N, 0, i / TRAIL_N, 1], i * 4);
+    if (i < TRAIL_N) streakIndex.push(i * 2, i * 2 + 2, i * 2 + 1, i * 2 + 1, i * 2 + 2, i * 2 + 3);
+  }
+  streakGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array((TRAIL_N + 1) * 6), 3));
+  streakGeometry.setAttribute('uv', new THREE.BufferAttribute(streakUv, 2)); streakGeometry.setIndex(streakIndex);
+  const streak = new THREE.Mesh(streakGeometry, additive({ map: tx(texStreak()), color: hdr(2.3, 2.0, 1.5), side: THREE.DoubleSide, opacity: 0 }));
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.84, 1, 64), additive({ color: hdr(2.6, 1.9, 1.1), side: THREE.DoubleSide, opacity: 0 }));
+  ring.rotation.x = -Math.PI / 2;
+  const flash = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), additive({ map: tx(texGlow(brandCss('TEXT_MAIN', .95), brandCss('METAL', .32))), color: hdr(1.9, 1.7, 1.35), opacity: 0 }));
+  [streak, ring, flash].forEach(mesh => { mesh.frustumCulled = false; mesh.visible = false; mesh.renderOrder = 6; scene.add(mesh); });
+  WORLD.fx = { streak: streak, ring: ring, flash: flash };
+}
+/* Pha đập cầu. t < 0: nghỉ. 0 → T_HIT: vợt lấy đà, cầu rơi vào mặt vợt. T_HIT: chạm cước. T_HIT → T_LAND: cầu lao qua lưới.
+   Sau đó cầu nằm trên sân, thu nhỏ rồi một quả mới rơi xuống chỗ chờ. Chỉ chạy khi đang ở màn mở đầu và không giảm chuyển động. */
+const SMASH = { t: -1, next: 0, count: 0, first: false, used: false, auto: true, hit: false, landed: false, u: 0, arc: .35, pulse: 0,
+  land: new THREE.Vector3(), from: new THREE.Vector3() };
+const TRAIL_N = 18;
+/* đường bay của quả cầu sau khi rời mặt vợt: gần như thẳng, vồng vừa đủ để qua mép lưới. u = 0 ở mặt vợt, 1 ở điểm rơi */
+function smashPath(u, out) { out.lerpVectors(SMASH.from, SMASH.land, u); out.y += Math.sin(Math.PI * u) * SMASH.arc; return out; }
+const SMASH_SPOTS = [[-1.2, -14.3], [1.5, -13.6], [-.4, -14.8], [2.0, -14.4], [-2.0, -13.4]];
+const T_HIT = .395, T_FLY = .55, T_LAND = T_HIT + T_FLY, T_END = 2.5;
+function smash(x, z) {
+  if (SMASH.t >= 0 || REDUCE || !WORLD.bigRacket || RIG.smooth > .5) return false;
+  const spot = SMASH_SPOTS[SMASH.count++ % SMASH_SPOTS.length];
+  SMASH.land.set(x === undefined ? spot[0] : clamp(x, -2.4, 2.4), .03, z === undefined ? spot[1] : clamp(z, -15, -10.6));
+  SMASH.t = 0; SMASH.hit = SMASH.landed = false; return true;
+}
+const X_AXIS = new THREE.Vector3(1, 0, 0), _pe = new THREE.Euler(), _qb = new THREE.Quaternion(), _qs = new THREE.Quaternion(), _qh = new THREE.Quaternion(),
+  _pt = new THREE.Vector3(), _pb = new THREE.Vector3(), _pg = new THREE.Vector3(), _pc = new THREE.Vector3(), _ph = new THREE.Vector3(), _pv = new THREE.Vector3(), _ps = new THREE.Vector3(), _pn = new THREE.Vector3();
+function updateProps(dt) {
+  const R = WORLD.bigRacket, S = WORLD.shuttle, FX = WORLD.fx; if (!R || !S || !FX) return;
+  const m = REDUCE ? 0 : 1, H = PROPS.hero, D = PROPS.racket, k = smooth(.1, .75, RIG.smooth), nf = aspectFix();
+  /* tư thế gốc của vợt: hoà giữa tư thế mở đầu và tư thế trưng bày theo tiến độ cuộn, lơ lửng nhẹ */
+  _pb.set(lerp(H.x - nf * H.nx, D.x, k), lerp(H.y - nf * H.ny, D.y, k) + Math.sin(clock * .7) * .08 * m, lerp(H.z - nf * H.nz, D.z, k));
+  _pe.set(lerp(H.rx, D.rx, k), lerp(H.ry, D.ry, k) + Math.sin(clock * .31) * lerp(.07, .16, k) * m, lerp(H.rz, D.rz, k) + Math.sin(clock * .5 + 1) * .03 * m);
+  _qb.setFromEuler(_pe);
+  /* chỗ quả cầu chờ. Chương 01 soi cây vợt: quả cầu bay lên cao, nhường chỗ cho chú thích khung vợt */
+  const lift = 1 - smooth(.15, .7, Math.abs(RIG.smooth - 1));
+  _ph.set(lerp(_pb.x + H.hx, PROPS.shuttle.x + lift * .9, k), lerp(_pb.y + H.hy, PROPS.shuttle.y + lift * 1.9, k) + Math.sin(clock * .9 + 2) * .1 * m,
+    lerp(_pb.z + H.hz, PROPS.shuttle.z - lift * 1.2, k));
+  _qh.copy(S.userData.heroAim).slerp(S.userData.aim, k); SPIN.setFromAxisAngle(Y_AXIS, clock * .35 * m); _qh.multiply(SPIN);
+  /* điểm chạm cước: ngay trước mặt vợt ở tư thế gốc */
+  _pc.set(0, 0, -.2).applyQuaternion(_qb).add(_pb);
+
+  let t = SMASH.t, phi = 0, size = 1;
+  if (t >= 0) {
+    t = SMASH.t += dt;
+    /* vợt: ngả ra sau lấy đà, quất về trước qua tư thế gốc đúng lúc chạm cầu, rồi thu về */
+    phi = t < .34 ? .55 * smooth(0, .34, t) : t < .46 ? .55 - 1.3 * smooth(.34, .46, t) : -.75 * (1 - easeIO(sat((t - .46) / .9)));
+    phi *= 1 - k;
+  }
+  R.quaternion.copy(_qb); R.position.copy(_pb);
+  if (phi) {
+    _pg.set(0, -3.9 * D.s, 0).applyQuaternion(_qb).add(_pb);              /* tâm xoay: bàn tay nắm cán */
+    _qs.setFromAxisAngle(X_AXIS, phi);
+    R.quaternion.premultiply(_qs); R.position.sub(_pg).applyQuaternion(_qs).add(_pg);
+  }
+  if (WORLD.propLight) WORLD.propLight.position.set(_pb.x - 1.4, _pb.y + 1.2, _pb.z + 2.6);
+  if (WORLD.propGlow) { WORLD.propGlow.position.set(_pb.x + .6, _pb.y, _pb.z - 1.4); WORLD.propGlow.quaternion.copy(camera.quaternion); }
+
+  FX.streak.visible = FX.ring.visible = FX.flash.visible = false;
+  if (t < 0) { S.position.copy(_ph); S.quaternion.copy(_qh); }
+  else if (t < T_HIT) { const u = t / T_HIT; S.position.lerpVectors(_ph, _pc, u * u); S.quaternion.copy(_qh); }
+  else {
+    if (!SMASH.hit) {
+      SMASH.hit = true; SMASH.from.copy(_pc); RIG.shake = Math.max(RIG.shake, .85);
+      const A = SMASH.from, L = SMASH.land, fn = sat((A.z - COURT_PLAN.netZ) / Math.max(.001, A.z - L.z));
+      SMASH.arc = Math.max(.35, (1.95 - lerp(A.y, L.y, fn)) / Math.max(.2, Math.sin(Math.PI * fn)));
+    }
+    if (t < T_LAND) {
+      const u = SMASH.u = 1 - Math.pow(1 - (t - T_HIT) / T_FLY, 1.6);
+      smashPath(u, S.position);
+      /* đầu cầu đi trước, lông kéo theo sau dọc tiếp tuyến đường bay */
+      smashPath(u - .02, _pv).sub(smashPath(u + .02, _pn)).normalize();
+      _qs.setFromUnitVectors(Y_AXIS, _pv); SPIN.setFromAxisAngle(Y_AXIS, clock * 11); _qs.multiply(SPIN);
+      S.quaternion.slerp(_qs, sat(dt * 26));
+    } else {
+      if (!SMASH.landed) { SMASH.landed = true; SMASH.pulse = 1; RIG.shake = Math.max(RIG.shake, .45); S.position.set(SMASH.land.x, .2, SMASH.land.z); }
+      if (t < 1.75) size = 1 - smooth(1.4, 1.75, t);
+      else { const u = smooth(1.85, 2.4, t); size = u; S.position.set(_ph.x, _ph.y + (1 - u) * 1.4, _ph.z); S.quaternion.copy(_qh); }
+    }
+    /* vệt sáng: dải uốn theo đường bay từ mặt vợt tới quả cầu, bề rộng giữ gần đều trên màn hình; sau khi chạm sân đuôi vệt chạy dồn về điểm rơi rồi tắt */
+    const after = t - T_LAND, fade = after < 0 ? sat((t - T_HIT) * 14) : 1 - sat(after / .5);
+    if (fade > 0) {
+      const uHead = after < 0 ? SMASH.u : 1, uTail = after < 0 ? 0 : easeIO(sat(after / .5));
+      const p = FX.streak.geometry.getAttribute('position');
+      for (let i = 0; i <= TRAIL_N; i++) {
+        const w = i / TRAIL_N, ui = lerp(uTail, uHead, w);
+        smashPath(ui, _pn); smashPath(ui + .02, _pv).sub(smashPath(ui - .02, _pt));
+        _ps.subVectors(camera.position, _pn); const reach = _ps.length();
+        _ps.cross(_pv).normalize().multiplyScalar(reach * .026 * (.3 + .7 * w));
+        p.setXYZ(i * 2, _pn.x - _ps.x, _pn.y - _ps.y, _pn.z - _ps.z); p.setXYZ(i * 2 + 1, _pn.x + _ps.x, _pn.y + _ps.y, _pn.z + _ps.z);
+      }
+      p.needsUpdate = true; FX.streak.material.opacity = .95 * fade; FX.streak.visible = true;
+    }
+    /* chớp sáng lúc chạm cước, rồi lúc chạm sân; vòng sáng lan trên mặt sân */
+    const a = (t - T_HIT) / .22, b = after / .6;
+    if (a < 1) { FX.flash.position.copy(SMASH.from); FX.flash.scale.setScalar(lerp(1.3, 3.4, a)); FX.flash.material.opacity = 1 - a; FX.flash.visible = true; }
+    else if (b >= 0 && b < 1) { FX.flash.position.set(SMASH.land.x, .5, SMASH.land.z); FX.flash.scale.setScalar(lerp(3, 7.5, b)); FX.flash.material.opacity = 1 - b; FX.flash.visible = true; }
+    FX.flash.quaternion.copy(camera.quaternion);
+    const c = after / .75;
+    if (c >= 0 && c < 1) { FX.ring.position.set(SMASH.land.x, .05, SMASH.land.z); FX.ring.scale.setScalar(lerp(.3, 3, easeOut(c))); FX.ring.material.opacity = (1 - c) * (1 - c); FX.ring.visible = true; }
+    if (t >= T_END) { SMASH.t = -1; SMASH.next = clock + 7.5; }
+  }
+  S.scale.setScalar(PROPS.shuttle.s * size); S.visible = size > .002;
+  /* băng LED quanh sân loé lên một nhịp khi cầu chạm sân */
+  if (SMASH.pulse > 0) { SMASH.pulse = SMASH.pulse < .02 ? 0 : damp(SMASH.pulse, 0, 5, dt); SHOW.board = 1 + .75 * SMASH.pulse; applyShow(); }
+  /* khán đài reo lên ngay sau cú đập, lắng dần khi quả cầu mới về chỗ */
+  if (WORLD.crowd) WORLD.crowd.cheer = (t >= T_HIT + .12 && t < 2.2) ? 1 : 0;
+  /* tự lặp lại một pha sau mỗi quãng nghỉ, chỉ khi người xem còn ở màn mở đầu */
+  if (SMASH.t < 0 && SMASH.auto && SMASH.first && RIG.smooth < .35 && clock > SMASH.next) smash();
 }
 function buildAtmosphere() {
   const random = mulberry32(66), hazeTexture = tx(texGlow(brandCss('TEXT_DIM', .12), brandCss('PRIMARY', .035)));
@@ -2238,28 +2934,48 @@ function buildCardCloth() {
   });
 }
 
-/* Đèn nhà thi đấu: đèn chính rọi từ trần xuống sân (đổ bóng vợt, cầu, lưới), hai đèn điểm trên sân chính,
-   đèn dịu cho sân phụ, viền xanh từ cuối nhà, một đốm cam sát băng LED cuối sân. */
+/* Đèn "đêm thi đấu": một chùm rọi từ giàn đèn chụp xuống sân chính (đổ bóng vợt, cầu, lưới), mép chùm sáng tắt dần
+   trên hai sân phụ nên tường và khán đài chìm vào tối. Thêm hai đèn điểm trên sân chính, đèn dịu cho sân phụ,
+   viền xanh từ cuối nhà, một đốm cam sát băng LED cuối sân. Mọi cường độ đi qua bàn điều khiển SHOW. */
 function buildLights() {
-  scene.add(new THREE.HemisphereLight(brandColor('TEXT_DIM'), brandColor('BG_DEEP'), .34));
-  const key = new THREE.DirectionalLight(brandColor('TEXT_MAIN'), 1.55);
-  key.position.set(2.5, 26, -5); key.target.position.set(0, 0, -9.4); scene.add(key.target);
+  const hemi = new THREE.HemisphereLight(brandColor('TEXT_DIM'), brandColor('BG_DEEP'), .2); scene.add(hemi);
+  const key = new THREE.SpotLight(brandColor('TEXT_MAIN'), 1.9, 0, .42, .5, 0);
+  key.position.set(1.5, 25, -5.5); key.target.position.set(0, 0, -9.4); scene.add(key.target);
   if (WANT_SHADOW) {
     key.castShadow = true; const resolution = LOW ? 1024 : 2048; key.shadow.mapSize.set(resolution, resolution);
-    const shadow = key.shadow.camera; shadow.left = -10; shadow.right = 10; shadow.top = 12; shadow.bottom = -12; shadow.near = 10; shadow.far = 40;
+    key.shadow.camera.near = 12; key.shadow.camera.far = 36;
     key.shadow.bias = -.0006; key.shadow.normalBias = .02; key.shadow.radius = 3;
   }
   scene.add(key); WORLD.key = key;
-  [-12.4, -4.8].forEach(z => {
-    const light = new THREE.PointLight(brandColor('TEXT_MAIN'), 1.25, 17, 2); light.position.set(0, 9.6, z); scene.add(light);
+  const courtLights = [-12.4, -4.8].map(z => {
+    const light = new THREE.PointLight(brandColor('TEXT_MAIN'), 1.1, 17, 2); light.position.set(0, 9.6, z); scene.add(light); return light;
   });
-  [-1, 1].forEach(side => {
-    const light = new THREE.PointLight(brandColor('TEXT_MAIN'), .6, 14, 2); light.position.set(side * HALL.sideCourtX, 9.2, -8.6); scene.add(light);
+  const sideLights = [-1, 1].map(side => {
+    const light = new THREE.PointLight(brandColor('TEXT_MAIN'), .32, 14, 2); light.position.set(side * HALL.sideCourtX, 9.2, -8.6); scene.add(light); return light;
   });
-  const rim = new THREE.DirectionalLight(brandColor('PRIMARY'), .6);
+  const rim = new THREE.DirectionalLight(brandColor('PRIMARY'), .45);
   rim.position.set(-12, 10, -30); rim.target.position.set(0, 2, -9); scene.add(rim.target); scene.add(rim);
   const warm = new THREE.PointLight(brandColor('ACCENT'), .9, 9, 2); warm.position.set(0, 1.3, HALL.boardFarZ + 1.4); scene.add(warm);
-  const fill = new THREE.PointLight(brandColor('TEXT_DIM'), .55, 30, 2); fill.position.set(0, 6, 6); scene.add(fill);
+  const fill = new THREE.PointLight(brandColor('TEXT_DIM'), .3, 30, 2); fill.position.set(0, 6, 6); scene.add(fill);
+  dimmer(s => {
+    hemi.intensity = .2 * (.1 + .9 * s.hall); key.intensity = 1.9 * s.lamp;
+    courtLights[0].intensity = 1.1 * (s.rows[0] + s.rows[1]) * .5; courtLights[1].intensity = 1.1 * (s.rows[3] + s.rows[4]) * .5;
+    sideLights.forEach(light => { light.intensity = .32 * s.rows[2]; });
+    rim.intensity = .45 * s.hall; warm.intensity = .9 * s.board; fill.intensity = .3 * s.hall;
+  });
+}
+/* Ánh môi trường (scene.environment) cũng phải tắt được khi nhà thi đấu chưa bật đèn: gom mọi vật liệu chuẩn sau khi dựng xong cảnh. */
+function wireShowEnvironment() {
+  const list = [];
+  scene.traverse(o => {
+    const material = o.material;
+    if (material && material.isMeshStandardMaterial && list.indexOf(material) < 0) { material.userData.env = material.envMapIntensity; list.push(material); }
+  });
+  /* vật liệu của cây vợt phản chiếu phòng chụp riêng nên sáng theo kênh đèn rọi vợt */
+  dimmer(s => {
+    const hall = .04 + .96 * s.hall, spot = .1 + .9 * s.spot;
+    list.forEach(material => { material.envMapIntensity = material.userData.env * (material.userData.spot ? spot : hall); });
+  });
 }
 const POST = { levels: [] };
 const QUAD_VS = 'varying vec2 vUv;\nvoid main(){ vUv = uv; gl_Position = vec4( position.xy, 0.0, 1.0 ); }';
@@ -2378,13 +3094,13 @@ function renderPost() {
    chương 02 hướng màn LED, chương 03 lướt băng LED cuối sân, chương 04 đứng ngang tầm lưới, chân trang nhìn toàn cảnh. */
 const CAM = [
   { p: [0, 5.4, 10.5], t: [.4, 3.0, -14], fov: 38 },
-  { p: [-1.2, 3.6, 3.4], t: [2.9, 3.7, -3.6], fov: 38 },
+  { p: [-1.0, 4.4, 3.6], t: [2.55, 2.8, -3.5], fov: 38 },
   { p: [4.6, 3.8, -2.6], t: [-.6, 5.2, -20.6], fov: 46 },
   { p: [-2.6, 2.4, -6.2], t: [4.55, 1.0, -12.4], fov: 46 },
   { p: [.9, 1.6, -3.6], t: [0, 1.05, -16], fov: 50 },
   { p: [0, 10.5, 8], t: [0, 1.4, -12], fov: 46 }
 ];
-const RIG = { prog: 0, smooth: 0, mx: 0, my: 0, tmx: 0, tmy: 0, intro: 0, focus: -1, focusAmt: 0 };
+const RIG = { prog: 0, smooth: 0, mx: 0, my: 0, tmx: 0, tmy: 0, intro: 0, focus: -1, focusAmt: 0, shake: 0 };
 let curveP, curveT, tmpCam;
 
 function buildRig() {
@@ -2414,10 +3130,12 @@ function applyCamera() {
   fov = fitAspect(_p, _t, fov);
 
   
-  const io = REDUCE ? 0 : 1 - RIG.intro;
-  _p.z += io * 5.6; _p.y += io * 0.65; fov += io * 8;
+  /* mở đầu: camera hạ từ trên cao xuống như cần cẩu quay phim trong lúc đèn bật dần; cuộn sớm thì bỏ qua */
+  const io = REDUCE ? 0 : (1 - RIG.intro) * (1 - smooth(0, .6, RIG.smooth));
+  _p.y += io * 5.5; _p.z += io * 4.5; _t.y += io * 1.5; fov += io * 6;
+  /* cú đập cầu làm rung nhẹ khung hình */
+  if (RIG.shake > .001) { _p.x += Math.sin(clock * 71) * .035 * RIG.shake; _p.y += Math.sin(clock * 93 + 1) * .03 * RIG.shake; }
 
-  
   const par = REDUCE ? 0 : 1 - smooth(0, 1.6, RIG.smooth) * .55;
   _p.x += RIG.mx * 0.62 * par; _p.y += RIG.my * 0.34 * par;
   _t.x -= RIG.mx * 0.20 * par; _t.y -= RIG.my * 0.12 * par;
@@ -2435,6 +3153,9 @@ function measure() {
   anchors = SECS.map((element, index) => {
     if (!index) return 0;
     if (index === SECS.length - 1) return maxScroll;
+    /* data-cam-at: camera tới mốc khi KHỐI CON này ở giữa màn hình (chương 01 dài: khối chữ + vợt có chú thích ở trên, thẻ hãng ở dưới) */
+    const at = element.dataset.camAt && element.querySelector(element.dataset.camAt);
+    if (at && at.offsetParent === element) return clamp(element.offsetTop + at.offsetTop + at.offsetHeight * .5 - vpH() * .5, 0, maxScroll);
     return clamp(element.offsetTop + element.offsetHeight * .5 - vpH() * .5, 0, maxScroll);
   });
   for (let i = 1; i < anchors.length; i++) anchors[i] = Math.max(anchors[i], anchors[i - 1] + .001);
@@ -2450,7 +3171,7 @@ function progressFor(y) {
 /* =================================================== 11 · page wiring */
 const $  = s => document.querySelector(s);
 const $$ = s => [].slice.call(document.querySelectorAll(s));
-const nav = $('#nav'), preEl = $('#pre'), preFill = $('#pre-fill'), prePct = $('#pre-pct');
+const nav = $('#nav'), preEl = $('#pre'), prePct = $('#pre-pct'), preJob = $('#pre-job');
 
 function wireReveals() {
   splitHeadingWords();
@@ -2485,16 +3206,23 @@ function splitHeadingWords() {
       if (target.dataset.wordReady === 'true') return;
       const phrase = target.textContent.replace(/\s+/g, ' ').trim();
       if (!phrase) return;
+      /* giữ cụm nhấn màu (<span class="hl">) như tiêu đề trang chủ: mỗi từ nhớ nó nằm trong cụm nhấn hay không */
+      const words = [];
+      const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const hl = !!(node.parentElement && node.parentElement.closest('.hl'));
+        node.textContent.split(/\s+/).filter(Boolean).forEach(word => words.push({ word, hl }));
+      }
       target.dataset.wordReady = 'true';
       target.classList.add('word-reveal');
       target.setAttribute('aria-label', phrase);
       target.textContent = '';
-      phrase.split(' ').forEach((word, i) => {
+      words.forEach((w, i) => {
         if (i) target.appendChild(document.createTextNode(' '));
         const mask = document.createElement('span');
         const inner = document.createElement('span');
         mask.className = 'word-mask'; mask.setAttribute('aria-hidden', 'true');
-        inner.className = 'word'; inner.textContent = word;
+        inner.className = w.hl ? 'word hl' : 'word'; inner.textContent = w.word;
         inner.style.setProperty('--word-delay', (i * 72) + 'ms');
         mask.appendChild(inner); target.appendChild(mask);
       });
@@ -2559,7 +3287,7 @@ function wireHeroExit() {
 function wireNav() {
   let last = 0;
   const rail = $('#rail');
-  const names = ['Mở đầu', 'Công nghệ', 'Danh mục', 'Vợt nổi bật', 'Ra sân', 'Chân trang'];
+  const names = ['Mở đầu', 'Kết cấu vợt', 'Danh mục', 'Vợt nổi bật', 'Ra sân', 'Chân trang'];
   SECS.forEach((s, i) => {
     const b = document.createElement('button');
     b.innerHTML = '<i></i>'; b.title = names[i] || '';
@@ -2657,7 +3385,42 @@ function makeGrain() {
 
 /* ==================================================== 13 · the machine */
 let running = false, tPrev = 0, clock = 0, fadeIn = 0;
-const INTRO = { t0: 0 };
+const INTRO = { t0: 0, lit: false }, INTRO_END = 2.6;
+/* Màn mở đầu "bật đèn nhà thi đấu": nhà tối, chỉ có đèn điện thoại trên khán đài; năm dãy đèn trần bật lần lượt từ cuối nhà
+   về phía người xem, rồi màn LED, băng LED quanh sân, cuối cùng là đèn rọi cây vợt. Mỗi đèn chỉ chớp nhẹ một lần trước khi
+   sáng hẳn (không nhấp nháy liên tục). Giảm chuyển động hoặc ?shot: mọi kênh bằng 1 ngay. */
+function strike(el, t0) { const x = el - t0; return x < 0 ? 0 : x < .06 ? .3 : x < .15 ? .1 : lerp(.1, 1, easeOut(sat((x - .15) / .5))); }
+function introShow(el) {
+  let sum = 0;
+  for (let i = 0; i < 5; i++) { SHOW.rows[i] = strike(el, .35 + i * .2); sum += SHOW.rows[i]; }
+  SHOW.lamp = SHOW.hall = sum / 5;
+  SHOW.screen = strike(el, 1.3); SHOW.board = smooth(1.55, 2.0, el); SHOW.spot = strike(el, 1.9); SHOW.crowd = 1;
+  applyShow();
+}
+/* Gợi ý tương tác: hiện sau màn mở đầu khi người xem còn ở đầu trang, ẩn hẳn sau lần đầu người xem tự đập cầu */
+const smashHint = $('#smash-hint');
+function updateSmashHint(el) {
+  if (!smashHint || REDUCE) return;
+  const want = !SMASH.used && el > INTRO_END + 1.6 && RIG.prog < .06;
+  if (want !== INTRO.hint) { INTRO.hint = want; smashHint.classList.toggle('on', want); }
+}
+function wireSmash() {
+  const hero = $('#hero'); if (!hero || REDUCE || !window.THREE) return;
+  if (smashHint) { smashHint.hidden = false; if (COARSE) smashHint.querySelector('.tx').textContent = 'Chạm vào sân để đập cầu'; }
+  const ray = new THREE.Vector3();
+  const go = (x, z) => { if (running && smash(x, z)) SMASH.used = true; };
+  hero.addEventListener('click', e => {
+    if (!running || !WORLD.bigRacket || e.target.closest('a, button, input, label')) return;
+    /* chiếu điểm bấm xuống mặt sân; bấm ngoài nửa sân bên kia lưới thì cầu rơi vào một điểm định sẵn */
+    ray.set(e.clientX / vpW() * 2 - 1, 1 - e.clientY / vpH() * 2, .5).unproject(camera).sub(camera.position);
+    if (ray.y < -1e-4) {
+      const d = -camera.position.y / ray.y, x = camera.position.x + ray.x * d, z = camera.position.z + ray.z * d;
+      if (Math.abs(x) < 3.6 && z < -8.8 && z > -16) return go(x, z);
+    }
+    go();
+  });
+  if (smashHint) smashHint.addEventListener('click', () => go());
+}
 
 function resize() {
   const w = vpW(), h = vpH();
@@ -2679,6 +3442,7 @@ function resize() {
   }
   if (WANT_SHADOW && WORLD.key) WORLD.key.shadow.needsUpdate = true;
   if (WORLD.embers) WORLD.embers.material.uniforms.uSize.value = h * renderer.getPixelRatio() * .5;
+  if (WORLD.crowd) WORLD.crowd.lu.uSize.value = h * renderer.getPixelRatio() * .5;
   if (WISP.mesh) WISP.mesh.material.uniforms.uPx.value = h * renderer.getPixelRatio();
   measure();
 }
@@ -2692,19 +3456,10 @@ function updateWorld(dt) {
     h.position.x = h.userData.x0 + Math.sin(clock * h.userData.sp + h.userData.ph) * 5.5;
     h.quaternion.copy(camera.quaternion);
   });
-  /* vợt và cầu khổng lồ: lơ lửng nhẹ, cầu tự xoay quanh trục như khi bay */
-  const R = WORLD.bigRacket;
-  if (R) {
-    const base = R.userData.rot;
-    R.position.y = PROPS.racket.y + Math.sin(clock * .7) * .08 * m;
-    R.rotation.set(base.x, base.y + Math.sin(clock * .31) * .16 * m, base.z + Math.sin(clock * .5 + 1) * .03 * m);
-  }
-  const S = WORLD.shuttle;
-  if (S) {
-    S.position.y = PROPS.shuttle.y + Math.sin(clock * .9 + 2) * .1 * m;
-    SPIN.setFromAxisAngle(Y_AXIS, clock * .35 * m);
-    S.quaternion.copy(S.userData.aim).multiply(SPIN);
-  }
+  /* vợt và cầu khổng lồ: tư thế theo tiến độ cuộn, pha đập cầu ở màn mở đầu */
+  updateProps(dt);
+  RIG.shake = damp(RIG.shake, 0, 8, dt);
+  if (WANT_POST && POST.comp) POST.comp.uniforms.uCA.value = 1 + 2.2 * RIG.shake;
   /* băng LED chạy chậm; dải chữ dưới màn hình */
   if (WORLD.boards && m) WORLD.boards.forEach(b => { b.tex.offset.x = (b.tex.offset.x + b.speed * dt) % 1; });
   if (WORLD.ticker && m) WORLD.ticker.offset.x = (WORLD.ticker.offset.x + .025 * dt) % 1;
@@ -2716,9 +3471,26 @@ function updateWorld(dt) {
       if (SCREEN.t >= 1) SCREEN.cur = SCREEN.next;
     }
   }
-  if (WORLD.shafts) WORLD.shafts.forEach(s => {
-    s.material.uniforms.uOp.value = s.userData.base * (1 + .1 * Math.sin(clock * .6 + s.userData.ph) * m);
+  if (WORLD.shafts) WORLD.shafts.forEach((s, i) => {
+    s.material.uniforms.uOp.value = s.userData.base * (1 + .1 * Math.sin(clock * .6 + s.userData.ph) * m) * SHOW.rows[i + 1];
   });
+  /* băng rôn đung đưa quanh thanh treo */
+  if (WORLD.banners && m) WORLD.banners.forEach(b => {
+    b.group.rotation.z = Math.sin(clock * .5 + b.ph) * .012;
+    b.group.rotation.y = b.rot + Math.sin(clock * .37 + b.ph) * .03;
+  });
+  /* khán giả: mức reo hò lên nhanh, lắng chậm; đèn flash dày lên theo */
+  const C = WORLD.crowd;
+  if (C) {
+    C.u.uCheer.value = damp(C.u.uCheer.value, C.cheer, C.cheer > C.u.uCheer.value ? 9 : 1.8, dt);
+    C.lu.uBurst.value = damp(C.lu.uBurst.value, C.cheer, C.cheer > C.lu.uBurst.value ? 12 : 1.4, dt);
+    C.u.uLit.value = SHOW.lamp; C.lu.uOn.value = SHOW.crowd;
+  }
+  /* chương 01 soi cây vợt: băng rôn phía sau tối bớt để vợt và chú thích nổi lên */
+  if (WORLD.banners) {
+    const k = (1 - .62 * (1 - smooth(.2, .6, Math.abs(RIG.smooth - 1)))) * (.06 + .94 * SHOW.hall);
+    WORLD.banners.forEach(b => { b.face.material.color.setScalar(k); b.face.material.emissiveIntensity = .42 * k; });
+  }
   updateWisps(dt);
 }
 
@@ -2740,7 +3512,7 @@ function frame(now) {
   const raw = (now - tPrev) / 1000 || 0;
   const dt = Math.min(raw, .05);              /* animation never jumps … */
   tPrev = now; clock += dt;
-  fadeIn = INTRO.t0 ? sat((now - INTRO.t0) / 700) : 1;
+  fadeIn = INTRO.t0 ? sat((now - INTRO.t0) / 350) : 1;
 
   if (!PERF.locked && clock > 2.2) {
     PERF.acc += raw; PERF.n++;      /* … but the governor reads the truth */
@@ -2756,11 +3528,16 @@ function frame(now) {
   RIG.my = damp(RIG.my, RIG.tmy, 2.6, dt);
   if (INTRO.t0) {
     const el = (now - INTRO.t0) / 1000;
-    RIG.intro = sat(el / 2.4);
+    RIG.intro = 1 - Math.pow(1 - sat(el / 3.4), 3);
+    if (!INTRO.lit) { introShow(el); INTRO.lit = el > INTRO_END; }
+    /* đèn rọi vợt vừa sáng là cú đập đầu tiên; sau đó tự lặp lại, người xem bấm vào sân để tự đập */
+    if (!SMASH.first && el > INTRO_END) { SMASH.first = true; smash(); }
+    updateSmashHint(el);
   }
 
   applyCamera();
   updateWorld(dt);
+  updateAnatomy();
   render();
   queue();
 }
@@ -2869,34 +3646,108 @@ function categoryKey(product) {
   const t = productType(product);
   return t.includes('vợt') ? 'vot' : t.includes('giày') ? 'giay' : (t.includes('áo') || t.includes('quần')) ? 'aoquan' : t.includes('phụ kiện') ? 'phukien' : '';
 }
+/* Bậc cân bằng / độ cứng: cùng quy tắc bacCanBang, bacDoCung, loiChoiCuaThongSo trong lib/landing-data.ts của web,
+   để số vợt theo lối chơi trên trang này khớp với bộ lọc loi_choi của danh sách sản phẩm. */
+const lower = v => String(v || '').trim().toLowerCase();
+function balanceLevel(ts) {
+  const s = lower(ts?.doCanBang); if (!s) return null;
+  if (s.includes('rất nặng')) return 3; if (s.includes('hơi nặng')) return 1; if (s.includes('nặng')) return 2;
+  if (s.includes('cân bằng')) return 0; if (s.includes('rất nhẹ')) return -2; if (s.includes('nhẹ')) return -1;
+  return null;
+}
+function stiffLevel(ts) {
+  const s = lower(ts?.doCung); if (!s) return null;
+  if (s.includes('rất cứng')) return 3; if (s.includes('cứng')) return 2; if (s.includes('trung bình')) return 1;
+  if (s.includes('mềm') || s.includes('dẻo')) return 0;
+  return null;
+}
+function playStyles(ts) {
+  const b = balanceLevel(ts); if (b === null || stiffLevel(ts) === null) return [];
+  const r = []; if (b >= 1) r.push('cong'); if (b <= -1) r.push('toc'); if (b === 0 || b === 1) r.push('toan'); return r;
+}
+/** Dòng vợt trong tên ("Vợt Cầu Lông Yonex Astrox 99 Pro" → "Astrox"; "Victor Brave Sword 12" → "Brave Sword"; "Victor TK Ryuga" → "TK Ryuga"). */
+function racketSeries(product) {
+  const brand = lower(product.hang?.tenHang).replace(/[^a-z]/g, '');
+  const words = String(product.tenSanPham || '').split(/\s+/);
+  const i = words.findIndex(w => brand && lower(w).replace(/[^a-z]/g, '') === brand);
+  if (i < 0 || !words[i + 1]) return '';
+  const a = words[i + 1], b = words[i + 2] || '', c = words[i + 3] || '';
+  if (a.length <= 2 && b) return a + ' ' + b;
+  if (/^[A-Za-z]{4,}$/.test(b) && /^\d/.test(c)) return a + ' ' + b;
+  return a;
+}
+/** "16 cây nặng đầu, 7 cây cân bằng": đếm theo nhãn, nhiều nhất trước, bỏ nhãn trống. */
+function tally(list) {
+  const n = {}; list.forEach(v => { if (v) n[v] = (n[v] || 0) + 1; });
+  return Object.keys(n).sort((a, b) => n[b] - n[a]).map(k => n[k] + ' cây ' + k).join(', ');
+}
+const shortPrice = v => { const m = Number(v) / 1e6; return Number.isFinite(m) ? (Math.round(m * 10) / 10).toLocaleString('vi-VN') + ' triệu' : ''; };
+
 function fillCatalog(products) {
-  const rackets = products.filter(p => isRacket(p) && inStock(p));
+  const live = products.filter(inStock);
+  const rackets = live.filter(isRacket);
   const tensions = rackets.map(p => parseTension(p.thongSoVot?.sucCang)).filter(t => t && t.unit);
   const weights = rackets.map(p => String(p.thongSoVot?.trongLuong || '').match(/(\d+)\s*U/i)).filter(Boolean);
   setText('[data-stat="soVot"]', String(rackets.length));
   setText('[data-stat="nheNhat"]', weights.length ? Math.max(...weights.map(m => Number(m[1]))) + 'U' : '—');
   setText('[data-stat="cangCaoNhat"]', tensions.length ? Math.round(Math.max(...tensions.map(tensionToLbs)) * 10) / 10 + ' lbs' : '—');
 
-  /* hàng logo: số vợt còn hàng của từng hãng, bấm vào lọc danh sách vợt theo hãng */
-  const byBrand = new Map();
-  rackets.forEach(p => {
-    const key = brandKey(p.hang?.tenHang); if (!key) return;
-    const entry = byBrand.get(key) || { n: 0, id: p.hang.id };
-    entry.n++; byBrand.set(key, entry);
-  });
-  setText('[data-stat="soHang"]', String(byBrand.size || '—'));
-  $$('#brand-list [data-hang]').forEach(tile => {
-    const entry = byBrand.get(tile.dataset.hang);
-    if (!entry) { tile.hidden = true; return; }
-    tile.querySelector('b').textContent = String(entry.n);
-    if (entry.id) tile.href = '/SanPham/Index?loai=Vot&hangs=' + encodeURIComponent(entry.id);
-  });
+  /* số vợt theo lối chơi trên các chip ở hero, số giày còn hàng */
+  const styles = { cong: 0, toc: 0, toan: 0 };
+  rackets.forEach(p => playStyles(p.thongSoVot).forEach(k => { styles[k]++; }));
+  $$('[data-lc]').forEach(el => { const n = styles[el.dataset.lc]; el.textContent = n ? n + ' vợt' : ''; });
 
-  /* số mẫu còn hàng của từng danh mục, ghi dưới tên thẻ */
+  /* số mẫu còn hàng của từng danh mục */
   const count = {};
-  products.filter(inStock).forEach(p => { const key = categoryKey(p); if (key) count[key] = (count[key] || 0) + 1; });
+  live.forEach(p => { const key = categoryKey(p); if (key) count[key] = (count[key] || 0) + 1; });
   const unit = { vot: 'mẫu vợt còn hàng', giay: 'mẫu giày còn hàng', aoquan: 'mẫu áo quần còn hàng', phukien: 'món còn hàng' };
   $$('[data-dem]').forEach(el => { const n = count[el.dataset.dem]; if (n) el.textContent = n + ' ' + unit[el.dataset.dem]; });
+  $$('[data-dem-chip]').forEach(el => { const n = count[el.dataset.demChip]; el.textContent = n ? n + ' mẫu' : ''; });
+
+  /* chú thích cấu tạo vợt: số liệu đếm từ vợt còn hàng */
+  const ts = rackets.map(p => p.thongSoVot || {});
+  const balanceGroup = t => { const b = balanceLevel(t); return b === null ? '' : b > 0 ? 'nặng đầu' : b < 0 ? 'nhẹ đầu' : 'cân bằng'; };
+  const anat = {
+    khung: tally(ts.map(t => t.chieuDai ? 'dài ' + String(t.chieuDai).replace(/\s*mm$/i, ' mm') : '')),
+    khop: tally(ts.map(balanceGroup)),
+    than: tally(ts.map(t => lower(t.doCung))),
+    can: tally(ts.map(t => (String(t.trongLuong || '').match(/\d+\s*U/i) || [''])[0].replace(/\s+/g, '').toUpperCase()))
+  };
+  $$('[data-anat]').forEach(el => { const v = anat[el.dataset.anat]; el.textContent = v ? 'Trong kho: ' + v : ''; });
+  ANAT.dirty = true;
+
+  /* thẻ hãng: dòng vợt, số vợt / giày / áo quần còn hàng, khoảng giá vợt; bấm vào lọc toàn bộ sản phẩm của hãng */
+  const brands = new Map();
+  live.forEach(p => {
+    const key = brandKey(p.hang?.tenHang); if (!key) return;
+    const b = brands.get(key) || { id: p.hang.id, name: p.hang.tenHang, n: { vot: 0, giay: 0, aoquan: 0 }, series: new Map(), prices: [] };
+    const cat = categoryKey(p); if (cat in b.n) b.n[cat]++;
+    if (cat === 'vot') {
+      const s = racketSeries(p); if (s) b.series.set(s, (b.series.get(s) || 0) + 1);
+      const price = Number(productPrice(p)); if (Number.isFinite(price)) b.prices.push(price);
+    }
+    brands.set(key, b);
+  });
+  setText('[data-stat="soHang"]', String(brands.size || '—'));
+  $$('#brand-list [data-hang]').forEach(card => {
+    const b = brands.get(card.dataset.hang);
+    if (!b) { card.hidden = true; return; }
+    if (b.id) card.href = '/SanPham/Index?hangs=' + encodeURIComponent(b.id);
+    const series = [...b.series.entries()].sort((x, y) => y[1] - x[1]).slice(0, 3).map(e => e[0]);
+    if (series.length) card.querySelector('[data-f="dong"]').textContent = series.join(' · ');
+    const dem = card.querySelector('[data-f="dem"]'); dem.replaceChildren();
+    [['vot', 'vợt'], ['giay', 'giày'], ['aoquan', 'áo quần']].forEach(([k, label]) => {
+      if (!b.n[k]) return;
+      const item = document.createElement('span'), num = document.createElement('b');
+      num.textContent = String(b.n[k]); item.append(num, label); dem.appendChild(item);
+    });
+    const gia = card.querySelector('[data-f="gia"]');
+    if (b.prices.length) {
+      const lo = Math.min(...b.prices), hi = Math.max(...b.prices);
+      gia.textContent = 'Vợt ' + (lo === hi ? shortPrice(lo) : shortPrice(lo) + ' – ' + shortPrice(hi));
+    }
+    card.setAttribute('aria-label', 'Xem sản phẩm ' + b.name);
+  });
 
   /* 5 vợt nổi bật: mỗi hãng một cây trước (ảnh đã duyệt được ưu tiên, rồi đến tồn kho), thiếu thì bù theo tồn kho */
   const score = p => (ANH_SACH.includes(fileName(p.hinhAnhDaiDien)) ? 1e6 : 0) + Number(p.tongTonKho || 0);
@@ -2908,16 +3759,30 @@ function fillCatalog(products) {
   });
   sorted.forEach(p => { if (chosen.length < 5 && !chosen.includes(p)) chosen.push(p); });
   $$('.les[data-slot]').forEach((el, i) => {
-    const p = chosen[i], name = el.querySelector('[data-f="ten"]'), logo = el.querySelector('[data-f="logo"]');
-    const spec = el.querySelector('[data-f="thongso"]'), price = el.querySelector('[data-f="gia"]'), img = el.querySelector('[data-f="anh"]');
+    const p = chosen[i];
     if (!p) { el.hidden = true; return; }
+    const f = name => el.querySelector('[data-f="' + name + '"]');
+    const put = (name, value) => { const node = f(name); if (node) node.textContent = value; };
     el.dataset.productId = p.id || '';
-    el.setAttribute('aria-label', 'Xem nhanh ' + productLabel(p));
-    if (name) name.textContent = productLabel(p);
-    if (logo) { logo.replaceChildren(); const l = logoImg(p); if (l) logo.appendChild(l); }
-    if (img) { img.src = imgUrl(p.hinhAnhDaiDien); img.alt = productLabel(p); }
-    if (spec) spec.textContent = [p.thongSoVot?.doCanBang, p.thongSoVot?.doCung, p.thongSoVot?.trongLuong].filter(Boolean).join(' · ') || 'Đang cập nhật thông số';
-    if (price) { price.textContent = formatPrice(productPrice(p)); if (p.dangGiamGia && p.giaGoc) price.title = 'Giá gốc ' + formatPrice(p.giaGoc); }
+    el.setAttribute('aria-label', 'Xem nhanh và thêm vào giỏ: ' + productLabel(p));
+    put('hang', p.hang?.tenHang || 'Shop Cầu Lông');
+    put('ten', productLabel(p));
+    const img = f('anh'); if (img) { img.src = imgUrl(p.hinhAnhDaiDien); img.alt = productLabel(p); }
+    const price = Number(productPrice(p)), old = Number(p.giaGoc);
+    const sale = p.dangGiamGia && Number.isFinite(old) && old > price;
+    put('gia', formatPrice(price));
+    put('giacu', sale ? formatPrice(old) : '');
+    put('tietkiem', sale ? 'Tiết kiệm ' + formatPrice(old - price) : '');
+    const off = f('giam'); if (off) { off.hidden = !sale; off.textContent = sale ? '-' + Math.round((1 - price / old) * 100) + '%' : ''; }
+    /* dải thông số như thẻ của web: chỉ những thông số kho có ghi, tối đa 3 ô */
+    const t = p.thongSoVot || {}, dl = el.querySelector('.les-spec');
+    const specs = [['Cân bằng', t.doCanBang], ['Độ cứng', t.doCung],
+      ['Trọng lượng', (String(t.trongLuong || '').match(/\d+\s*U/i) || [''])[0].replace(/\s+/g, '').toUpperCase()],
+      ['Sức căng', t.sucCang], ['Dài', t.chieuDai]].filter(x => x[1]).slice(0, 3);
+    if (dl) {
+      dl.replaceChildren(...specs.map(([k, v]) => { const d = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; d.append(dt, dd); return d; }));
+      dl.hidden = !specs.length;
+    }
   });
 }
 async function loadShopCatalog() {
@@ -3113,6 +3978,79 @@ function wireShopDrawer() {
   loadShopCatalog().catch(err => { setText('#sd-msg', 'Không tải được dữ liệu cửa hàng. Hãy thử lại.'); console.error('[trai-nghiem] tải catalog lỗi', err); });
 }
 
+/* ---- chú thích cấu tạo vợt (chương 01): bốn điểm trên mô hình vợt 3D được chiếu ra màn hình mỗi khung.
+   Thẻ xếp thành một cột ngay bên phải cây vợt, giữ khoảng cách tối thiểu; đường dẫn gấp khúc nối chấm trên vợt với thẻ.
+   Màn hẹp (≤1080 px) hoặc không có WebGL: giữ lưới thẻ tĩnh trong luồng trang. */
+const ANAT_LOCAL = { khung: [.985, -.22, .04], khop: [0, -1.27, .05], than: [0, -2.35, .03], can: [0, -3.9, .1] };
+const ANAT = { el: null, svg: null, pts: [], on: false, dirty: true, v: new THREE.Vector3(), cardW: 0, frame: 0 };
+function wireAnatomy() {
+  const el = $('#anat'); if (!el) return;
+  const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'anat-svg'); svg.setAttribute('aria-hidden', 'true');
+  ANAT.el = el; ANAT.svg = svg;
+  ANAT.pts = $$('#anat .anat-pt').map(li => {
+    const path = document.createElementNS(NS, 'path'); svg.appendChild(path);
+    return { li, key: li.dataset.pt, card: li.querySelector('.anat-card'), path, h: 0, sx: 0, sy: 0, top: 0 };
+  });
+  el.parentElement.appendChild(svg);
+  addEventListener('resize', () => { ANAT.dirty = true; ANAT.tight = false; ANAT.el.classList.remove('tight'); }, { passive: true });
+}
+function setAnatomyLive(on) {
+  ANAT.on = on; ANAT.dirty = true;
+  ANAT.el.classList.toggle('live', on); ANAT.svg.classList.toggle('live', on);
+  if (!on) { ANAT.el.style.opacity = ANAT.svg.style.opacity = ''; ANAT.el.style.visibility = ANAT.svg.style.visibility = ''; }
+}
+function updateAnatomy() {
+  if (!ANAT.el) return;
+  const R = WORLD.bigRacket, want = !!R && vpW() > 1080;
+  if (want !== ANAT.on) setAnatomyLive(want);
+  if (!ANAT.on) return;
+  /* chỉ hiện khi khối chữ + vợt đang ở giữa màn hình VÀ camera đã tới mốc; cuộn xuống thẻ hãng là tắt hẳn */
+  const g = ANAT.el.parentElement.getBoundingClientRect();
+  const off = Math.abs(g.top + g.height / 2 - vpH() / 2) / vpH();
+  const vis = Math.min(1 - smooth(.1, .24, off), 1 - smooth(.18, .4, Math.abs(RIG.smooth - 1)));
+  const o = vis.toFixed(3), hide = vis < .01 ? 'hidden' : '';
+  ANAT.el.style.opacity = ANAT.svg.style.opacity = o; ANAT.el.style.visibility = ANAT.svg.style.visibility = hide;
+  if (hide) return;
+  /* đọc layout trước, ghi sau: chiều cao thẻ chỉ đo lại khi đổi cỡ màn hình hoặc vừa điền số liệu */
+  if (ANAT.dirty || ++ANAT.frame % 90 === 0) {
+    ANAT.pts.forEach(p => { p.h = p.card.offsetHeight; }); ANAT.cardW = ANAT.pts[0].card.offsetWidth; ANAT.dirty = false;
+  }
+  /* thẻ/chấm tính theo hộp của danh sách, đường nối theo hộp của svg (hai gốc tọa độ khác nhau) */
+  const box = ANAT.el.getBoundingClientRect(), sb = ANAT.svg.getBoundingClientRect(), W = vpW(), H = vpH();
+  R.updateMatrixWorld(true); camera.updateMatrixWorld();
+  ANAT.pts.forEach(p => {
+    ANAT.v.fromArray(ANAT_LOCAL[p.key]); R.localToWorld(ANAT.v); ANAT.v.project(camera);
+    p.sx = (ANAT.v.x * .5 + .5) * W; p.sy = (-ANAT.v.y * .5 + .5) * H;
+  });
+  const right = Math.max(...ANAT.pts.map(p => p.sx)), gapX = 64;
+  const colX = Math.min(right + gapX, W - ANAT.cardW - 70);
+  const order = ANAT.pts.slice().sort((a, b) => a.sy - b.sy);
+  const topMin = 92, gap = 12;
+  let bottom = topMin - gap;
+  order.forEach(p => { p.top = Math.max(p.sy - p.h / 2, bottom + gap); bottom = p.top + p.h; });
+  /* tràn đáy: đẩy ngược từ thẻ dưới cùng lên, giữ khoảng cách; vẫn tràn đỉnh thì ẩn dòng mô tả (chỉ giữ tên + số liệu) */
+  let limit = H - 18;
+  for (let i = order.length - 1; i >= 0; i--) { const p = order[i]; if (p.top + p.h > limit) p.top = limit - p.h; limit = p.top - gap; }
+  if (order[0].top < topMin - 4 && !ANAT.tight) { ANAT.tight = true; ANAT.el.classList.add('tight'); ANAT.dirty = true; }
+  ANAT.pts.forEach(p => {
+    p.li.style.setProperty('--ax', (p.sx - box.left).toFixed(1) + 'px'); p.li.style.setProperty('--ay', (p.sy - box.top).toFixed(1) + 'px');
+    p.li.style.setProperty('--cx', (colX - box.left).toFixed(1) + 'px'); p.li.style.setProperty('--cy', (p.top - box.top).toFixed(1) + 'px');
+    const ax = p.sx - sb.left, ay = p.sy - sb.top, cx = colX - sb.left, mid = p.top - sb.top + Math.min(p.h / 2, 24);
+    const elbow = Math.max(ax + 16, cx - 28);
+    p.path.setAttribute('d', 'M' + (ax + 9).toFixed(1) + ' ' + ay.toFixed(1) + 'H' + elbow.toFixed(1) + 'L' + (cx - 4).toFixed(1) + ' ' + mid.toFixed(1));
+  });
+}
+
+/* ---- tên và logo shop lấy từ /api/site như header của web */
+function loadSiteInfo() {
+  fetch('/api/site', { headers: { Accept: 'application/json' } }).then(r => r.ok ? r.json() : null).then(site => {
+    if (!site) return;
+    if (site.tenSite) $$('[data-site="ten"]').forEach(el => { el.textContent = site.tenSite; });
+    if (site.logo) $$('img[data-site="logo"]').forEach(img => { img.src = imgUrl(site.logo); });
+  }).catch(err => console.warn('[trai-nghiem] không đọc được thông tin shop', err));
+}
+
 /* ======================================================== 14 · booting */
 /* Các bước dựng cảnh, chạy lần lượt sau màn tải. Bước trả về Promise (phông chữ, ảnh logo/banner) được chờ xong mới đi tiếp. */
 const JOBS = [
@@ -3124,20 +4062,27 @@ const JOBS = [
   ['Dựng nhà thi đấu', () => buildArena()],
   ['Căng lưới', () => { WORLD.net = buildNet(); }],
   ['Treo màn LED', () => buildScreen()],
-  ['Dựng băng LED', () => Promise.all(Object.keys(LOGO).map(k => loadImage(LOGO[k]).then(img => [k, img])))
-    .then(list => buildLedBoards(Object.fromEntries(list)))],
-  ['Lắp giàn đèn, khán đài', () => { buildCeiling(); buildStands(); }],
+  ['Dựng băng LED, treo băng rôn', () => Promise.all(Object.keys(LOGO).map(k => loadImage(LOGO[k]).then(img => [k, img])))
+    .then(list => { const logos = Object.fromEntries(list); buildLedBoards(logos); buildBanners(logos); })],
+  ['Lắp giàn đèn, khán đài, khán giả', () => { buildCeiling(); buildStands(); }],
   ['Đặt vợt và cầu', () => buildProps()],
   ['Tạo bụi sáng', () => { buildAtmosphere(); buildWisps(); }],
   ['Hậu kỳ', () => {
     initPost(); buildCardCloth(); measure();
     /* vợt và cầu lơ lửng có chuyển động nên bóng cập nhật mỗi khung; giảm chuyển động thì nướng một lần */
     if (WANT_SHADOW && WORLD.key) { WORLD.key.shadow.autoUpdate = !REDUCE; WORLD.key.shadow.needsUpdate = true; }
+  }],
+  /* nối bàn điều khiển ánh sáng, rồi biên dịch shader và vẽ thử một khung sau màn tải: lúc bật đèn không còn bị khựng */
+  ['Thử đèn', () => {
+    wireShowEnvironment(); applyShow(); resize();
+    if (WANT_POST && POST.scene) renderer.setRenderTarget(POST.scene);
+    renderer.compile(scene, camera); renderer.setRenderTarget(null);
+    applyCamera(); updateWorld(0); render();
   }]
 ];
 function boot() {
   makeGrain();
-  wireReveals(); wireNav(); wireHeroExit(); wireCursor(); wireShopDrawer();
+  wireReveals(); wireNav(); wireHeroExit(); wireCursor(); wireAnatomy(); wireShopDrawer(); wireSmash(); loadSiteInfo();
   document.body.classList.add('is-locked');
   let i = 0;
   const step = () => {
@@ -3145,8 +4090,10 @@ function boot() {
     const done = () => {
       i++;
       const p = i / JOBS.length;
-      preFill.style.right = ((1 - p) * 100).toFixed(1) + '%';
+      /* màn tải: nét vẽ cây vợt dài dần theo tiến độ, dòng chữ nhỏ là bước sắp chạy */
+      preEl.style.setProperty('--p', p.toFixed(3));
       prePct.textContent = Math.round(p * 100);
+      if (preJob) preJob.textContent = i < JOBS.length ? JOBS[i][0] : 'Bật đèn';
       if (i < JOBS.length) setTimeout(step, 16); else setTimeout(start, 220);
     };
     let r;
@@ -3188,17 +4135,19 @@ function start() {
     document.body.classList.remove('is-locked');
     preEl.classList.add('done');
   } else {
+    /* nhà thi đấu còn tối khi màn tải tan; chữ mở đầu vào sau khi mấy dãy đèn đầu tiên đã sáng */
+    if (!REDUCE) introShow(0);
     preEl.classList.add('done');
     setTimeout(() => {
       document.body.classList.remove('is-locked');
       $('#hero').querySelectorAll('[data-rv], .mask-line').forEach((e, i) =>
         setTimeout(() => e.classList.add('rv-in'), REDUCE ? 0 : 120 + i * 95));
-    }, REDUCE ? 0 : 340);
+    }, REDUCE ? 0 : 900);
   }
   running = true; tPrev = performance.now();
   INTRO.t0 = shot !== null ? 0 : (REDUCE ? performance.now() - 4000 : performance.now());
   queue();
-  window.__sanTrungBay = { RIG: RIG, WORLD: WORLD, SCREEN: SCREEN, CAM: CAM, POST: POST, renderer: renderer, scene: scene, camera: camera, anchors: () => anchors };
+  window.__sanTrungBay = { RIG: RIG, WORLD: WORLD, SCREEN: SCREEN, CAM: CAM, POST: POST, SHOW: SHOW, SMASH: SMASH, smash: smash, renderer: renderer, scene: scene, camera: camera, anchors: () => anchors };
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(boot, 0);
