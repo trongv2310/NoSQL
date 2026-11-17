@@ -1,4 +1,5 @@
 import { KHOA_THUOC_TINH } from '../catalog/thuoc-tinh';
+import { THE_DANH_GIA } from '../common/danh-gia';
 import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TAY_THUAN, TOI_DA_BUOI_MOI_TUAN, TRINH_DO } from '../common/ho-so-choi';
 import { TRANG_THAI } from '../schemas/don-hang.schema';
 import { Quyen } from '../schemas/tai-khoan.schema';
@@ -202,7 +203,9 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
   },
 
   phanhois: {
-    moTa: 'Đánh giá phải gắn với một sản phẩm, số sao là số nguyên 1–5, nội dung tối đa 255 ký tự.',
+    moTa:
+      'Đánh giá phải gắn với một sản phẩm, số sao là số nguyên 1–5, nội dung tối đa 255 ký tự; bản chụp người viết và thẻ chỉ nhận giá trị trong danh sách; ' +
+      'số lượt hữu ích luôn bằng số người đã bấm.',
     validator: {
       $jsonSchema: {
         bsonType: 'object',
@@ -214,8 +217,26 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           daXacMinh: { bsonType: 'bool' },
           khachHang: ID_HOAC_NULL,
           sanPham: ID,
+          bienThe: ID_HOAC_NULL,
+          nguoiDanh: {
+            bsonType: 'object',
+            additionalProperties: false,
+            properties: {
+              trinhDo: { enum: [...TRINH_DO] },
+              noiDung: { bsonType: 'array', uniqueItems: true, items: { enum: [...NOI_DUNG] } },
+              loiChoi: { enum: [...LOI_CHOI] },
+              chanThuong: { bsonType: 'array', uniqueItems: true, items: { enum: [...CHAN_THUONG] } },
+            },
+          },
+          the: { bsonType: 'array', uniqueItems: true, maxItems: THE_DANH_GIA.length, items: { enum: [...THE_DANH_GIA] } },
+          huuIch: { bsonType: 'array', uniqueItems: true, items: ID },
+          soHuuIch: SO_NGUYEN_KHONG_AM,
+          daMuaHang: { bsonType: 'bool' },
+          laDuLieuMau: { bsonType: 'bool' },
         },
       },
+      // Bộ đếm phải khớp danh sách người bấm (cả hai được đổi trong cùng một lệnh, xem PhanHoiController.huuIch).
+      $expr: { $eq: [{ $ifNull: ['$soHuuIch', 0] }, { $size: { $ifNull: ['$huuIch', []] } }] },
     },
   },
 

@@ -8,6 +8,9 @@ import { RelatedProducts } from "@/components/RelatedProducts";
 import { ProductGallery } from "@/components/ProductGallery";
 import { TEN_ANH_MORPH, anhDaBam } from "@/lib/morph";
 import { InlineReviewForm } from "@/components/InlineReviewForm";
+import { NguoiChoiGiongBan } from "@/components/product/NguoiChoiGiongBan";
+import { NutHuuIch } from "@/components/product/NutHuuIch";
+import { NHAN_THE, nhanNguoiDanh, type NguoiDanhCongKhai } from "@/lib/danh-gia";
 import { ProductPurchaseInfo } from "@/components/ProductPurchaseInfo";
 import { HoiNguoiBan } from "@/components/HoiNguoiBan";
 import { ComboQuanCan } from "@/components/product/ComboQuanCan";
@@ -36,7 +39,10 @@ interface ChiTiet {
   mauSacs: { id: string; tenMau: string }[];
   sizes: { id: string; tenSize: string; loaiSize: string }[];
   thongSoVot: BienTheV["thongSo"];
-  danhGias: { id: string; noiDung: string; danhGia: number; ngayPhanHoi: string; tenKhachHang: string }[];
+  danhGias: {
+    id: string; noiDung: string; danhGia: number; ngayPhanHoi: string; tenKhachHang: string;
+    nguoiDanh?: NguoiDanhCongKhai | null; the?: string[]; soHuuIch?: number; daMuaHang?: boolean; phienBan?: string | null; laDuLieuMau?: boolean;
+  }[];
   /** null khi chưa có đánh giá đã xác minh. */
   trungBinhDanhGia: number | null;
   soDanhGia: number;
@@ -292,8 +298,9 @@ export default function ChiTietSanPhamPage() {
           <button type="button" className="btn btn-outline-primary btn-sm" disabled={dangGuiDanhGia} aria-expanded={moDanhGia} aria-controls="product-inline-review" onClick={() => setMoDanhGia((v) => !v)}>{moDanhGia ? "Đóng form" : "Viết đánh giá"}</button>
         </div>
         <div id="product-inline-review">
-          {moDanhGia && <InlineReviewForm key={id} sanPhamId={id} onBusyChange={setDangGuiDanhGia} onSent={capNhatDanhGia} onClose={() => setMoDanhGia(false)} />}
+          {moDanhGia && <InlineReviewForm key={id} sanPhamId={id} bienTheId={bienThe?.id ?? null} tenPhienBan={bienThe?.size?.tenSize ?? null} onBusyChange={setDangGuiDanhGia} onSent={capNhatDanhGia} onClose={() => setMoDanhGia(false)} />}
         </div>
+        <NguoiChoiGiongBan sanPhamId={id} lanTai={phanHoi.soDanhGia} />
         <div className="product-review-layout">
           <div className="product-rating-summary">
             <strong>{phanHoi.soDanhGia > 0 && phanHoi.trungBinhDanhGia !== null ? phanHoi.trungBinhDanhGia.toFixed(1) : "—"}{phanHoi.soDanhGia > 0 && <small>/ 5</small>}</strong>
@@ -305,7 +312,17 @@ export default function ChiTietSanPhamPage() {
               <article key={r.id} className="product-review-item">
                 <div className="product-review-author"><span className="product-review-avatar" aria-hidden="true">{r.tenKhachHang?.trim().charAt(0).toLocaleUpperCase('vi') || "K"}</span><div><strong>{r.tenKhachHang}</strong><time dateTime={r.ngayPhanHoi}>{ngay(r.ngayPhanHoi)}</time></div></div>
                 <div className="text-warning" aria-label={`${r.danhGia} trên 5 sao`}><span aria-hidden="true">{"★".repeat(r.danhGia)}<span className="text-muted">{"★".repeat(5 - r.danhGia)}</span></span></div>
+                {(nhanNguoiDanh(r.nguoiDanh) || r.daMuaHang || r.phienBan) && (
+                  <div className="d-flex flex-wrap gap-1 small mb-1">
+                    {nhanNguoiDanh(r.nguoiDanh) && <span className="badge rounded-pill text-bg-light border"><i className="fa-solid fa-user" aria-hidden="true" /> {nhanNguoiDanh(r.nguoiDanh)}</span>}
+                    {r.phienBan && <span className="badge rounded-pill text-bg-light border">Dùng bản {r.phienBan}</span>}
+                    {r.daMuaHang && <span className="badge rounded-pill text-bg-success-subtle border border-success-subtle text-success-emphasis"><i className="fa-solid fa-circle-check" aria-hidden="true" /> Đã mua tại shop</span>}
+                    {r.laDuLieuMau && <span className="badge rounded-pill text-bg-warning">Dữ liệu mẫu</span>}
+                  </div>
+                )}
                 <p>{r.noiDung}</p>
+                {!!r.the?.length && <div className="d-flex flex-wrap gap-1 mb-1">{r.the.map((t) => <span key={t} className="badge rounded-pill text-bg-light border fw-normal">{NHAN_THE[t] ?? t}</span>)}</div>}
+                <NutHuuIch danhGiaId={r.id} soBanDau={r.soHuuIch ?? 0} />
               </article>
             ))}
           </div>

@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { LOC_PHAN_HOI_CONG_KHAI, tongKetDanhGia } from '../common/danh-gia';
+import { locPhanHoiCongKhai, tongKetDanhGia } from '../common/danh-gia';
 import { bienTheView, idOf, sanPhamView } from '../common/mappers';
 import { dangGiamGia, giaSauKhuyenMai } from '../common/pricing';
 import { parseObjectId, phanTrang } from '../common/helpers';
 import { locKhuyenMaiDangChay } from './khuyen-mai';
 import { ghepTrangChu, gomThongSoTheoSanPham } from './trang-chu';
+import { nguoiDanhCongKhai } from '../phan-hoi/danh-gia-nhom';
 import { dieuKienThuocTinh } from './thuoc-tinh';
 import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, gopThongSoBienThe } from './vot-thong-so';
 import {
@@ -65,7 +66,7 @@ export class CatalogService {
         .lean() as Promise<any[]>,
       // Chỉ tính đánh giá đã xác minh; sản phẩm chưa có thì điểm là null (không mặc định 5 sao).
       this.phanHoiModel.aggregate<{ _id: any; tb: number; so: number }>([
-        { $match: LOC_PHAN_HOI_CONG_KHAI },
+        { $match: locPhanHoiCongKhai() },
         { $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } },
       ]),
     ]);
@@ -249,7 +250,8 @@ export class CatalogService {
     }
     const [bienThes, danhGias]: [any[], any[]] = await Promise.all([
       this.chiTietModel.find({ sanPham: oid }).populate('mau size').sort({ _id: 1 }).lean(),
-      this.phanHoiModel.find({ sanPham: oid, ...LOC_PHAN_HOI_CONG_KHAI }).populate('khachHang').sort({ ngayPhanHoi: -1 }).lean(),
+      // Chỉ lấy họ tên người viết: không kéo theo hồ sơ người chơi (có thông tin chấn thương) của khách hàng.
+      this.phanHoiModel.find({ sanPham: oid, ...locPhanHoiCongKhai() }).populate({ path: 'khachHang', select: 'hoTen' }).sort({ ngayPhanHoi: -1 }).lean(),
     ]);
     const duyNhat = <T extends { id: string | null }>(ds: (T | null)[]): T[] => {
       const seen = new Set<string>();
@@ -269,6 +271,12 @@ export class CatalogService {
         danhGia: r.danhGia,
         ngayPhanHoi: r.ngayPhanHoi,
         tenKhachHang: r.khachHang?.hoTen ?? 'Khách hàng',
+        nguoiDanh: nguoiDanhCongKhai(r.nguoiDanh),
+        the: r.the ?? [],
+        soHuuIch: r.soHuuIch ?? 0,
+        daMuaHang: !!r.daMuaHang,
+        phienBan: r.bienThe ? (views.find((v) => v.id === String(r.bienThe))?.size?.tenSize ?? null) : null,
+        laDuLieuMau: !!r.laDuLieuMau,
       })),
       trungBinhDanhGia: tongKet.trungBinh,
       soDanhGia: tongKet.so,

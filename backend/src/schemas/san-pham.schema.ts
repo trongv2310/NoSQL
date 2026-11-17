@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { thuocTinhTuThongSo, ThuocTinh } from '../catalog/thuoc-tinh';
+import { THE_DANH_GIA } from '../common/danh-gia';
+import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TRINH_DO } from '../common/ho-so-choi';
 
 @Schema({ collection: 'sanphams' })
 export class SanPham {
@@ -140,6 +142,16 @@ export class LichSuThayDoiGia {
 export type LichSuThayDoiGiaDocument = HydratedDocument<LichSuThayDoiGia>;
 export const LichSuThayDoiGiaSchema = SchemaFactory.createForClass(LichSuThayDoiGia);
 
+/** Bản chụp hồ sơ người chơi gắn vào đánh giá (cùng khoá với khachhangs.hoSoChoi). */
+@Schema({ _id: false })
+export class NguoiDanhChup {
+  @Prop({ type: String, enum: TRINH_DO }) trinhDo?: string;
+  @Prop({ type: [String], enum: NOI_DUNG, default: undefined }) noiDung?: string[];
+  @Prop({ type: String, enum: LOI_CHOI }) loiChoi?: string;
+  @Prop({ type: [String], enum: CHAN_THUONG, default: undefined }) chanThuong?: string[];
+}
+export const NguoiDanhChupSchema = SchemaFactory.createForClass(NguoiDanhChup);
+
 @Schema({ collection: 'phanhois' })
 export class PhanHoi {
   @Prop({ maxlength: 255 }) noiDung?: string;
@@ -152,6 +164,30 @@ export class PhanHoi {
   @Prop({ default: false, index: true }) daXacMinh: boolean;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang' }) khachHang?: Types.ObjectId;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'SanPham', required: true, index: true }) sanPham: Types.ObjectId;
+
+  /** Phiên bản người viết dùng (3U hay 4U ảnh hưởng cảm nhận). Không bắt buộc. */
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham' }) bienThe?: Types.ObjectId;
+  /**
+   * BẢN CHỤP hồ sơ người viết LÚC VIẾT (như đơn hàng chụp giá): hồ sơ đổi về sau không làm đổi ngữ cảnh của đánh giá cũ.
+   * Chỉ có khi người viết đồng ý; chanThuong cần đồng ý riêng và không bao giờ trả về ở API công khai.
+   */
+  @Prop({ type: NguoiDanhChupSchema, default: undefined }) nguoiDanh?: NguoiDanhChup;
+  /** Thẻ cảm nhận (THE_DANH_GIA). */
+  @Prop({ type: [String], enum: THE_DANH_GIA, default: undefined }) the?: string[];
+  /** Khách đã bấm "hữu ích" (để mỗi người chỉ tính một lần) và bộ đếm đi kèm, cập nhật trong CÙNG một lệnh. */
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang' }], default: undefined }) huuIch?: Types.ObjectId[];
+  @Prop({ type: Number, default: 0, min: 0 }) soHuuIch: number;
+  /** Người viết có đơn ĐÃ HOÀN THÀNH chứa sản phẩm này tại thời điểm viết. */
+  @Prop({ type: Boolean, default: false }) daMuaHang: boolean;
+  /** Dữ liệu sinh ra để minh hoạ thống kê (M6). Không tính vào số liệu công khai, xem common/danh-gia.ts. */
+  @Prop({ type: Boolean, default: undefined }) laDuLieuMau?: boolean;
 }
 export type PhanHoiDocument = HydratedDocument<PhanHoi>;
 export const PhanHoiSchema = SchemaFactory.createForClass(PhanHoi);
+/** "Người chơi giống bạn": lọc theo sản phẩm + trình độ trong bản chụp, đọc kèm số sao (index kép, slide 90). */
+PhanHoiSchema.index({ sanPham: 1, 'nguoiDanh.trinhDo': 1, danhGia: -1 }, { name: 'danh_gia_theo_nhom' });
+/**
+ * Danh sách đánh giá công khai mới nhất của một sản phẩm. Index MỘT PHẦN (partial): chỉ chứa đánh giá đã xác minh. Khác sparse
+ * (chỉ xét "có trường hay không"), partial lọc theo một điều kiện bất kỳ, nên đánh giá import/chưa xác minh không chiếm chỗ trong index.
+ */
+PhanHoiSchema.index({ sanPham: 1, ngayPhanHoi: -1 }, { name: 'cong_khai_moi_nhat', partialFilterExpression: { daXacMinh: true } });

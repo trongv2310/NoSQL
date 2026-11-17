@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CatalogService } from '../catalog/catalog.service';
-import { LOC_PHAN_HOI_CONG_KHAI } from '../common/danh-gia';
+import { locPhanHoiCongKhai } from '../common/danh-gia';
 import { lamSachHtmlTin } from '../common/lam-sach-html';
 import { idOf, sanPhamView } from '../common/mappers';
 import { dangGiamGia, giaSauKhuyenMai, khuyenMaiConHieuLuc } from '../common/pricing';
@@ -114,7 +114,7 @@ export class CongKhaiService {
         { $group: { _id: '$loai', n: { $sum: 1 } } },
       ]),
       this.phanHoiModel
-        .find({ danhGia: { $gte: 4 }, noiDung: { $nin: [null, ''] }, ...LOC_PHAN_HOI_CONG_KHAI })
+        .find({ danhGia: { $gte: 4 }, noiDung: { $nin: [null, ''] }, ...locPhanHoiCongKhai() })
         .populate('khachHang sanPham')
         .sort({ ngayPhanHoi: -1 })
         .limit(3)

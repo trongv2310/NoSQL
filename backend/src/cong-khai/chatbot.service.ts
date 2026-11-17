@@ -7,7 +7,7 @@ import { khuyenMaiConHieuLuc } from '../common/pricing';
 import { ChiTietSanPham, DonHang, KhachHang, KhuyenMai, PhanHoi, SanPham } from '../schemas';
 import { CauDao, GioiHanTanSuat, giaHopLe, KetQuaGioiHan, LuotChat, trichSoTien, YeuCauChat } from './chatbot/an-toan';
 import { GioHangService } from '../gio-hang/gio-hang.service';
-import { LOC_PHAN_HOI_CONG_KHAI } from '../common/danh-gia';
+import { locPhanHoiCongKhai } from '../common/danh-gia';
 import { docLienHe } from '../common/lien-he';
 import { HanhDong, lienHeCuaHang, PhanHoiChatbot, TheDonHang, TheSanPham } from './chatbot/chatbot.types';
 import { dsHangTrongKho, dungKho, SanPhamKho, TEN_LOAI, timTheoTen, tuKhoaTrongKho } from './chatbot/kho';
@@ -104,7 +104,7 @@ export class ChatbotService {
         const [sps, bts, dg] = await Promise.all([
           this.spModel.find({ deletedAt: null }).populate('loai hang khuyenMai').lean() as Promise<any[]>,
           this.ctModel.find().populate('mau size').lean() as Promise<any[]>,
-          this.phModel.aggregate<{ _id: any; tb: number; so: number }>([{ $match: LOC_PHAN_HOI_CONG_KHAI }, { $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } }]),
+          this.phModel.aggregate<{ _id: any; tb: number; so: number }>([{ $match: locPhanHoiCongKhai() }, { $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } }]),
         ]);
         const kho = dungKho(sps, bts, new Map(dg.map((x) => [String(x._id), { tb: x.tb, so: x.so }])));
         this.boNho = { kho, het: Date.now() + THOI_GIAN_CACHE_KHO_MS };
