@@ -36,6 +36,20 @@ npm run dev                   # http://localhost:3000
 Tài khoản mẫu (lấy từ seeder gốc): `admin / admin@123`, `nhanvien_banhang / nv@123`, `nguyenvana / vana@123`, `tranthib / thib@123`.
 Trang quản trị: `/admin` (admin và nhân viên đăng nhập tại đây).
 
+### Dữ liệu dùng chung cho team
+
+`npm run seed:reset` sinh ObjectId mới mỗi lần chạy, nên mỗi máy có id khác nhau. Muốn cả team thử nghiệm trên **cùng dữ liệu và cùng id**,
+nhập bộ dữ liệu cố định trong `backend/seed-data/mongodb` (cùng nội dung: 48 sản phẩm, 103 biến thể, 24 đơn mẫu, tin tức, 4 tài khoản mẫu):
+
+```bash
+cd backend
+npm run data:import:reset     # xóa dữ liệu hệ thống rồi nhập lại (chỉ chạy trên MongoDB của máy này)
+npm run data:import           # chỉ nhập khi CSDL còn trống
+npm run data:export           # xuất lại bộ dữ liệu sau khi chỉnh (chỉ từ CSDL sạch)
+```
+
+Chi tiết (nội dung từng collection, `mongoimport`, lưu ý hạn khuyến mãi…) xem `backend/seed-data/mongodb/README.md`.
+
 ## Ánh xạ Laravel → NestJS
 
 | Laravel | NestJS / MongoDB |

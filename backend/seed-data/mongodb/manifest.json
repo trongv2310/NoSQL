@@ -1,0 +1,22 @@
+{
+  "taoLuc": "2026-11-07T10:02:30.157Z",
+  "ghiChu": "Dữ liệu mẫu dùng chung cho team. Nhập bằng `npm run data:import` (xem README.md cùng thư mục).",
+  "collections": {
+    "cauhinhs": 3,
+    "chitietsanphams": 103,
+    "counters": 1,
+    "donhangs": 24,
+    "hangs": 4,
+    "khachhangs": 4,
+    "khuyenmais": 8,
+    "loaisanphams": 4,
+    "mausacs": 10,
+    "nhacungcaps": 5,
+    "phanhois": 3,
+    "sanphams": 48,
+    "sizes": 26,
+    "taikhoans": 4,
+    "tintucs": 12,
+    "trandaus": 11
+  }
+}

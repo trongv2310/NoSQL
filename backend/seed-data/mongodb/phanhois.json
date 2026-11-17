@@ -1,0 +1,5 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737daaf5"},"noiDung":"Vợt đánh rất đầm tay, đập cầu uy lực, chính hãng 100%!","ngayPhanHoi":{"$date":"2026-11-01T01:20:33Z"},"danhGia":5,"khachHang":{"$oid":"6aeef73504c66f8f737da9c1"},"sanPham":{"$oid":"6aeef73504c66f8f737da9c7"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737daaf6"},"noiDung":"Giao hàng nhanh, vợt rất đẹp và vừa tay.","ngayPhanHoi":{"$date":"2026-11-01T01:20:33Z"},"danhGia":5,"khachHang":{"$oid":"6aeef73504c66f8f737da9c2"},"sanPham":{"$oid":"6aeef73504c66f8f737da9c8"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737daaf7"},"noiDung":"Cước căng chuẩn số kg, đóng gói cẩn thận.","ngayPhanHoi":{"$date":"2026-11-01T01:20:33Z"},"danhGia":4,"khachHang":{"$oid":"6aeef73504c66f8f737da9c1"},"sanPham":{"$oid":"6aeef73504c66f8f737da9ce"}}
+]

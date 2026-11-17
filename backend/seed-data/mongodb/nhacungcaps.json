@@ -1,0 +1,7 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da94d"},"tenNhaCungCap":"Công ty TNHH Thể thao Đức Phát","diaChi":"25 Hoàng Hoa Thám, Q.Tân Bình, TP.HCM","soDienThoai":"0905123456","email":"sales@ducphat.vn"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da94e"},"tenNhaCungCap":"Công ty TNHH Cầu Lông Sunrise Việt Nam","diaChi":"22 Nguyễn Văn Trỗi, Q.Phú Nhuận, TP.HCM","soDienThoai":"0908789123","email":"info@sunrisevn.com"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da94f"},"tenNhaCungCap":"Công ty TNHH Thể thao Đại Hưng","diaChi":"19 Nguyễn Hữu Cảnh, Q.Bình Thạnh, TP.HCM","soDienThoai":"0903332121","email":"contact@daihung.vn"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da950"},"tenNhaCungCap":"Công ty TNHH SportPro Việt Nam","diaChi":"88 Trần Hưng Đạo, Q.1, TP.HCM","soDienThoai":"0918234567","email":"support@sportpro.vn"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da951"},"tenNhaCungCap":"Công ty TNHH Thể thao Phúc Gia","diaChi":"12 Cầu Giấy, Hà Nội","soDienThoai":"0934556677","email":"info@phucgiasport.vn"}
+]

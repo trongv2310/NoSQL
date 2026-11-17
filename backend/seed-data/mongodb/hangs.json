@@ -1,0 +1,6 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da957"},"tenHang":"Yonex","quocGia":"Nhật Bản"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da958"},"tenHang":"Lining","quocGia":"Trung Quốc"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da959"},"tenHang":"Victor","quocGia":"Đài Loan"},
+  {"_id":{"$oid":"6aeef73504c66f8f737da95a"},"tenHang":"Mizuno","quocGia":"Nhật Bản"}
+]

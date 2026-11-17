@@ -1,0 +1,6 @@
+[
+  {"_id":{"$oid":"6aeef73504c66f8f737da9b7"},"tenDangNhap":"admin","matKhau":"$2y$10$fJflhWzIK6ynLHuWeKzA9em0ICV8WhsJ6PRjdpkxJA3m1G7kK55Bm","email":"admin@shopcaulong.com","maQuyen":1,"ngayTao":{"$date":"2026-11-01T01:20:33Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9b8"},"tenDangNhap":"nhanvien_banhang","matKhau":"$2y$10$/iJ4JCQbeuPrGT/DucDd0ODKbt8BhaCkn6c3OkFHAoba3EaaSMomu","email":"nhanvien1@shopcaulong.com","maQuyen":2,"ngayTao":{"$date":"2026-11-01T01:20:33Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9b9"},"tenDangNhap":"nguyenvana","matKhau":"$2y$10$WEmoCAdBF4w695cSGWiFI.9lOEJoKKJRn1qXx0O2UO4o0XaIYbQPu","email":"nguyenvana@gmail.com","maQuyen":3,"ngayTao":{"$date":"2026-11-01T01:20:33Z"}},
+  {"_id":{"$oid":"6aeef73504c66f8f737da9ba"},"tenDangNhap":"tranthib","matKhau":"$2y$10$CsjaQTGowlQ5NP/Fvzuh0ODUpgZBwCkcgZfnYsHzKLrrG/OeIsGYS","email":"tranthib@gmail.com","maQuyen":3,"ngayTao":{"$date":"2026-11-01T01:20:33Z"}}
+]
