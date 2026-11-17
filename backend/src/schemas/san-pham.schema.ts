@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
+import { thuocTinhTuThongSo, ThuocTinh } from '../catalog/thuoc-tinh';
 
 @Schema({ collection: 'sanphams' })
 export class SanPham {
@@ -79,9 +80,52 @@ export class ChiTietSanPham {
 
   @Prop({ type: ThongSoVotSchema })
   thongSo?: ThongSoVot;
+
+  /**
+   * Attribute pattern: `thongSo` đọc thành cặp { k, v } dạng số để MongoDB lọc và đánh index được (xem catalog/thuoc-tinh.ts).
+   * KHÔNG ghi tay: hook bên dưới tự tính lại mỗi khi `thongSo` được tạo, thay hoặc xoá. Dữ liệu cũ thì chạy `npm run db:chuan-hoa-thong-so`.
+   */
+  @Prop({
+    type: [{ _id: false, k: { type: String, required: true }, v: { type: MongooseSchema.Types.Mixed, required: true } }],
+    default: undefined,
+  })
+  thuocTinh?: ThuocTinh[];
 }
 export type ChiTietSanPhamDocument = HydratedDocument<ChiTietSanPham>;
 export const ChiTietSanPhamSchema = SchemaFactory.createForClass(ChiTietSanPham);
+/** Một index cho mọi thuộc tính: lọc `{ thuocTinh: { $elemMatch: { k, v } } }` dùng được cả hai cận (k bằng, v trong khoảng). */
+ChiTietSanPhamSchema.index({ 'thuocTinh.k': 1, 'thuocTinh.v': 1 }, { name: 'thuoc_tinh' });
+
+/** Tạo mới / insertMany / save: tính `thuocTinh` từ `thongSo` (không có thông số đọc được thì bỏ hẳn trường). */
+ChiTietSanPhamSchema.pre('validate', function () {
+  if (this.isNew || this.isModified('thongSo')) {
+    const tt = thuocTinhTuThongSo(this.thongSo as ThongSoVot | undefined);
+    this.set('thuocTinh', tt.length ? tt : undefined);
+  }
+});
+
+/** Cập nhật bằng truy vấn: đặt/xoá `thongSo` thì đặt/xoá `thuocTinh` trong CÙNG lệnh, nên hai trường không bao giờ lệch nhau. */
+ChiTietSanPhamSchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate'], function () {
+  const u = this.getUpdate() as Record<string, any> | null;
+  if (!u || Array.isArray(u)) return;
+  const set: Record<string, any> = { ...u.$set };
+  if ('thongSo' in u) {
+    set.thongSo = u.thongSo; // cập nhật không có toán tử: Mongoose coi các khoá ở ngoài như $set
+    delete u.thongSo;
+  }
+  if (Object.keys(set).some((k) => k.startsWith('thongSo.'))) {
+    throw new Error('Không sửa lẻ thongSo.<trường>: hãy đặt lại cả thongSo để thuocTinh được tính lại cùng lúc.');
+  }
+  if ('thongSo' in set) {
+    const tt = thuocTinhTuThongSo(set.thongSo);
+    if (tt.length) set.thuocTinh = tt;
+    else u.$unset = { ...u.$unset, thuocTinh: '' };
+    u.$set = set;
+  } else if (u.$unset && 'thongSo' in u.$unset) {
+    u.$unset.thuocTinh = '';
+  }
+  this.setUpdate(u);
+});
 
 @Schema({ collection: 'lichsuthaydoigias' })
 export class LichSuThayDoiGia {

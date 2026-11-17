@@ -26,6 +26,7 @@
     "data:export": "nest build && node dist/seed/xuat-du-lieu.js",
     "db:setup": "nest build && node dist/csdl/thiet-lap.js",
     "db:setup:dry": "nest build && node dist/csdl/thiet-lap.js --dry-run",
+    "db:chuan-hoa-thong-so": "nest build && node dist/csdl/chuan-hoa-thong-so.js",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

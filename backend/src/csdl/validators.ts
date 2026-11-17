@@ -1,3 +1,4 @@
+import { KHOA_THUOC_TINH } from '../catalog/thuoc-tinh';
 import { TRANG_THAI } from '../schemas/don-hang.schema';
 import { Quyen } from '../schemas/tai-khoan.schema';
 
@@ -61,7 +62,9 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
   },
 
   chitietsanphams: {
-    moTa: 'Biến thể phải thuộc một sản phẩm, SKU 1–50 ký tự, tồn kho là số nguyên không âm, giá bán không âm, thông số vợt là chuỗi.',
+    moTa:
+      'Biến thể phải thuộc một sản phẩm, SKU 1–50 ký tự, tồn kho là số nguyên không âm, giá bán không âm, thông số vợt là chuỗi, ' +
+      'thuocTinh chỉ gồm khoá đã định nghĩa.',
     validator: {
       $jsonSchema: {
         bsonType: 'object',
@@ -83,6 +86,20 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
               doCung: chuoi(),
               chieuDai: chuoi(),
               sucCang: chuoi(),
+            },
+          },
+          // Attribute pattern: chỉ nhận khoá đã định nghĩa, giá trị là số (riêng loiChoi là chuỗi).
+          thuocTinh: {
+            bsonType: 'array',
+            maxItems: 20,
+            items: {
+              bsonType: 'object',
+              required: ['k', 'v'],
+              additionalProperties: false,
+              properties: {
+                k: { enum: [...KHOA_THUOC_TINH] },
+                v: { bsonType: ['number', 'string'] },
+              },
             },
           },
         },

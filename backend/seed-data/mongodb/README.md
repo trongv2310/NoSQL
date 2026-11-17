@@ -9,7 +9,7 @@ mỗi lần chạy sinh ObjectId mới), bộ này là bản chụp cố định
 | Collection | Số tài liệu | Ghi chú |
 |---|---:|---|
 | `sanphams` | 48 | 27 vợt (đủ độ cân bằng, độ cứng, trọng lượng), 10 giày, 6 trang phục, 5 phụ kiện |
-| `chitietsanphams` | 103 | biến thể (màu/size), tồn kho, thông số vợt |
+| `chitietsanphams` | 103 | biến thể (màu/size), tồn kho, thông số vợt (`thongSo` chuỗi + `thuocTinh` số để lọc) |
 | `loaisanphams`, `hangs`, `nhacungcaps`, `mausacs`, `sizes` | 4 · 4 · 5 · 10 · 26 | danh mục, hãng (Yonex, Li-Ning, Victor, Mizuno) |
 | `khuyenmais` | 8 | chương trình khuyến mãi (xem lưu ý hạn dưới đây) |
 | `taikhoans`, `khachhangs` | 4 · 4 | 1 quản trị, 1 nhân viên, 2 khách |

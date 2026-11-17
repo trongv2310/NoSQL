@@ -8,6 +8,8 @@ Thư mục này gồm hướng dẫn vận hành và các file truy vấn mẫu 
 | `src/csdl/thiet-lap.ts` | Script `db:setup`: áp validator, tạo index còn thiếu |
 | `src/csdl/so-sanh-index.ts` | So index khai báo trong schema Mongoose với index đang có trong CSDL |
 | `src/csdl/moi-truong.ts` | Đọc phiên bản MongoDB, có replica set hay không (in lúc API khởi động) |
+| `src/catalog/thuoc-tinh.ts` | Attribute pattern: đọc `thongSo` (chuỗi) thành `thuocTinh` [{k, v}] dạng số; dựng điều kiện lọc `$elemMatch` |
+| `src/csdl/chuan-hoa-thong-so.ts` | Script `db:chuan-hoa-thong-so`: tính lại `thuocTinh` cho dữ liệu cũ |
 | `db/truy-van-mau/*.mongodb.js` | Truy vấn mẫu chạy bằng `mongosh` hoặc Compass, dùng để minh hoạ trong báo cáo |
 
 Index chỉ khai báo ở **một chỗ**: trong các file `src/schemas/*.schema.ts` (`@Prop({ index: true })` hoặc `XxxSchema.index(...)`).
@@ -19,13 +21,22 @@ Index chỉ khai báo ở **một chỗ**: trong các file `src/schemas/*.schema
 cd backend
 npm run db:setup:dry      # chỉ kiểm tra: in số tài liệu vi phạm, index thiếu/thừa; không ghi gì
 npm run db:setup          # áp validator + tạo index còn thiếu (chạy lại nhiều lần không sao)
+npm run db:chuan-hoa-thong-so -- --dry-run   # bao nhiêu biến thể có thuocTinh lệch với thongSo
+npm run db:chuan-hoa-thong-so                # ghi phần lệch (bản ghi đã đúng không bị đụng tới)
 ```
+
+`thuocTinh` được hook của schema `ChiTietSanPham` tự tính mỗi khi `thongSo` được tạo, thay hoặc xoá qua Mongoose.
+Chỉ cần chạy `db:chuan-hoa-thong-so` cho dữ liệu có từ trước, hoặc dữ liệu bị sửa thẳng bằng mongosh/Compass.
+Bộ `seed-data` đã có sẵn `thuocTinh`.
+
+Kiểm thử trên MongoDB thật (tạo CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog/bo-loc-mongo.spec.ts`.
 
 - Script dùng `MONGODB_URI` trong `.env`. Ghi lên MongoDB không phải của máy mình thì phải thêm `-- --force`.
 - Collection nào còn tài liệu vi phạm thì validator **không** được áp. Script in vài `_id` để sửa dữ liệu, rồi kết thúc với mã lỗi 1.
 - Sau khi gộp nhánh này, chạy thêm `npm run db:setup -- --xoa-index-thua` một lần để xoá `donhangs.khachHang_1`.
   Index này đã được thay bằng index kép `don_cua_khach`.
 - Thứ tự cho máy mới: `npm run data:import`, rồi `npm run db:setup`.
+- Máy đã có dữ liệu từ trước: `npm run db:setup -- --xoa-index-thua`, rồi `npm run db:chuan-hoa-thong-so`.
 
 ## Bật replica set `rs0` (để có transaction)
 

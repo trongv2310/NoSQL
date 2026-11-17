@@ -7,7 +7,8 @@ import { dangGiamGia, giaSauKhuyenMai } from '../common/pricing';
 import { parseObjectId, phanTrang } from '../common/helpers';
 import { locKhuyenMaiDangChay } from './khuyen-mai';
 import { ghepTrangChu, gomThongSoTheoSanPham } from './trang-chu';
-import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, bienTheKhopBoLoc, coBoLocThongSo, gopThongSoBienThe } from './vot-thong-so';
+import { dieuKienThuocTinh } from './thuoc-tinh';
+import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, gopThongSoBienThe } from './vot-thong-so';
 import {
   ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, PhanHoi, SanPham,
 } from '../schemas';
@@ -82,7 +83,18 @@ export class CatalogService {
     return new Map(r.map((x) => [String(x._id), x.t]));
   }
 
-  private loc(ds: any[], q: Record<string, any>, tonKho: Map<string, number>, thongSoTheoSp: Map<string, any[]> = new Map()): any[] {
+  /**
+   * Sản phẩm có ÍT NHẤT MỘT phiên bản thoả mọi nhóm thông số đã chọn, lọc ngay trong MongoDB trên `chitietsanphams.thuocTinh`
+   * (index `thuoc_tinh`): $match theo điều kiện $elemMatch rồi $group theo sanPham. Không chọn nhóm nào → null (không lọc).
+   */
+  async sanPhamKhopThongSo(q: Record<string, any>): Promise<Set<string> | null> {
+    const dk = dieuKienThuocTinh(boLocThongSoTuQuery(q));
+    if (!dk) return null;
+    const r = await this.chiTietModel.aggregate<{ _id: any }>([{ $match: dk }, { $group: { _id: '$sanPham' } }]);
+    return new Set(r.map((x) => String(x._id)));
+  }
+
+  private loc(ds: any[], q: Record<string, any>, tonKho: Map<string, number>, spKhopThongSo: Set<string> | null = null): any[] {
     let r = ds;
     const loai = q.loai || q.maLoai;
     if (loai) {
@@ -122,10 +134,9 @@ export class CatalogService {
     if (den !== null && den > 0) {
       r = r.filter((sp) => giaSauKhuyenMai(sp.giaGoc, sp.khuyenMai) <= den);
     }
-    // Lọc theo thông số vợt: một sản phẩm khớp khi CÓ MỘT phiên bản thỏa mọi nhóm đã chọn (không lấy phiên bản đầu đại diện cho cả sản phẩm).
-    const boLocThongSo = boLocThongSoTuQuery(q);
-    if (coBoLocThongSo(boLocThongSo)) {
-      r = r.filter((sp) => (thongSoTheoSp.get(String(sp._id)) ?? []).some((ts) => bienTheKhopBoLoc(ts, boLocThongSo)));
+    // Lọc theo thông số vợt: tập sản phẩm đã được MongoDB tính sẵn (sanPhamKhopThongSo).
+    if (spKhopThongSo) {
+      r = r.filter((sp) => spKhopThongSo.has(String(sp._id)));
     }
     const hangIds = mangTuQuery(q.hangs ?? q['hangs[]']);
     if (hangIds.length) {
@@ -173,15 +184,16 @@ export class CatalogService {
   }
 
   async danhSach(q: Record<string, any>) {
-    const [all, tonKho, dsHang, dsLoai, bienThes] = await Promise.all([
+    const [all, tonKho, dsHang, dsLoai, bienThes, spKhopThongSo] = await Promise.all([
       this.tatCaSanPham(),
       this.tonKhoTheoSanPham(),
       this.hangModel.find().sort({ tenHang: 1 }).lean(),
       this.loaiModel.find().sort({ _id: 1 }).lean(),
       this.chiTietModel.find({ thongSo: { $ne: null } }, { sanPham: 1, thongSo: 1 }).sort({ _id: 1 }).lean(),
+      this.sanPhamKhopThongSo(q),
     ]);
     const thongSoTheoSp = gomThongSoTheoSanPham(bienThes);
-    const khop = this.loc(all, q, tonKho, thongSoTheoSp);
+    const khop = this.loc(all, q, tonKho, spKhopThongSo);
     const trang = phanTrang(khop, Number(q.page) || 1, 12);
     const [tu, den] = this.khoangGia(q);
     let hangDangChon = mangTuQuery(q.hangs ?? q['hangs[]']);
