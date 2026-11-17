@@ -24,6 +24,8 @@
     "data:import": "nest build && node dist/seed/nhap-du-lieu.js",
     "data:import:reset": "nest build && node dist/seed/nhap-du-lieu.js --reset",
     "data:export": "nest build && node dist/seed/xuat-du-lieu.js",
+    "db:setup": "nest build && node dist/csdl/thiet-lap.js",
+    "db:setup:dry": "nest build && node dist/csdl/thiet-lap.js --dry-run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

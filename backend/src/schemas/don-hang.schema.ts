@@ -39,7 +39,8 @@ export class DonHang {
   @Prop({ default: 0 }) tongTien: number;
   @Prop({ default: 0 }) tongTienSauGiam: number;
   @Prop({ default: 0 }) tienGiam: number;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang', index: true }) khachHang?: Types.ObjectId;
+  /** Không đánh index đơn ở đây: index kép `don_cua_khach` bên dưới có khachHang ở đầu nên đã phục vụ mọi truy vấn theo khách. */
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang' }) khachHang?: Types.ObjectId;
   /** Tên người nhận hàng nhập ở bước thanh toán (có thể khác chủ tài khoản). Đơn cũ không có trường này. */
   @Prop({ maxlength: 100 }) hoTenNhan?: string;
   @Prop({ maxlength: 255 }) diaChiGiaoHang?: string;
@@ -49,6 +50,11 @@ export class DonHang {
 }
 export type DonHangDocument = HydratedDocument<DonHang>;
 export const DonHangSchema = SchemaFactory.createForClass(DonHang);
+/**
+ * "Đơn của tôi": find({ khachHang }).sort({ ngayDat: -1, soDonHang: -1 }). Index kép theo đúng thứ tự (bằng trước, sắp sau) cho phép
+ * MongoDB đọc thẳng theo thứ tự index, bỏ được bước SORT trong bộ nhớ. Đo trước/sau ở db/truy-van-mau/02-index-don-cua-khach.mongodb.js.
+ */
+DonHangSchema.index({ khachHang: 1, ngayDat: -1, soDonHang: -1 }, { name: 'don_cua_khach' });
 
 @Schema({ collection: 'giohangs' })
 export class GioHang {

@@ -107,7 +107,7 @@ export class PhanHoi {
    */
   @Prop({ default: false, index: true }) daXacMinh: boolean;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'KhachHang' }) khachHang?: Types.ObjectId;
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'SanPham', index: true }) sanPham: Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'SanPham', required: true, index: true }) sanPham: Types.ObjectId;
 }
 export type PhanHoiDocument = HydratedDocument<PhanHoi>;
 export const PhanHoiSchema = SchemaFactory.createForClass(PhanHoi);
