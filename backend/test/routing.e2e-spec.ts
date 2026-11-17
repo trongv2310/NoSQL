@@ -108,6 +108,26 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
     expect(JSON.stringify(res.body.message)).toContain('Số điện thoại phải bắt đầu bằng 0');
   });
 
+  it('hồ sơ người chơi: cần đăng nhập (401) và từ chối giá trị ngoài danh sách (400) trước khi chạm DB', async () => {
+    const http = app.getHttpServer();
+    await request(http).get('/api/auth/ho-so-choi').expect(401);
+    await request(http).put('/api/auth/ho-so-choi').send({ trinhDo: 'deu' }).expect(401);
+    await request(http).delete('/api/auth/ho-so-choi').expect(401);
+    const sai = [
+      { trinhDo: 'sieu-cap' },
+      { trinhDo: 'phong-trao' },
+      { noiDung: ['don', 'doi-nam-nu'] },
+      { noiDung: 'don' },
+      { chanThuong: ['dau-goi'] },
+      { soBuoiMoiTuan: 15 },
+      { soBuoiMoiTuan: 2.5 },
+      { loiChoi: 'phong-thu' },
+    ];
+    for (const body of sai) {
+      await request(http).put('/api/auth/ho-so-choi').set('Cookie', `token=${tokenKhach}`).send(body).expect(400);
+    }
+  });
+
   it('thêm giỏ hàng với id không phải ObjectId bị từ chối trước khi chạm DB', async () => {
     await request(app.getHttpServer())
       .post('/api/gio-hang')

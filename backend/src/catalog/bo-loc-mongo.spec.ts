@@ -23,7 +23,7 @@ describe.skipIf(!URI)('bộ lọc thông số trên MongoDB thật', () => {
   beforeAll(async () => {
     // Tắt tự tạo collection/index để collection được tạo kèm validator ngay dưới đây.
     conn = await mongoose.createConnection(URI!, { dbName: TEN_DB, autoCreate: false, autoIndex: false }).asPromise();
-    M = conn.model('ChiTietSanPham', ChiTietSanPhamSchema);
+    M = conn.model('ChiTietSanPham', ChiTietSanPhamSchema) as unknown as Model<any>;
     await conn.createCollection('chitietsanphams', { validator: VALIDATORS.chitietsanphams.validator, validationLevel: 'strict', validationAction: 'error' });
     await M.syncIndexes();
     // Nhập qua model để hook tính thuocTinh, đúng như đường ghi của ứng dụng.

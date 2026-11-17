@@ -1,4 +1,5 @@
 import { KHOA_THUOC_TINH } from '../catalog/thuoc-tinh';
+import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TAY_THUAN, TOI_DA_BUOI_MOI_TUAN, TRINH_DO } from '../common/ho-so-choi';
 import { TRANG_THAI } from '../schemas/don-hang.schema';
 import { Quyen } from '../schemas/tai-khoan.schema';
 
@@ -170,7 +171,7 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
   },
 
   khachhangs: {
-    moTa: 'Họ tên 1–100 ký tự; liên kết tài khoản (nếu có) là ObjectId.',
+    moTa: 'Họ tên 1–100 ký tự; liên kết tài khoản (nếu có) là ObjectId; hồ sơ người chơi chỉ nhận giá trị trong danh sách, mảng không trùng phần tử.',
     validator: {
       $jsonSchema: {
         bsonType: 'object',
@@ -182,6 +183,19 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           diaChi: chuoi(255),
           taiKhoan: ID_HOAC_NULL,
           ngayTao: NGAY,
+          hoSoChoi: {
+            bsonType: 'object',
+            additionalProperties: false,
+            properties: {
+              trinhDo: { enum: [...TRINH_DO] },
+              noiDung: { bsonType: 'array', uniqueItems: true, minItems: 1, items: { enum: [...NOI_DUNG] } },
+              loiChoi: { enum: [...LOI_CHOI] },
+              tayThuan: { enum: [...TAY_THUAN] },
+              chanThuong: { bsonType: 'array', uniqueItems: true, minItems: 1, items: { enum: [...CHAN_THUONG] } },
+              soBuoiMoiTuan: { bsonType: 'number', minimum: 0, maximum: TOI_DA_BUOI_MOI_TUAN, multipleOf: 1 },
+              capNhatLuc: NGAY,
+            },
+          },
         },
       },
     },

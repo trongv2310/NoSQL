@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Post, Put, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { CurrentUser } from './auth.decorators';
-import { DangKyDto, DangNhapDto, DoiMatKhauDto } from './auth.dto';
+import { DangKyDto, DangNhapDto, DoiMatKhauDto, HoSoChoiDto } from './auth.dto';
 import { CanDangNhap, COOKIE_TOKEN } from './auth.guards';
 import { AuthService } from './auth.service';
 import type { NguoiDung } from './auth.types';
@@ -58,6 +58,26 @@ export class AuthController {
   @CanDangNhap()
   thongTin(@CurrentUser() user: NguoiDung) {
     return this.auth.thongTinKhachHang(user.id);
+  }
+
+  /** Hồ sơ người chơi: chỉ chủ tài khoản đọc/ghi được (có thông tin chấn thương). */
+  @Get('ho-so-choi')
+  @CanDangNhap()
+  hoSoChoi(@CurrentUser() user: NguoiDung) {
+    return this.auth.hoSoChoi(user.id);
+  }
+
+  @Put('ho-so-choi')
+  @CanDangNhap()
+  async capNhatHoSoChoi(@CurrentUser() user: NguoiDung, @Body() dto: HoSoChoiDto) {
+    return { ...(await this.auth.capNhatHoSoChoi(user.id, dto)), message: 'Đã lưu hồ sơ người chơi.' };
+  }
+
+  @Delete('ho-so-choi')
+  @CanDangNhap()
+  async xoaHoSoChoi(@CurrentUser() user: NguoiDung) {
+    await this.auth.xoaHoSoChoi(user.id);
+    return { hoSoChoi: null, message: 'Đã xoá hồ sơ người chơi.' };
   }
 
   @Post('doi-mat-khau')

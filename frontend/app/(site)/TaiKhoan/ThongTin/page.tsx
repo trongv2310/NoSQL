@@ -40,6 +40,7 @@ export default function ThongTinPage() {
           </section>
           <aside className="pf-side">
             <Link href="/DonHang/Index" className="pf-link sf-reveal"><span><i className="fa-solid fa-box-open" aria-hidden="true" /></span><div><b>Đơn hàng của tôi</b><small>Theo dõi trạng thái và lịch sử mua hàng</small></div><i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
+            <Link href="/TaiKhoan/HoSoChoi" className="pf-link sf-reveal"><span><i className="fa-solid fa-person-running" aria-hidden="true" /></span><div><b>Hồ sơ người chơi</b><small>Trình độ, lối chơi, cách bạn hay đánh</small></div><i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
             <Link href="/TaiKhoan/DoiMatKhau" className="pf-link sf-reveal"><span><i className="fa-solid fa-key" aria-hidden="true" /></span><div><b>Đổi mật khẩu</b><small>Giữ tài khoản của bạn an toàn</small></div><i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
             <Link href="/Home/ViewCart" className="pf-link sf-reveal"><span><i className="fa-solid fa-cart-shopping" aria-hidden="true" /></span><div><b>Giỏ hàng</b><small>Xem sản phẩm bạn đã chọn</small></div><i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
           </aside>

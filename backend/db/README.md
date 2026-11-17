@@ -10,6 +10,7 @@ Thư mục này gồm hướng dẫn vận hành và các file truy vấn mẫu 
 | `src/csdl/moi-truong.ts` | Đọc phiên bản MongoDB, có replica set hay không (in lúc API khởi động) |
 | `src/catalog/thuoc-tinh.ts` | Attribute pattern: đọc `thongSo` (chuỗi) thành `thuocTinh` [{k, v}] dạng số; dựng điều kiện lọc `$elemMatch` |
 | `src/csdl/chuan-hoa-thong-so.ts` | Script `db:chuan-hoa-thong-so`: tính lại `thuocTinh` cho dữ liệu cũ |
+| `src/common/ho-so-choi.ts` | Hồ sơ người chơi nhúng trong `khachhangs`: danh sách giá trị, lệnh `$set`/`$unset` trường con (API `GET/PUT/DELETE /auth/ho-so-choi`) |
 | `db/truy-van-mau/*.mongodb.js` | Truy vấn mẫu chạy bằng `mongosh` hoặc Compass, dùng để minh hoạ trong báo cáo |
 
 Index chỉ khai báo ở **một chỗ**: trong các file `src/schemas/*.schema.ts` (`@Prop({ index: true })` hoặc `XxxSchema.index(...)`).
@@ -29,7 +30,7 @@ npm run db:chuan-hoa-thong-so                # ghi phần lệch (bản ghi đã
 Chỉ cần chạy `db:chuan-hoa-thong-so` cho dữ liệu có từ trước, hoặc dữ liệu bị sửa thẳng bằng mongosh/Compass.
 Bộ `seed-data` đã có sẵn `thuocTinh`.
 
-Kiểm thử trên MongoDB thật (tạo CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog/bo-loc-mongo.spec.ts`.
+Kiểm thử trên MongoDB thật (mỗi file tạo một CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog/bo-loc-mongo.spec.ts src/common/ho-so-choi-mongo.spec.ts`.
 
 - Script dùng `MONGODB_URI` trong `.env`. Ghi lên MongoDB không phải của máy mình thì phải thêm `-- --force`.
 - Collection nào còn tài liệu vi phạm thì validator **không** được áp. Script in vài `_id` để sửa dữ liệu, rồi kết thúc với mã lỗi 1.
