@@ -4,9 +4,18 @@ Thư mục này gồm hướng dẫn vận hành và các file truy vấn mẫu 
 
 | File | Vai trò |
 |---|---|
-| `src/csdl/validators.ts` | Validator `$jsonSchema` (+ `$expr`) cho 6 collection chính |
-| `src/csdl/thiet-lap.ts` | Script `db:setup`: áp validator, tạo index còn thiếu |
-| `src/csdl/so-sanh-index.ts` | So index khai báo trong schema Mongoose với index đang có trong CSDL |
+| `src/csdl/validators.ts` | Validator `$jsonSchema` (+ `$expr` ràng buộc giữa các trường) cho mọi collection thường |
+| `src/csdl/thiet-lap.ts` | Script `db:setup`: tạo time series collection, áp validator, tạo index còn thiếu |
+| `src/csdl/so-sanh-index.ts` | So index khai báo trong schema Mongoose với index đang có trong CSDL (hiểu cả text index) |
+| `src/csdl/giao-dich.ts` | Chạy một nhóm lệnh trong transaction khi có replica set, không thì chạy thẳng để bên gọi tự bù trừ |
+| `src/don-hang/order.service.ts` | Đặt hàng / huỷ đơn trong một transaction (trừ kho + số đơn + tạo đơn; đổi trạng thái + hoàn kho) |
+| `src/catalog/danh-sach-pipeline.ts` | Trang danh sách bằng một aggregation: `$lookup`, giá sau khuyến mãi, `$facet` (trang, tổng, đếm theo hãng), `$bucket` phân bố giá |
+| `src/catalog/tim-kiem.ts` | Tìm kiếm: text index có trọng số → tiền tố trên mảng từ không dấu → gần đúng bằng bộ ba ký tự |
+| `src/phan-hoi/tong-hop-danh-gia.ts` | Computed pattern: `sanphams.danhGiaTongHop` cộng bằng update pipeline, đối soát bằng `$merge` |
+| `src/common/gioi-han-tan-suat.ts` | Chặn đăng nhập sai: bộ đếm upsert + `$inc` theo cửa sổ 15 phút, TTL index tự xoá |
+| `src/schemas/luot-xem.schema.ts` | Time series `luotxems` (lượt xem sản phẩm), tự xoá sau 180 ngày |
+| `src/su-kien/` | Change stream → SSE: thông báo đơn mới / sắp hết hàng cho admin, resume token trong `theodoisukiens` |
+| `db/bat-replica-set.ps1` | Bật/tắt replica set `rs0` cho dịch vụ MongoDB trên Windows |
 | `src/csdl/moi-truong.ts` | Đọc phiên bản MongoDB, có replica set hay không (in lúc API khởi động) |
 | `src/catalog/thuoc-tinh.ts` | Attribute pattern: đọc `thongSo` (chuỗi) thành `thuocTinh` [{k, v}] dạng số; dựng điều kiện lọc `$elemMatch` |
 | `src/csdl/chuan-hoa-thong-so.ts` | Script `db:chuan-hoa-thong-so`: tính lại `thuocTinh` cho dữ liệu cũ |
@@ -30,14 +39,23 @@ npm run db:setup:dry      # chỉ kiểm tra: in số tài liệu vi phạm, ind
 npm run db:setup          # áp validator + tạo index còn thiếu (chạy lại nhiều lần không sao)
 npm run db:chuan-hoa-thong-so -- --dry-run   # bao nhiêu biến thể có thuocTinh lệch với thongSo
 npm run db:chuan-hoa-thong-so                # ghi phần lệch (bản ghi đã đúng không bị đụng tới)
+npm run db:chuan-hoa-tim-kiem -- --dry-run   # sanphams.timKiem (không dấu, từ, bộ ba ký tự) cho dữ liệu nhập thẳng
+npm run db:chuan-hoa-tim-kiem
+npm run db:tinh-lai-danh-gia -- --dry-run    # đối soát danhGiaTongHop với phanhois (in các sản phẩm lệch)
+npm run db:tinh-lai-danh-gia                 # tính lại bằng $merge
 ```
+
+Máy đã có dữ liệu từ trước khi có các tính năng này: `npm run db:sao-luu`, rồi `npm run db:setup -- --xoa-index-thua`
+(xoá `deletedAt_1` đã được partial index thay), `npm run db:chuan-hoa-tim-kiem`, `npm run db:tinh-lai-danh-gia`.
 
 `thuocTinh` được hook của schema `ChiTietSanPham` tự tính mỗi khi `thongSo` được tạo, thay hoặc xoá qua Mongoose.
 Chỉ cần chạy `db:chuan-hoa-thong-so` cho dữ liệu có từ trước, hoặc dữ liệu bị sửa thẳng bằng mongosh/Compass.
 Bộ `seed-data` đã có sẵn `thuocTinh`.
 
-Kiểm thử trên MongoDB thật (mỗi file tạo một CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog/bo-loc-mongo.spec.ts src/common/ho-so-choi-mongo.spec.ts src/phan-hoi/danh-gia-mongo.spec.ts src/tu-vot src/csdl/validators-mongo.spec.ts`.
-Thêm `MONGO_RS_TEST_URI` (một replica set, ví dụ `mongodb://127.0.0.1:27018/?replicaSet=rs-thu`) để `tu-vot-mongo.spec.ts` chạy cả đường có transaction.
+Kiểm thử trên MongoDB thật (mỗi file tạo một CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog src/common src/phan-hoi src/tu-vot src/csdl src/don-hang src/admin src/su-kien`.
+Các file `src/catalog/*-mongo.spec.ts` và `src/admin/luot-xem-mongo.spec.ts` dùng `TEST_MONGODB_URI` (mặc định 127.0.0.1:27017).
+Thêm `MONGO_RS_TEST_URI` (một replica set, ví dụ `mongodb://127.0.0.1:27018/?replicaSet=rs-thu`) để chạy cả đường có transaction
+(`tu-vot`, `don-hang/dat-hang-mongo`, `phan-hoi/tong-hop-mongo`) và change stream (`su-kien`).
 Replica set thử nghiệm không cần đụng dịch vụ MongoDB đang chạy: `mongod --replSet rs-thu --port 27018 --dbpath <thư mục trống>` rồi `rs.initiate(...)`.
 
 - Script dùng `MONGODB_URI` trong `.env`. Ghi lên MongoDB không phải của máy mình thì phải thêm `-- --force`.
@@ -50,7 +68,22 @@ Replica set thử nghiệm không cần đụng dịch vụ MongoDB đang chạy
 ## Bật replica set `rs0` (để có transaction)
 
 MongoDB chạy một máy (standalone) không có transaction và change stream. Replica set một node vẫn chạy trên đúng một máy, giữ nguyên
-dữ liệu cũ, chỉ bật thêm nhật ký sao chép (oplog). Mỗi thành viên làm **một lần**:
+dữ liệu cũ, chỉ bật thêm nhật ký sao chép (oplog). Mỗi thành viên làm **một lần**.
+
+**Cách nhanh:** mở PowerShell bằng *Run as Administrator* rồi chạy script (tự sao lưu `mongod.cfg` và `.env`, chạy lại không sao):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\db\bat-replica-set.ps1 -ThuKhongGhi   # xem trước, không ghi gì
+powershell -ExecutionPolicy Bypass -File backend\db\bat-replica-set.ps1                # bật rs0
+powershell -ExecutionPolicy Bypass -File backend\db\bat-replica-set.ps1 -HoanTac       # quay lại standalone
+```
+
+Đường dẫn cấu hình mặc định là `F:\MongoDB\bin\mongod.cfg`; máy khác thì thêm `-Cfg "<đường dẫn>"`. Làm tay thì theo các bước dưới.
+
+Khi có replica set, các việc sau chạy trong MỘT transaction (lỗi giữa chừng thì MongoDB huỷ hết): đặt hàng (trừ kho + số đơn + tạo đơn),
+huỷ đơn (đổi trạng thái + hoàn kho), gửi đánh giá (thêm đánh giá + cộng điểm tổng hợp), ghi lần căng và hoàn tất lịch căng.
+Standalone vẫn chạy được: dùng cập nhật nguyên tử có điều kiện và tự bù trừ, chỉ khác là bộ đếm số đơn có thể nhảy số khi lỗi
+(xem `src/don-hang/dat-hang-mongo.spec.ts`, chạy cả hai chế độ).
 
 1. Mở file cấu hình của dịch vụ MongoDB. Đường dẫn nằm trong lệnh khởi động dịch vụ: `sc qc MongoDB` (dòng `BINARY_PATH_NAME`, phần sau `--config`).
    Bản cài mặc định thường là `C:\Program Files\MongoDB\Server\<phiên bản>\bin\mongod.cfg`.

@@ -7,6 +7,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { CongKhaiModule } from './cong-khai/cong-khai.module';
 import { DatabaseModule } from './database/database.module';
 import { DonHangModule } from './don-hang/don-hang.module';
+import { SuKienModule } from './su-kien/su-kien.module';
 import { TuVotModule } from './tu-vot/tu-vot.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { TuVotModule } from './tu-vot/tu-vot.module';
     DonHangModule,
     TuVotModule,
     AdminModule,
+    SuKienModule,
   ],
 })
 export class AppModule {}

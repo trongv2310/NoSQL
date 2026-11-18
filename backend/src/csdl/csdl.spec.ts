@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
 import { ALL_MODELS, TRANG_THAI } from '../schemas';
-import { soSanhIndex } from './so-sanh-index';
+import { IndexKhaiBao, IndexThucTe, soSanhIndex } from './so-sanh-index';
 import { MAU_BCRYPT, VALIDATORS } from './validators';
 
 /** collection → schema Mongoose tương ứng. */
@@ -86,6 +86,14 @@ describe('so sánh index khai báo với CSDL', () => {
       ['ngayXoa_1', ['expireAfterSeconds']],
       ['sku_1', ['unique']],
     ]);
+  });
+
+  it('text index: khoá khai báo đổi về { _fts, _ftsx }, so trọng số (mặc định 1) và ngôn ngữ mặc định', () => {
+    const kb: IndexKhaiBao = [{ 'timKiem.chuoi': 'text', moTa: 'text' }, { name: 'tk', weights: { 'timKiem.chuoi': 10 }, default_language: 'none' }];
+    const tt: IndexThucTe = { name: 'tk', key: { _fts: 'text', _ftsx: 1 }, weights: { moTa: 1, 'timKiem.chuoi': 10 }, default_language: 'none' };
+    expect(soSanhIndex([kb], [tt])).toEqual({ thieu: [], thua: [], lech: [] });
+    expect(soSanhIndex([kb], [{ ...tt, weights: { moTa: 1, 'timKiem.chuoi': 5 } }]).lech[0].khac).toEqual(['weights']);
+    expect(soSanhIndex([kb], [{ ...tt, default_language: 'english' }]).lech[0].khac).toEqual(['default_language']);
   });
 
   it('unique: false trong code và không có cờ trong CSDL là như nhau', () => {

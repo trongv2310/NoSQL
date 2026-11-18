@@ -1,8 +1,25 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { thuocTinhTuThongSo, ThuocTinh } from '../catalog/thuoc-tinh';
+import { dungTruongTimKiem } from '../catalog/tim-kiem';
 import { THE_DANH_GIA } from '../common/danh-gia';
 import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TRINH_DO } from '../common/ho-so-choi';
+
+@Schema({ _id: false })
+export class DanhGiaTongHop {
+  @Prop({ type: Number, default: 0 }) so: number;
+  @Prop({ type: Number, default: 0 }) tong: number;
+  @Prop({ type: Number, default: null }) trungBinh?: number | null;
+}
+export const DanhGiaTongHopSchema = SchemaFactory.createForClass(DanhGiaTongHop);
+
+@Schema({ _id: false })
+export class TimKiem {
+  @Prop({ type: String, required: true }) chuoi: string;
+  @Prop({ type: [String], default: undefined }) tu: string[];
+  @Prop({ type: [String], default: undefined }) baKyTu: string[];
+}
+export const TimKiemSchema = SchemaFactory.createForClass(TimKiem);
 
 @Schema({ collection: 'sanphams' })
 export class SanPham {
@@ -39,12 +56,53 @@ export class SanPham {
   @Prop({ default: () => new Date(), index: true })
   ngayTao: Date;
 
-  /** Xóa mềm: khác null nghĩa là sản phẩm đã ngừng kinh doanh. */
-  @Prop({ type: Date, default: null, index: true })
+  /**
+   * Xóa mềm: khác null nghĩa là sản phẩm đã ngừng kinh doanh. Không đánh index riêng trường này: index MỘT PHẦN `dang_ban_moi_nhat`
+   * bên dưới chỉ chứa sản phẩm chưa xóa, đúng tập mà cửa hàng luôn đọc.
+   */
+  @Prop({ type: Date, default: null })
   deletedAt?: Date | null;
+
+  /** Computed pattern: tổng hợp đánh giá công khai thật (xem phan-hoi/tong-hop-danh-gia.ts). */
+  @Prop({ type: DanhGiaTongHopSchema, default: undefined })
+  danhGiaTongHop?: DanhGiaTongHop;
+
+  /** Tên đã chuẩn hoá cho tìm kiếm (không dấu, tách từ, bộ ba ký tự). Hook bên dưới tự dựng; xem catalog/tim-kiem.ts. */
+  @Prop({ type: TimKiemSchema, default: undefined })
+  timKiem?: TimKiem;
 }
 export type SanPhamDocument = HydratedDocument<SanPham>;
 export const SanPhamSchema = SchemaFactory.createForClass(SanPham);
+/**
+ * Partial index: chỉ sản phẩm đang bán (deletedAt null), theo đúng thứ tự trang danh sách dùng (mới nhất trước).
+ * Truy vấn `{ deletedAt: null }` + sort này đọc thẳng index; sản phẩm đã xóa không chiếm chỗ trong index.
+ */
+SanPhamSchema.index({ ngayTao: -1, _id: -1 }, { name: 'dang_ban_moi_nhat', partialFilterExpression: { deletedAt: null } });
+
+/**
+ * Tìm kiếm (catalog/tim-kiem.ts). Cả ba index đều MỘT PHẦN như trên: sản phẩm đã xoá không nằm trong index, truy vấn luôn kèm
+ * `deletedAt: null`. Mỗi collection chỉ được MỘT text index; default_language 'none' vì MongoDB không có bộ tách gốc từ tiếng Việt
+ * (và không bỏ "từ dừng" của tiếng Anh như "the", "a").
+ */
+SanPhamSchema.index(
+  { 'timKiem.chuoi': 'text', moTa: 'text' },
+  { name: 'tim_kiem_toan_van', weights: { 'timKiem.chuoi': 10, moTa: 1 }, default_language: 'none', partialFilterExpression: { deletedAt: null } },
+);
+SanPhamSchema.index({ 'timKiem.tu': 1 }, { name: 'tu_khoa_tien_to', partialFilterExpression: { deletedAt: null } });
+SanPhamSchema.index({ 'timKiem.baKyTu': 1 }, { name: 'ba_ky_tu', partialFilterExpression: { deletedAt: null } });
+
+/** Tạo mới / insertMany / save: dựng `timKiem` từ tên. */
+SanPhamSchema.pre('validate', function () {
+  if (this.isNew || this.isModified('tenSanPham')) this.set('timKiem', dungTruongTimKiem(this.tenSanPham));
+});
+
+/** Đổi tên bằng truy vấn cập nhật: đặt `timKiem` trong CÙNG lệnh nên tên và trường tìm kiếm không lệch nhau. */
+SanPhamSchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate'], function () {
+  const u = this.getUpdate() as Record<string, any> | null;
+  if (!u || Array.isArray(u)) return; // update pipeline (vd. cộng điểm đánh giá) không đụng tới tên
+  const ten = u.$set && 'tenSanPham' in u.$set ? u.$set.tenSanPham : 'tenSanPham' in u ? u.tenSanPham : undefined;
+  if (ten !== undefined) u.$set = { ...u.$set, timKiem: dungTruongTimKiem(ten) };
+});
 
 @Schema({ _id: false })
 export class ThongSoVot {
@@ -131,7 +189,7 @@ ChiTietSanPhamSchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate'], functi
 
 @Schema({ collection: 'lichsuthaydoigias' })
 export class LichSuThayDoiGia {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham', index: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham', required: true, index: true })
   chiTiet: Types.ObjectId;
 
   @Prop({ type: Number }) giaCu?: number;

@@ -44,10 +44,13 @@ export class TinTuc {
   @Prop({ default: 1 }) thuTu: number;
   @Prop({ default: 0 }) luotXem: number;
   @Prop({ default: () => new Date(), index: true }) ngayDang: Date;
-  @Prop({ type: Date, default: null, index: true }) deletedAt?: Date | null;
+  /** Xóa mềm; không index riêng, xem partial index `tin_chua_xoa_moi_nhat`. */
+  @Prop({ type: Date, default: null }) deletedAt?: Date | null;
 }
 export type TinTucDocument = HydratedDocument<TinTuc>;
 export const TinTucSchema = SchemaFactory.createForClass(TinTuc);
+/** Partial index: chỉ tin chưa xóa mềm, sắp mới nhất trước (bảng tin công khai và trang quản trị đều đọc theo thứ tự này). */
+TinTucSchema.index({ ngayDang: -1, _id: -1 }, { name: 'tin_chua_xoa_moi_nhat', partialFilterExpression: { deletedAt: null } });
 
 @Schema({ collection: 'cauhinhs', timestamps: true })
 export class CauHinh {

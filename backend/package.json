@@ -27,6 +27,8 @@
     "db:setup": "nest build && node dist/csdl/thiet-lap.js",
     "db:setup:dry": "nest build && node dist/csdl/thiet-lap.js --dry-run",
     "db:chuan-hoa-thong-so": "nest build && node dist/csdl/chuan-hoa-thong-so.js",
+    "db:tinh-lai-danh-gia": "nest build && node dist/csdl/tinh-lai-danh-gia.js",
+    "db:chuan-hoa-tim-kiem": "nest build && node dist/csdl/chuan-hoa-tim-kiem.js",
     "db:du-lieu-mau": "nest build && node dist/csdl/sinh-du-lieu-mau.js",
     "db:sao-luu": "nest build && node dist/csdl/sao-luu.js",
     "db:phuc-hoi": "nest build && node dist/csdl/phuc-hoi.js",

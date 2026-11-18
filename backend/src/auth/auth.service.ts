@@ -1,11 +1,21 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Optional, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
 import { lenhCapNhatHoSo } from '../common/ho-so-choi';
 import { DangKyDto, DangNhapDto, DoiMatKhauDto, HoSoChoiDto } from './auth.dto';
-import { GioHang, KhachHang, Quyen, TaiKhoan, TaiKhoanDocument } from '../schemas';
+import { GioiHanMongo, loiQuaNhieuLan, QuyTac } from '../common/gioi-han-tan-suat';
+import { GioHang, GioiHanTanSuat, KhachHang, Quyen, TaiKhoan, TaiKhoanDocument } from '../schemas';
+
+/** Đăng nhập SAI: tối đa 5 lần / 15 phút cho một tài khoản, 30 lần / 15 phút cho một địa chỉ IP (chống dò mật khẩu). */
+export const CUA_SO_DANG_NHAP_MS = 15 * 60_000;
+export function quyTacDangNhap(tenDangNhap: string, ip: string): QuyTac[] {
+  return [
+    { khoa: `dang-nhap:tk:${tenDangNhap.trim().toLowerCase()}`, toiDa: 5, cuaSoMs: CUA_SO_DANG_NHAP_MS },
+    { khoa: `dang-nhap:ip:${ip}`, toiDa: 30, cuaSoMs: CUA_SO_DANG_NHAP_MS },
+  ];
+}
 
 /** Chuỗi băm bcrypt ($2a$/$2b$/$2y$ + cost + 53 ký tự). */
 const DANG_BCRYPT = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
@@ -17,7 +27,12 @@ export class AuthService {
     @InjectModel(KhachHang.name) private readonly khachHangModel: Model<KhachHang>,
     @InjectModel(GioHang.name) private readonly gioHangModel: Model<GioHang>,
     private readonly jwt: JwtService,
-  ) {}
+    @Optional() @InjectModel(GioiHanTanSuat.name) gioiHanModel?: Model<GioiHanTanSuat>,
+  ) {
+    this.gioiHan = gioiHanModel ? new GioiHanMongo(gioiHanModel) : null;
+  }
+
+  private readonly gioiHan: GioiHanMongo | null;
 
   taoToken(tk: TaiKhoanDocument): string {
     return this.jwt.sign({ sub: String(tk._id), tenDangNhap: tk.tenDangNhap, maQuyen: tk.maQuyen });
@@ -59,11 +74,17 @@ export class AuthService {
     return r[0]?.t ?? 0;
   }
 
-  async dangNhap(dto: DangNhapDto, quanTri: boolean) {
+  async dangNhap(dto: DangNhapDto, quanTri: boolean, ip = '?') {
+    const quyTac = quyTacDangNhap(dto.tenDangNhap, ip);
+    // Chặn TRƯỚC khi kiểm mật khẩu (bcrypt tốn CPU): đã sai quá số lần trong cửa sổ thì trả 429 kèm số giây phải chờ.
+    const cho = await this.gioiHan?.daVuot(quyTac);
+    if (cho) throw loiQuaNhieuLan(cho, `Bạn đã đăng nhập sai quá nhiều lần. Vui lòng thử lại sau ${Math.ceil(cho / 60)} phút.`);
     const tk = await this.taiKhoanModel.findOne({ tenDangNhap: dto.tenDangNhap.trim() });
     if (!tk || !(await this.kiemTraMatKhau(tk, dto.matKhau))) {
+      await this.gioiHan?.ghiNhan(quyTac);
       throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng.');
     }
+    await this.gioiHan?.xoa(quyTac[0].khoa); // đúng mật khẩu: xoá số lần sai của tài khoản (giữ bộ đếm theo IP)
     const coQuyenQuanTri = tk.maQuyen === Quyen.Admin || tk.maQuyen === Quyen.NhanVien;
     if (quanTri && !coQuyenQuanTri) {
       throw new UnauthorizedException('Tài khoản không có quyền truy cập vào trang quản trị.');

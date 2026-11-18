@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { giaBienThe } from '../common/pricing';
+import { GiaoDich } from '../csdl/giao-dich';
 import { DONG_GIO_HOAT_DONG, xoaDongGio } from '../gio-hang/gio-hang-xoa';
 import { ChiTietSanPham, Counter, DonHang, GioHang, TRANG_THAI } from '../schemas';
 import { TuVotService } from '../tu-vot/tu-vot.service';
@@ -21,9 +22,11 @@ interface DongDaTru {
 }
 
 /**
- * Logic đặt/hủy đơn. MongoDB bản standalone không có transaction nên tồn kho được trừ
- * bằng $inc có điều kiện (soLuongTon >= n) – an toàn khi nhiều người mua cùng lúc – và
- * hoàn lại thủ công nếu một bước phía sau thất bại.
+ * Logic đặt/hủy đơn. Đặt hàng = trừ tồn kho từng dòng + lấy số đơn từ bộ đếm + tạo đơn; huỷ = đổi trạng thái + hoàn kho.
+ *  - MongoDB replica set: cả nhóm chạy trong MỘT transaction (GiaoDich). Bước nào lỗi thì MongoDB huỷ hết: tồn kho, bộ đếm số đơn
+ *    (không bị "nhảy số") và đơn đều như chưa từng chạy. Hai người mua cùng lúc đụng nhau thì withTransaction tự thử lại.
+ *  - Standalone (không có transaction): trừ tồn bằng $inc có điều kiện (soLuongTon >= n) – vẫn đúng khi nhiều người mua cùng lúc –
+ *    và tự HOÀN LẠI những dòng đã trừ nếu bước sau lỗi; bộ đếm thì không lùi được nên có thể nhảy số.
  */
 @Injectable()
 export class OrderService {
@@ -35,13 +38,23 @@ export class OrderService {
     @InjectModel(GioHang.name) private readonly gioHangModel: Model<GioHang>,
     @InjectModel(Counter.name) private readonly counterModel: Model<Counter>,
     @Optional() private readonly tuVot?: TuVotService,
-  ) {}
+    @Optional() @InjectConnection() conn?: Connection,
+  ) {
+    this.giaoDich = conn ? new GiaoDich(conn) : null;
+  }
 
-  private async soDonKeTiep(): Promise<number> {
+  private readonly giaoDich: GiaoDich | null;
+
+  /** Chạy trong transaction khi có thể; không có kết nối (test đơn vị) hoặc standalone thì session = undefined. */
+  private async trongGiaoDich<T>(viec: (s?: ClientSession) => Promise<T>): Promise<T> {
+    return this.giaoDich ? (await this.giaoDich.chay(viec)).kq : viec(undefined);
+  }
+
+  private async soDonKeTiep(session?: ClientSession): Promise<number> {
     const c = await this.counterModel.findOneAndUpdate(
       { _id: 'donhang' },
       { $inc: { seq: 1 } },
-      { upsert: true, returnDocument: 'after' },
+      { upsert: true, returnDocument: 'after', session },
     );
     return c.seq;
   }
@@ -54,9 +67,9 @@ export class OrderService {
     }
   }
 
-  private async hoanLaiTon(dongs: DongDaTru[]): Promise<void> {
+  private async hoanLaiTon(dongs: DongDaTru[], session?: ClientSession): Promise<void> {
     for (const d of dongs) {
-      await this.chiTietModel.updateOne({ _id: d.chiTiet }, { $inc: { soLuongTon: d.soLuong } });
+      await this.chiTietModel.updateOne({ _id: d.chiTiet }, { $inc: { soLuongTon: d.soLuong } }, { session });
     }
   }
 
@@ -67,16 +80,37 @@ export class OrderService {
     trangThaiDau: string = TRANG_THAI.DangXuLy,
     xoaGioHang = true,
   ) {
+    const don = await this.trongGiaoDich((session) => this.taoDonVaTruKho(khachHang, thongTin, dongGio, trangThaiDau, session));
+    // Dọn giỏ nằm NGOÀI transaction: đơn đã lưu và tồn đã trừ thì lỗi dọn giỏ không được huỷ đơn.
+    if (xoaGioHang) {
+      try {
+        await xoaDongGio(this.gioHangModel, { khachHang });
+      } catch (e) {
+        // Giỏ còn dòng cũ sẽ hiện lại, khách tự xóa được. Không hoàn tồn vì đơn vẫn có hiệu lực.
+        this.logger.error(`Đơn #${don.soDonHang} đã tạo nhưng dọn giỏ lỗi: ${(e as Error).message}`);
+      }
+    }
+    return don;
+  }
+
+  /** Trừ kho từng dòng + số đơn + tạo đơn. Có session: lỗi ở đâu MongoDB huỷ hết. Không có: tự hoàn các dòng đã trừ rồi ném lỗi lại. */
+  private async taoDonVaTruKho(
+    khachHang: Types.ObjectId,
+    thongTin: ThongTinGiaoHang,
+    dongGio: { chiTietSanPham: any; soLuong: number }[],
+    trangThaiDau: string,
+    session?: ClientSession,
+  ) {
     const daTru: DongDaTru[] = [];
     const chiTiet: any[] = [];
     let tongTien = 0;
-    let daTaoDon = false; // sau điểm này đơn đã tồn tại: KHÔNG được hoàn tồn kho nếu bước phụ (dọn giỏ) lỗi
     try {
       for (const dong of dongGio) {
         const ctId = dong.chiTietSanPham?._id ?? dong.chiTietSanPham;
         const ct: any = await this.chiTietModel
           .findById(ctId)
           .populate([{ path: 'sanPham', populate: { path: 'khuyenMai' } }, { path: 'mau' }, { path: 'size' }])
+          .session(session ?? null)
           .lean();
         if (!ct) {
           throw new BadRequestException(`Sản phẩm biến thể ID: ${ctId} không tồn tại.`);
@@ -84,6 +118,7 @@ export class OrderService {
         const tru = await this.chiTietModel.updateOne(
           { _id: ct._id, soLuongTon: { $gte: dong.soLuong } },
           { $inc: { soLuongTon: -dong.soLuong } },
+          { session },
         );
         if (tru.modifiedCount === 0) {
           const ten = ct.sanPham?.tenSanPham ?? 'Sản phẩm';
@@ -106,8 +141,8 @@ export class OrderService {
           thanhTien,
         });
       }
-      const don = await this.donHangModel.create({
-        soDonHang: await this.soDonKeTiep(),
+      const [don] = await this.donHangModel.create([{
+        soDonHang: await this.soDonKeTiep(session),
         ngayDat: new Date(),
         trangThai: trangThaiDau,
         tongTien,
@@ -119,19 +154,10 @@ export class OrderService {
         soDienThoaiNhanHang: thongTin.soDienThoaiNhanHang ?? '0000000000',
         ghiChu: thongTin.ghiChu ?? '',
         chiTiet,
-      });
-      daTaoDon = true;
-      if (xoaGioHang) {
-        try {
-          await xoaDongGio(this.gioHangModel, { khachHang });
-        } catch (e) {
-          // Đơn đã lưu và tồn đã trừ: báo thành công; giỏ còn dòng cũ sẽ hiện lại, khách tự xóa được. Không hoàn tồn vì đơn vẫn có hiệu lực.
-          this.logger.error(`Đơn #${don.soDonHang} đã tạo nhưng dọn giỏ lỗi: ${(e as Error).message}`);
-        }
-      }
+      }], { session });
       return don;
     } catch (e) {
-      if (!daTaoDon) await this.hoanLaiTon(daTru);
+      if (!session) await this.hoanLaiTon(daTru); // có transaction thì MongoDB đã tự huỷ các lệnh trừ kho
       throw e;
     }
   }
@@ -145,12 +171,22 @@ export class OrderService {
     );
   }
 
-  private async hoanKho(don: { chiTiet: any[] }): Promise<void> {
+  private async hoanKho(don: { chiTiet: any[] }, session?: ClientSession): Promise<void> {
     await this.hoanLaiTon(
       don.chiTiet
         .filter((c) => c.chiTietSanPham)
         .map((c) => ({ chiTiet: c.chiTietSanPham, soLuong: Number(c.soLuong ?? 0) })),
+      session,
     );
+  }
+
+  /** Đổi trạng thái (CAS) + hoàn kho: cùng một transaction nếu có, để không bao giờ có đơn "đã huỷ" mà kho chưa được hoàn. */
+  private async doiTrangThaiVaHoanKho(soDonHang: number, tu: string, den: string): Promise<any | null> {
+    return this.trongGiaoDich(async (session) => {
+      const daDoi = await this.doiTrangThai(soDonHang, tu, den, session);
+      if (daDoi) await this.hoanKho(daDoi, session);
+      return daDoi;
+    });
   }
 
   async cancelOrder(soDonHang: number, khachHang: Types.ObjectId | null, isAdmin = false): Promise<void> {
@@ -165,18 +201,14 @@ export class OrderService {
     if (!duoc) {
       throw new BadRequestException('Đơn hàng đang giao, đã hoàn tất hoặc đã hủy, không thể hủy.');
     }
-    const daDoi = await this.doiTrangThai(soDonHang, don.trangThai, TRANG_THAI.DaHuy);
+    const daDoi = await this.doiTrangThaiVaHoanKho(soDonHang, don.trangThai, TRANG_THAI.DaHuy);
     if (!daDoi) {
       throw new BadRequestException('Đơn hàng vừa được cập nhật, vui lòng tải lại trang.');
     }
-    await this.hoanKho(daDoi);
   }
 
   async huyDoThanhToanThatBai(soDonHang: number): Promise<void> {
-    const don = await this.doiTrangThai(soDonHang, TRANG_THAI.ChoThanhToanMomo, TRANG_THAI.DaHuyThanhToanThatBai);
-    if (don) {
-      await this.hoanKho(don);
-    }
+    await this.doiTrangThaiVaHoanKho(soDonHang, TRANG_THAI.ChoThanhToanMomo, TRANG_THAI.DaHuyThanhToanThatBai);
   }
 
   async danhDauDaThanhToanMomo(soDonHang: number): Promise<any | null> {
@@ -225,12 +257,11 @@ export class OrderService {
       });
       return;
     }
-    const daDoi = await this.doiTrangThai(soDonHang, don.trangThai, trangThaiMoi);
+    const daDoi = trangThaiMoi === TRANG_THAI.DaHuy
+      ? await this.doiTrangThaiVaHoanKho(soDonHang, don.trangThai, trangThaiMoi)
+      : await this.doiTrangThai(soDonHang, don.trangThai, trangThaiMoi);
     if (!daDoi) {
       throw new BadRequestException('Đơn hàng vừa được cập nhật, vui lòng tải lại trang.');
-    }
-    if (trangThaiMoi === TRANG_THAI.DaHuy) {
-      await this.hoanKho(daDoi);
     }
   }
 }

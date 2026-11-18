@@ -32,7 +32,8 @@ async function main() {
     const db = mongoose.connection.db!;
     const info = await db.admin().command({ buildInfo: 1 });
     const meta: MetaSaoLuu = { phienBan: 1, luc: new Date().toISOString(), csdl: db.databaseName, mongodb: String(info.version), collections: [] };
-    const ds = (await db.listCollections({ type: 'collection' }, { nameOnly: false }).toArray()).filter((c) => !c.name.startsWith('system.'));
+    // Collection thường và time series (tuỳ chọn timeseries + expireAfterSeconds lưu trong _meta.json để tạo lại đúng kiểu); bỏ view và system.*.
+    const ds = (await db.listCollections({}, { nameOnly: false }).toArray()).filter((c: any) => ['collection', 'timeseries'].includes(c.type) && !c.name.startsWith('system.'));
     for (const c of ds.sort((a, b) => a.name.localeCompare(b.name))) {
       const file = createWriteStream(join(out, `${c.name}.jsonl`), 'utf8');
       let so = 0;

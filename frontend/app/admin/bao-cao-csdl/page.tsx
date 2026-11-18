@@ -13,6 +13,28 @@ interface BaoCao {
   vuotMucNSX: { _id: string; tong: number; vuot: number }[];
   votTheoTrinhDo: { trinhDo: string; sanPham: string; ten: string; tb: number; so: number }[];
   denHan: { _id: "daDenHan" | "trong7Ngay"; so: number }[];
+  luotXemTheoNgay: { ngay: string; so: number; tb7: number }[];
+  xemNhieu: { sanPham: string; tenSanPham: string | null; so: number; soNgayCoXem: number }[];
+  luuTruLuotXem: { soLuotXem: number; soBucket: number | null; kichThuocByte: number | null } | null;
+}
+
+/** Cột = lượt xem mỗi ngày, đường = trung bình trượt 7 ngày. SVG thuần, co giãn theo chiều ngang. */
+function BieuDoLuotXem({ ds }: { ds: BaoCao["luotXemTheoNgay"] }) {
+  if (!ds.some((d) => d.so > 0)) return <p className="small text-muted mb-0">Chưa có lượt xem nào trong 30 ngày qua.</p>;
+  const W = 600, H = 150, dem = 18;
+  const max = Math.max(1, ...ds.map((d) => Math.max(d.so, d.tb7)));
+  const w = W / ds.length;
+  const y = (v: number) => H - dem - (v / max) * (H - dem - 6);
+  const ngay = (s: string) => new Date(s).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={`Lượt xem ${ds.length} ngày, cao nhất ${max}`}>
+      {ds.map((d, i) => <rect key={d.ngay} x={i * w + 1} y={y(d.so)} width={w - 2} height={H - dem - y(d.so)} fill="var(--bs-primary, #0d6efd)" opacity={0.35}><title>{`${ngay(d.ngay)}: ${d.so} lượt`}</title></rect>)}
+      <polyline fill="none" stroke="var(--bs-primary, #0d6efd)" strokeWidth={2} points={ds.map((d, i) => `${i * w + w / 2},${y(d.tb7)}`).join(" ")} />
+      <text x={0} y={H - 4} fontSize={11} fill="currentColor">{ngay(ds[0].ngay)}</text>
+      <text x={W} y={H - 4} fontSize={11} fill="currentColor" textAnchor="end">{ngay(ds[ds.length - 1].ngay)}</text>
+      <text x={W} y={12} fontSize={11} fill="currentColor" textAnchor="end">cao nhất {max}</text>
+    </svg>
+  );
 }
 
 const TRINH_DO: Record<string, string> = { moi: "Mới chơi", deu: "Chơi đều", thi: "Thi đấu" };
@@ -38,9 +60,26 @@ export default function BaoCaoCsdlPage() {
         </label>
       </div>
       {data.coMau && data.coDuLieuMau && <div className="alert alert-warning py-2">Đang tính cả <b>dữ liệu mẫu</b> (sinh bằng <code>npm run db:du-lieu-mau</code> để minh hoạ). Số liệu không phản ánh khách hàng thật.</div>}
-      <p className="small text-muted">7 aggregation chạy song song trong {data.thoiGianMs} ms.</p>
+      <p className="small text-muted">9 aggregation chạy song song trong {data.thoiGianMs} ms.</p>
 
       <div className="row g-3">
+        <div className="col-12"><div className="card-custom p-3">
+          <h6>Lượt xem sản phẩm 30 ngày <small className="text-muted">(time series luotxems: $dateTrunc theo ngày, $densify + $fill ngày trống, $setWindowFields trung bình 7 ngày)</small></h6>
+          <div className="row g-3">
+            <div className="col-lg-7"><BieuDoLuotXem ds={data.luotXemTheoNgay} />
+              <p className="small text-muted mb-0">Cột: lượt xem trong ngày · Đường: trung bình trượt 7 ngày.</p></div>
+            <div className="col-lg-5">
+              <table className="table table-sm mb-2"><thead><tr><th>Xem nhiều nhất 7 ngày</th><th>Lượt</th><th>Số ngày</th></tr></thead>
+                <tbody>{data.xemNhieu.map((x) => <tr key={x.sanPham}><td>{x.tenSanPham ?? "(đã xoá)"}</td><td><b>{x.so}</b></td><td>{x.soNgayCoXem}</td></tr>)}
+                  {!data.xemNhieu.length && <tr><td colSpan={3} className="text-muted">Chưa có.</td></tr>}</tbody></table>
+              {data.luuTruLuotXem && (
+                <p className="small mb-0">Lưu trữ: <b>{data.luuTruLuotXem.soLuotXem.toLocaleString("vi-VN")}</b> lượt xem nằm trong <b>{data.luuTruLuotXem.soBucket ?? "?"}</b> bucket
+                  {data.luuTruLuotXem.soBucket ? <> (trung bình {so1(data.luuTruLuotXem.soLuotXem / data.luuTruLuotXem.soBucket)} lượt mỗi bucket)</> : null}. Tự xoá sau 180 ngày.</p>
+              )}
+            </div>
+          </div>
+        </div></div>
+
         <div className="col-lg-6"><div className="card-custom p-3 h-100">
           <h6>Mức căng theo trình độ <small className="text-muted">($group, $avg, $stdDevPop)</small></h6>
           <table className="table table-sm mb-0"><thead><tr><th>Trình độ</th><th>TB (lbs)</th><th>Thấp–cao</th><th>Độ lệch</th><th>Số lần</th></tr></thead>

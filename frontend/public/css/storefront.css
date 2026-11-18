@@ -127,6 +127,12 @@ html { scroll-behavior: smooth; }
 .sf-suggest a { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; background: var(--brand-50); color: var(--brand-700); font-size: .84rem; font-weight: 600; }
 .sf-suggest a i { font-size: .7rem; opacity: .7; }
 .sf-suggest a:hover { background: var(--brand); color: #fff; }
+.sf-suggest a.sf-suggest-sp { width: 100%; display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; padding: 6px 8px; border-radius: 12px; background: transparent; color: var(--ink, #1a1a1a); }
+.sf-suggest a.sf-suggest-sp:hover, .sf-suggest a.sf-suggest-sp:focus-visible { background: var(--brand-50); color: var(--brand-700); }
+.sf-suggest-sp img { width: 40px; height: 40px; object-fit: contain; border-radius: 8px; background: #fff; }
+.sf-suggest-sp b { font-weight: 600; font-size: .86rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sf-suggest-sp em { font-style: normal; font-weight: 700; font-size: .84rem; color: var(--brand-700); }
+.sf-suggest span a.sf-suggest-sua { display: inline; padding: 0; background: none; text-transform: none; letter-spacing: 0; font-size: .84rem; text-decoration: underline; }
 
 .login-btn { background: var(--grad-brand); border-color: transparent; box-shadow: none; }
 .login-btn:hover { background: var(--grad-brand); filter: brightness(1.12); transform: translateY(-1px); }

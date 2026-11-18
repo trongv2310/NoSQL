@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Connection, Model, Types } from 'mongoose';
-import { docMoiTruong } from '../csdl/moi-truong';
+import { GiaoDich } from '../csdl/giao-dich';
 import { ChiTietSanPham, KhachHang, LanCang, SanPham, VotCaNhan } from '../schemas';
 import {
   kiemTraLanCang, LanCangDaKiem, NhapLanCang, pipelineDoiChuKy, pipelineGhiLanCang, thongSoChupTuThuocTinh, vuotMucNSX,
@@ -37,7 +37,6 @@ const homNayUtc = () => {
 @Injectable()
 export class TuVotService {
   private readonly logger = new Logger(TuVotService.name);
-  private coTransaction: Promise<boolean> | null = null;
 
   constructor(
     @InjectConnection() private readonly conn: Connection,
@@ -46,27 +45,20 @@ export class TuVotService {
     @InjectModel(KhachHang.name) private readonly khachHangModel: Model<KhachHang>,
     @InjectModel(ChiTietSanPham.name) private readonly chiTietModel: Model<ChiTietSanPham>,
     @InjectModel(SanPham.name) private readonly sanPhamModel: Model<SanPham>,
-  ) {}
-
-  /** MongoDB có hỗ trợ transaction không (replica set / mongos). Hỏi một lần rồi nhớ. */
-  dungTransaction(): Promise<boolean> {
-    this.coTransaction ??= docMoiTruong(this.conn.db!).then((m) => m.coTransaction).catch(() => false);
-    return this.coTransaction;
+  ) {
+    this.giaoDich = new GiaoDich(conn);
   }
 
-  /** Chạy `viec` trong một transaction nếu có; không có thì chạy thẳng (session = undefined). */
-  async trongTransaction<T>(viec: (s?: ClientSession) => Promise<T>): Promise<{ kq: T; coTransaction: boolean }> {
-    if (!(await this.dungTransaction())) return { kq: await viec(undefined), coTransaction: false };
-    const s = await this.conn.startSession();
-    try {
-      let kq!: T;
-      await s.withTransaction(async () => {
-        kq = await viec(s);
-      });
-      return { kq, coTransaction: true };
-    } finally {
-      await s.endSession();
-    }
+  private readonly giaoDich: GiaoDich;
+
+  /** MongoDB có hỗ trợ transaction không (replica set / mongos). */
+  dungTransaction(): Promise<boolean> {
+    return this.giaoDich.hoTro();
+  }
+
+  /** Chạy `viec` trong một transaction nếu có; không có thì chạy thẳng (session = undefined). Xem csdl/giao-dich.ts. */
+  trongTransaction<T>(viec: (s?: ClientSession) => Promise<T>): Promise<{ kq: T; coTransaction: boolean }> {
+    return this.giaoDich.chay(viec);
   }
 
   async khachHangCua(taiKhoanId: string) {

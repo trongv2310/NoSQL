@@ -1,6 +1,8 @@
 /**
  * So sánh index khai báo trong Mongoose với index đang có trong MongoDB. Hàm thuần để test được không cần CSDL.
  * Hai index được coi là "cùng một cái" khi có cùng khoá (cùng trường, cùng chiều, cùng thứ tự).
+ * Text index được MongoDB lưu với khoá `{ _fts: 'text', _ftsx: 1 }`, còn tên trường nằm ở `weights`: khoá khai báo được đổi về
+ * dạng đó trước khi so, và trọng số / ngôn ngữ mặc định được so như tuỳ chọn.
  */
 
 export interface IndexThucTe {
@@ -10,6 +12,8 @@ export interface IndexThucTe {
   sparse?: boolean;
   expireAfterSeconds?: number;
   partialFilterExpression?: Record<string, unknown>;
+  weights?: Record<string, number>;
+  default_language?: string;
 }
 
 /** Một phần tử của `schema.indexes()` trong Mongoose: [khoá, tuỳ chọn]. */
@@ -24,14 +28,35 @@ export interface KetQuaSoSanh {
   lech: { khaiBao: IndexKhaiBao; thucTe: IndexThucTe; khac: string[] }[];
 }
 
-export const khoaIndex = (key: Record<string, unknown>) => JSON.stringify(Object.entries(key).map(([k, v]) => [k, Number(v) || v]));
+const truongText = (key: Record<string, unknown>) => Object.keys(key).filter((k) => key[k] === 'text');
 
-const TUY_CHON = ['unique', 'sparse', 'expireAfterSeconds', 'partialFilterExpression'] as const;
+export function khoaIndex(key: Record<string, unknown>): string {
+  const ds: [string, unknown][] = [];
+  let daCoText = false;
+  for (const [k, v] of Object.entries(key)) {
+    if (k === '_ftsx') continue; // khoá text index đã lưu trong CSDL: _fts đã đại diện
+    if (v === 'text') {
+      if (!daCoText) ds.push(['_fts', 'text'], ['_ftsx', 1]);
+      daCoText = true;
+    } else ds.push([k, Number(v) || v]);
+  }
+  return JSON.stringify(ds);
+}
 
-/** Mongoose bỏ trống thì MongoDB coi là false/không có: chuẩn hoá về cùng một dạng trước khi so. */
-const chuanHoaTuyChon = (o: Record<string, unknown> | undefined, ten: (typeof TUY_CHON)[number]) => {
+const TUY_CHON = ['unique', 'sparse', 'expireAfterSeconds', 'partialFilterExpression', 'weights', 'default_language'] as const;
+
+/**
+ * Mongoose bỏ trống thì MongoDB coi là false/không có: chuẩn hoá về cùng một dạng trước khi so.
+ * `key` chỉ truyền cho index KHAI BÁO (để biết trường text nào, trọng số mặc định 1, ngôn ngữ mặc định "english").
+ */
+const chuanHoaTuyChon = (o: Record<string, unknown> | undefined, ten: (typeof TUY_CHON)[number], key?: Record<string, unknown>) => {
   const v = o?.[ten];
   if (ten === 'unique' || ten === 'sparse') return Boolean(v);
+  if (ten === 'weights') {
+    const w = key ? Object.fromEntries(truongText(key).map((f) => [f, Number((v as Record<string, number>)?.[f] ?? 1)])) : (v as Record<string, number>);
+    return w && Object.keys(w).length ? JSON.stringify(Object.entries(w).sort(([a], [b]) => a.localeCompare(b))) : null;
+  }
+  if (ten === 'default_language') return key ? (truongText(key).length ? String(v ?? 'english') : null) : v ? String(v) : null;
   return v === undefined || v === null ? null : JSON.stringify(v);
 };
 
@@ -48,7 +73,7 @@ export function soSanhIndex(khaiBao: IndexKhaiBao[], thucTe: IndexThucTe[]): Ket
       kq.thieu.push(kb);
       continue;
     }
-    const khac = TUY_CHON.filter((t) => chuanHoaTuyChon(kb[1], t) !== chuanHoaTuyChon(tt as unknown as Record<string, unknown>, t));
+    const khac = TUY_CHON.filter((t) => chuanHoaTuyChon(kb[1], t, kb[0]) !== chuanHoaTuyChon(tt as unknown as Record<string, unknown>, t));
     if (khac.length) kq.lech.push({ khaiBao: kb, thucTe: tt, khac });
   }
   kq.thua = conLai.filter((i) => !daGap.has(khoaIndex(i.key)));

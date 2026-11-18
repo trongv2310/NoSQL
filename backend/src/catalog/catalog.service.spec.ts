@@ -1,3 +1,4 @@
+import { pipelineTinhLaiTongHop } from '../phan-hoi/tong-hop-danh-gia';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import mongoose, { Connection, Model, Types } from 'mongoose';
@@ -94,6 +95,8 @@ describe.runIf(coMongo)('đánh giá và khuyến mãi công khai (MongoDB thậ
     await danhGia(sp, 5, false);
     await danhGia(sp, 5, true);
     await danhGia(sp, 2, true);
+    // Đánh giá được ghi thẳng vào collection (không qua API) nên tổng hợp lưu sẵn chưa có: chạy bước đối soát $merge như sau khi nhập dữ liệu.
+    await spModel.aggregate(pipelineTinhLaiTongHop());
     expect(await trongDanhSach(sp)).toMatchObject({ trungBinhDanhGia: 3.5, soDanhGia: 2 });
     const ct = await catalog.chiTiet(String(sp._id));
     expect(ct).toMatchObject({ trungBinhDanhGia: 3.5, soDanhGia: 2 });

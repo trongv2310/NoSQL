@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
 import { CatalogService } from './catalog.service';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -24,6 +24,19 @@ export class CatalogController {
   @Get('khuyen-mai')
   khuyenMai() {
     return this.catalog.khuyenMaiDangChay();
+  }
+
+  /** Gợi ý khi gõ: /api/san-pham/goi-y?q=astr */
+  @Get('goi-y')
+  goiY(@Query('q') q?: string) {
+    return this.catalog.goiY(String(q ?? '').slice(0, 100));
+  }
+
+  /** Trang chi tiết gọi một lần khi mở (trình duyệt tự bỏ lần lặp trong 30 phút). Ghi vào time series luotxems. */
+  @Post(':id/luot-xem')
+  @HttpCode(204)
+  async luotXem(@Param('id') id: string) {
+    await this.catalog.ghiLuotXem(id);
   }
 
   @Get(':id')

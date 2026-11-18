@@ -79,3 +79,38 @@ export const pipelineDenHan = (loc: LocMau, now: Date): PipelineStage[] => [
   { $match: { ...loc, deletedAt: null, hanNhacLuc: { $lte: new Date(now.getTime() + 7 * 86_400_000) } } },
   { $group: { _id: { $cond: [{ $lte: ['$hanNhacLuc', now] }, 'daDenHan', 'trong7Ngay'] }, so: { $sum: 1 } } },
 ];
+
+// ---- Lượt xem sản phẩm: time series collection `luotxems` ----
+
+/**
+ * Lượt xem theo ngày (giờ địa phương của máy chủ) trong `soNgay` ngày gần nhất: $dateTrunc gom theo ngày, $densify thêm ngày không
+ * có lượt xem nào, $fill điền 0, $setWindowFields tính trung bình trượt 7 ngày.
+ */
+export function pipelineLuotXemTheoNgay(loc: LocMau, now: Date, tz: string, soNgay = 30): PipelineStage[] {
+  const homNay = new Date(now);
+  homNay.setHours(0, 0, 0, 0);
+  const tu = new Date(homNay.getTime() - (soNgay - 1) * 86_400_000);
+  return [
+    { $match: { ...loc, luc: { $gte: tu } } },
+    { $group: { _id: { $dateTrunc: { date: '$luc', unit: 'day', timezone: tz } }, so: { $sum: 1 } } },
+    { $densify: { field: '_id', range: { step: 1, unit: 'day', bounds: [tu, new Date(homNay.getTime() + 86_400_000)] } } },
+    { $fill: { output: { so: { value: 0 } } } },
+    { $setWindowFields: { sortBy: { _id: 1 }, output: { tb7: { $avg: '$so', window: { documents: [-6, 0] } } } } },
+    { $project: { _id: 0, ngay: '$_id', so: 1, tb7: { $round: ['$tb7', 1] } } },
+  ] as PipelineStage[];
+}
+
+/** Sản phẩm được xem nhiều nhất trong `soNgay` ngày lịch gần nhất (tính cả hôm nay), kèm số ngày có người xem. */
+export function pipelineXemNhieu(loc: LocMau, now: Date, tz: string, soNgay = 7, n = 5): PipelineStage[] {
+  const tu = new Date(now);
+  tu.setHours(0, 0, 0, 0);
+  tu.setDate(tu.getDate() - (soNgay - 1));
+  return [
+    { $match: { ...loc, luc: { $gte: tu } } },
+    { $group: { _id: '$sanPham', so: { $sum: 1 }, ngay: { $addToSet: { $dateTrunc: { date: '$luc', unit: 'day', timezone: tz } } } } },
+    { $sort: { so: -1, _id: 1 } },
+    { $limit: n },
+    { $lookup: { from: 'sanphams', localField: '_id', foreignField: '_id', as: 'sp', pipeline: [{ $project: { tenSanPham: 1 } }] } },
+    { $project: { _id: 0, sanPham: '$_id', tenSanPham: { $first: '$sp.tenSanPham' }, so: 1, soNgayCoXem: { $size: '$ngay' } } },
+  ] as PipelineStage[];
+}

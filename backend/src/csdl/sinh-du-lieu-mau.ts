@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import { anMatKhau, laMayLocal } from '../seed/du-lieu-mongodb';
-import { PhienBanVot, sinhDuLieuMau } from './du-lieu-mau';
+import { PhienBanVot, sinhDuLieuMau, sinhLuotXemMau } from './du-lieu-mau';
 
 /**
  * Nạp / xoá dữ liệu mẫu cho thống kê (xem du-lieu-mau.ts).
@@ -23,6 +23,9 @@ async function main() {
       const n = (await db.collection(b).deleteMany({ laDuLieuMau: true })).deletedCount;
       if (n) console.log(`Đã xoá ${n} tài liệu mẫu cũ trong ${b}.`);
     }
+    // Time series: deleteMany theo trường đo (laDuLieuMau) được hỗ trợ từ MongoDB 7.0.
+    const nXem = await db.collection('luotxems').deleteMany({ laDuLieuMau: true }).then((x) => x.deletedCount).catch(() => 0);
+    if (nXem) console.log(`Đã xoá ${nXem} lượt xem mẫu cũ trong luotxems.`);
     if (args.includes('--xoa')) return;
 
     // Phiên bản vợt có thông số dạng số (thuocTinh, M1) + tên sản phẩm còn kinh doanh.
@@ -43,6 +46,11 @@ async function main() {
       // insertMany qua driver: validator $jsonSchema của từng collection vẫn kiểm từng tài liệu.
       await db.collection(b).insertMany(dl[b] as never[], { ordered: true });
     }
+    const luotXem = sinhLuotXemMau((await db.collection('sanphams').find({ deletedAt: null }, { projection: { _id: 1 } }).toArray()).map((d) => d._id));
+    if ((await db.listCollections({ name: 'luotxems', type: 'timeseries' }).toArray()).length) {
+      await db.collection('luotxems').insertMany(luotXem as never[], { ordered: false });
+      console.log(`Đã sinh ${luotXem.length} lượt xem mẫu (60 ngày) vào time series luotxems.`);
+    } else console.warn('Bỏ qua lượt xem mẫu: luotxems chưa là time series collection (chạy npm run db:setup trước).');
     console.log(`Kết nối ${anMatKhau(uri)}: đã sinh ${dl.khachhangs.length} người chơi, ${dl.votcanhans.length} hộ chiếu, ${dl.lancangs.length} lần căng, ${dl.phanhois.length} đánh giá (đều gắn laDuLieuMau: true).`);
   } finally {
     await mongoose.disconnect();

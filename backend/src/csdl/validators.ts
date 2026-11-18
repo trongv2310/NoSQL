@@ -2,6 +2,7 @@ import { KHOA_THUOC_TINH } from '../catalog/thuoc-tinh';
 import { THE_DANH_GIA } from '../common/danh-gia';
 import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TAY_THUAN, TOI_DA_BUOI_MOI_TUAN, TRINH_DO } from '../common/ho-so-choi';
 import { TRANG_THAI } from '../schemas/don-hang.schema';
+import { LOAI_TIN } from '../schemas/ban-tin.schema';
 import { Quyen } from '../schemas/tai-khoan.schema';
 import { TRANG_THAI_DAT_CHO } from '../schemas/lich-cang.schema';
 import { DON_VI_CANG, LOAI_SU_KIEN, NGUON_VOT, NOI_CANG, TOI_DA_CHU_KY_NGAY, TOI_DA_LICH_SU_NHUNG } from '../schemas/vot-ca-nhan.schema';
@@ -60,7 +61,7 @@ export interface DinhNghiaValidator {
 
 export const VALIDATORS: Record<string, DinhNghiaValidator> = {
   sanphams: {
-    moTa: 'Tên 1–100 ký tự, giá gốc không âm, các khoá ngoại là ObjectId, xoá mềm là ngày hoặc null.',
+    moTa: 'Tên 1–100 ký tự, giá gốc không âm, các khoá ngoại là ObjectId, xoá mềm là ngày hoặc null, trường tìm kiếm chỉ chữ không dấu.',
     validator: {
       $jsonSchema: {
         bsonType: 'object',
@@ -78,7 +79,38 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           coMau: { bsonType: 'bool' },
           ngayTao: NGAY,
           deletedAt: NGAY_HOAC_NULL,
+          danhGiaTongHop: {
+            bsonType: 'object',
+            required: ['so', 'tong'],
+            properties: {
+              so: SO_NGUYEN_KHONG_AM,
+              tong: SO_NGUYEN_KHONG_AM,
+              trungBinh: { bsonType: ['number', 'null'], minimum: 1, maximum: 5 },
+            },
+          },
+          // Trường tìm kiếm đã chuẩn hoá: chỉ chữ thường không dấu và số (đúng như khongDau() sinh ra).
+          timKiem: {
+            bsonType: 'object',
+            required: ['chuoi'],
+            properties: {
+              chuoi: { bsonType: 'string', pattern: '^[a-z0-9 ]*$' },
+              tu: { bsonType: 'array', items: { bsonType: 'string', pattern: '^[a-z0-9]+$' } },
+              baKyTu: { bsonType: 'array', items: { bsonType: 'string', maxLength: 3 } },
+            },
+          },
         },
+      },
+      // Computed pattern: tổng điểm nằm giữa 1×số đánh giá và 5×số đánh giá (chưa có tổng hợp thì bỏ qua).
+      $expr: {
+        $or: [
+          { $eq: [{ $type: '$danhGiaTongHop' }, 'missing'] },
+          {
+            $and: [
+              { $gte: ['$danhGiaTongHop.tong', '$danhGiaTongHop.so'] },
+              { $lte: ['$danhGiaTongHop.tong', { $multiply: ['$danhGiaTongHop.so', 5] }] },
+            ],
+          },
+        ],
       },
     },
   },
@@ -403,6 +435,137 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           { $lte: ['$soDaDat', '$sucChua'] },
           { $eq: ['$soDaDat', { $size: { $filter: { input: '$datCho', cond: { $ne: ['$$this.trangThai', 'huy'] } } } }] },
         ],
+      },
+    },
+  },
+
+  // ---- Bổ sung: phủ nốt các collection còn lại (danh mục, khuyến mãi, bản tin, giỏ hàng, nhật ký giá) ----
+  khuyenmais: {
+    moTa: 'Phần trăm giảm 0–100, giảm tối đa ≥ 0; $expr: ngày kết thúc không trước ngày bắt đầu.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['tenChuongTrinh', 'phanTramGiam'],
+        properties: {
+          tenChuongTrinh: chuoi(100, 1),
+          moTa: chuoi(255),
+          ngayBatDau: NGAY_HOAC_NULL,
+          ngayKetThuc: NGAY_HOAC_NULL,
+          phanTramGiam: { bsonType: 'number', minimum: 0, maximum: 100 },
+          giamToiDa: { bsonType: ['number', 'null'], minimum: 0 },
+          soLuongSuDung: { bsonType: ['number', 'null'], minimum: 0 },
+        },
+      },
+      $expr: {
+        $or: [
+          { $eq: [{ $type: '$ngayBatDau' }, 'missing'] },
+          { $eq: [{ $type: '$ngayKetThuc' }, 'missing'] },
+          { $eq: ['$ngayBatDau', null] },
+          { $eq: ['$ngayKetThuc', null] },
+          { $lte: ['$ngayBatDau', '$ngayKetThuc'] },
+        ],
+      },
+    },
+  },
+
+  tintucs: {
+    moTa: 'Tiêu đề 1–200 ký tự, nội dung bắt buộc, loại tin thuộc danh sách, lượt xem là số nguyên không âm.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['tieuDe', 'noiDung', 'loaiTin'],
+        properties: {
+          tieuDe: chuoi(200, 1),
+          tomTat: chuoi(500),
+          noiDung: chuoi(undefined, 1),
+          loaiTin: { enum: Object.keys(LOAI_TIN) },
+          sanPham: ID_HOAC_NULL,
+          tranDau: ID_HOAC_NULL,
+          tacGia: ID_HOAC_NULL,
+          noiBat: { bsonType: 'bool' },
+          hienThi: { bsonType: 'bool' },
+          thuTu: { bsonType: 'number' },
+          luotXem: SO_NGUYEN_KHONG_AM,
+          ngayDang: NGAY,
+          deletedAt: NGAY_HOAC_NULL,
+        },
+      },
+    },
+  },
+
+  trandaus: {
+    moTa: 'Đội thắng là A, B hoặc chưa có; $expr: hai đội phải khác nhau.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['tenGiaiDau', 'vong', 'noiDung', 'doiA', 'doiB', 'ngayThiDau'],
+        properties: {
+          tenGiaiDau: chuoi(150, 1),
+          vong: chuoi(60, 1),
+          noiDung: chuoi(60, 1),
+          doiA: chuoi(150, 1),
+          doiB: chuoi(150, 1),
+          tiSo: chuoi(60),
+          doiThang: { enum: ['A', 'B', null] },
+          ngayThiDau: NGAY,
+        },
+      },
+      $expr: { $ne: [{ $toLower: { $trim: { input: '$doiA' } } }, { $toLower: { $trim: { input: '$doiB' } } }] },
+    },
+  },
+
+  giohangs: {
+    moTa: 'Mỗi dòng giỏ thuộc một khách và một biến thể; số lượng là số nguyên không âm.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['khachHang', 'chiTietSanPham', 'soLuong'],
+        properties: {
+          khachHang: ID,
+          chiTietSanPham: ID,
+          soLuong: SO_NGUYEN_KHONG_AM,
+          ngayThem: NGAY,
+          daXoa: { bsonType: 'bool' },
+          ngayXoa: NGAY,
+        },
+      },
+    },
+  },
+
+  lichsuthaydoigias: {
+    moTa: 'Nhật ký đổi giá của một biến thể; giá cũ/mới không âm.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['chiTiet'],
+        properties: { chiTiet: ID, giaCu: { bsonType: ['number', 'null'], minimum: 0 }, giaMoi: { bsonType: ['number', 'null'], minimum: 0 }, ngayThayDoi: NGAY, nguoiThayDoi: chuoi(50) },
+      },
+    },
+  },
+
+  hangs: { moTa: 'Tên hãng 1–100 ký tự.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenHang'], properties: { tenHang: chuoi(100, 1) } } } },
+  loaisanphams: { moTa: 'Tên loại 1–100 ký tự.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenLoai'], properties: { tenLoai: chuoi(100, 1) } } } },
+  mausacs: { moTa: 'Tên màu 1–50 ký tự.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenMau'], properties: { tenMau: chuoi(50, 1) } } } },
+  sizes: { moTa: 'Tên size 1–20 ký tự, loại size bắt buộc.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenSize', 'loaiSize'], properties: { tenSize: chuoi(20, 1), loaiSize: chuoi(30, 1) } } } },
+
+  gioihantansuats: {
+    moTa: 'Bộ đếm giới hạn tần suất: khoá + mốc cửa sổ + số lần ≥ 0 + thời điểm hết hạn (TTL tự xoá).',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['khoa', 'cuaSo', 'so', 'hetHan'],
+        properties: { khoa: chuoi(200, 1), cuaSo: NGAY, so: SO_NGUYEN_KHONG_AM, hetHan: NGAY },
+      },
+      $expr: { $gt: ['$hetHan', '$cuaSo'] },
+    },
+  },
+  theodoisukiens: {
+    moTa: 'Resume token của change stream: tên luồng (_id) + token (object có _data) + thời điểm lưu.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['_id', 'token', 'luc'],
+        properties: { _id: chuoi(100, 1), token: { bsonType: 'object', required: ['_data'] }, luc: NGAY },
       },
     },
   },
