@@ -39,12 +39,20 @@ export class SanPham {
   @Prop({ default: () => new Date(), index: true })
   ngayTao: Date;
 
-  /** Xóa mềm: khác null nghĩa là sản phẩm đã ngừng kinh doanh. */
-  @Prop({ type: Date, default: null, index: true })
+  /**
+   * Xóa mềm: khác null nghĩa là sản phẩm đã ngừng kinh doanh. Không đánh index riêng trường này: index MỘT PHẦN `dang_ban_moi_nhat`
+   * bên dưới chỉ chứa sản phẩm chưa xóa, đúng tập mà cửa hàng luôn đọc.
+   */
+  @Prop({ type: Date, default: null })
   deletedAt?: Date | null;
 }
 export type SanPhamDocument = HydratedDocument<SanPham>;
 export const SanPhamSchema = SchemaFactory.createForClass(SanPham);
+/**
+ * Partial index: chỉ sản phẩm đang bán (deletedAt null), theo đúng thứ tự trang danh sách dùng (mới nhất trước).
+ * Truy vấn `{ deletedAt: null }` + sort này đọc thẳng index; sản phẩm đã xóa không chiếm chỗ trong index.
+ */
+SanPhamSchema.index({ ngayTao: -1, _id: -1 }, { name: 'dang_ban_moi_nhat', partialFilterExpression: { deletedAt: null } });
 
 @Schema({ _id: false })
 export class ThongSoVot {
@@ -131,7 +139,7 @@ ChiTietSanPhamSchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate'], functi
 
 @Schema({ collection: 'lichsuthaydoigias' })
 export class LichSuThayDoiGia {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham', index: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ChiTietSanPham', required: true, index: true })
   chiTiet: Types.ObjectId;
 
   @Prop({ type: Number }) giaCu?: number;
