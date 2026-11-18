@@ -13,6 +13,14 @@ import { coCongCu, docDong, indexCanTao, MetaSaoLuu, TEN_META } from './sao-luu-
  *   npm run db:phuc-hoi -- --from=sao-luu/<thời điểm> --drop     # xoá collection trùng tên rồi phục hồi
  * Bản tự viết tạo lại collection KÈM validator, nạp dữ liệu, rồi tạo lại index. Ghi lên MongoDB không phải máy này phải thêm --force.
  */
+/** Time series: MongoDB tự suy bucketMaxSpanSeconds từ granularity; truyền cả hai (đọc từ listCollections) có thể bị từ chối. */
+export function tuyChonTaoLai(tuyChon: Record<string, any>): Record<string, unknown> {
+  const ts = tuyChon.timeseries;
+  if (!ts?.granularity) return tuyChon;
+  const { bucketMaxSpanSeconds: _a, bucketRoundingSeconds: _b, ...giu } = ts;
+  return { ...tuyChon, timeseries: giu };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const tu = args.find((a) => a.startsWith('--from='))?.slice(7);
@@ -44,7 +52,7 @@ async function main() {
     for (const c of meta.collections) {
       if (daCo.has(c.ten)) await db.collection(c.ten).drop();
       // Tạo collection kèm tuỳ chọn (validator...) TRƯỚC khi nạp: dữ liệu đi qua đúng luật như lúc sao lưu.
-      await db.createCollection(c.ten, c.tuyChon as never);
+      await db.createCollection(c.ten, tuyChonTaoLai(c.tuyChon) as never);
       let lo: Record<string, unknown>[] = [];
       let so = 0;
       const nap = async () => {

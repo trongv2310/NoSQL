@@ -50,7 +50,22 @@ Replica set thử nghiệm không cần đụng dịch vụ MongoDB đang chạy
 ## Bật replica set `rs0` (để có transaction)
 
 MongoDB chạy một máy (standalone) không có transaction và change stream. Replica set một node vẫn chạy trên đúng một máy, giữ nguyên
-dữ liệu cũ, chỉ bật thêm nhật ký sao chép (oplog). Mỗi thành viên làm **một lần**:
+dữ liệu cũ, chỉ bật thêm nhật ký sao chép (oplog). Mỗi thành viên làm **một lần**.
+
+**Cách nhanh:** mở PowerShell bằng *Run as Administrator* rồi chạy script (tự sao lưu `mongod.cfg` và `.env`, chạy lại không sao):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend\db\bat-replica-set.ps1 -ThuKhongGhi   # xem trước, không ghi gì
+powershell -ExecutionPolicy Bypass -File backend\db\bat-replica-set.ps1                # bật rs0
+powershell -ExecutionPolicy Bypass -File backend\db\bat-replica-set.ps1 -HoanTac       # quay lại standalone
+```
+
+Đường dẫn cấu hình mặc định là `F:\MongoDB\bin\mongod.cfg`; máy khác thì thêm `-Cfg "<đường dẫn>"`. Làm tay thì theo các bước dưới.
+
+Khi có replica set, các việc sau chạy trong MỘT transaction (lỗi giữa chừng thì MongoDB huỷ hết): đặt hàng (trừ kho + số đơn + tạo đơn),
+huỷ đơn (đổi trạng thái + hoàn kho), gửi đánh giá (thêm đánh giá + cộng điểm tổng hợp), ghi lần căng và hoàn tất lịch căng.
+Standalone vẫn chạy được: dùng cập nhật nguyên tử có điều kiện và tự bù trừ, chỉ khác là bộ đếm số đơn có thể nhảy số khi lỗi
+(xem `src/don-hang/dat-hang-mongo.spec.ts`, chạy cả hai chế độ).
 
 1. Mở file cấu hình của dịch vụ MongoDB. Đường dẫn nằm trong lệnh khởi động dịch vụ: `sc qc MongoDB` (dòng `BINARY_PATH_NAME`, phần sau `--config`).
    Bản cài mặc định thường là `C:\Program Files\MongoDB\Server\<phiên bản>\bin\mongod.cfg`.
