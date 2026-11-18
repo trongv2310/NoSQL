@@ -22,7 +22,15 @@ interface ListData extends Trang<SanPhamV> {
     khoangGiaGoiY: string[];
     locThongSo?: { loiChoi: string[]; canBang: string[]; trongLuong: string[]; doCung: string[] };
     locGiaTu: number | null; locGiaDen: number | null; locHang: string[]; locKhoang: string | null; sapXep: string; dangLoc: boolean;
+    /** Đếm bằng $facet trong MongoDB: nếu chọn hãng / khoảng giá này (giữ các bộ lọc khác) sẽ ra bao nhiêu sản phẩm. */
+    demTheoHang?: Record<string, number>;
+    demTheoKhoang?: Record<string, number>;
   };
+}
+
+/** Số sản phẩm cạnh lựa chọn lọc; lựa chọn ra 0 sản phẩm được làm mờ (vẫn bấm được). */
+function SoDem({ so }: { so?: number }) {
+  return so === undefined ? null : <span className="text-muted small ms-1">({so})</span>;
 }
 
 const NHAN_KHOANG: Record<string, string> = {
@@ -179,7 +187,7 @@ export function ProductListing() {
             <h6 className="fw-bold">Khoảng giá</h6>
             <div className="d-flex flex-column gap-1 mb-2">
               {boLoc?.khoangGiaGoiY.map((k) => (
-                <label key={k} className="form-check"><input type="radio" className="form-check-input" name="khoang" checked={sp.get("khoang") === k} onChange={() => cap((q) => { q.set("khoang", k); q.delete("gia_tu"); q.delete("gia_den"); })} /> <span className="form-check-label">{NHAN_KHOANG[k] ?? k}</span></label>
+                <label key={k} className="form-check"><input type="radio" className="form-check-input" name="khoang" checked={sp.get("khoang") === k} onChange={() => cap((q) => { q.set("khoang", k); q.delete("gia_tu"); q.delete("gia_den"); })} /> <span className={`form-check-label${boLoc.demTheoKhoang?.[k] === 0 && sp.get("khoang") !== k ? " text-muted" : ""}`}>{NHAN_KHOANG[k] ?? k}</span><SoDem so={boLoc.demTheoKhoang?.[k]} /></label>
               ))}
             </div>
             <form className="d-flex gap-1 mb-3" onSubmit={(e) => { e.preventDefault(); cap((q) => {
@@ -199,7 +207,8 @@ export function ProductListing() {
                     const cur = new Set(hangDangChon);
                     if (cur.has(h.id)) cur.delete(h.id); else cur.add(h.id);
                     q.delete("hangs"); q.delete("hang"); cur.forEach((id) => q.append("hangs", id));
-                  })} /> <span className="form-check-label">{h.tenHang}</span>
+                  })} /> <span className={`form-check-label${boLoc.demTheoHang && !boLoc.demTheoHang[h.id] && !hangDangChon.includes(h.id) ? " text-muted" : ""}`}>{h.tenHang}</span>
+                  {boLoc.demTheoHang && <SoDem so={boLoc.demTheoHang[h.id] ?? 0} />}
                 </label>
               ))}
             </div>

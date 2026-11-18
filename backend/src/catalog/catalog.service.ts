@@ -10,6 +10,7 @@ import { locKhuyenMaiDangChay } from './khuyen-mai';
 import { ghepTrangChu, gomThongSoTheoSanPham } from './trang-chu';
 import { nguoiDanhCongKhai } from '../phan-hoi/danh-gia-nhom';
 import { dieuKienThuocTinh } from './thuoc-tinh';
+import { demTheoKhoang, phanBoGia, pipelineDanhSach } from './danh-sach-pipeline';
 import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, gopThongSoBienThe } from './vot-thong-so';
 import {
   ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, PhanHoi, SanPham,
@@ -195,7 +196,98 @@ export class CatalogService {
     return [tu, den];
   }
 
+  /**
+   * Trang danh sách: MỘT aggregation trong MongoDB ($lookup + giá sau khuyến mãi tính bằng biểu thức + $facet trả trang kết quả,
+   * tổng số, số sản phẩm theo hãng và phân bố giá bằng $bucket). Xem danh-sach-pipeline.ts.
+   */
   async danhSach(q: Record<string, any>) {
+    const moiTrang = 12;
+    const [tu, den] = this.khoangGia(q);
+    const bool = (v: any) => ['1', 'true', 'on'].includes(String(v));
+    const gon = (v: unknown) => (v === undefined || v === null ? '' : String(v).trim());
+    const [dsHang, dsLoai, spKhopThongSo] = await Promise.all([
+      this.hangModel.find().sort({ tenHang: 1 }).lean(),
+      this.loaiModel.find().sort({ _id: 1 }).lean(),
+      this.sanPhamKhopThongSo(q),
+    ]);
+    const dieuKien = {
+      // Chuỗi rỗng sau khi bỏ khoảng trắng = không lọc (bản cũ: includes('') luôn đúng).
+      loai: gon(q.loai || q.maLoai) || undefined,
+      hang: gon(q.hang) || undefined,
+      ten: gon(q.ten) || undefined,
+      keyword: gon(q.keyword) || undefined,
+      giaTu: tu,
+      giaDen: den,
+      hangIds: mangTuQuery(q.hangs ?? q['hangs[]']),
+      giamGia: bool(q.giam_gia),
+      conHang: bool(q.con_hang),
+      spKhopThongSo,
+      sapXep: q.sap_xep,
+      moiTrang,
+    };
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const chay = async (trang: number) => {
+      const [f] = await this.sanPhamModel.aggregate(pipelineDanhSach({ ...dieuKien, trang }, new Date(), tz, KHOANG_GIA)).collation({ locale: 'vi' });
+      return f as { items: any[]; tong: { n: number }[]; theoHang: { _id: any; so: number }[]; theoGia: any[]; demKhoangGia: any[] };
+    };
+    let page = Math.max(1, Number(q.page) || 1);
+    let f = await chay(page);
+    const total = f.tong[0]?.n ?? 0;
+    const pages = Math.max(1, Math.ceil(total / moiTrang));
+    if (page > pages) {
+      page = pages; // giống phanTrang: trang vượt quá thì trả trang cuối
+      f = await chay(page);
+    }
+    const items = await this.ganDiemVaThongSo(f.items);
+    let hangDangChon = dieuKien.hangIds;
+    if (!hangDangChon.length && dieuKien.hang) {
+      hangDangChon = dsHang.filter((h) => chua(h.tenHang, dieuKien.hang!)).map((h) => String(h._id));
+    }
+    return {
+      items, total, page, perPage: moiTrang, pages,
+      tieuDe: q.keyword ? `Kết quả tìm kiếm cho '${String(q.keyword).trim()}'` : 'Danh sách sản phẩm',
+      boLoc: {
+        dsHang: dsHang.map((h) => ({ id: idOf(h), tenHang: h.tenHang })),
+        dsLoai: dsLoai.map((l) => ({ id: idOf(l), tenLoai: l.tenLoai })),
+        khoangGiaGoiY: Object.keys(KHOANG_GIA),
+        locGiaTu: tu,
+        locGiaDen: den,
+        locHang: hangDangChon,
+        locKhoang: q.khoang ?? null,
+        locThongSo: boLocThongSoTuQuery(q),
+        sapXep: q.sap_xep ?? 'moi',
+        dangLoc: tu !== null || den !== null || hangDangChon.length > 0 || dieuKien.giamGia || dieuKien.conHang,
+        // Đếm từ nhánh $facet: chọn hãng / khoảng giá khác thì sẽ ra bao nhiêu sản phẩm.
+        demTheoHang: Object.fromEntries(f.theoHang.filter((x) => x._id).map((x) => [String(x._id), x.so])),
+        demTheoKhoang: demTheoKhoang(f.demKhoangGia[0], KHOANG_GIA),
+        phanBoGia: phanBoGia(f.theoGia),
+      },
+    };
+  }
+
+  /** Điểm đánh giá (computed pattern, hoặc gom lại khi bật dữ liệu mẫu) và thông số vợt cho CHỈ các sản phẩm của trang hiện tại. */
+  private async ganDiemVaThongSo(ds: any[]) {
+    const ids = ds.map((sp) => sp._id);
+    const [bienThes, diem] = await Promise.all([
+      this.chiTietModel.find({ sanPham: { $in: ids }, thongSo: { $ne: null } }, { sanPham: 1, thongSo: 1 }).sort({ _id: 1 }).lean(),
+      hienDuLieuMau()
+        ? this.phanHoiModel.aggregate<{ _id: any; tb: number; so: number }>([
+          { $match: { ...locPhanHoiCongKhai(), sanPham: { $in: ids } } },
+          { $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } },
+        ])
+        : Promise.resolve(null),
+    ]);
+    const diemMap = diem && new Map(diem.map((d) => [String(d._id), { trungBinhDanhGia: Math.round(d.tb * 10) / 10, soDanhGia: d.so }]));
+    const thongSoTheoSp = gomThongSoTheoSanPham(bienThes);
+    return ds.map((sp) => {
+      const g = gopThongSoBienThe(thongSoTheoSp.get(String(sp._id)) ?? []);
+      const d = diemMap ? (diemMap.get(String(sp._id)) ?? { trungBinhDanhGia: null, soDanhGia: 0 }) : docTongHop(sp);
+      return { ...sanPhamView({ ...sp, ...d }), tongTonKho: sp.tongTonKho, thongSoVot: g.thongSoVot, thongSoKhacNhau: g.khacNhau };
+    });
+  }
+
+  /** Bản cũ: tải mọi sản phẩm rồi lọc/sắp xếp/phân trang bằng JavaScript. Giữ lại làm chuẩn cho test so khớp với bản $facet. */
+  async danhSachTrongBoNho(q: Record<string, any>) {
     const [all, tonKho, dsHang, dsLoai, bienThes, spKhopThongSo] = await Promise.all([
       this.tatCaSanPham(),
       this.tonKhoTheoSanPham(),
