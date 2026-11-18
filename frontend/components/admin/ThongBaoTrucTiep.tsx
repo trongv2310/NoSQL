@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { apiGet } from "@/lib/api";
 import { vnd } from "@/lib/format";
 
@@ -72,13 +73,17 @@ export function ThongBaoTrucTiep() {
               : <ul className="list-unstyled mb-0">{ds.map((s) => <li key={khoa(s)} className="py-1 border-bottom"><span className="text-muted me-2">{gio(s.luc)}</span><NoiDung s={s} /></li>)}</ul>}
         </div>
       )}
-      <div className="position-fixed bottom-0 end-0 p-3 d-flex flex-column gap-2" style={{ zIndex: 1080 }} aria-live="polite">
-        {noi.map((s) => (
-          <div key={khoa(s)} className={`alert ${s.loai === "don-moi" ? "alert-success" : "alert-warning"} shadow mb-0 py-2 small`} role="status">
-            <i className={`fa-solid ${s.loai === "don-moi" ? "fa-cart-shopping" : "fa-box-open"} me-2`} aria-hidden="true" /><NoiDung s={s} />
-          </div>
-        ))}
-      </div>
+      {/* Portal ra body: thanh trên của admin tạo khung chứa riêng cho position: fixed, để trong đó thì thông báo bị kẹt ở mép thanh. */}
+      {createPortal(
+        <div className="position-fixed bottom-0 end-0 p-3 d-flex flex-column gap-2" style={{ zIndex: 1080, maxWidth: 420 }} aria-live="polite">
+          {noi.map((s) => (
+            <div key={khoa(s)} className={`alert ${s.loai === "don-moi" ? "alert-success" : "alert-warning"} shadow mb-0 py-2 small`} role="status">
+              <i className={`fa-solid ${s.loai === "don-moi" ? "fa-cart-shopping" : "fa-box-open"} me-2`} aria-hidden="true" /><NoiDung s={s} />
+            </div>
+          ))}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
