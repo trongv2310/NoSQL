@@ -35,8 +35,8 @@ export function NguoiChoiGiongBan({ sanPhamId, lanTai }: { sanPhamId: string; la
   const g = data.giongBan;
 
   return (
-    <div className="nguoi-choi-giong-ban mb-3 p-3 border rounded-4 bg-light-subtle">
-      {data.coDuLieuMau && <p className="small text-warning-emphasis mb-2"><i className="fa-solid fa-flask" aria-hidden="true" /> Có dữ liệu mẫu để minh hoạ (máy chạy demo), không phải đánh giá thật.</p>}
+    <div className="nguoi-choi-giong-ban mb-3 p-3 border rounded-4 bg-light">
+      {data.coDuLieuMau && <p className="small text-muted mb-2"><i className="fa-solid fa-flask" aria-hidden="true" /> Có dữ liệu mẫu để minh hoạ (máy chạy demo), không phải đánh giá thật.</p>}
       <div className="row g-3">
         <div className="col-md-6">
           <h3 className="fs-6 fw-semibold mb-2">Người chơi giống bạn nói gì</h3>
@@ -52,7 +52,7 @@ export function NguoiChoiGiongBan({ sanPhamId, lanTai }: { sanPhamId: string; la
           ) : (
             <>
               <p className="mb-1"><span className="fs-4 fw-bold">{g.trungBinh.toFixed(1)}</span><small className="text-muted"> / 5 từ {g.so} người {nhanNguoiDanh(g.nhom)}</small></p>
-              {g.theNoiBat.length > 0 && <div className="d-flex flex-wrap gap-1">{g.theNoiBat.map((t) => <span key={t.the} className="badge rounded-pill text-bg-success-subtle border border-success-subtle text-success-emphasis">{NHAN_THE[t.the] ?? t.the} · {t.so}</span>)}</div>}
+              {g.theNoiBat.length > 0 && <div className="d-flex flex-wrap gap-1">{g.theNoiBat.map((t) => <span key={t.the} className="badge rounded-pill text-bg-success">{NHAN_THE[t.the] ?? t.the} · {t.so}</span>)}</div>}
             </>
           )}
           {data.theoTrinhDo.length > 0 && (

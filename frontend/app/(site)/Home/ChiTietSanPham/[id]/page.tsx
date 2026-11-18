@@ -316,7 +316,7 @@ export default function ChiTietSanPhamPage() {
                   <div className="d-flex flex-wrap gap-1 small mb-1">
                     {nhanNguoiDanh(r.nguoiDanh) && <span className="badge rounded-pill text-bg-light border"><i className="fa-solid fa-user" aria-hidden="true" /> {nhanNguoiDanh(r.nguoiDanh)}</span>}
                     {r.phienBan && <span className="badge rounded-pill text-bg-light border">Dùng bản {r.phienBan}</span>}
-                    {r.daMuaHang && <span className="badge rounded-pill text-bg-success-subtle border border-success-subtle text-success-emphasis"><i className="fa-solid fa-circle-check" aria-hidden="true" /> Đã mua tại shop</span>}
+                    {r.daMuaHang && <span className="badge rounded-pill text-bg-success"><i className="fa-solid fa-circle-check" aria-hidden="true" /> Đã mua tại shop</span>}
                     {r.laDuLieuMau && <span className="badge rounded-pill text-bg-warning">Dữ liệu mẫu</span>}
                   </div>
                 )}
