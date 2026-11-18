@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, Post, Put, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Body, Controller, Delete, Get, HttpCode, Post, Put, Req, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { CurrentUser } from './auth.decorators';
 import { DangKyDto, DangNhapDto, DoiMatKhauDto, HoSoChoiDto } from './auth.dto';
 import { CanDangNhap, COOKIE_TOKEN } from './auth.guards';
@@ -14,22 +14,28 @@ const COOKIE_OPTS = {
   path: '/',
 };
 
+/** Địa chỉ IP người gọi (sau proxy Next.js thì lấy phần tử cuối của x-forwarded-for do proxy thêm vào). */
+function diaChiIp(req: Request): string {
+  const xff = String(req.headers['x-forwarded-for'] ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+  return xff[xff.length - 1] ?? req.ip ?? req.socket?.remoteAddress ?? '?';
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post('dang-nhap')
   @HttpCode(200)
-  async dangNhap(@Body() dto: DangNhapDto, @Res({ passthrough: true }) res: Response) {
-    const { token, user } = await this.auth.dangNhap(dto, false);
+  async dangNhap(@Body() dto: DangNhapDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const { token, user } = await this.auth.dangNhap(dto, false, diaChiIp(req));
     res.cookie(COOKIE_TOKEN, token, COOKIE_OPTS);
     return { user, message: 'Đăng nhập thành công.' };
   }
 
   @Post('admin/dang-nhap')
   @HttpCode(200)
-  async adminDangNhap(@Body() dto: DangNhapDto, @Res({ passthrough: true }) res: Response) {
-    const { token, user } = await this.auth.dangNhap(dto, true);
+  async adminDangNhap(@Body() dto: DangNhapDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const { token, user } = await this.auth.dangNhap(dto, true, diaChiIp(req));
     res.cookie(COOKIE_TOKEN, token, COOKIE_OPTS);
     return { user, message: 'Đăng nhập thành công.' };
   }

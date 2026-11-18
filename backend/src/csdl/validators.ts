@@ -516,4 +516,16 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
   loaisanphams: { moTa: 'Tên loại 1–100 ký tự.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenLoai'], properties: { tenLoai: chuoi(100, 1) } } } },
   mausacs: { moTa: 'Tên màu 1–50 ký tự.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenMau'], properties: { tenMau: chuoi(50, 1) } } } },
   sizes: { moTa: 'Tên size 1–20 ký tự, loại size bắt buộc.', validator: { $jsonSchema: { bsonType: 'object', required: ['tenSize', 'loaiSize'], properties: { tenSize: chuoi(20, 1), loaiSize: chuoi(30, 1) } } } },
+
+  gioihantansuats: {
+    moTa: 'Bộ đếm giới hạn tần suất: khoá + mốc cửa sổ + số lần ≥ 0 + thời điểm hết hạn (TTL tự xoá).',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['khoa', 'cuaSo', 'so', 'hetHan'],
+        properties: { khoa: chuoi(200, 1), cuaSo: NGAY, so: SO_NGUYEN_KHONG_AM, hetHan: NGAY },
+      },
+      $expr: { $gt: ['$hetHan', '$cuaSo'] },
+    },
+  },
 };
