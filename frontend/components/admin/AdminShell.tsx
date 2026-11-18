@@ -9,6 +9,7 @@ import { imgUrl } from "@/lib/format";
 import { useApp } from "../AppProviders";
 import { LoginForm } from "../AuthForms";
 import { Loading } from "../Ui";
+import { ThongBaoTrucTiep } from "./ThongBaoTrucTiep";
 
 const MUC: { nhom: string; muc: [string, string, string, boolean][] }[] = [
   { nhom: "Tổng quan", muc: [["/admin", "fa-chart-pie", "Thống kê", false], ["/admin/bao-cao-csdl", "fa-chart-column", "Báo cáo sổ căng & đánh giá", false]] },
@@ -105,9 +106,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <button ref={nutMo} type="button" className="admin-toggle" aria-label="Mở menu" aria-expanded={mo} aria-controls="admin-sidebar" onClick={() => setMo((v) => !v)}><i className="fa-solid fa-bars" /></button>
             <h1>{tieuDe}</h1>
           </div>
+          <div className="d-flex align-items-center">
+          <ThongBaoTrucTiep />
           <div className="admin-user">
             <div className="meta text-end"><div className="name">{user.hoTen}</div><div className="role">{laAdmin ? "Quản trị viên" : "Nhân viên"}</div></div>
             <div className="admin-avatar">{user.hoTen.charAt(0).toUpperCase()}</div>
+          </div>
           </div>
         </header>
         <main className="admin-content"><Suspense fallback={<Loading />}>{children}</Suspense></main>

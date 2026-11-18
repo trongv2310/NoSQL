@@ -559,4 +559,14 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
       $expr: { $gt: ['$hetHan', '$cuaSo'] },
     },
   },
+  theodoisukiens: {
+    moTa: 'Resume token của change stream: tên luồng (_id) + token (object có _data) + thời điểm lưu.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['_id', 'token', 'luc'],
+        properties: { _id: chuoi(100, 1), token: { bsonType: 'object', required: ['_data'] }, luc: NGAY },
+      },
+    },
+  },
 };

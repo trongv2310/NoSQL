@@ -18,6 +18,7 @@ import { LanCang, LanCangSchema, VotCaNhan, VotCaNhanSchema } from './vot-ca-nha
 import { LichCang, LichCangSchema } from './lich-cang.schema';
 import { GioiHanTanSuat, GioiHanTanSuatSchema } from './gioi-han.schema';
 import { LuotXem, LuotXemSchema } from './luot-xem.schema';
+import { TheoDoiSuKien, TheoDoiSuKienSchema } from './theo-doi.schema';
 
 export * from './tai-khoan.schema';
 export * from './khach-hang.schema';
@@ -29,6 +30,7 @@ export * from './vot-ca-nhan.schema';
 export * from './lich-cang.schema';
 export * from './gioi-han.schema';
 export * from './luot-xem.schema';
+export * from './theo-doi.schema';
 
 export const ALL_MODELS: ModelDefinition[] = [
   { name: TaiKhoan.name, schema: TaiKhoanSchema },
@@ -57,4 +59,5 @@ export const ALL_MODELS: ModelDefinition[] = [
   { name: LichCang.name, schema: LichCangSchema },
   { name: GioiHanTanSuat.name, schema: GioiHanTanSuatSchema },
   { name: LuotXem.name, schema: LuotXemSchema },
+  { name: TheoDoiSuKien.name, schema: TheoDoiSuKienSchema },
 ];
