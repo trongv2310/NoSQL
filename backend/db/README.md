@@ -13,6 +13,9 @@ Thư mục này gồm hướng dẫn vận hành và các file truy vấn mẫu 
 | `src/phan-hoi/danh-gia-nhom.ts` | Đánh giá theo nhóm người chơi: bản chụp hồ sơ, pipeline `$facet`, ngưỡng "chưa đủ dữ liệu" |
 | `src/tu-vot/` | Hộ chiếu cây vợt (`votcanhans`) + sổ căng (`lancangs`): update pipeline ghi lần căng, transaction khi có replica set, tạo hộ chiếu khi đơn hoàn thành |
 | `src/tu-vot/lich-cang.service.ts` | Lịch căng tại shop (`lichcangs`): giữ chỗ bằng một lệnh có điều kiện, huỷ bằng toán tử vị trí `$`, hoàn tất trong transaction |
+| `src/csdl/du-lieu-mau.ts`, `sinh-du-lieu-mau.ts` | Dữ liệu MẪU cho thống kê (`npm run db:du-lieu-mau`, `-- --xoa` để xoá); mọi tài liệu gắn `laDuLieuMau: true` |
+| `src/admin/bao-cao-csdl.ts` | Pipeline báo cáo cho trang `/admin/bao-cao-csdl` ($group, $bucket, $setWindowFields, $median, $lookup, $facet) |
+| `src/csdl/sao-luu.ts`, `phuc-hoi.ts` | Sao lưu/phục hồi: mongodump/mongorestore nếu có, không thì bản tự viết giữ cả validator + index |
 | `src/common/ho-so-choi.ts` | Hồ sơ người chơi nhúng trong `khachhangs`: danh sách giá trị, lệnh `$set`/`$unset` trường con (API `GET/PUT/DELETE /auth/ho-so-choi`) |
 | `db/truy-van-mau/*.mongodb.js` | Truy vấn mẫu chạy bằng `mongosh` hoặc Compass, dùng để minh hoạ trong báo cáo |
 
@@ -72,7 +75,30 @@ Kiểm tra: khi `npm run start:dev`, log phải có dòng `replica set "rs0": c�
 
 Muốn quay lại standalone: xoá khối `replication` ở bước 2, khởi động lại dịch vụ, bỏ `?replicaSet=rs0`. Dữ liệu vẫn còn nguyên.
 
-## Sao lưu trước khi thử nghiệm
+## Dữ liệu mẫu cho thống kê
+
+```bash
+npm run db:du-lieu-mau            # xoá dữ liệu mẫu cũ rồi sinh: ~40 người chơi, ~80 hộ chiếu, ~700 lần căng, ~160 đánh giá
+npm run db:du-lieu-mau -- --xoa   # chỉ xoá
+```
+
+Dữ liệu mẫu là GIẢ LẬP theo vài quy tắc ghi trong `src/csdl/du-lieu-mau.ts`, chỉ để minh hoạ truy vấn. Trang công khai không tính nó,
+trừ khi API chạy với `HIEN_DU_LIEU_MAU=true` (máy demo). Khi đó giao diện ghi rõ "dữ liệu mẫu". Trang báo cáo admin có công tắc bật/tắt.
+
+## Sao lưu và phục hồi
+
+```bash
+npm run db:sao-luu                                         # vào backend/sao-luu/<thời điểm>/ (đã gitignore)
+npm run db:phuc-hoi -- --from=sao-luu/<thời điểm>          # chỉ chạy khi collection đích còn trống
+npm run db:phuc-hoi -- --from=sao-luu/<thời điểm> --drop   # ghi đè
+```
+
+- Máy có *MongoDB Database Tools* thì script gọi `mongodump`/`mongorestore`.
+- Không có thì dùng bản tự viết: mỗi collection một file `.jsonl` (Extended JSON canonical, giữ đúng kiểu số), kèm `_meta.json` ghi validator và index.
+  Khi phục hồi, collection được tạo lại kèm validator TRƯỚC khi nạp dữ liệu, rồi mới tạo lại index.
+- Đã thử 18/11/2026: sao lưu rồi phục hồi sang CSDL khác. `dbHash` của cả 24 collection trùng nhau; số index (68) và số validator (9) khớp.
+
+Lệnh gốc của bài giảng (cần cài Database Tools):
 
 ```bash
 mongodump --db shop_caulong --out ./sao-luu/truoc-csdl      # sao lưu

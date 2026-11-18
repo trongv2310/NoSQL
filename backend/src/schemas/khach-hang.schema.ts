@@ -37,6 +37,10 @@ export class KhachHang {
 
   @Prop({ type: HoSoChoiSchema, default: undefined })
   hoSoChoi?: HoSoChoi;
+
+  /** Người chơi mẫu sinh để minh hoạ thống kê (npm run db:du-lieu-mau); không có tài khoản đăng nhập. */
+  @Prop({ type: Boolean, default: undefined })
+  laDuLieuMau?: boolean;
 }
 export type KhachHangDocument = HydratedDocument<KhachHang>;
 export const KhachHangSchema = SchemaFactory.createForClass(KhachHang);

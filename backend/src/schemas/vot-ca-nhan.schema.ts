@@ -76,6 +76,7 @@ export class VotCaNhan {
   @Prop({ type: String, maxlength: 200, default: '' }) ghiChu?: string;
   @Prop({ type: Date, default: () => new Date() }) taoLuc: Date;
   @Prop({ type: Date, default: null }) deletedAt?: Date | null;
+  @Prop({ type: Boolean, default: undefined }) laDuLieuMau?: boolean;
 }
 export type VotCaNhanDocument = HydratedDocument<VotCaNhan>;
 export const VotCaNhanSchema = SchemaFactory.createForClass(VotCaNhan);

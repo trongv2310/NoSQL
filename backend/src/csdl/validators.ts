@@ -204,6 +204,7 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           diaChi: chuoi(255),
           taiKhoan: ID_HOAC_NULL,
           ngayTao: NGAY,
+          laDuLieuMau: { bsonType: 'bool' },
           hoSoChoi: {
             bsonType: 'object',
             additionalProperties: false,
@@ -316,6 +317,7 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           ghiChu: chuoi(200),
           taoLuc: NGAY,
           deletedAt: NGAY_HOAC_NULL,
+          laDuLieuMau: { bsonType: 'bool' },
         },
       },
       $expr: {
