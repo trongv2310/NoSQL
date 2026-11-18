@@ -26,6 +26,12 @@ export class CatalogController {
     return this.catalog.khuyenMaiDangChay();
   }
 
+  /** Gợi ý khi gõ: /api/san-pham/goi-y?q=astr */
+  @Get('goi-y')
+  goiY(@Query('q') q?: string) {
+    return this.catalog.goiY(String(q ?? '').slice(0, 100));
+  }
+
   @Get(':id')
   chiTiet(@Param('id') id: string) {
     return this.catalog.chiTiet(id);

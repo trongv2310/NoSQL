@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { giuFocusTrongVung } from "@/lib/bay-focus";
-import { apiPost } from "@/lib/api";
-import { imgUrl } from "@/lib/format";
+import { apiGet, apiPost } from "@/lib/api";
+import { imgUrl, vnd } from "@/lib/format";
 import { useApp } from "./AppProviders";
 import { HoSoChip } from "./HoSoChoi";
 import { useSoSanh } from "./so-sanh/so-sanh-store";
@@ -40,6 +40,28 @@ const CHINH_SACH = [
 
 const GOI_Y_TIM = ["Vợt Yonex", "Giày Victor", "Áo Lining", "Quả cầu lông", "Quấn cán"];
 
+/** Kết quả /api/san-pham/goi-y: tiền tố trên mảng từ không dấu, không có thì gần đúng theo bộ ba ký tự (backend catalog/tim-kiem.ts). */
+interface GoiYTim {
+  cheDo: "tien-to" | "gan-dung" | "trong";
+  goiY: string | null;
+  items: { id: string; tenSanPham: string; hinhAnhDaiDien: string; giaGoc: number; giaSauKhuyenMai: number }[];
+}
+
+/** Gợi ý khi gõ: chờ người dùng ngừng gõ 200 ms rồi mới hỏi; câu trả lời về muộn của từ khoá cũ bị bỏ. */
+function useGoiYTim(tuKhoa: string): GoiYTim | null {
+  const [kq, setKq] = useState<GoiYTim | null>(null);
+  useEffect(() => {
+    const q = tuKhoa.trim();
+    if (q.length < 2) { setKq(null); return; }
+    let conHieuLuc = true;
+    const hen = setTimeout(() => {
+      apiGet<GoiYTim>(`/san-pham/goi-y?q=${encodeURIComponent(q)}`).then((r) => { if (conHieuLuc) setKq(r); }).catch(() => { if (conHieuLuc) setKq(null); });
+    }, 200);
+    return () => { conHieuLuc = false; clearTimeout(hen); };
+  }, [tuKhoa]);
+  return kq;
+}
+
 const spUrl = (p: Record<string, string>) => `/SanPham/Index?${new URLSearchParams(p).toString()}`;
 
 export function Header() {
@@ -47,6 +69,7 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [keyword, setKeyword] = useState("");
+  const goiY = useGoiYTim(keyword);
   const [moMenu, setMoMenu] = useState(false);
   const nutMoMenu = useRef<HTMLButtonElement>(null);
   const nutDongMenu = useRef<HTMLButtonElement>(null);
@@ -139,9 +162,26 @@ export function Header() {
             <label htmlFor="sf-tim-kiem" className="visually-hidden">Tìm kiếm sản phẩm</label>
             <input id="sf-tim-kiem" type="search" name="keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm kiếm sản phẩm..." className="search-input" autoComplete="off" enterKeyHint="search" />
             <button type="submit" className="search-btn" aria-label="Tìm kiếm"><i className="fa-solid fa-magnifying-glass" /></button>
-            <div className="sf-suggest" aria-label="Gợi ý tìm kiếm">
-              <span>Tìm nhiều</span>
-              {GOI_Y_TIM.map((t) => <Link key={t} href={`/SanPham/TimKiem?keyword=${encodeURIComponent(t)}`}><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /> {t}</Link>)}
+            <div className="sf-suggest" aria-label="Gợi ý tìm kiếm" aria-live="polite">
+              {goiY?.items.length ? (
+                <>
+                  {goiY.cheDo === "gan-dung" && goiY.goiY
+                    ? <span>Có phải bạn muốn tìm <Link className="sf-suggest-sua" href={`/SanPham/TimKiem?keyword=${encodeURIComponent(goiY.goiY)}`}>{goiY.goiY}</Link></span>
+                    : <span>Sản phẩm gợi ý</span>}
+                  {goiY.items.map((sp) => (
+                    <Link key={sp.id} href={`/Home/ChiTietSanPham/${sp.id}`} className="sf-suggest-sp">
+                      { }<img src={imgUrl(sp.hinhAnhDaiDien)} alt="" width={40} height={40} />
+                      <b>{sp.tenSanPham}</b>
+                      <em>{vnd(sp.giaSauKhuyenMai)}</em>
+                    </Link>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <span>{goiY && keyword.trim() ? "Không có sản phẩm khớp. Tìm nhiều" : "Tìm nhiều"}</span>
+                  {GOI_Y_TIM.map((t) => <Link key={t} href={`/SanPham/TimKiem?keyword=${encodeURIComponent(t)}`}><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /> {t}</Link>)}
+                </>
+              )}
             </div>
           </form>
           <HoSoChip />

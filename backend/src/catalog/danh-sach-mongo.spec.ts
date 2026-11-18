@@ -9,6 +9,7 @@ import { CatalogService, KHOANG_GIA } from './catalog.service';
  * So khớp bản danh sách chạy trong MongoDB ($facet + $bucket) với bản lọc trong bộ nhớ cũ trên CÙNG dữ liệu: khuyến mãi còn hạn /
  * hết hạn / chưa tới / có trần giảm / 0%, giá đúng biên khoảng giá, tên có dấu và trùng tên, ngày tạo trùng nhau, hết hàng,
  * sản phẩm đã xoá mềm, thiếu hãng. Hơn hai trăm tổ hợp truy vấn: cùng id, cùng thứ tự, cùng tổng, cùng trang.
+ * Riêng từ khoá tìm kiếm cố ý đổi nghĩa (text index, không dấu, chịu lỗi chính tả) nên được kiểm ở tim-kiem-mongo.spec.ts.
  * Các con số đếm của $facet được đối chiếu bằng cách chạy lại bản cũ với lựa chọn tương ứng.
  */
 const BASE = (process.env.TEST_MONGODB_URI ?? 'mongodb://127.0.0.1:27017').replace(/\/+$/, '');
@@ -98,7 +99,7 @@ describe.runIf(coMongo)('danh sách sản phẩm: $facet trong MongoDB khớp b�
       {},
       { page: '2' }, { page: '99' }, { page: '0' }, { page: 'abc' },
       { sap_xep: 'ten' }, { sap_xep: 'gia_tang' }, { sap_xep: 'gia_giam' }, { sap_xep: 'la' },
-      { keyword: 'VỢT' }, { keyword: 'yonex' }, { keyword: '  ' }, { keyword: 'đai' }, { keyword: 'a.b*' }, { keyword: 'cầu lông' },
+      { keyword: '  ' }, // từ khoá rỗng = không tìm
       { loai: 'vot' }, { loai: 'giày' }, { loai: 'quan' }, { loai: 'phu' }, { loai: 'xyz' }, { loai: String(loaiIds['Áo thi đấu']) },
       { maLoai: String(loaiIds['Phụ kiện']) }, { hang: 'yon' }, { ten: 'pro' },
       { khoang: '1000000-2000000' }, { khoang: '5000000-' }, { khoang: 'sai' },
@@ -114,7 +115,6 @@ describe.runIf(coMongo)('danh sách sản phẩm: $facet trong MongoDB khớp b�
       if (r() < 0.2) q.hang = chon(['yonex', 'Li', 'VICTOR']);
       if (r() < 0.3) q.khoang = chon(Object.keys(KHOANG_GIA));
       else if (r() < 0.3) { q.gia_tu = String(chon([0, 1_000_000, 1_187_500, 2_000_000])); q.gia_den = String(chon([2_000_000, 2_150_000, 5_000_000])); }
-      if (r() < 0.2) q.keyword = chon(['vợt', 'Áo', 'pro', 'cầu', 'trùng']);
       if (r() < 0.25) q.giam_gia = '1';
       if (r() < 0.25) q.con_hang = '1';
       if (r() < 0.2) q.loi_choi = chon(['cong', 'toc', 'toan']);
@@ -145,7 +145,7 @@ describe.runIf(coMongo)('danh sách sản phẩm: $facet trong MongoDB khớp b�
   }, 120_000);
 
   it('số đếm theo hãng và theo khoảng giá = tổng mà bản cũ trả khi chọn đúng lựa chọn đó (các bộ lọc khác giữ nguyên)', async () => {
-    for (const q of [{}, { loai: 'vot' }, { con_hang: '1', khoang: '1000000-2000000' }, { hangs: [String(hangIds[0])], giam_gia: '1' }, { keyword: 'vợt', gia_tu: '1000000' }]) {
+    for (const q of [{}, { loai: 'vot' }, { con_hang: '1', khoang: '1000000-2000000' }, { hangs: [String(hangIds[0])], giam_gia: '1' }, { hang: 'yon', gia_tu: '1000000' }]) {
       const moi = (await catalog.danhSach(q)).boLoc as any;
       const { hangs: _h, 'hangs[]': _h2, ...khongHang } = q as Record<string, any>;
       for (const h of hangIds) {

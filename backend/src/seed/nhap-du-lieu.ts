@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { existsSync, readFileSync } from 'fs';
+import { chuanHoaTimKiem } from '../csdl/chuan-hoa-tim-kiem';
 import mongoose from 'mongoose';
 import { join } from 'path';
 import { anMatKhau, docChuoi, laMayLocal, Manifest, TEN_MANIFEST, thuMucMacDinh } from './du-lieu-mongodb';
@@ -51,6 +52,8 @@ async function main() {
       await db.collection(t).insertMany(docs as never[]);
       dem[t] = docs.length;
     }
+    // Tài liệu chèn thẳng không qua hook schema: dựng trường tìm kiếm không dấu cho sanphams.
+    await chuanHoaTimKiem(db);
     console.table(dem);
     console.log('Hoàn tất. Tài khoản mẫu: admin / admin@123, nhanvien_banhang / nv@123, nguyenvana / vana@123, tranthib / thib@123');
   } finally {

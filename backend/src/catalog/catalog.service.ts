@@ -11,6 +11,7 @@ import { ghepTrangChu, gomThongSoTheoSanPham } from './trang-chu';
 import { nguoiDanhCongKhai } from '../phan-hoi/danh-gia-nhom';
 import { dieuKienThuocTinh } from './thuoc-tinh';
 import { demTheoKhoang, phanBoGia, pipelineDanhSach } from './danh-sach-pipeline';
+import { goiYKhiGo, KetQuaTim, timKiemSanPham } from './tim-kiem';
 import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, gopThongSoBienThe } from './vot-thong-so';
 import {
   ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, PhanHoi, SanPham,
@@ -205,10 +206,12 @@ export class CatalogService {
     const [tu, den] = this.khoangGia(q);
     const bool = (v: any) => ['1', 'true', 'on'].includes(String(v));
     const gon = (v: unknown) => (v === undefined || v === null ? '' : String(v).trim());
-    const [dsHang, dsLoai, spKhopThongSo] = await Promise.all([
+    const [dsHang, dsLoai, spKhopThongSo, tim] = await Promise.all([
       this.hangModel.find().sort({ tenHang: 1 }).lean(),
       this.loaiModel.find().sort({ _id: 1 }).lean(),
       this.sanPhamKhopThongSo(q),
+      // Có từ khoá: tìm bằng text index / tiền tố / gần đúng (tim-kiem.ts), danh sách chỉ giữ các id tìm được, xếp theo độ khớp.
+      gon(q.keyword) ? timKiemSanPham(this.sanPhamModel, q.keyword) : Promise.resolve(null as KetQuaTim | null),
     ]);
     const dieuKien = {
       // Chuỗi rỗng sau khi bỏ khoảng trắng = không lọc (bản cũ: includes('') luôn đúng).
@@ -216,6 +219,7 @@ export class CatalogService {
       hang: gon(q.hang) || undefined,
       ten: gon(q.ten) || undefined,
       keyword: gon(q.keyword) || undefined,
+      timKiem: tim ? { ids: tim.ids } : null,
       giaTu: tu,
       giaDen: den,
       hangIds: mangTuQuery(q.hangs ?? q['hangs[]']),
@@ -246,6 +250,7 @@ export class CatalogService {
     return {
       items, total, page, perPage: moiTrang, pages,
       tieuDe: q.keyword ? `Kết quả tìm kiếm cho '${String(q.keyword).trim()}'` : 'Danh sách sản phẩm',
+      ...(tim ? { timKiem: { cheDo: tim.cheDo, goiY: tim.goiY ?? null } } : {}),
       boLoc: {
         dsHang: dsHang.map((h) => ({ id: idOf(h), tenHang: h.tenHang })),
         dsLoai: dsLoai.map((l) => ({ id: idOf(l), tenLoai: l.tenLoai })),
@@ -262,6 +267,21 @@ export class CatalogService {
         demTheoKhoang: demTheoKhoang(f.demKhoangGia[0], KHOANG_GIA),
         phanBoGia: phanBoGia(f.theoGia),
       },
+    };
+  }
+
+  /** Gợi ý khi gõ ở ô tìm kiếm: tối đa 8 sản phẩm (tên, ảnh, giá sau khuyến mãi). */
+  async goiY(tuKhoa: unknown) {
+    const kq = await goiYKhiGo(this.sanPhamModel, tuKhoa);
+    const ds: any[] = kq.ids.length ? await this.sanPhamModel.find({ _id: { $in: kq.ids } }).populate('khuyenMai').lean() : [];
+    const theoId = new Map(ds.map((sp) => [String(sp._id), sp]));
+    return {
+      cheDo: kq.cheDo,
+      goiY: kq.goiY ?? null,
+      items: kq.ids.map((id) => theoId.get(String(id))).filter(Boolean).map((sp) => {
+        const v = sanPhamView(sp);
+        return { id: v.id, tenSanPham: v.tenSanPham, hinhAnhDaiDien: v.hinhAnhDaiDien, giaGoc: v.giaGoc, giaSauKhuyenMai: v.giaSauKhuyenMai };
+      }),
     };
   }
 

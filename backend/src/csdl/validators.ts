@@ -61,7 +61,7 @@ export interface DinhNghiaValidator {
 
 export const VALIDATORS: Record<string, DinhNghiaValidator> = {
   sanphams: {
-    moTa: 'Tên 1–100 ký tự, giá gốc không âm, các khoá ngoại là ObjectId, xoá mềm là ngày hoặc null.',
+    moTa: 'Tên 1–100 ký tự, giá gốc không âm, các khoá ngoại là ObjectId, xoá mềm là ngày hoặc null, trường tìm kiếm chỉ chữ không dấu.',
     validator: {
       $jsonSchema: {
         bsonType: 'object',
@@ -86,6 +86,16 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
               so: SO_NGUYEN_KHONG_AM,
               tong: SO_NGUYEN_KHONG_AM,
               trungBinh: { bsonType: ['number', 'null'], minimum: 1, maximum: 5 },
+            },
+          },
+          // Trường tìm kiếm đã chuẩn hoá: chỉ chữ thường không dấu và số (đúng như khongDau() sinh ra).
+          timKiem: {
+            bsonType: 'object',
+            required: ['chuoi'],
+            properties: {
+              chuoi: { bsonType: 'string', pattern: '^[a-z0-9 ]*$' },
+              tu: { bsonType: 'array', items: { bsonType: 'string', pattern: '^[a-z0-9]+$' } },
+              baKyTu: { bsonType: 'array', items: { bsonType: 'string', maxLength: 3 } },
             },
           },
         },

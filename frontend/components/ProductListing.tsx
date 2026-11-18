@@ -16,6 +16,8 @@ import type { SanPhamV, Trang } from "@/lib/types";
 
 interface ListData extends Trang<SanPhamV> {
   tieuDe: string;
+  /** Có từ khoá: tầng tìm đã dùng (text index / tiền tố / gần đúng) và từ khoá đã sửa khi phải tìm gần đúng. */
+  timKiem?: { cheDo: "van-ban" | "tien-to" | "gan-dung" | "trong"; goiY: string | null };
   boLoc: {
     dsHang: { id: string; tenHang: string }[];
     dsLoai: { id: string; tenLoai: string }[];
@@ -143,6 +145,12 @@ export function ProductListing() {
         </div>
       </div>
       <KhaySoSanh />
+      {data?.timKiem?.cheDo === "gan-dung" && data.timKiem.goiY && (
+        <p className="alert alert-light border small mb-3" role="status">
+          Không có sản phẩm khớp đúng “{sp.get("keyword")}”. Đang hiện kết quả gần đúng, có phải bạn muốn tìm{" "}
+          <Link href={`/SanPham/TimKiem?keyword=${encodeURIComponent(data.timKiem.goiY)}`} className="fw-semibold">{data.timKiem.goiY}</Link>?
+        </p>
+      )}
       {laVot && !hoSoTrong(hs) && hs.lc && !loiChoiChon.length && (
         <div className="ls-profile" role="region" aria-label="Hồ sơ người chơi">
           <span>Hồ sơ của bạn: lối chơi {NHAN_LOI_CHOI[hs.lc]}.</span>
