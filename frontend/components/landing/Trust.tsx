@@ -5,6 +5,7 @@ import { fontTieuDe } from "./fonts";
 import { HeroScroll } from "./HeroScroll";
 import { OpenChatButton } from "./OpenChatButton";
 import { RvHeading } from "./Words";
+import { SecHead } from "./SecHead";
 import s from "./trust.module.css";
 
 /** Đánh giá quá ngắn (vd. "ok") không giúp người đọc quyết định nên không đưa lên trang chủ. */
@@ -26,6 +27,7 @@ export async function Reviews() {
   return (
     <section id="danh-gia" className={s.reviews} aria-labelledby="danh-gia-title">
       <div className="container">
+        <SecHead label="Đánh giá" tag="Khách hàng" />
         <RvHeading id="danh-gia-title" className={`${s.title} ${fontTieuDe.className}`} text="Khách hàng nói gì" />
         <div className={s.grid}>
           {[dau, ...con].map((r, i) => (

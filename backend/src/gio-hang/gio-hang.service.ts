@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { bienTheView, idOf } from '../common/mappers';
 import { giaBienThe } from '../common/pricing';
 import { parseObjectId } from '../common/helpers';
 import { ChiTietSanPham, GioHang, KhachHang } from '../schemas';
+import { DONG_GIO_HOAT_DONG, xoaDongGio } from './gio-hang-xoa';
+import { TOI_DA_SO_LUONG, laLoiTrungKhoa } from './gio-khach';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 @Injectable()
@@ -25,7 +27,7 @@ export class GioHangService {
 
   async layDong(khachHang: Types.ObjectId): Promise<any[]> {
     return this.gioHangModel
-      .find({ khachHang })
+      .find({ khachHang, ...DONG_GIO_HOAT_DONG })
       .populate({
         path: 'chiTietSanPham',
         populate: [
@@ -79,7 +81,7 @@ export class GioHangService {
       return 0;
     }
     const r = await this.gioHangModel.aggregate<{ t: number }>([
-      { $match: { khachHang: kh._id } },
+      { $match: { khachHang: kh._id, ...DONG_GIO_HOAT_DONG } },
       { $group: { _id: null, t: { $sum: '$soLuong' } } },
     ]);
     return r[0]?.t ?? 0;
@@ -94,24 +96,65 @@ export class GioHangService {
     if (!ct.sanPham || ct.sanPham.deletedAt) {
       throw new BadRequestException('Sản phẩm không còn kinh doanh.');
     }
-    const co = await this.gioHangModel.findOne({ khachHang: kh, chiTietSanPham: ct._id });
-    const moi = (co?.soLuong ?? 0) + soLuong;
-    if ((ct.soLuongTon ?? 0) < moi) {
-      throw new BadRequestException('Số lượng sản phẩm trong giỏ vượt quá tồn kho!');
+    const ton = Math.max(0, Number(ct.soLuongTon ?? 0));
+    const tran = Math.min(ton, TOI_DA_SO_LUONG);
+    const quaTran = () =>
+      new BadRequestException(
+        ton < TOI_DA_SO_LUONG ? 'Số lượng sản phẩm trong giỏ vượt quá tồn kho!' : `Mỗi sản phẩm chỉ được đặt tối đa ${TOI_DA_SO_LUONG}.`,
+      );
+    if (soLuong > tran) {
+      throw quaTran();
     }
-    if (co) {
-      co.soLuong = moi;
-      co.ngayThem = new Date();
-      await co.save();
-    } else {
-      await this.gioHangModel.create({ khachHang: kh, chiTietSanPham: ct._id, soLuong: moi });
+    // Cộng nguyên tử và chỉ khi tổng sau khi cộng không vượt trần: hai yêu cầu cùng lúc (hoặc một lần đồng bộ giỏ khách xen vào)
+    // không ghi đè số lượng của nhau như kiểu đọc rồi lưu lại cả tài liệu.
+    let xong = false;
+    for (let lan = 0; lan < 5 && !xong; lan++) {
+      // Số lượng hiện có của dòng đã bị xóa tính là 0 và thêm lại sẽ kích hoạt lại dòng (mã đồng bộ trên dòng được giữ nguyên).
+      const hienCo = { $cond: [{ $eq: ['$daXoa', true] }, 0, { $ifNull: ['$soLuong', 0] }] };
+      const r = await this.gioHangModel.updateOne(
+        { khachHang: kh, chiTietSanPham: ct._id, $expr: { $lte: [hienCo, tran - soLuong] } },
+        [{ $set: { soLuong: { $add: [hienCo, soLuong] }, daXoa: false, ngayThem: new Date() } }, { $unset: 'ngayXoa' }],
+        { updatePipeline: true },
+      );
+      if (r.matchedCount > 0) {
+        xong = true;
+      } else if (await this.dongDaCo(kh, ct._id, soLuong, tran, quaTran)) {
+        continue; // dòng vừa xuất hiện giữa hai bước (ví dụ một lần đồng bộ vừa tạo) và còn đủ chỗ: thử lại cộng nguyên tử
+      } else {
+        try {
+          await this.gioHangModel.create({ khachHang: kh, chiTietSanPham: ct._id, soLuong });
+          xong = true;
+        } catch (e) {
+          if (!laLoiTrungKhoa(e)) {
+            throw e;
+          }
+        }
+      }
+    }
+    if (!xong) {
+      throw new ServiceUnavailableException('Chưa thêm được vào giỏ hàng lúc này, vui lòng thử lại.');
     }
     return { message: 'Đã thêm sản phẩm vào giỏ hàng thành công!', cartCount: await this.dem(taiKhoanId) };
   }
 
+  /**
+   * Cộng nguyên tử thất bại: hoặc dòng chưa có (→ false, để tạo mới), hoặc dòng đã có. Dòng đã có chỉ bị từ chối khi THỰC SỰ không đủ
+   * chỗ (số lượng hiện tại + thêm > trần); còn chỗ thì là dòng vừa xuất hiện giữa hai bước nên trả true để thử cộng lại.
+   */
+  private async dongDaCo(kh: Types.ObjectId, ctId: Types.ObjectId, them: number, tran: number, quaTran: () => Error): Promise<boolean> {
+    const co: any = await this.gioHangModel.findOne({ khachHang: kh, chiTietSanPham: ctId }, { soLuong: 1, daXoa: 1 }).lean();
+    if (!co) {
+      return false;
+    }
+    if ((co.daXoa ? 0 : Number(co.soLuong ?? 0)) + them > tran) {
+      throw quaTran();
+    }
+    return true;
+  }
+
   async capNhat(taiKhoanId: string, dongId: string, soLuong: number) {
     const kh = await this.khachHangId(taiKhoanId);
-    const dong = await this.gioHangModel.findOne({ _id: parseObjectId(dongId, 'Dòng giỏ hàng'), khachHang: kh });
+    const dong = await this.gioHangModel.findOne({ _id: parseObjectId(dongId, 'Dòng giỏ hàng'), khachHang: kh, ...DONG_GIO_HOAT_DONG });
     if (!dong) {
       throw new NotFoundException('Sản phẩm không có trong giỏ hàng.');
     }
@@ -138,7 +181,7 @@ export class GioHangService {
 
   async xoa(taiKhoanId: string, dongId: string) {
     const kh = await this.khachHangId(taiKhoanId);
-    await this.gioHangModel.deleteOne({ _id: parseObjectId(dongId, 'Dòng giỏ hàng'), khachHang: kh });
+    await xoaDongGio(this.gioHangModel, { _id: parseObjectId(dongId, 'Dòng giỏ hàng'), khachHang: kh });
     return { message: 'Đã xóa sản phẩm khỏi giỏ hàng.', cartCount: await this.dem(taiKhoanId) };
   }
 }

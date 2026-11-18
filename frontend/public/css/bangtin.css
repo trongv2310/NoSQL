@@ -339,3 +339,8 @@
     .tin-card-thumb { width: 104px; }
     .tin-card-sum { display: none; }
 }
+
+.bt-content img { max-width: 100%; height: auto; border-radius: 12px; }
+.bt-content figure { margin: 0 0 20px; }
+.bt-content table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.bt-content th, .bt-content td { padding: 6px 10px; border: 1px solid #d9e2dd; }

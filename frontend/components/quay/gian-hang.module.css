@@ -1,0 +1,78 @@
+/* Mosaic danh mục, bậc thang tầm giá, các ô thương hiệu (nền xanh đậm). */
+
+/* ── Danh mục ── */
+.mosaic { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: clamp(170px, 17vw, 230px); gap: clamp(10px, 1.4vw, 18px); margin: 0; padding: 0; list-style: none; }
+.manh { position: relative; min-width: 0; border-radius: 22px; overflow: hidden; background: #0b3b2b; isolation: isolate; }
+.manhLon { grid-column: span 2; grid-row: span 2; }
+.manhRong { grid-column: span 2; }
+.manhLienKet { position: absolute; inset: 0; display: flex; align-items: flex-end; color: #fff; text-decoration: none; }
+.manhLienKet:focus-visible { outline: 3px solid #0f7550; outline-offset: -4px; border-radius: 22px; }
+.manhAnh { object-fit: cover; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.manhLienKet:hover .manhAnh { transform: scale(1.05); }
+.manhPhu { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 25, 18, 0) 18%, rgba(5, 25, 18, 0.62) 55%, rgba(5, 25, 18, 0.93) 100%); }
+.manhChu { position: relative; display: grid; gap: 4px; width: 100%; padding: clamp(12px, 1.6vw, 22px); }
+.manhTen { font-size: clamp(1.5rem, 2.4vw, 2.2rem); font-weight: 800; line-height: 1.05; letter-spacing: 0.01em; }
+.manhLon .manhTen { font-size: clamp(1.9rem, 3.4vw, 3rem); }
+.manhMoTa { font-size: 0.88rem; line-height: 1.4; color: #f0f7f3; }
+.manhChu { text-shadow: 0 1px 8px rgba(5, 25, 18, 0.55); }
+.manhSo { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 2px; font-size: 0.82rem; font-weight: 700; color: #fff; }
+.manhGiam { color: #ffc59b; }
+
+/* ── Bậc thang tầm giá ── */
+.thang { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2vw, 28px); margin: 0; padding: 0; list-style: none; align-items: end; }
+.bac { display: grid; gap: 8px; min-width: 0; align-content: end; }
+.cotTrack { display: flex; align-items: flex-end; height: clamp(120px, 14vw, 190px); border-bottom: 3px solid #0b3b2b; }
+.cot { display: flex; align-items: flex-start; justify-content: center; width: 100%; min-height: 8px; border-radius: 16px 16px 0 0; background: linear-gradient(180deg, #148f5f 0%, #0f7550 100%); transition: height 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.cot[data-bac="1"] { background: linear-gradient(180deg, #0f7550 0%, #0b5a3f 100%); }
+.cot[data-bac="2"] { background: linear-gradient(180deg, #0b5a3f 0%, #0b3b2b 100%); }
+.cotSo { padding-top: 10px; font-size: clamp(2rem, 3.6vw, 3.2rem); font-weight: 800; line-height: 1; color: #fff; }
+.bacTen { margin: 6px 0 0; font-size: clamp(1.35rem, 2vw, 1.7rem); font-weight: 800; letter-spacing: 0.01em; color: #0b3b2b; }
+.bacMoTa { margin: 0; font-size: 0.92rem; line-height: 1.5; color: #3b4943; }
+.bacLienKet { justify-self: start; font-size: 0.92rem; font-weight: 700; color: #0f7550; text-decoration: underline; text-underline-offset: 3px; }
+.bacLienKet:hover { color: #0b3b2b; }
+.bacLienKet:focus-visible { outline: 3px solid #0f7550; outline-offset: 3px; border-radius: 4px; }
+
+/* ── Thương hiệu ── */
+.hang { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 18px); margin: 0; padding: 0; list-style: none; }
+.hangO { min-width: 0; }
+.hangLienKet { display: grid; gap: 10px; height: 100%; padding: clamp(16px, 1.8vw, 24px); border: 1px solid rgba(143, 224, 189, 0.28); border-radius: 22px; background: rgba(255, 255, 255, 0.05); color: #e8f3ed; text-decoration: none; transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.hangLienKet:hover { background: rgba(255, 255, 255, 0.11); border-color: #8fe0bd; transform: translateY(-3px); color: #fff; }
+.hangLienKet:focus-visible { outline: 3px solid #8fe0bd; outline-offset: 3px; }
+.hangTen { font-size: clamp(2.1rem, 3.6vw, 3.1rem); font-weight: 800; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase; color: #fff; overflow-wrap: anywhere; }
+.hangSo { font-size: 0.9rem; color: #c5dccf; }
+.hangSo b { font-size: 1.5rem; font-weight: 800; color: #8fe0bd; margin-right: 2px; }
+.coCau { display: flex; gap: 3px; height: 10px; border-radius: 5px; overflow: hidden; }
+.coCau i { display: block; flex-basis: 0; min-width: 6px; }
+.chuThich { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 0.78rem; color: #c5dccf; }
+.chuThich span { display: inline-flex; align-items: center; gap: 5px; }
+.chuThich i { width: 8px; height: 8px; border-radius: 50%; }
+.hangChan { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; margin-top: 2px; padding-top: 10px; border-top: 1px solid rgba(143, 224, 189, 0.22); font-size: 0.86rem; font-weight: 700; color: #fff; }
+.hangGiam { color: #ffc59b; }
+
+@media (max-width: 991px) {
+  .hang { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mosaic { grid-auto-rows: clamp(150px, 24vw, 220px); }
+}
+@media (max-width: 767px) {
+  .mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 170px; gap: 10px; }
+  .manhLon { grid-column: span 2; grid-row: span 1; }
+  .manhRong { grid-column: span 2; }
+  .manhLon .manhTen { font-size: 2rem; }
+  .manhMoTa { display: none; }
+  .manhLon .manhMoTa { display: block; }
+  .thang { gap: 10px; }
+  .cotTrack { height: 110px; }
+  .cot { border-radius: 10px 10px 0 0; }
+  .bacMoTa { font-size: 0.82rem; }
+  .bacLienKet { font-size: 0.82rem; }
+  .bacTen { font-size: 1.15rem; }
+}
+@media (max-width: 479px) {
+  .hang { gap: 10px; }
+  .hangLienKet { padding: 14px; gap: 8px; }
+  .hangTen { font-size: 1.7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manhAnh, .cot, .hangLienKet { transition: none; }
+  .manhLienKet:hover .manhAnh, .hangLienKet:hover { transform: none; }
+}

@@ -1,0 +1,75 @@
+/* ==========================================================================
+   M2 — Quầy tư vấn: hồ sơ trên header, khung "Hỏi người bán" nhúng, bộ lọc thông số ở danh sách, phiếu thông số ở trang chi tiết.
+   Nạp sau storefront-shop.css. Cam chỉ cho hành động chính và con số đang chọn.
+   ========================================================================== */
+
+/* Hồ sơ người chơi gọn trên header */
+.sf-hoso { flex: 0 0 auto; margin-left: auto; display: inline-flex; align-items: center; max-width: 230px; border: 1.5px solid #b7d3c6; border-radius: 999px; background: #eef8f3; overflow: hidden; }
+.sf-hoso-nhan { display: inline-flex; align-items: center; gap: 7px; min-width: 0; padding: 7px 8px 7px 12px; color: #0b3b2b; font-size: .8rem; font-weight: 700; line-height: 1.2; text-decoration: none; }
+.sf-hoso-nhan span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sf-hoso-nhan:hover { color: #0f7550; }
+.sf-hoso-xoa { display: grid; place-items: center; flex: 0 0 auto; width: 34px; height: 34px; border: 0; background: transparent; color: #3b4943; cursor: pointer; }
+.sf-hoso-xoa:hover { color: #8a2c08; }
+.sf-hoso-nhan:focus-visible, .sf-hoso-xoa:focus-visible { outline: 3px solid #0f7550; outline-offset: -3px; border-radius: 999px; }
+@media (max-width: 767px) { .sf-hoso { max-width: 120px; } .sf-hoso-nhan { padding-left: 9px; } .sf-hoso-nhan i { display: none; } }
+
+/* Khung chat nhúng: cùng chatbot duy nhất, không cố định vị trí */
+#chat-container.chat-inline {
+  position: static;
+  inset: auto;
+  width: 100%;
+  max-width: none;
+  height: min(520px, 78dvh);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px -28px rgba(11, 59, 43, .5);
+}
+@media (max-width: 576px) {
+  #chat-container.chat-inline { inset: auto; width: 100%; height: min(500px, 78dvh); border: 1px solid var(--line, #e3e9e5); border-radius: 16px; }
+}
+
+/* Bộ lọc thông số vợt ở trang danh sách */
+.ls-facet { margin: 0 0 16px; padding: 0; border: 0; min-width: 0; }
+.ls-facet legend { float: none; width: auto; margin: 0 0 6px; padding: 0; font-size: .8rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #3b4943; }
+.ls-facet-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ls-facet-chips button { min-height: 38px; padding: 6px 12px; border: 1.5px solid #b7d3c6; border-radius: 999px; background: #fff; color: #0b3b2b; font-size: .82rem; font-weight: 600; cursor: pointer; }
+.ls-facet-chips button:hover { border-color: #0f7550; }
+.ls-facet-chips button[aria-pressed="true"] { border-color: #0b3b2b; background: #0b3b2b; color: #fff; }
+.ls-facet-chips button:focus-visible { outline: 3px solid #0f7550; outline-offset: 2px; }
+.ls-profile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 14px; padding: 10px 14px; border: 1px solid #b7d3c6; border-radius: 14px; background: #eef8f3; color: #0b3b2b; font-size: .88rem; }
+.ls-profile button { min-height: 36px; padding: 6px 14px; border: 0; border-radius: 10px; background: #b83c0a; color: #fff; font-weight: 700; cursor: pointer; }
+.ls-profile button:focus-visible { outline: 3px solid #0f7550; outline-offset: 2px; }
+.ls-empty-help { display: grid; gap: 14px; margin-top: 18px; }
+.ls-empty-help ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ls-empty-help a { display: inline-block; padding: 8px 14px; border: 1.5px solid #b7d3c6; border-radius: 999px; color: #0b3b2b; font-weight: 600; text-decoration: none; }
+.ls-empty-help a:hover { border-color: #0f7550; }
+.ls-grid .col-6 > article, .ls-grid .col-md-4 > article { height: 100%; }
+
+/* Phiếu thông số trang chi tiết (nền sáng kiểu catalogue) */
+.pt-phieu { display: grid; gap: 16px; }
+.pt-fit { margin: 0; padding: 10px 14px; border-left: 4px solid #0f7550; border-radius: 0 12px 12px 0; background: #eef8f3; color: #0b3b2b; font-size: .9rem; line-height: 1.5; }
+.pt-fit.is-khong { border-left-color: #9db3a9; background: #f3f6f4; color: #3b4943; }
+.pt-luoi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.pt-o { display: grid; gap: 4px; padding: 14px 16px; border: 1px solid #e3e9e5; border-radius: 16px; background: #fff; }
+.pt-o dt { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #55645d; }
+.pt-o dd { margin: 0; font-size: 1.05rem; font-weight: 700; color: #0b3b2b; }
+.pt-o dd.pt-so { font-size: 1.7rem; line-height: 1.1; color: #b83c0a; }
+.pt-o p { margin: 2px 0 0; font-size: .84rem; line-height: 1.5; color: #3b4943; }
+.pt-ghichu { margin: 0; font-size: .82rem; line-height: 1.5; color: #55645d; }
+@media (max-width: 575px) { .pt-luoi { grid-template-columns: minmax(0, 1fr); } }
+
+/* Chip hồ sơ là anh em của .header-actions (không nằm trong đó) để không đẩy nút giỏ hàng ra ngoài mép trên điện thoại; có chip thì nhóm nút bên phải chỉ cách chip một khoảng. */
+.sf-hoso + .header-actions { margin-left: -16px; }
+@media (max-width: 767px) { .sf-hoso + .header-actions { margin-left: auto; } }
+
+/* M3: công cụ trên trang chi tiết vợt */
+.pdp-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 10px 0 0; }
+.pdp-tool-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; border: 1.5px solid #b7d3c6; border-radius: 12px; background: #fff; color: #0b3b2b; font-size: 0.9rem; font-weight: 700; text-decoration: none; }
+.pdp-tool-link:hover { border-color: #0f7550; color: #0b3b2b; }
+.pdp-tool-link:focus-visible { outline: 3px solid #0f7550; outline-offset: 2px; }
+.pdp-cong-cu { display: grid; gap: 16px; margin-top: 16px; }
+.pdp-cong-cu > section { margin: 0; }
+
+/* M3: lối vào So sánh / Tủ vợt trên thanh điều hướng; dấu đếm nằm tuyệt đối nên không làm đổi kích thước hàng điều hướng */
+.nav-co-dem { position: relative; display: inline-block; }
+.nav-dem { position: absolute; top: -9px; right: -14px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #0b3b2b; color: #fff; font-size: 0.66rem; font-weight: 800; line-height: 16px; text-align: center; }
+.nav-dem-nhac { background: #b83c0a; }

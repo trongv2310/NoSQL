@@ -6,7 +6,7 @@ const sp = (id: string, tenLoai: string) => ({
 });
 
 describe('ghepTrangChu', () => {
-  it('gắn tồn kho (mặc định 0) và thông số của biến thể đầu tiên có thông số', () => {
+  it('gắn tồn kho (mặc định 0) và gộp thông số mọi biến thể: trường khác nhau không lấy bừa biến thể đầu', () => {
     const kq = ghepTrangChu(
       [sp('a', 'Vợt cầu lông'), sp('b', 'Giày cầu lông')],
       new Map([['a', 12]]),
@@ -16,7 +16,8 @@ describe('ghepTrangChu', () => {
         { sanPham: 'a', thongSo: { doCanBang: 'Nhẹ đầu' } },
       ],
     );
-    expect(kq[0]).toMatchObject({ id: 'a', tongTonKho: 12, thongSoVot: { doCanBang: 'Nặng đầu', doCung: 'Cứng' } });
+    expect(kq[0]).toMatchObject({ id: 'a', tongTonKho: 12, thongSoVot: { doCung: 'Cứng' }, thongSoKhacNhau: { doCanBang: ['Nặng đầu', 'Nhẹ đầu'] } });
+    expect((kq[0].thongSoVot as Record<string, unknown>).doCanBang).toBeUndefined();
     expect(kq[1]).toMatchObject({ id: 'b', tongTonKho: 0, thongSoVot: null });
   });
 });

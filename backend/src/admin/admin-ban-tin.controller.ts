@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { Model } from 'mongoose';
 import { CurrentUser } from '../auth/auth.decorators';
+import { lamSachHtmlTin } from '../common/lam-sach-html';
 import { Roles } from '../auth/auth.guards';
 import type { NguoiDung } from '../auth/auth.types';
 import { likeRegex, parseObjectId, phanTrang, toBool } from '../common/helpers';
@@ -24,7 +25,7 @@ const BOOL = () => Transform(({ value }) => toBool(value));
 export class TinTucDto {
   @IsString() @IsNotEmpty({ message: 'Vui lòng nhập tiêu đề.' }) @MaxLength(200) tieuDe: string;
   @rong() @IsOptional() @IsString() @MaxLength(500) tomTat?: string;
-  @IsString() @MinLength(20, { message: 'Nội dung quá ngắn, hãy nhập ít nhất 20 ký tự.' }) noiDung: string;
+  @IsString() @MinLength(20, { message: 'Nội dung quá ngắn, hãy nhập ít nhất 20 ký tự.' }) @MaxLength(300000, { message: 'Nội dung quá dài (tối đa 300.000 ký tự).' }) noiDung: string;
   @IsIn(Object.keys(LOAI_TIN), { message: 'Loại tin không hợp lệ.' }) loaiTin: string;
   @rong() @IsOptional() @IsString() @MaxLength(255) hinhAnh?: string;
   @rong() @IsOptional() @IsMongoId() sanPham?: string;
@@ -123,7 +124,7 @@ export class AdminBanTinController {
   private duLieu(dto: TinTucDto, file?: Express.Multer.File) {
     const anh = duongDanTuongDoi('tintuc', file);
     return {
-      tieuDe: dto.tieuDe, tomTat: dto.tomTat, noiDung: dto.noiDung, loaiTin: dto.loaiTin,
+      tieuDe: dto.tieuDe, tomTat: dto.tomTat, noiDung: lamSachHtmlTin(dto.noiDung), loaiTin: dto.loaiTin,
       sanPham: dto.sanPham ?? null, tranDau: dto.tranDau ?? null,
       nguonTin: dto.nguonTin, lienKetNguon: dto.lienKetNguon,
       noiBat: dto.noiBat, hienThi: dto.hienThi, thuTu: dto.thuTu ?? 1,

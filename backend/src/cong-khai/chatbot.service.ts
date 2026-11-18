@@ -7,7 +7,9 @@ import { khuyenMaiConHieuLuc } from '../common/pricing';
 import { ChiTietSanPham, DonHang, KhachHang, KhuyenMai, PhanHoi, SanPham } from '../schemas';
 import { CauDao, GioiHanTanSuat, giaHopLe, KetQuaGioiHan, LuotChat, trichSoTien, YeuCauChat } from './chatbot/an-toan';
 import { GioHangService } from '../gio-hang/gio-hang.service';
-import { HanhDong, PhanHoiChatbot, THONG_TIN_CUA_HANG, TheDonHang, TheSanPham } from './chatbot/chatbot.types';
+import { locPhanHoiCongKhai } from '../common/danh-gia';
+import { docLienHe } from '../common/lien-he';
+import { HanhDong, lienHeCuaHang, PhanHoiChatbot, TheDonHang, TheSanPham } from './chatbot/chatbot.types';
 import { dsHangTrongKho, dungKho, SanPhamKho, TEN_LOAI, timTheoTen, tuKhoaTrongKho } from './chatbot/kho';
 import { chuanHoa, gopNguCanh, KetQuaPhanTich, NguCanh, nhanSoLuong, phanTich, phanTichNganSach, YDinh } from './chatbot/nlu';
 import * as TL from './chatbot/tra-loi';
@@ -102,7 +104,7 @@ export class ChatbotService {
         const [sps, bts, dg] = await Promise.all([
           this.spModel.find({ deletedAt: null }).populate('loai hang khuyenMai').lean() as Promise<any[]>,
           this.ctModel.find().populate('mau size').lean() as Promise<any[]>,
-          this.phModel.aggregate<{ _id: any; tb: number; so: number }>([{ $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } }]),
+          this.phModel.aggregate<{ _id: any; tb: number; so: number }>([{ $match: locPhanHoiCongKhai() }, { $group: { _id: '$sanPham', tb: { $avg: '$danhGia' }, so: { $sum: 1 } } }]),
         ]);
         const kho = dungKho(sps, bts, new Map(dg.map((x) => [String(x._id), { tb: x.tb, so: x.so }])));
         this.boNho = { kho, het: Date.now() + THOI_GIAN_CACHE_KHO_MS };
@@ -124,7 +126,8 @@ export class ChatbotService {
       kho = await this.layKho();
     } catch (e) {
       this.logger.error(`Không tải được kho cho chatbot: ${(e as Error).message}`);
-      const reply = `Hệ thống tra cứu đang bận, bạn thử lại sau ít phút nhé. Nếu cần gấp, vui lòng gọi ${THONG_TIN_CUA_HANG.dienThoai}.`;
+      const sdt = docLienHe().dienThoai;
+      const reply = `Hệ thống tra cứu đang bận, bạn thử lại sau ít phút nhé.${sdt ? ` Nếu cần gấp, vui lòng gọi ${sdt}.` : ''}`;
       return this.phanHoi({ reply, the: [], donHang: [], chips: [], lienKet: [], nguCanh: yc.nguCanh, choPhepGia: [] }, 'khac', 'tra-cuu', false);
     }
 
@@ -234,8 +237,7 @@ export class ChatbotService {
   }
 
   private duLieuChung(them: string): string {
-    const ch = THONG_TIN_CUA_HANG;
-    return `${them}\nCửa hàng: ${ch.ten}. Địa chỉ ${ch.diaChi}. Điện thoại ${ch.dienThoai}. Email ${ch.email}. Giờ mở cửa ${ch.gioMoCua}. Thanh toán: COD hoặc MoMo. Chưa có dữ liệu về bảo hành, đổi trả, phí và thời gian giao hàng.`;
+    return `${them}\nCửa hàng: ${lienHeCuaHang()} Thanh toán: COD hoặc MoMo. Chưa có dữ liệu về bảo hành, đổi trả, phí và thời gian giao hàng.`;
   }
 
   private chonSanPham(pt: KetQuaPhanTich, khopTen: SanPhamKho[], c: NguCanh, truoc: SanPhamKho[]): SanPhamKho[] {

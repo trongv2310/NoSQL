@@ -12,9 +12,11 @@ import { ghiNhoAnhBam } from "@/lib/morph";
 import { useCatalog } from "./CatalogProvider";
 import { fontTieuDe } from "./fonts";
 import { docLuaChon, ghiLuaChon } from "./luu-lua-chon";
+import { datLoiChoi, usePhongCach } from "./phong-cach-store";
 import { ProductImage } from "./ProductImage";
 import { useScrollVar } from "./useScrollVar";
 import { RvHeading } from "./Words";
+import { SecHead } from "./SecHead";
 import s from "./picker.module.css";
 
 const CAU_HOI = ["Bạn định chi bao nhiêu?", "Bạn chơi cầu lông được bao lâu?", "Bạn thích đánh theo kiểu nào?"] as const;
@@ -27,6 +29,7 @@ export function RacketPicker() {
   const [nsKhoa, setNsKhoa] = useState<NganSachVot["khoa"] | null>(null);
   const [knKhoa, setKnKhoa] = useState<KinhNghiem | null>(null);
   const [lcKhoa, setLcKhoa] = useState<LoiChoi | null>(null);
+  const { lc: lcChung } = usePhongCach();
   const tieuDe = useRef<HTMLHeadingElement>(null);
   const khung = useRef<HTMLElement>(null);
   useScrollVar(khung, "pass");
@@ -42,6 +45,11 @@ export function RacketPicker() {
     }
     setDaKhoiPhuc(true);
   }, []);
+  // Lối chơi đã chọn ở khu "chọn lối chơi" phía trên là câu trả lời có sẵn cho câu hỏi thứ ba (đổi ở đâu cũng đồng bộ).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (lcChung) setLcKhoa(lcChung);
+  }, [lcChung]);
   useEffect(() => { if (daKhoiPhuc) ghiLuaChon("landing:picker", { ns: nsKhoa, kn: knKhoa, lc: lcKhoa, buoc }); }, [daKhoiPhuc, nsKhoa, knKhoa, lcKhoa, buoc]);
 
   // Chuyển bước thì đưa focus về tiêu đề bước mới (người dùng bàn phím/đọc màn hình không bị bỏ lại ở nút cũ).
@@ -73,6 +81,7 @@ export function RacketPicker() {
       </div>
       <div className={`container ${s.inner}`}>
         <div className={s.intro}>
+          <SecHead label="Tìm vợt" tag="Gợi ý" />
           <RvHeading id="tim-vot-title" className={`${s.title} ${fontTieuDe.className}`} text="Tìm vợt phù hợp" />
           <p className={s.note} data-rv="up">
             Trả lời ba câu hỏi, chúng tôi đối chiếu độ cân bằng, độ cứng thân và giá ghi trong kho. Đây là gợi ý tham khảo, nên cầm thử vợt khi có thể.
@@ -130,7 +139,7 @@ export function RacketPicker() {
                 ))}
                 {buoc === 2 && LOI_CHOI.map((l) => (
                   <button key={l.khoa} type="button" className={s.option} aria-pressed={lcKhoa === l.khoa}
-                    onClick={() => chon(2, () => setLcKhoa(l.khoa), !!nsKhoa && !!knKhoa)}>
+                    onClick={() => chon(2, () => { setLcKhoa(l.khoa); datLoiChoi(l.khoa); }, !!nsKhoa && !!knKhoa)}>
                     <b>{l.nhan}</b><span>{l.mota}</span>
                   </button>
                 ))}

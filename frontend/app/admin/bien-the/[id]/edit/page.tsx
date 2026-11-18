@@ -21,7 +21,7 @@ export default function SuaBienThePage() {
   const router = useRouter();
   const { flash } = useApp();
   const { data, error, loading } = useApi<Data>(`/admin/bien-the/${id}`);
-  const [f, setF] = useState({ mau: "", size: "", giaBan: "", soLuongTon: "0", sku: "", doCanBang: "", trongLuong: "", doCung: "", chieuDai: "", sucCang: "" });
+  const [f, setF] = useState({ mau: "", size: "", giaBan: "", soLuongTon: "0", soLuongTonDaTai: "", sku: "", doCanBang: "", trongLuong: "", doCung: "", chieuDai: "", sucCang: "" });
   const [file, setFile] = useState<File | null>(null);
   const [loi, setLoi] = useState<string | null>(null);
   const [dang, setDang] = useState(false);
@@ -30,7 +30,7 @@ export default function SuaBienThePage() {
     if (data) {
       const b = data.bienThe;
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setF({ mau: b.mau?.id ?? "", size: b.size?.id ?? "", giaBan: String(b.giaBan ?? ""), soLuongTon: String(b.soLuongTon), sku: b.sku,
+      setF({ mau: b.mau?.id ?? "", size: b.size?.id ?? "", giaBan: String(b.giaBan ?? ""), soLuongTon: String(b.soLuongTon), soLuongTonDaTai: String(b.soLuongTon), sku: b.sku,
         doCanBang: b.thongSo?.doCanBang ?? "", trongLuong: b.thongSo?.trongLuong ?? "", doCung: b.thongSo?.doCung ?? "", chieuDai: b.thongSo?.chieuDai ?? "", sucCang: b.thongSo?.sucCang ?? "" });
     }
   }, [data]);

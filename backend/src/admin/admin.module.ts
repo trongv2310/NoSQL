@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CongKhaiModule } from '../cong-khai/cong-khai.module';
 import { DonHangModule } from '../don-hang/don-hang.module';
 import { AdminBanTinController } from './admin-ban-tin.controller';
+import { AdminBaoCaoController } from './admin-bao-cao.controller';
 import {
   AdminKhuyenMaiController, AdminLogoController, AdminTaiKhoanController, AdminTranDauController,
 } from './admin-danh-muc.controller';
@@ -12,7 +13,7 @@ import { AdminVanHanhController } from './admin-van-hanh.controller';
   imports: [DonHangModule, CongKhaiModule],
   controllers: [
     AdminSanPhamController, AdminVanHanhController, AdminBanTinController,
-    AdminKhuyenMaiController, AdminTranDauController, AdminTaiKhoanController, AdminLogoController,
+    AdminKhuyenMaiController, AdminTranDauController, AdminTaiKhoanController, AdminLogoController, AdminBaoCaoController,
   ],
 })
 export class AdminModule {}

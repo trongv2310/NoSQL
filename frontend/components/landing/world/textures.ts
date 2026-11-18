@@ -5,14 +5,14 @@ import * as THREE from "three";
  * Ánh sáng được "nướng" sẵn vào texture (vệt đèn trên sàn, độ tối mép) nên vật liệu cảnh dùng MeshBasic: rẻ và ổn định.
  */
 
-const canvas = (w: number, h: number) => {
+export const canvas = (w: number, h: number) => {
   const c = document.createElement("canvas");
   c.width = w;
   c.height = h;
   return c;
 };
 
-function toTexture(c: HTMLCanvasElement, opts: { srgb?: boolean; repeat?: boolean; aniso?: number } = {}) {
+export function toTexture(c: HTMLCanvasElement, opts: { srgb?: boolean; repeat?: boolean; aniso?: number } = {}) {
   const t = new THREE.CanvasTexture(c);
   if (opts.srgb !== false) t.colorSpace = THREE.SRGBColorSpace;
   if (opts.repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -38,7 +38,8 @@ export function rng(seed: number) {
 export const COURT = { len: 13.4, wid: 6.1, margin: 1.2, singles: 5.18, shortService: 1.98, longServiceDoubles: 0.76 } as const;
 
 /**
- * Mặt sân nhìn từ trên xuống: nền xanh, vạch trắng đúng kích thước, vệt sáng của dải đèn trần và mép tối dần.
+ * Mặt sân nhìn từ trên xuống: nền xanh ngọc, vạch trắng đúng kích thước, vũng sáng của các dải đèn trần và mép tối dần.
+ * Sàn được vẽ bóng (có phản chiếu) nên texture chỉ mang màu và vệt sáng "nướng sẵn"; phản chiếu do shader sàn lo.
  * Trục canvas: x = bề ngang sân (wid + 2*margin), y = chiều dài (len + 2*margin), y = 0 là đầu xa (−z).
  */
 export function courtTexture(maxAniso: number, ppm = 150) {
@@ -49,41 +50,47 @@ export function courtTexture(maxAniso: number, ppm = 150) {
   const X = (m: number) => (m + W / 2) * ppm; // m: mét từ trục giữa
   const Y = (m: number) => (m + L / 2) * ppm; // m: mét từ tâm sân (âm = đầu xa)
 
-  // nền: vùng đánh xanh lục đậm, viền ngoài tối hơn
-  g.fillStyle = "#06261c";
+  // nền: viền ngoài xanh đen, vùng đánh xanh ngọc đậm dần về giữa
+  g.fillStyle = "#04221a";
   g.fillRect(0, 0, c.width, c.height);
   const inner = g.createLinearGradient(0, Y(-COURT.len / 2), 0, Y(COURT.len / 2));
-  inner.addColorStop(0, "#0b5b40");
-  inner.addColorStop(0.5, "#0f7a55");
-  inner.addColorStop(1, "#0b5b40");
+  inner.addColorStop(0, "#08543b");
+  inner.addColorStop(0.5, "#0c6a49");
+  inner.addColorStop(1, "#08543b");
   g.fillStyle = inner;
   g.fillRect(X(-COURT.wid / 2), Y(-COURT.len / 2), COURT.wid * ppm, COURT.len * ppm);
 
-  // hạt sàn
+  // hạt sàn PU
   const r = rng(7);
-  for (let i = 0; i < Math.round(26000 * (ppm / 150) ** 2); i++) {
-    g.fillStyle = `rgba(255,255,255,${(r() * 0.035).toFixed(3)})`;
+  for (let i = 0; i < Math.round(30000 * (ppm / 150) ** 2); i++) {
+    g.fillStyle = `rgba(255,255,255,${(r() * 0.03).toFixed(3)})`;
     g.fillRect(r() * c.width, r() * c.height, 1 + r() * 2, 1 + r() * 2);
   }
 
-  // vệt sáng của ba hàng đèn trần
-  for (const x of [-2.2, 0, 2.2]) {
-    const lg = g.createLinearGradient(X(x - 1.1), 0, X(x + 1.1), 0);
-    lg.addColorStop(0, "rgba(180,255,220,0)");
-    lg.addColorStop(0.5, "rgba(180,255,220,0.13)");
-    lg.addColorStop(1, "rgba(180,255,220,0)");
+  // vũng sáng dưới ba hàng đèn trần (cộng sáng)
+  g.globalCompositeOperation = "lighter";
+  for (const x of [-2.4, 0, 2.4]) {
+    const lg = g.createLinearGradient(X(x - 1.5), 0, X(x + 1.5), 0);
+    lg.addColorStop(0, "rgba(150,240,200,0)");
+    lg.addColorStop(0.5, "rgba(150,240,200,0.12)");
+    lg.addColorStop(1, "rgba(150,240,200,0)");
     g.fillStyle = lg;
-    g.fillRect(X(x - 1.1), 0, 2.2 * ppm, c.height);
+    g.fillRect(X(x - 1.5), 0, 3 * ppm, c.height);
   }
-  for (let z = -COURT.len / 2 + 1.2; z < COURT.len / 2; z += 3.4) {
-    const rg = g.createRadialGradient(X(0), Y(z), 0, X(0), Y(z), 3.6 * ppm);
-    rg.addColorStop(0, "rgba(210,255,235,0.22)");
-    rg.addColorStop(1, "rgba(210,255,235,0)");
-    g.fillStyle = rg;
-    g.fillRect(0, Y(z) - 3.6 * ppm, c.width, 7.2 * ppm);
+  for (const x of [-2.4, 0, 2.4]) {
+    for (let z = -18; z <= 14; z += 3.4) {
+      if (Math.abs(z) > L / 2 + 3) continue;
+      const rg = g.createRadialGradient(X(x), Y(z), 0, X(x), Y(z), 2.3 * ppm);
+      rg.addColorStop(0, "rgba(200,255,228,0.30)");
+      rg.addColorStop(0.5, "rgba(120,220,180,0.10)");
+      rg.addColorStop(1, "rgba(120,220,180,0)");
+      g.fillStyle = rg;
+      g.fillRect(X(x) - 2.3 * ppm, Y(z) - 2.3 * ppm, 4.6 * ppm, 4.6 * ppm);
+    }
   }
+  g.globalCompositeOperation = "source-over";
 
-  // vạch sân (rộng 4cm), hơi phát sáng
+  // vạch sân (rộng 4 cm), hơi phát sáng
   const line = (x1: number, z1: number, x2: number, z2: number) => {
     g.beginPath();
     g.moveTo(X(x1), Y(z1));
@@ -92,9 +99,9 @@ export function courtTexture(maxAniso: number, ppm = 150) {
   };
   g.lineCap = "butt";
   g.shadowColor = "rgba(190,255,225,0.9)";
-  g.shadowBlur = 10;
-  g.strokeStyle = "#eef7f2";
-  g.lineWidth = 0.045 * ppm;
+  g.shadowBlur = 8;
+  g.strokeStyle = "#f4faf6";
+  g.lineWidth = 0.05 * ppm;
   const hl = COURT.len / 2, hw = COURT.wid / 2, hs = COURT.singles / 2;
   g.strokeRect(X(-hw), Y(-hl), COURT.wid * ppm, COURT.len * ppm); // biên đôi
   line(-hs, -hl, -hs, hl); line(hs, -hl, hs, hl); // biên đơn
@@ -107,9 +114,9 @@ export function courtTexture(maxAniso: number, ppm = 150) {
   g.shadowBlur = 0;
 
   // tối dần ra mép để sàn tan vào bóng tối của nhà thi đấu
-  const vg = g.createRadialGradient(c.width / 2, c.height / 2, c.height * 0.12, c.width / 2, c.height / 2, c.height * 0.62);
+  const vg = g.createRadialGradient(c.width / 2, c.height / 2, c.height * 0.14, c.width / 2, c.height / 2, c.height * 0.62);
   vg.addColorStop(0, "rgba(2,12,9,0)");
-  vg.addColorStop(1, "rgba(2,12,9,0.78)");
+  vg.addColorStop(1, "rgba(2,12,9,0.82)");
   g.fillStyle = vg;
   g.fillRect(0, 0, c.width, c.height);
 
@@ -162,33 +169,6 @@ export function adBoardTexture(text: string, fontFamily: string, accent: string)
   g.textAlign = "center";
   g.textBaseline = "middle";
   g.fillText(text.toUpperCase(), 512, 138);
-  return toTexture(c, { aniso: 8 });
-}
-
-/** Chữ khổng lồ đứng trên sân: sáng ở trên, ngả xanh ở chân, có một dải sáng quét ngang. */
-export function wordmarkTexture(text: string, fontFamily: string, scale = 1) {
-  const c = canvas(Math.round(4096 * scale), Math.round(1024 * scale));
-  const g = c.getContext("2d")!;
-  g.clearRect(0, 0, c.width, c.height);
-  g.scale(scale, scale);
-  g.font = `800 920px ${fontFamily}`;
-  g.textAlign = "center";
-  g.textBaseline = "alphabetic";
-  const fill = g.createLinearGradient(0, 120, 0, 980);
-  fill.addColorStop(0, "#f1f8f4");
-  fill.addColorStop(0.55, "#c8dcd2");
-  fill.addColorStop(1, "#6f9486");
-  g.fillStyle = fill;
-  g.fillText(text, c.width / 2, 960);
-  // ánh sáng quét ngang chữ
-  g.globalCompositeOperation = "source-atop";
-  const sheen = g.createLinearGradient(0, 0, c.width, 0);
-  sheen.addColorStop(0, "rgba(255,255,255,0)");
-  sheen.addColorStop(0.42, "rgba(255,255,255,0.24)");
-  sheen.addColorStop(0.6, "rgba(255,255,255,0)");
-  g.fillStyle = sheen;
-  g.fillRect(0, 0, 4096, 1024);
-  g.globalCompositeOperation = "source-over";
   return toTexture(c, { aniso: 8 });
 }
 
@@ -245,55 +225,3 @@ export function wallTexture() {
   return toTexture(c);
 }
 
-/** Cánh cầu: nhiều thớ trắng ngà, khe hở giữa các thớ cắt bằng alpha, vài đường chỉ ngang. */
-export function featherTexture() {
-  const c = canvas(512, 256);
-  const g = c.getContext("2d")!;
-  g.clearRect(0, 0, 512, 256);
-  const vanes = 16;
-  const w = 512 / vanes;
-  for (let i = 0; i < vanes; i++) {
-    const gr = g.createLinearGradient(0, 0, 0, 256);
-    gr.addColorStop(0, "#fffdf6");
-    gr.addColorStop(1, "#d8cfb8");
-    g.fillStyle = gr;
-    g.fillRect(i * w + 2.5, 0, w - 5, 256);
-    g.fillStyle = "rgba(120,100,70,0.35)";
-    g.fillRect(i * w + w / 2 - 0.8, 0, 1.6, 256); // sống lông
-  }
-  g.fillStyle = "rgba(235,225,200,1)";
-  g.fillRect(0, 14, 512, 7); // chỉ buộc gần miệng
-  g.fillRect(0, 238, 512, 6); // chỉ buộc gần nút
-  return toTexture(c, { repeat: true });
-}
-
-/** Mắt vợt: đan ô vuông mảnh trên nền trong suốt. */
-export function stringsTexture() {
-  const c = canvas(512, 512);
-  const g = c.getContext("2d")!;
-  g.clearRect(0, 0, 512, 512);
-  g.strokeStyle = "rgba(255,255,255,0.8)";
-  g.lineWidth = 2;
-  const step = 512 / 22;
-  for (let i = 0; i <= 22; i++) {
-    g.beginPath(); g.moveTo(i * step, 0); g.lineTo(i * step, 512); g.stroke();
-    g.beginPath(); g.moveTo(0, i * step); g.lineTo(512, i * step); g.stroke();
-  }
-  return toTexture(c, { aniso: 8 });
-}
-
-/** Quấn cán vợt: dải chéo cam – đen. */
-export function gripTexture() {
-  const c = canvas(64, 256);
-  const g = c.getContext("2d")!;
-  g.fillStyle = "#101614";
-  g.fillRect(0, 0, 64, 256);
-  g.fillStyle = "#f4691a";
-  for (let y = -64; y < 320; y += 22) {
-    g.beginPath();
-    g.moveTo(0, y); g.lineTo(64, y + 26); g.lineTo(64, y + 34); g.lineTo(0, y + 8);
-    g.closePath();
-    g.fill();
-  }
-  return toTexture(c, { repeat: true });
-}

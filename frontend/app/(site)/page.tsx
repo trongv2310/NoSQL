@@ -1,54 +1,50 @@
 import type { Metadata } from "next";
 import { Catalog } from "@/components/landing/Catalog";
-import { ChapterRail } from "@/components/landing/ChapterRail";
-import { Categories } from "@/components/landing/Categories";
-import { HeroCourt } from "@/components/landing/Hero";
-import { fontTieuDe } from "@/components/landing/fonts";
-import { LandingMotion } from "@/components/landing/LandingMotion";
-import { Story } from "@/components/landing/Story";
-import { World } from "@/components/landing/World";
-import { Brands, FinalCta, Reviews } from "@/components/landing/Trust";
-import s from "@/components/landing/landing.module.css";
+import { CongCu, DaiSoLieu } from "@/components/quay/CongCu";
+import { DanhMucBento, TamGia, ThuongHieu } from "@/components/quay/GianHang";
+import { BangTinTrangChu, HoiDap, QuyTrinh } from "@/components/quay/HuongDan";
+import { ConNhieuHang, KeHang, KhuyenMai } from "@/components/quay/KhuyenMai";
+import { LoiChoi } from "@/components/quay/LoiChoi";
+import { HoiNguoiBanTrangChu } from "@/components/quay/PhanKhac";
+import { QuayTuVan } from "@/components/quay/QuayTuVan";
 
-const MO_TA = "Vợt, giày, trang phục và phụ kiện cầu lông từ Yonex, Li-Ning, Victor, Mizuno. Lọc theo ngân sách, tìm vợt phù hợp và xem tồn kho trước khi đặt.";
+const MO_TA = "Chọn vợt cầu lông theo lối chơi, trình độ và ngân sách: shop đưa ra 3 cây còn hàng kèm lý do từ thông số ghi trong kho. Giá và tồn kho thật, thêm vào giỏ không cần đăng nhập.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
-  title: "Khám phá cửa hàng cầu lông - Cửa Hàng Cầu Lông",
+  title: "Quầy tư vấn vợt cầu lông - Cửa Hàng Cầu Lông",
   description: MO_TA,
-  openGraph: {
-    title: "Cửa Hàng Cầu Lông — Đúng vợt, đúng giày, vào trận",
-    description: MO_TA,
-    images: [{ url: "/images/landing/hero-court.webp", width: 1600, height: 667 }],
-    locale: "vi_VN",
-    type: "website",
-  },
+  openGraph: { title: "Cửa Hàng Cầu Lông — Quầy tư vấn vợt", description: MO_TA, locale: "vi_VN", type: "website" },
 };
 
 /**
- * Trang tĩnh làm mới theo hạn của dữ liệu giá/tồn kho (phải là literal để Next đọc lúc build; bằng LAM_MOI_SAN_PHAM_GIAY trong lib/server-api.ts).
- * Dữ liệu được lấy lúc dựng/làm mới trang (mỗi lần gọi chờ tối đa 2,5 giây, quá hạn thì coi như chưa có), nên người xem nhận HTML đủ nội dung
- * ngay từ byte đầu, không có khối nào được chèn muộn làm footer nhảy. Hero và danh mục không đọc API. Khối nào thiếu dữ liệu thì tự tải lại
- * phía client với trạng thái loading/lỗi/thử lại riêng (xem CatalogProvider).
+ * Trang chủ "Quầy tư vấn": nền sáng, không có cảnh 3D/WebGL. Màn hình đầu là bộ chọn + 3 vợt thật; bên dưới là các khu có nhịp khác nhau:
+ * số liệu kho, công cụ của shop, danh mục, chọn theo lối chơi (Racket DNA), khuyến mãi, tầm giá, thương hiệu, kệ giày/áo quần/phụ kiện, tồn kho,
+ * Bảng tin, hỏi người bán, quy trình mua hàng, câu hỏi thường gặp. Mọi con số và danh sách đều đếm/chọn từ dữ liệu thật (lib/landing-data.ts).
+ * Trang tĩnh làm mới theo hạn của dữ liệu giá/tồn kho (literal để Next đọc lúc build; bằng LAM_MOI_SAN_PHAM_GIAY trong lib/server-api.ts).
+ * Dữ liệu lấy ở server nên HTML đã có sản phẩm; server không lấy được thì client tự tải lại với trạng thái loading/lỗi/thử lại, từng khu độc lập.
+ * Mã cảnh 3D cũ (components/landing/World…) được giữ nguyên trong repo nhưng không gắn vào trang.
  */
 export const revalidate = 120;
 
-/** Bốn thương hiệu shop đang bán, in trên bảng quảng cáo ven sân trong thế giới 3D. */
-const HANG = ["Yonex", "Li-Ning", "Victor", "Mizuno"];
-
 export default function TrangChu() {
   return (
-    <main className={s.root} data-landing>
-      <World fontFamily={fontTieuDe.style.fontFamily} brands={HANG} wordmark="CẦU LÔNG" />
-      <LandingMotion />
-      <ChapterRail />
-      <HeroCourt />
-      <Categories />
-      <Catalog />
-      <Story />
-      <Reviews />
-      <Brands />
-      <FinalCta />
+    <main>
+      <Catalog>
+        <QuayTuVan />
+        <DaiSoLieu />
+        <CongCu />
+        <DanhMucBento />
+        <LoiChoi />
+        <KhuyenMai />
+        <TamGia />
+        <ThuongHieu />
+        <KeHang />
+        <ConNhieuHang />
+        <BangTinTrangChu />
+        <HoiNguoiBanTrangChu />
+        <QuyTrinh />
+        <HoiDap />
+      </Catalog>
     </main>
   );
 }

@@ -1,0 +1,147 @@
+/* Thẻ sản phẩm duy nhất + dải thông số: bề mặt sáng kiểu catalogue, chữ xanh sân; cam chỉ cho hành động chính và số đang được chọn. */
+
+.the {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--line, #e3e9e5);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.the:hover { border-color: #b7d3c6; box-shadow: 0 14px 30px -18px rgba(11, 59, 43, 0.35); }
+.the:focus-within { border-color: #0f7550; }
+
+/* Khung ảnh trung tính đồng nhất: ảnh KHÔNG bị cắt hay méo (contain), ảnh nền trắng hòa vào khung. */
+.khung {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  background: #f3f6f4;
+  overflow: hidden;
+}
+/* Thẻ dựng đứng ở Quầy tư vấn: khung ảnh cao theo chiều cao màn hình (đủ thấy giá + nút mua ngay màn hình đầu), ảnh không bị cắt hay méo. */
+.dung .khung { aspect-ratio: auto; height: clamp(150px, 22vh, 240px); }
+.dung .than { gap: 5px; padding: 10px 14px 8px; }
+.dung .hanh { padding-bottom: 12px; }
+/* Điện thoại: thẻ ngang (ảnh trái; hãng, tên, giá, tiết kiệm, nút mua phải) để giá và nút mua luôn thấy ngay; dải thông số và lý do nằm dưới, full bề ngang. */
+@media (max-width: 767px) {
+  .dung { display: grid; grid-template-columns: 36% minmax(0, 1fr); align-content: start; row-gap: 4px; }
+  .dung .khung { grid-column: 1; grid-row: 1 / span 5; height: auto; min-height: 150px; align-self: stretch; }
+  .dung .than { display: contents; }
+  .dung .hang, .dung .ten, .dung .hangGia, .dung .tietKiem, .dung .hanh { grid-column: 2; }
+  .dung .hang { grid-row: 1; padding: 10px 12px 0; }
+  .dung .ten { grid-row: 2; padding-inline: 12px; font-size: 0.94rem; }
+  .dung .hangGia { grid-row: 3; margin-top: 0; padding: 0 12px; }
+  .dung .tietKiem { grid-row: 4; padding-inline: 12px; }
+  .dung .hanh { grid-row: 5; align-self: end; padding: 2px 12px 10px; }
+  .dung .gia { font-size: 1.3rem; }
+  .dung .dai { grid-row: 6; grid-column: 1 / -1; margin: 2px 12px 0; }
+  .dung .lyDo { grid-row: 7; grid-column: 1 / -1; margin: 0 12px 12px; }
+  .dung .dai:last-child { margin-bottom: 12px; }
+}
+.anh { object-fit: contain; object-position: 50% 50%; padding: 6%; mix-blend-mode: multiply; }
+.dung .anh { padding: 5% 8% 4%; object-position: 50% 55%; }
+
+.giuCho { position: absolute; inset: 0; color: #8fb5a3; }
+.giuChoHinh { position: absolute; top: 10px; bottom: 36px; left: 50%; height: calc(100% - 46px); width: auto; transform: translateX(-50%); }
+.giuChoNhan { position: absolute; right: 8px; bottom: 8px; padding: 3px 9px; border: 1px dashed #9db3a9; border-radius: 999px; background: #fff; font-size: 0.7rem; font-weight: 600; line-height: 1.3; color: #3b4943; }
+
+.huy { position: absolute; z-index: 2; top: 10px; padding: 3px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; line-height: 1.3; }
+.giam { left: 10px; background: #c2410c; color: #fff; }
+/* Góc trên phải dành cho nút so sánh (40px); nhãn tồn kho xuống góc dưới trái, nhãn "Gần khớp" ngay dưới nhãn giảm giá. */
+.het { left: 10px; top: auto; bottom: 10px; background: #e9eeeb; color: #3b4943; }
+.it { left: 10px; top: auto; bottom: 10px; background: #fff; color: #8a5a06; border: 1px solid #f3e1b6; }
+.nhanGan { left: 10px; top: 40px; background: #fff; color: #3b4943; border: 1px dashed #9db3a9; }
+
+.than { display: flex; flex: 1; flex-direction: column; gap: 6px; padding: 12px 14px 14px; }
+.hang { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #55645d; }
+.ten {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #17211c;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.ten::after { content: ""; position: absolute; inset: 0; z-index: 1; } /* một liên kết phủ cả thẻ; nút bên dưới nâng lên trên */
+.ten:hover { color: #0f7550; }
+.ten:focus-visible { outline: 3px solid #0f7550; outline-offset: -3px; border-radius: 16px; }
+
+.hangGia { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: auto; padding-top: 4px; }
+.gia { font-size: 1.5rem; font-weight: 700; line-height: 1.1; color: #0b3b2b; letter-spacing: 0.005em; }
+.giaCu { font-size: 0.82rem; color: #55645d; text-decoration: line-through; }
+.tietKiem { font-size: 0.76rem; font-weight: 600; color: #8a2c08; }
+
+.lyDo {
+  margin: 0;
+  padding-left: 8px;
+  border-left: 3px solid #0f7550;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #3b4943;
+}
+
+.hanh { position: relative; z-index: 2; display: grid; gap: 8px; padding: 0 14px 14px; }
+.nutThem {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #b83c0a;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.nutThem:hover:not(:disabled) { background: #a23408; }
+.nutThem:active:not(:disabled) { transform: translateY(1px); }
+.nutThem:disabled { background: #e3e9e5; color: #55645d; cursor: not-allowed; }
+.nutThem:focus-visible, .pbNut:focus-visible { outline: 3px solid #0f7550; outline-offset: 2px; }
+
+.chonPb { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--line, #e3e9e5); border-radius: 12px; background: #f8faf9; }
+.chonPb p { margin: 0 2px; font-size: 0.74rem; font-weight: 700; color: #3b4943; }
+.pbNut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid #b7d3c6;
+  border-radius: 10px;
+  background: #fff;
+  color: #17211c;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+.pbNut:hover { border-color: #0f7550; background: #eef8f3; }
+.pbNut b { font-weight: 700; color: #0b3b2b; white-space: nowrap; }
+
+/* ───────────── Dải thông số (DNA) ───────────── */
+.dai { display: flex; align-items: center; gap: 10px; color: #0b3b2b; }
+.daiHinh { flex: 0 0 auto; width: 26px; height: auto; color: #55645d; }
+.daiLon .daiHinh { width: 44px; }
+.diemCanBang { fill: #0f7550; stroke: #fff; stroke-width: 2; transition: cy 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.daiBang { display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 0; min-width: 0; font-size: 0.76rem; line-height: 1.35; }
+.daiBang > div { display: flex; flex-direction: column; min-width: 0; }
+.daiBang dt { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #55645d; }
+.daiBang dd { margin: 0; font-weight: 600; color: #17211c; }
+.daiU dd.so, .so { font-size: 1.15rem; font-weight: 800; line-height: 1; color: #b83c0a; } /* số đang hiển thị: cam đậm đạt 5:1 */
+.daiTuyBien dd { color: #55645d; font-weight: 500; }
+.daiLon .daiBang { font-size: 0.9rem; gap: 6px 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .the, .nutThem, .diemCanBang { transition: none; }
+}
+@media (max-width: 575px) {
+  .gia { font-size: 1.3rem; }
+  .than { padding: 10px 12px 12px; }
+  .hanh { padding: 0 12px 12px; }
+}

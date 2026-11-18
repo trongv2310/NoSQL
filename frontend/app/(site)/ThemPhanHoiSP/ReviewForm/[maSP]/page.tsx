@@ -37,16 +37,16 @@ export default function ReviewFormPage() {
       <div className="card mx-auto" style={{ maxWidth: 560 }}><form className="card-body" onSubmit={gui}>
         <h4 className="mb-3">Đánh giá sản phẩm</h4>
         {loi && <ErrorBox message={loi} />}
-        <div className="mb-3">
-          <label className="form-label">Số sao</label>
+        <div className="mb-3" role="group" aria-labelledby="rv-sao">
+          <label className="form-label" id="rv-sao">Số sao</label>
           <div className="fs-2">{[1, 2, 3, 4, 5].map((i) => (
             <button type="button" key={i} className="btn p-0 border-0 bg-transparent" style={{ color: i <= danhGia ? "#f5a623" : "#ccc", fontSize: "inherit" }} onClick={() => setDanhGia(i)} aria-label={`${i} sao`}>★</button>
           ))}</div>
         </div>
         <div className="mb-3">
-          <label className="form-label">Nội dung đánh giá</label>
-          <textarea className="form-control" rows={4} required minLength={5} maxLength={255} value={noiDung} onChange={(e) => setNoiDung(e.target.value)} />
-          <div className="form-text">{noiDung.length}/255</div>
+          <label className="form-label" htmlFor="rv-noi-dung">Nội dung đánh giá</label>
+          <textarea id="rv-noi-dung" aria-describedby="rv-dem" className="form-control" rows={4} required minLength={5} maxLength={255} value={noiDung} onChange={(e) => setNoiDung(e.target.value)} />
+          <div className="form-text" id="rv-dem">{noiDung.length}/255</div>
         </div>
         <button className="btn btn-primary" disabled={dang}>Gửi đánh giá</button>
       </form></div>

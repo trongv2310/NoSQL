@@ -5,7 +5,8 @@
 import { TRANG_THAI } from '../../schemas';
 import { khachCoTheHuy } from '../../don-hang/trang-thai';
 import { SanPhamKho, TEN_LOAI } from './kho';
-import { THONG_TIN_CUA_HANG as CH } from './chatbot.types';
+import { docLienHe } from '../../common/lien-he';
+import { lienHeCuaHang } from './chatbot.types';
 import { ChuDeChinhSach, ChuDeHuongDan, NguCanh } from './nlu';
 
 const TEN_NHOM = { cau: 'quả cầu', tui: 'túi vợt', cuon_can: 'quấn cán vợt' } as const;
@@ -186,7 +187,20 @@ export function loiKhuyenMai(dsKm: KhuyenMaiTin[], coSanPham: boolean, tt: strin
 // Chính sách, hướng dẫn, đơn hàng
 // ---------------------------------------------------------------------------
 
-const LIEN_HE = `${CH.ten} – ${CH.diaChi}. Điện thoại ${CH.dienThoai}, email ${CH.email}, mở cửa ${CH.gioMoCua}.`;
+/** Tính khi trả lời (không phải lúc nạp module) để đọc đúng cấu hình liên hệ hiện tại. */
+const lienHe = () => lienHeCuaHang();
+
+/** Trả lời câu hỏi địa chỉ/liên hệ: chỉ liệt kê mục đã cấu hình. */
+function thongTinCuaHang(): string {
+  const lh = docLienHe();
+  const dong = [
+    lh.diaChi && `• Địa chỉ: ${lh.diaChi}`,
+    lh.dienThoai && `• Điện thoại: ${lh.dienThoai}`,
+    lh.email && `• Email: ${lh.email}`,
+    lh.gioMoCua && `• Giờ mở cửa: ${lh.gioMoCua}`,
+  ].filter((x): x is string => !!x);
+  return dong.length ? `Thông tin cửa hàng:\n${dong.join('\n')}` : lienHeCuaHang(lh);
+}
 
 export function loiChinhSach(chuDe: ChuDeChinhSach, dsHang: string[]): string {
   switch (chuDe) {
@@ -195,17 +209,17 @@ export function loiChinhSach(chuDe: ChuDeChinhSach, dsHang: string[]): string {
     case 'thanh_toan':
       return 'Khi đặt hàng, bạn có thể chọn một trong hai hình thức: thanh toán khi nhận hàng (COD) hoặc thanh toán online qua ví MoMo. Hiện mình chưa có thông tin về trả góp hay chuyển khoản trực tiếp.';
     case 'huy_don':
-      return 'Bạn có thể tự hủy đơn ngay trong mục "Đơn hàng của tôi" khi đơn còn ở trạng thái Chờ xác nhận, Chờ thanh toán MoMo hoặc Đang xử lý. Đơn đang giao hoặc đã hoàn thành thì không tự hủy được, bạn vui lòng liên hệ cửa hàng:\n' + LIEN_HE;
+      return 'Bạn có thể tự hủy đơn ngay trong mục "Đơn hàng của tôi" khi đơn còn ở trạng thái Chờ xác nhận, Chờ thanh toán MoMo hoặc Đang xử lý. Đơn đang giao hoặc đã hoàn thành thì không tự hủy được, bạn vui lòng liên hệ cửa hàng:\n' + lienHe();
     case 'cua_hang':
-      return `Thông tin cửa hàng:\n• Địa chỉ: ${CH.diaChi}\n• Điện thoại: ${CH.dienThoai}\n• Email: ${CH.email}\n• Giờ mở cửa: ${CH.gioMoCua}`;
+      return thongTinCuaHang();
     case 'chinh_hang':
-      return `Shop đang kinh doanh các hãng ${dsHang.join(', ') || 'cầu lông phổ biến'}. Mình chưa có tài liệu về chứng nhận nguồn gốc từng sản phẩm, bạn có thể ghé xem trực tiếp hoặc hỏi nhân viên:\n${LIEN_HE}`;
+      return `Shop đang kinh doanh các hãng ${dsHang.join(', ') || 'cầu lông phổ biến'}. Mình chưa có tài liệu về chứng nhận nguồn gốc từng sản phẩm, bạn có thể ghé xem trực tiếp hoặc hỏi nhân viên:\n${lienHe()}`;
     case 'giao_hang':
     case 'bao_hanh':
     case 'doi_tra':
     case 'chung': {
       const ten = { giao_hang: 'phí và thời gian giao hàng', bao_hanh: 'chính sách bảo hành', doi_tra: 'chính sách đổi trả', chung: 'chính sách chi tiết' }[chuDe];
-      return `Hiện hệ thống của mình chưa có thông tin ${ten} nên mình không muốn nói sai với bạn. Bạn vui lòng liên hệ cửa hàng để được xác nhận chính xác:\n${LIEN_HE}`;
+      return `Hiện hệ thống của mình chưa có thông tin ${ten} nên mình không muốn nói sai với bạn. Bạn vui lòng liên hệ cửa hàng để được xác nhận chính xác:\n${lienHe()}`;
     }
   }
 }

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { bayVaoGio } from "@/lib/cart-motion";
 import { useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
+import { useKhuChat } from "./khu-chat";
 import { ApiError, api, loiTuApi } from "@/lib/api";
 import { imgUrl, vnd } from "@/lib/format";
 import { useApp } from "./AppProviders";
@@ -191,6 +194,12 @@ export function Chatbot() {
   const router = useRouter();
   const { setCartCount } = useApp();
   const [mo, setMo] = useState(false);
+  const host = useKhuChat();
+  const nhung = !!host;
+  const pathname = usePathname();
+  // Có khung nhúng thì chính khung này hiện ngay trong trang và nút nổi ẩn đi; trang thanh toán/giỏ hàng không có nút nổi để không che nút chính.
+  const anNut = nhung || /^\/(DonHang\/Checkout|Home\/ViewCart)/.test(pathname);
+  const hien = mo || nhung;
   const [ds, setDs] = useState<Tin[]>(() => [tinChao()]);
   const [nhap, setNhap] = useState("");
   const [cho, setCho] = useState(false);
@@ -264,20 +273,20 @@ export function Chatbot() {
   // Tin mới của bot: cuộn tới đầu tin để khách đọc lời đáp trước khi xem các thẻ; còn lại cuộn xuống cuối.
   useEffect(() => {
     const el = thanCuon.current;
-    if (!mo || !el) return;
+    if (!hien || !el) return;
     const cuoi = ds[ds.length - 1];
     const tin = el.querySelector<HTMLElement>(`[data-tin="${cuoi.id}"]`);
     if (!cho && cuoi.vai === "bot" && tin) el.scrollTo({ top: Math.max(0, tin.offsetTop - 8), behavior: "smooth" });
     else el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [ds, cho, mo]);
+  }, [ds, cho, hien]);
 
   useEffect(() => {
-    if (mo) oNhap.current?.focus();
-    else {
+    if (mo && !nhung) oNhap.current?.focus();
+    else if (!hien) {
       nhanDang.current?.abort();
       dungDoc();
     }
-  }, [mo, dungDoc]);
+  }, [mo, nhung, hien, dungDoc]);
 
   // Cho phép nơi khác trong site (nút "Hỏi trợ lý tư vấn" ở landing) mở khung chat.
   useEffect(() => {
@@ -287,11 +296,11 @@ export function Chatbot() {
   }, []);
 
   useEffect(() => {
-    if (!mo) return;
+    if (!mo || nhung) return;
     const dong = (e: KeyboardEvent) => { if (e.key === "Escape") setMo(false); };
     window.addEventListener("keydown", dong);
     return () => window.removeEventListener("keydown", dong);
-  }, [mo]);
+  }, [mo, nhung]);
 
   // Trên điện thoại khung chat phủ kín màn hình nên đóng lại khi khách bấm sang trang sản phẩm/đơn hàng.
   const dongNeuDienThoai = useCallback(() => { if (window.matchMedia("(max-width: 576px)").matches) setMo(false); }, []);
@@ -345,6 +354,15 @@ export function Chatbot() {
       oNhap.current?.focus();
     }
   }, [cho, doc, dungDoc, dongNeuDienThoai, router, setCartCount]);
+
+  // Câu hỏi gợi ý từ khung nhúng (cùng guiCauHoi, lịch sử và API với khung chat nổi).
+  const guiRef = useRef(guiCauHoi);
+  useEffect(() => { guiRef.current = guiCauHoi; }, [guiCauHoi]);
+  useEffect(() => {
+    const hoi = (e: Event) => { const t = (e as CustomEvent<{ text?: string }>).detail?.text; if (t) void guiRef.current(t); };
+    window.addEventListener("sf:chat-ask", hoi);
+    return () => window.removeEventListener("sf:chat-ask", hoi);
+  }, []);
 
   const batDauNghe = () => {
     const Ham = layNhanDang();
@@ -413,14 +431,15 @@ export function Chatbot() {
   };
 
   const tinCuoi = ds[ds.length - 1];
+  const goi = (n: React.ReactElement) => (nhung && host ? createPortal(n, host) : n);
 
   return (
     <>
-      <button id="chat-toggle-btn" type="button" className={mo ? "is-open" : ""} aria-label={mo ? "Đóng trợ lý" : "Chat với trợ lý"} aria-expanded={mo} onClick={() => setMo((v) => !v)}>
+      {!anNut && <button id="chat-toggle-btn" type="button" className={mo ? "is-open" : ""} aria-label={mo ? "Đóng trợ lý" : "Chat với trợ lý"} aria-expanded={mo} onClick={() => setMo((v) => !v)}>
         <i className={`fa-solid ${mo ? "fa-xmark" : "fa-comments"}`} aria-hidden="true" />
-      </button>
-      {mo && (
-        <section id="chat-container" role="dialog" aria-label="Trợ lý Shop Cầu Lông">
+      </button>}
+      {hien && goi(
+        <section id="chat-container" className={nhung ? "chat-inline" : undefined} role={nhung ? "region" : "dialog"} aria-label="Trợ lý Shop Cầu Lông">
           <header className="chat-head">
             <span className="chat-head-avatar" aria-hidden="true"><i className="fa-solid fa-robot" /></span>
             <div className="chat-head-text">
@@ -431,7 +450,7 @@ export function Chatbot() {
               <i className={`fa-solid ${docTo ? "fa-volume-high" : "fa-volume-xmark"}`} />
             </button>
             <button type="button" className="chat-head-btn" aria-label="Cuộc trò chuyện mới" title="Cuộc trò chuyện mới" onClick={lamMoi}><i className="fa-solid fa-rotate-right" /></button>
-            <button type="button" className="chat-head-btn" aria-label="Đóng" title="Đóng" onClick={() => setMo(false)}><i className="fa-solid fa-xmark" /></button>
+            {!nhung && <button type="button" className="chat-head-btn" aria-label="Đóng" title="Đóng" onClick={() => setMo(false)}><i className="fa-solid fa-xmark" /></button>}
           </header>
 
           <div className="chat-body" ref={thanCuon} aria-live="polite">

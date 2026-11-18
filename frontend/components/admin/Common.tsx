@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Children, cloneElement, isValidElement, useId, useState } from "react";
 import { ErrorBox, Pagination } from "../Ui";
 import type { Trang } from "@/lib/types";
 
@@ -19,7 +19,10 @@ export function PageBar({ title, action }: { title?: string; action?: { href: st
 export function FilterBar({ children, fields = ["keyword"] }: { children?: (set: (k: string, v: string) => void, get: (k: string) => string) => React.ReactNode; fields?: string[] }) {
   const sp = useSearchParams();
   const router = useRouter();
-  const [keyword, setKeyword] = useState(sp.get("keyword") ?? "");
+  const keywordUrl = sp.get("keyword") ?? "";
+  const [keyword, setKeyword] = useState(keywordUrl);
+  const [keywordUrlCu, setKeywordUrlCu] = useState(keywordUrl);
+  if (keywordUrlCu !== keywordUrl) { setKeywordUrlCu(keywordUrl); setKeyword(keywordUrl); } // URL đổi (Back/Forward, bộ lọc khác): ô tìm kiếm theo URL
   const di = (mut: (q: URLSearchParams) => void) => {
     const q = new URLSearchParams(sp.toString());
     mut(q);
@@ -45,12 +48,23 @@ export function ListState<T>({ loading, error, data, empty, children }: { loadin
 
 export { Pagination };
 
+/**
+ * Một dòng form: nhãn gắn đúng với ô nhập (htmlFor/id) để trình đọc màn hình và bấm vào nhãn hoạt động. Con là MỘT phần tử (input/select/textarea) thì được gắn id
+ * và aria-describedby tự động; nhiều phần tử (ví dụ ảnh xem trước + input) thì nhóm lại và nhãn đặt tên cho nhóm.
+ */
 export function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
+  const id = useId();
+  const mo = hint ? `${id}-hint` : undefined;
+  const mot = Children.toArray(children);
+  // Ô cần gắn nhãn = phần tử HTML input/select/textarea ĐẦU TIÊN ở cấp trên cùng (kể cả khi có nút/ảnh xem trước đi kèm). Component bọc ngoài không được suy luận là nhận id.
+  const dich = mot.find((c): c is React.ReactElement<{ id?: string; type?: string; "aria-describedby"?: string }> =>
+    isValidElement(c) && typeof c.type === "string" && ["input", "select", "textarea"].includes(c.type) && (c.props as { type?: string }).type !== "hidden");
+  const idDich = dich ? (dich.props.id ?? id) : undefined;
   return (
-    <div className="mb-3">
-      <label className="form-label fw-semibold">{label}</label>
-      {children}
-      {hint && <div className="form-text">{hint}</div>}
+    <div className="mb-3" {...(dich ? {} : { role: "group", "aria-labelledby": `${id}-nhan` })}>
+      <label className="form-label fw-semibold" id={`${id}-nhan`} {...(idDich ? { htmlFor: idDich } : {})}>{label}</label>
+      {dich ? mot.map((c) => (c === dich ? cloneElement(dich, { id: idDich, "aria-describedby": dich.props["aria-describedby"] ?? mo }) : c)) : children}
+      {hint && <div className="form-text" id={mo}>{hint}</div>}
     </div>
   );
 }

@@ -1,0 +1,65 @@
+/* Khu "Chọn vợt theo lối chơi": ba tab lớn, bên trái Racket DNA, bên phải danh sách xếp hạng (không phải lưới thẻ). */
+
+.tab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1.2vw, 14px); margin-bottom: clamp(14px, 2vw, 24px); }
+.tabNut { display: grid; align-content: start; gap: 3px; padding: clamp(12px, 1.4vw, 18px); border: 2px solid #d3e2da; border-radius: 18px; background: #fff; color: #17211c; text-align: left; cursor: pointer; transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.tabNut b { font-size: clamp(1.4rem, 2vw, 1.8rem); font-weight: 800; line-height: 1.05; letter-spacing: 0.01em; color: #0b3b2b; }
+.tabNut span { font-size: 0.86rem; line-height: 1.4; color: #3b4943; }
+.tabNut em { margin-top: 4px; font-size: 0.8rem; font-style: normal; font-weight: 700; color: #55645d; }
+.tabNut:hover { border-color: #0f7550; transform: translateY(-2px); }
+.tabNut[aria-pressed="true"] { border-color: #b83c0a; background: #fff6f0; box-shadow: inset 0 0 0 1px #b83c0a; }
+.tabNut[aria-pressed="true"] b { color: #8a2c08; }
+.tabNut:focus-visible, .xemDna:focus-visible, .nutChinh:focus-visible, .tatCa:focus-visible, .dongTen:focus-visible { outline: 3px solid #0f7550; outline-offset: 2px; }
+
+.cho { min-height: 420px; border-radius: 22px; background: #e9eeeb; }
+.bang { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(14px, 2vw, 28px); align-items: start; }
+.dna { display: grid; gap: 10px; padding: clamp(14px, 1.6vw, 20px); border: 1px solid #d3e2da; border-radius: 22px; background: #fff; box-shadow: 0 16px 36px -30px rgba(11, 59, 43, 0.55); }
+.dnaDau { margin: 0; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #0f7550; }
+.dnaDau span { letter-spacing: 0; text-transform: none; color: #3b4943; font-weight: 700; }
+.quyTac { margin: 0; padding-top: 10px; border-top: 1px dashed #9db3a9; font-size: 0.84rem; line-height: 1.5; color: #3b4943; }
+.quyTac b { color: #0b3b2b; }
+.trong { margin: 0; padding: 14px; border-radius: 12px; background: #f3f6f4; font-size: 0.9rem; color: #3b4943; }
+
+.ds { min-width: 0; }
+.dsTieuDe { margin: 0 0 10px; font-size: 1.1rem; font-weight: 800; color: #0b3b2b; }
+.hang { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.dong { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; align-items: center; gap: 6px 14px; padding: 12px 14px; border: 1.5px solid #d3e2da; border-radius: 16px; background: #fff; transition: border-color 0.18s ease, background-color 0.18s ease; }
+.dongDang { border-color: #0f7550; background: #eef8f3; }
+.stt { font-size: 2rem; font-weight: 800; line-height: 1; color: #9db3a9; }
+.dongDang .stt { color: #b83c0a; }
+.dongThan { display: grid; gap: 1px; min-width: 0; }
+.dongHang { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #55645d; }
+.dongTen { overflow: hidden; color: #17211c; font-weight: 700; line-height: 1.3; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.dongTen:hover { color: #0f7550; text-decoration: underline; }
+.dongThongSo { font-size: 0.8rem; line-height: 1.35; color: #3b4943; }
+.dongGia { display: grid; justify-items: end; gap: 2px; }
+.dongGia b { font-size: 1.4rem; font-weight: 700; line-height: 1.1; color: #0b3b2b; white-space: nowrap; }
+.giam { padding: 1px 8px; border-radius: 999px; background: #b83c0a; color: #fff; font-size: 0.74rem; font-weight: 800; }
+.xemDna { min-height: 40px; padding: 6px 14px; border: 1.5px solid #b7d3c6; border-radius: 999px; background: #fff; color: #0b3b2b; font-size: 0.84rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.xemDna:hover { border-color: #0f7550; }
+.xemDna[aria-pressed="true"] { border-color: #0b3b2b; background: #0b3b2b; color: #fff; }
+.chan { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 14px; }
+.nutChinh { min-height: 44px; padding: 9px 18px; border: 0; border-radius: 12px; background: #b83c0a; color: #fff; font-size: 0.92rem; font-weight: 700; cursor: pointer; }
+.nutChinh:hover { background: #a23408; }
+.tatCa { font-size: 0.92rem; font-weight: 700; color: #0f7550; text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 991px) {
+  .bang { grid-template-columns: minmax(0, 1fr); }
+  .dna { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  .tab { gap: 6px; }
+  .tabNut { padding: 10px 8px; border-radius: 14px; text-align: center; justify-items: center; }
+  .tabNut span { display: none; }
+  .tabNut b { font-size: 1.25rem; }
+  .tabNut em { font-size: 0.72rem; }
+  .dong { grid-template-columns: 28px minmax(0, 1fr) auto; padding: 10px; }
+  .xemDna { grid-column: 2 / -1; justify-self: start; }
+  .stt { font-size: 1.5rem; }
+  .dongTen { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .dongGia b { font-size: 1.15rem; }
+  .nutChinh { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabNut, .dong { transition: none; }
+  .tabNut:hover { transform: none; }
+}

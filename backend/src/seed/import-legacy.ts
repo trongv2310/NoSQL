@@ -124,7 +124,7 @@ export async function importLegacy(data: LegacyData, options: { donMau?: boolean
   await chen('CauHinh', [
     { khoa: 'logo_url', giaTri: 'images/HUIT.jpg', moTa: 'Đường dẫn logo hệ thống' },
     { khoa: 'site_name', giaTri: 'Shop Cầu Lông', moTa: 'Tên thương hiệu hệ thống' },
-    { khoa: 'site_description', giaTri: 'Cửa hàng dụng cụ và phụ kiện cầu lông chính hãng', moTa: 'Mô tả ngắn gọn hệ thống' },
+    { khoa: 'site_description', giaTri: 'Cửa hàng dụng cụ và phụ kiện cầu lông', moTa: 'Mô tả ngắn gọn hệ thống' },
   ]);
 
   // Đơn hàng: nhập từ dữ liệu cũ nếu có, ngược lại (tùy chọn) sinh đơn mẫu cho trang thống kê.

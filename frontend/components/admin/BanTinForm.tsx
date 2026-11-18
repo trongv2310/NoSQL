@@ -103,7 +103,7 @@ export function BanTinForm({ id }: { id?: string }) {
           <label className="btn btn-sm btn-outline-secondary mb-0"><i className="fa-solid fa-image" /> Chèn ảnh<input type="file" accept="image/*" hidden onChange={(e) => { const x = e.target.files?.[0]; if (x) void chenAnh(x); e.target.value = ""; }} /></label>
         </div>
         <textarea ref={noiDungRef} className="form-control font-monospace" rows={12} required minLength={20} value={f.noiDung} onChange={dat("noiDung")} />
-        {f.noiDung.length > 20 && <details className="mt-2"><summary>Xem trước</summary><div className="border rounded p-3 bg-white mt-2" dangerouslySetInnerHTML={{ __html: f.noiDung }} /></details>}
+        {f.noiDung.length > 20 && <details className="mt-2"><summary>Xem trước</summary><div className="border rounded p-3 bg-white mt-2 bt-preview" dangerouslySetInnerHTML={{ __html: f.noiDung }} /></details>}
       </Field>
       <div className="row">
         <div className="col-md-6"><Field label="Sản phẩm liên quan"><select className="form-select" value={f.sanPham} onChange={dat("sanPham")}><option value="">—</option>{ds.sanPhams.map((s) => <option key={s.id} value={s.id}>{s.tenSanPham}</option>)}</select></Field></div>

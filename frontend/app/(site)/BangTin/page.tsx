@@ -29,7 +29,10 @@ export default function BangTinPage() {
   const router = useRouter();
   const q = sp.toString();
   const { data, error, loading } = useApi<BangTinData>(`/ban-tin${q ? `?${q}` : ""}`);
-  const [keyword, setKeyword] = useState(sp.get("keyword") ?? "");
+  const keywordUrl = sp.get("keyword") ?? "";
+  const [keyword, setKeyword] = useState(keywordUrl);
+  const [keywordUrlCu, setKeywordUrlCu] = useState(keywordUrl);
+  if (keywordUrlCu !== keywordUrl) { setKeywordUrlCu(keywordUrl); setKeyword(keywordUrl); } // Back/Forward: ô tìm kiếm khớp query đang áp dụng
   const loai = sp.get("loai") ?? "";
 
   const di = (l: string, k: string) => {

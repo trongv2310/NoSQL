@@ -44,6 +44,8 @@ export function loiTuApi(e: unknown): string {
   if (e instanceof ApiError) {
     return e.messages.join(" ");
   }
+  // Lỗi mạng của fetch (mất kết nối, máy chủ tắt) là TypeError với thông báo tiếng Anh của trình duyệt.
+  if (e instanceof TypeError) return "Không kết nối được tới máy chủ. Vui lòng kiểm tra mạng rồi thử lại.";
   return e instanceof Error ? e.message : "Đã xảy ra lỗi.";
 }
 

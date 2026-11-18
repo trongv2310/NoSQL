@@ -6,6 +6,7 @@ import s from "./rail.module.css";
 
 const CHUONG = [
   { id: "hero", nhan: "Mở đầu" },
+  { id: "phong-cach", nhan: "Lối chơi" },
   { id: "danh-muc", nhan: "Danh mục" },
   { id: "tim-vot", nhan: "Tìm vợt" },
   { id: "san-pham", nhan: "Sản phẩm" },

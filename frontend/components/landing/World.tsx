@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import s from "./world.module.css";
 
 /** Các chương (id phần tử) mà camera đi qua, theo thứ tự. Phải khớp WAY trong engine. */
-const CHUONG = ["hero", "tim-vot", "cau-chuyen", "ket-thuc"] as const;
+const CHUONG = ["hero", "pc-chon", "danh-muc", "tim-vot", "san-pham", "cau-chuyen", "ket-thuc"] as const;
+
+/** Cú chạm cầu ở hero diễn ra trong chừng này chiều cao màn hình đầu tiên (cuộn hết đoạn này là cầu đã bật đi). */
+const DOAN_CHAM_CAU = 0.62;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
@@ -22,10 +25,12 @@ function coWebGL() {
  * - Chỉ bật khi thiết bị đủ khả năng: có WebGL, không giảm chuyển động, không tiết kiệm dữ liệu, RAM > 2GB.
  *   Không đủ điều kiện (hoặc lỗi) thì trang giữ nguyên ảnh sân tĩnh của hero và các khối tối; hero luôn hiện ngay từ ảnh này.
  * - Khi cảnh đã vẽ khung đầu tiên mới đặt `data-gl="on"` lên trang để CSS làm các khối tối trong suốt, cảnh hiện ra bằng cross-fade.
+ * - Cú chạm cầu ở hero chạy theo cuộn (`hit`); lối chơi khách chọn ở khu "chọn lối chơi" (thuộc tính `data-pc` trên trang) quyết định
+ *   quỹ đạo cầu và màu nhấn trong cảnh. Chưa chọn thì cảnh lần lượt diễn cả ba.
  * - Chỉ vẽ khi một khối tối đang trong màn hình; tự giảm độ phân giải khi khung hình chậm, chậm kéo dài thì tự rút về ảnh tĩnh.
  * - `?gl=off` tắt hẳn (xem bản ảnh tĩnh); `?gl=force` bỏ qua cổng thiết bị và việc tự rút lui (để kiểm tra/so sánh trên máy yếu).
  */
-export function World({ fontFamily, brands, wordmark }: { fontFamily: string; brands: string[]; wordmark: string }) {
+export function World({ fontFamily, brands }: { fontFamily: string; brands: string[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -82,7 +87,7 @@ export function World({ fontFamily, brands, wordmark }: { fontFamily: string; br
     const khung = (now: number) => {
       raf = requestAnimationFrame(khung);
       if (!world) return;
-      world.render(now, tienDo(window.scrollY), mx, my);
+      world.render(now, tienDo(window.scrollY), mx, my, window.scrollY / (window.innerHeight * DOAN_CHAM_CAU));
       kiemTra(now);
     };
     const bat = () => { if (chay || !world || huy) return; chay = true; truoc = 0; raf = requestAnimationFrame(khung); };
@@ -101,6 +106,12 @@ export function World({ fontFamily, brands, wordmark }: { fontFamily: string; br
       if ([...hienThi.values()].some(Boolean) && !document.hidden) bat(); else tat();
     }, { rootMargin: "120px 0px" });
 
+    // Lối chơi khách chọn nằm ở thuộc tính data-pc của trang (do khối chọn lối chơi ghi); engine đổi quỹ đạo cầu và màu nhấn theo đó.
+    const doiLoiChoi = () => {
+      const k = goc.dataset.pc;
+      world?.setStyle(k === "cong" || k === "toc" || k === "toan" ? k : null);
+    };
+    const mo = new MutationObserver(doiLoiChoi);
     const khiAn = () => { if (document.hidden) tat(); };
     const khiDiChuot = (e: PointerEvent) => { mx = (e.clientX / window.innerWidth) * 2 - 1; my = (e.clientY / window.innerHeight) * 2 - 1; };
     const khiDoiCuaSo = () => { world?.resize(); doKichThuoc(); };
@@ -113,15 +124,17 @@ export function World({ fontFamily, brands, wordmark }: { fontFamily: string; br
         else window.setTimeout(xong, 400);
       });
       if (huy) return;
-      try { await document.fonts.load(`800 100px ${fontFamily}`, wordmark); } catch { /* font chưa sẵn thì dùng chữ dự phòng */ }
+      try { await document.fonts.load(`800 100px ${fontFamily}`, "SHOP CẦU LÔNG"); } catch { /* font chưa sẵn thì dùng chữ dự phòng */ }
       const { createWorld } = await import("./world/engine");
       if (huy) return;
-      const w = await createWorld({ canvas, fontFamily, brands, wordmark, light: nhe, onContextLost: () => rutLui() });
+      const w = await createWorld({ canvas, fontFamily, brands, light: nhe, skipIntro: ep, onContextLost: () => rutLui() });
       if (huy) { w.dispose(); return; }
       world = w;
       w.setPixelRatio(Math.min(window.devicePixelRatio || 1, nhe ? 1.25 : 1.5));
       doKichThuoc();
-      w.render(performance.now(), tienDo(window.scrollY), 0, 0); // khung đầu tiên trước khi lộ canvas
+      w.render(performance.now(), tienDo(window.scrollY), 0, 0, window.scrollY / (window.innerHeight * DOAN_CHAM_CAU)); // khung đầu tiên trước khi lộ canvas
+      doiLoiChoi();
+      mo.observe(goc, { attributes: true, attributeFilter: ["data-pc"] });
       goc.dataset.gl = "on";
       thay.forEach((el) => io.observe(el));
       window.addEventListener("resize", khiDoiCuaSo, { passive: true });
@@ -134,6 +147,7 @@ export function World({ fontFamily, brands, wordmark }: { fontFamily: string; br
       huy = true;
       tat();
       io.disconnect();
+      mo.disconnect();
       ro.disconnect();
       window.removeEventListener("resize", khiDoiCuaSo);
       window.removeEventListener("pointermove", khiDiChuot);
@@ -142,7 +156,7 @@ export function World({ fontFamily, brands, wordmark }: { fontFamily: string; br
       world?.dispose();
       world = null;
     };
-  }, [fontFamily, brands, wordmark]);
+  }, [fontFamily, brands]);
 
   return <canvas ref={ref} className={s.canvas} aria-hidden="true" />;
 }

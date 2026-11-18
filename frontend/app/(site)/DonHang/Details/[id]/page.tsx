@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useApp } from "@/components/AppProviders";
 import { PageHero } from "@/components/PageHero";
-import { ChipTrangThai, OrderTrack } from "@/components/Steps";
+import { CheckoutSteps, ChipTrangThai, OrderTrack } from "@/components/Steps";
 import { ErrorBox, Loading, Page } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
 import { imgUrl, ngayGio, vnd } from "@/lib/format";
@@ -16,6 +16,7 @@ const KHACH_DUOC_HUY = ["Chờ xác nhận", "Chờ thanh toán MoMo", "Đang x�
 export default function ChiTietDonPage() {
   const { id } = useParams<{ id: string }>();
   const { ready, user, flash } = useApp();
+  const moiDat = useSearchParams().get("moi") === "1";
   const { data, error, loading, reload } = useApi<DonHangV>(ready && user ? `/don-hang/${id}` : null);
 
   const huy = async () => {
@@ -30,12 +31,35 @@ export default function ChiTietDonPage() {
   };
 
   if (!ready || loading) return <Page><Loading /></Page>;
+  // M5A-20: khách chưa đăng nhập mở liên kết đơn: mời đăng nhập (quay lại đúng đơn này), không báo "không tìm thấy"
+  if (!user) {
+    return (
+      <Page>
+        <div className="od-card" role="status" style={{ padding: 24, maxWidth: 560, margin: "24px auto", textAlign: "center" }}>
+          <h2 className="h5">Đăng nhập để xem đơn hàng</h2>
+          <p>Đơn hàng chỉ hiển thị cho chủ đơn. Hãy đăng nhập bằng tài khoản đã đặt đơn #{id}.</p>
+          <Link className="btn btn-primary" href={`/TaiKhoan/DangNhap?returnUrl=${encodeURIComponent(`/DonHang/Details/${id}`)}`}>Đăng nhập</Link>
+        </div>
+      </Page>
+    );
+  }
   if (error || !data) return <Page><ErrorBox message={error ?? "Không tìm thấy đơn hàng"} /></Page>;
   return (
     <>
       <PageHero compact tone="green" kicker="Chi tiết đơn hàng" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Đơn hàng", href: "/DonHang/Index" }, { nhan: `#${data.soDonHang}` }]}
         title={<>Đơn hàng <em>#{data.soDonHang}</em></>} sub={`Đặt lúc ${ngayGio(data.ngayDat)}`} aside={<ChipTrangThai t={data.trangThai} />} />
       <Page className="od-wrap">
+        {moiDat && (
+          <>
+            <CheckoutSteps buoc={3} />
+            <div className="rs-card is-inline" role="status">
+              <span className="rs-icon is-ok"><i className="fa-solid fa-check" aria-hidden="true" /></span>
+              <h2>Đặt hàng thành công</h2>
+              <p className="rs-code">Mã đơn hàng <strong>#{data.soDonHang}</strong></p>
+              <p className="rs-desc">Đơn đang ở trạng thái “{data.trangThai}”. Bạn có thể xem lại đơn hoặc theo dõi trạng thái ngay trên trang này và ở mục Đơn hàng của tôi.</p>
+            </div>
+          </>
+        )}
         <div className="od-card"><OrderTrack trangThai={data.trangThai} /></div>
         <div className="row g-4">
           <div className="col-lg-8">
@@ -61,6 +85,7 @@ export default function ChiTietDonPage() {
             <section className="od-card od-summary">
               <h3 className="ct-card-title"><i className="fa-solid fa-receipt" aria-hidden="true" /> Thông tin đơn</h3>
               <dl className="od-info">
+                {data.hoTenNhan && <div><dt><i className="fa-solid fa-user" aria-hidden="true" /> Người nhận</dt><dd>{data.hoTenNhan}</dd></div>}
                 <div><dt><i className="fa-solid fa-location-dot" aria-hidden="true" /> Địa chỉ giao</dt><dd>{data.diaChiGiaoHang}</dd></div>
                 <div><dt><i className="fa-solid fa-phone" aria-hidden="true" /> SĐT nhận hàng</dt><dd>{data.soDienThoaiNhanHang}</dd></div>
                 {data.ghiChu && <div><dt><i className="fa-solid fa-note-sticky" aria-hidden="true" /> Ghi chú</dt><dd>{data.ghiChu}</dd></div>}

@@ -2,54 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { vnd } from "@/lib/format";
-import {
-  KHOANG_GIA, LOAI, conHang, dangGiam, locTab, phanTramGiam, trongKhoang,
-  type KhoaLoai, type SanPhamLanding,
-} from "@/lib/landing-data";
-import { ghiNhoAnhBam } from "@/lib/morph";
+import { KHOANG_GIA, LOAI, dangGiam, locTab, trongKhoang, type KhoaLoai } from "@/lib/landing-data";
 import { useCatalog } from "./CatalogProvider";
 import { fontTieuDe } from "./fonts";
 import { docLuaChon, ghiLuaChon } from "./luu-lua-chon";
-import { ProductImage } from "./ProductImage";
+import { ProductCard } from "./ProductCard";
 import { RvHeading } from "./Words";
+import { SecHead } from "./SecHead";
 import s from "./showcase.module.css";
 
 type Tab = KhoaLoai | "giam";
 const SO_O = 8; // số sản phẩm hiển thị ban đầu mỗi tab (đủ hai hàng ở bốn cột)
 
-function The({ sp }: { sp: SanPhamLanding }) {
-  const pt = phanTramGiam(sp);
-  const het = !conHang(sp);
-  const conIt = !het && sp.tongTonKho <= 5;
-  return (
-    <article className={s.card}>
-      <div className={s.media}>
-        <ProductImage src={sp.hinhAnhDaiDien} alt="" sizes="(max-width: 767px) 46vw, (max-width: 1199px) 30vw, 22vw" className={s.img} />
-        {pt > 0 && <span className={s.badgeSale}>-{pt}%</span>}
-        {het && <span className={s.badgeOut}>Hết hàng</span>}
-        {conIt && <span className={s.badgeLow}>Còn {sp.tongTonKho}</span>}
-      </div>
-      <div className={s.body}>
-        <span className={s.brand}>{sp.hang?.tenHang ?? "Hãng khác"}</span>
-        <Link href={`/Home/ChiTietSanPham/${sp.id}`} className={s.name}
-          onClick={(e) => ghiNhoAnhBam(sp.id, e.currentTarget.closest("article")?.querySelector("img") ?? null)}>
-          {sp.tenSanPham}
-        </Link>
-        <span className={s.priceRow}>
-          <b className={s.price}>{vnd(sp.giaSauKhuyenMai)}</b>
-          {dangGiam(sp) && <s className={s.old}>{vnd(sp.giaGoc)}</s>}
-        </span>
-        <span className={s.more}>Xem chi tiết <span aria-hidden="true">→</span></span>
-      </div>
-    </article>
-  );
-}
-
 /** Khu sản phẩm gom thành một chỗ: tab theo danh mục (hoặc ưu đãi thật) + lọc ngân sách. Chiều cao giữ ổn định khi đổi tab. */
 export function Showcase() {
   const kho = useCatalog();
-  const [tab, setTab] = useState<Tab>("giam");
+  const [tab, setTab] = useState<Tab>("vot");
   const [khoang, setKhoang] = useState<string | null>(null);
   const dsTab = useRef<(HTMLButtonElement | null)[]>([]);
   const thanhTab = useRef<HTMLDivElement>(null);
@@ -57,8 +25,8 @@ export function Showcase() {
 
   const tabs = useMemo(() => {
     const t: { khoa: Tab; nhan: string; n: number }[] = [
-      { khoa: "giam", nhan: "Đang giảm giá", n: kho.items.filter(dangGiam).length },
       ...(Object.keys(LOAI) as KhoaLoai[]).map((k) => ({ khoa: k as Tab, nhan: LOAI[k].tenNgan, n: locTab(kho.items, k, null).length })),
+      { khoa: "giam", nhan: "Đang giảm giá", n: kho.items.filter(dangGiam).length },
     ];
     return t.filter((x) => x.n > 0 || kho.trangThai !== "ok");
   }, [kho.items, kho.trangThai]);
@@ -111,6 +79,7 @@ export function Showcase() {
   return (
     <section id="san-pham" className={s.showcase} aria-labelledby="san-pham-title">
       <div className="container">
+        <SecHead label="Sản phẩm" tag="Theo nhóm" />
         <div className={s.head}>
           <RvHeading id="san-pham-title" className={`${s.title} ${fontTieuDe.className}`} text="Sản phẩm đáng xem" />
           <div className={s.budget} role="group" aria-label="Lọc theo ngân sách" data-rv="up">
@@ -153,7 +122,7 @@ export function Showcase() {
                   ? Array.from({ length: SO_O }, (_, i) => (
                       <div key={i} className={`${s.card} ${s.skeleton}`} aria-hidden="true"><div className={s.media} /><div className={s.body} /></div>
                     ))
-                  : hienThi.map((sp, i) => <div key={sp.id} className={s.cell} style={{ "--i": i } as React.CSSProperties}><The sp={sp} /></div>)}
+                  : hienThi.map((sp, i) => <div key={sp.id} className={s.cell} style={{ "--i": i } as React.CSSProperties}><ProductCard sp={sp} /></div>)}
                 {/* Ô giữ chỗ để lưới luôn đủ hai hàng, tab ít hàng không làm trang co lại. */}
                 {kho.trangThai === "ok" && Array.from({ length: Math.max(0, SO_O - hienThi.length) }, (_, i) => (
                   <div key={`g${i}`} className={`${s.card} ${s.ghost}`} aria-hidden="true"><div className={s.media} /><div className={s.body} /></div>

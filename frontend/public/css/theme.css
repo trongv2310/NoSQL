@@ -60,7 +60,7 @@
     --bs-body-color: var(--ink);
     --bs-body-bg: var(--bg);
     --bs-border-color: var(--line);
-    --bs-link-color: var(--brand);
+    --bs-link-color: var(--brand-text);
     --bs-link-hover-color: var(--brand-700);
 }
 
@@ -78,7 +78,9 @@ h1, h2, h3, h4, h5, h6 {
 
 ::selection { background: var(--brand-100); }
 
-a { color: var(--brand); }
+/* Chữ liên kết nhỏ dùng xanh đậm hơn --brand (4,1:1) để đạt 4,5:1 trên nền trắng; nút và viền vẫn dùng --brand. */
+:root { --brand-text: #0f7550; }
+a { color: var(--brand-text); }
 a:hover { color: var(--brand-700); }
 
 hr { border-color: var(--line); opacity: 1; }
@@ -350,8 +352,8 @@ label.form-check-label { font-weight: 400; }
 .modal-content { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
 
 .text-danger { color: var(--danger) !important; }
-.text-success { color: var(--brand) !important; }
-.text-primary { color: var(--brand) !important; }
+.text-success { color: var(--brand-text) !important; }
+.text-primary { color: var(--brand-text) !important; }
 .bg-light { background-color: #f3f7f5 !important; }
 .border { border-color: var(--line) !important; }
 .img-thumbnail { border-color: var(--line); border-radius: var(--radius-sm); }

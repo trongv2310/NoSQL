@@ -57,6 +57,7 @@ export default function ChiTietDonAdminPage() {
           <div className="mb-1"><strong>Khách hàng:</strong> {data.khachHang?.hoTen ?? "—"}</div>
           <div className="mb-1"><strong>Email:</strong> {data.khachHang?.email ?? "—"}</div>
           <div className="mb-1"><strong>Ngày đặt:</strong> {ngayGio(data.ngayDat)}</div>
+          <div className="mb-1"><strong>Người nhận:</strong> {data.hoTenNhan || "Chưa ghi (đơn cũ), xem tên khách ở trên"}</div>
           <div className="mb-1"><strong>Địa chỉ giao:</strong> {data.diaChiGiaoHang}</div>
           <div className="mb-1"><strong>SĐT nhận hàng:</strong> {data.soDienThoaiNhanHang}</div>
           {data.ghiChu && <div><strong>Ghi chú:</strong> {data.ghiChu}</div>}

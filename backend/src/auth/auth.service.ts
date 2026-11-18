@@ -3,8 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model, Types } from 'mongoose';
-import { DangKyDto, DangNhapDto, DoiMatKhauDto } from './auth.dto';
+import { lenhCapNhatHoSo } from '../common/ho-so-choi';
+import { DangKyDto, DangNhapDto, DoiMatKhauDto, HoSoChoiDto } from './auth.dto';
 import { GioHang, KhachHang, Quyen, TaiKhoan, TaiKhoanDocument } from '../schemas';
+
+/** Chuỗi băm bcrypt ($2a$/$2b$/$2y$ + cost + 53 ký tự). */
+const DANG_BCRYPT = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
 
 @Injectable()
 export class AuthService {
@@ -24,7 +28,8 @@ export class AuthService {
     if (await bcrypt.compare(matKhau, tk.matKhau).catch(() => false)) {
       return true;
     }
-    if (tk.matKhau === matKhau) {
+    // Chỉ bản ghi plaintext cũ mới được so bằng nhau; một chuỗi bcrypt đã lưu KHÔNG được dùng chính nó làm mật khẩu (M5A-05).
+    if (!DANG_BCRYPT.test(tk.matKhau) && tk.matKhau === matKhau) {
       tk.matKhau = await bcrypt.hash(matKhau, 10);
       await tk.save();
       return true;
@@ -48,7 +53,7 @@ export class AuthService {
 
   private async tongSoLuongGio(khachHangId: string): Promise<number> {
     const r = await this.gioHangModel.aggregate<{ t: number }>([
-      { $match: { khachHang: new Types.ObjectId(khachHangId) } },
+      { $match: { khachHang: new Types.ObjectId(khachHangId), daXoa: { $ne: true } } },
       { $group: { _id: null, t: { $sum: '$soLuong' } } },
     ]);
     return r[0]?.t ?? 0;
@@ -117,6 +122,28 @@ export class AuthService {
       throw new BadRequestException('Tài khoản của bạn là quản trị, không có thông tin khách hàng.');
     }
     return kh;
+  }
+
+  /** Hồ sơ người chơi của chính tài khoản đang đăng nhập (null nếu chưa khai). Tài khoản quản trị không có hồ sơ khách hàng. */
+  async hoSoChoi(id: string) {
+    const kh = await this.khachHangModel.findOne({ taiKhoan: id }, { hoSoChoi: 1 }).lean();
+    if (!kh) throw new BadRequestException('Tài khoản của bạn là quản trị, không có hồ sơ người chơi.');
+    return { hoSoChoi: kh.hoSoChoi ?? null };
+  }
+
+  /** Ghi đè cả bản khai bằng MỘT lệnh $set/$unset trên trường con (xem lenhCapNhatHoSo); runValidators để Mongoose kiểm enum. */
+  async capNhatHoSoChoi(id: string, dto: HoSoChoiDto) {
+    const kh = await this.khachHangModel
+      .findOneAndUpdate({ taiKhoan: id }, lenhCapNhatHoSo(dto, new Date()), { returnDocument: 'after', projection: { hoSoChoi: 1 }, runValidators: true })
+      .lean();
+    if (!kh) throw new BadRequestException('Tài khoản của bạn là quản trị, không có hồ sơ người chơi.');
+    return { hoSoChoi: kh.hoSoChoi ?? null };
+  }
+
+  /** Xoá toàn bộ hồ sơ người chơi (kể cả thông tin chấn thương). */
+  async xoaHoSoChoi(id: string) {
+    const kq = await this.khachHangModel.updateOne({ taiKhoan: id }, { $unset: { hoSoChoi: '' } });
+    if (!kq.matchedCount) throw new BadRequestException('Tài khoản của bạn là quản trị, không có hồ sơ người chơi.');
   }
 
   async doiMatKhau(id: string, dto: DoiMatKhauDto) {
