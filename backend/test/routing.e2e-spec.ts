@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { getModelToken } from '@nestjs/mongoose';
+import { getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { Global, Module } from '@nestjs/common';
 import request from 'supertest';
@@ -10,6 +10,7 @@ import { AuthModule } from '../src/auth/auth.module';
 import { CatalogModule } from '../src/catalog/catalog.module';
 import { CongKhaiModule } from '../src/cong-khai/cong-khai.module';
 import { DonHangModule } from '../src/don-hang/don-hang.module';
+import { TuVotModule } from '../src/tu-vot/tu-vot.module';
 import { cauHinhApp } from '../src/app.setup';
 import { ALL_MODELS } from '../src/schemas';
 
@@ -27,8 +28,11 @@ const taiKhoanGia = {
 
 @Global()
 @Module({
-  providers: ALL_MODELS.map((m) => ({ provide: getModelToken(m.name), useValue: m.name === 'TaiKhoan' ? taiKhoanGia : {} })),
-  exports: ALL_MODELS.map((m) => getModelToken(m.name)),
+  providers: [
+    ...ALL_MODELS.map((m) => ({ provide: getModelToken(m.name), useValue: m.name === 'TaiKhoan' ? taiKhoanGia : {} })),
+    { provide: getConnectionToken(), useValue: {} },
+  ],
+  exports: [...ALL_MODELS.map((m) => getModelToken(m.name)), getConnectionToken()],
 })
 class DatabaseGiaModule {}
 
@@ -47,6 +51,7 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
         CatalogModule,
         CongKhaiModule,
         DonHangModule,
+        TuVotModule,
         AdminModule,
       ],
     }).compile();
@@ -125,6 +130,24 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
     ];
     for (const body of sai) {
       await request(http).put('/api/auth/ho-so-choi').set('Cookie', `token=${tokenKhach}`).send(body).expect(400);
+    }
+  });
+
+  it('tủ vợt: cần đăng nhập (401) và từ chối dữ liệu sai (400) trước khi chạm DB', async () => {
+    const http = app.getHttpServer();
+    await request(http).get('/api/tu-vot').expect(401);
+    await request(http).post('/api/tu-vot/64b000000000000000000001/lan-cang').send({}).expect(401);
+    const sai: [string, object][] = [
+      ['/api/tu-vot', { ten: '' }],
+      ['/api/tu-vot', { ten: 'Vợt', chuKyNhacNgay: 400 }],
+      ['/api/tu-vot', { ten: 'Vợt', bienTheId: 'khong-phai-id' }],
+      ['/api/tu-vot/64b000000000000000000001/lan-cang', { ngay: '18/11/2026', giaTri: 25, donVi: 'lbs', noiCang: 'ngoai' }],
+      ['/api/tu-vot/64b000000000000000000001/lan-cang', { ngay: '2026-11-18', giaTri: 25, donVi: 'pound', noiCang: 'ngoai' }],
+      ['/api/tu-vot/64b000000000000000000001/lan-cang', { ngay: '2026-11-18', giaTri: 25, donVi: 'lbs', noiCang: 'nha-ban' }],
+      ['/api/tu-vot/chuyen-tu-trinh-duyet', { vot: Array.from({ length: 31 }, (_, i) => ({ id: `v-${i}`, ten: 'x' })) }],
+    ];
+    for (const [url, body] of sai) {
+      await request(http).post(url).set('Cookie', `token=${tokenKhach}`).send(body).expect(400);
     }
   });
 

@@ -11,6 +11,7 @@ Thư mục này gồm hướng dẫn vận hành và các file truy vấn mẫu 
 | `src/catalog/thuoc-tinh.ts` | Attribute pattern: đọc `thongSo` (chuỗi) thành `thuocTinh` [{k, v}] dạng số; dựng điều kiện lọc `$elemMatch` |
 | `src/csdl/chuan-hoa-thong-so.ts` | Script `db:chuan-hoa-thong-so`: tính lại `thuocTinh` cho dữ liệu cũ |
 | `src/phan-hoi/danh-gia-nhom.ts` | Đánh giá theo nhóm người chơi: bản chụp hồ sơ, pipeline `$facet`, ngưỡng "chưa đủ dữ liệu" |
+| `src/tu-vot/` | Hộ chiếu cây vợt (`votcanhans`) + sổ căng (`lancangs`): update pipeline ghi lần căng, transaction khi có replica set, tạo hộ chiếu khi đơn hoàn thành |
 | `src/common/ho-so-choi.ts` | Hồ sơ người chơi nhúng trong `khachhangs`: danh sách giá trị, lệnh `$set`/`$unset` trường con (API `GET/PUT/DELETE /auth/ho-so-choi`) |
 | `db/truy-van-mau/*.mongodb.js` | Truy vấn mẫu chạy bằng `mongosh` hoặc Compass, dùng để minh hoạ trong báo cáo |
 
@@ -31,7 +32,9 @@ npm run db:chuan-hoa-thong-so                # ghi phần lệch (bản ghi đã
 Chỉ cần chạy `db:chuan-hoa-thong-so` cho dữ liệu có từ trước, hoặc dữ liệu bị sửa thẳng bằng mongosh/Compass.
 Bộ `seed-data` đã có sẵn `thuocTinh`.
 
-Kiểm thử trên MongoDB thật (mỗi file tạo một CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog/bo-loc-mongo.spec.ts src/common/ho-so-choi-mongo.spec.ts src/phan-hoi/danh-gia-mongo.spec.ts`.
+Kiểm thử trên MongoDB thật (mỗi file tạo một CSDL tạm rồi xoá): `MONGO_TEST_URI=mongodb://127.0.0.1:27017 npx vitest run src/catalog/bo-loc-mongo.spec.ts src/common/ho-so-choi-mongo.spec.ts src/phan-hoi/danh-gia-mongo.spec.ts src/tu-vot/tu-vot-mongo.spec.ts src/csdl/validators-mongo.spec.ts`.
+Thêm `MONGO_RS_TEST_URI` (một replica set, ví dụ `mongodb://127.0.0.1:27018/?replicaSet=rs-thu`) để `tu-vot-mongo.spec.ts` chạy cả đường có transaction.
+Replica set thử nghiệm không cần đụng dịch vụ MongoDB đang chạy: `mongod --replSet rs-thu --port 27018 --dbpath <thư mục trống>` rồi `rs.initiate(...)`.
 
 - Script dùng `MONGODB_URI` trong `.env`. Ghi lên MongoDB không phải của máy mình thì phải thêm `-- --force`.
 - Collection nào còn tài liệu vi phạm thì validator **không** được áp. Script in vài `_id` để sửa dữ liệu, rồi kết thúc với mã lỗi 1.

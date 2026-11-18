@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TuVotModule } from '../tu-vot/tu-vot.module';
 import { GioHangController } from '../gio-hang/gio-hang.controller';
 import { GioHangService } from '../gio-hang/gio-hang.service';
 import { GioKhachService } from '../gio-hang/gio-khach.service';
@@ -8,6 +9,7 @@ import { MomoService } from './momo.service';
 import { OrderService } from './order.service';
 
 @Module({
+  imports: [TuVotModule],
   controllers: [DonHangController, GioHangController, PhanHoiController],
   providers: [OrderService, MomoService, GioHangService, GioKhachService],
   exports: [OrderService, GioHangService, GioKhachService],

@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { giaBienThe } from '../common/pricing';
 import { DONG_GIO_HOAT_DONG, xoaDongGio } from '../gio-hang/gio-hang-xoa';
 import { ChiTietSanPham, Counter, DonHang, GioHang, TRANG_THAI } from '../schemas';
+import { TuVotService } from '../tu-vot/tu-vot.service';
 import { adminCoTheHuy, coTheChuyen, khachCoTheHuy } from './trang-thai';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -33,6 +34,7 @@ export class OrderService {
     @InjectModel(ChiTietSanPham.name) private readonly chiTietModel: Model<ChiTietSanPham>,
     @InjectModel(GioHang.name) private readonly gioHangModel: Model<GioHang>,
     @InjectModel(Counter.name) private readonly counterModel: Model<Counter>,
+    @Optional() private readonly tuVot?: TuVotService,
   ) {}
 
   private async soDonKeTiep(): Promise<number> {
@@ -135,11 +137,11 @@ export class OrderService {
   }
 
   /** Chuyển trạng thái có điều kiện (compare-and-set) để tránh hoàn kho hai lần khi bấm đồng thời. */
-  private async doiTrangThai(soDonHang: number, tu: string, den: string): Promise<any | null> {
+  private async doiTrangThai(soDonHang: number, tu: string, den: string, session?: ClientSession): Promise<any | null> {
     return this.donHangModel.findOneAndUpdate(
       { soDonHang, trangThai: tu },
       { $set: { trangThai: den } },
-      { returnDocument: 'after' },
+      { returnDocument: 'after', session },
     );
   }
 
@@ -206,6 +208,22 @@ export class OrderService {
     }
     if (!coTheChuyen(don.trangThai, trangThaiMoi)) {
       throw new BadRequestException(`Không thể chuyển đơn hàng từ '${don.trangThai}' sang '${trangThaiMoi}'.`);
+    }
+    if (trangThaiMoi === TRANG_THAI.HoanThanh && this.tuVot) {
+      // Hoàn thành đơn + tạo hộ chiếu cho từng cây vợt trong đơn: chung MỘT transaction khi MongoDB chạy replica set.
+      // Standalone: đổi trạng thái (CAS) rồi tạo hộ chiếu; tạo hộ chiếu là upsert theo maNguon nên chạy lại không trùng.
+      const tuVot = this.tuVot;
+      await tuVot.trongTransaction(async (session) => {
+        const daDoi = await this.doiTrangThai(soDonHang, don.trangThai, trangThaiMoi, session);
+        if (!daDoi) throw new BadRequestException('Đơn hàng vừa được cập nhật, vui lòng tải lại trang.');
+        try {
+          await tuVot.taoHoChieuTuDon(daDoi, session);
+        } catch (e) {
+          if (session) throw e; // có transaction: huỷ cả việc đổi trạng thái
+          this.logger.error(`Đơn #${soDonHang} đã hoàn thành nhưng tạo hộ chiếu vợt lỗi: ${(e as Error).message}`);
+        }
+      });
+      return;
     }
     const daDoi = await this.doiTrangThai(soDonHang, don.trangThai, trangThaiMoi);
     if (!daDoi) {

@@ -7,6 +7,7 @@ import { CatalogModule } from './catalog/catalog.module';
 import { CongKhaiModule } from './cong-khai/cong-khai.module';
 import { DatabaseModule } from './database/database.module';
 import { DonHangModule } from './don-hang/don-hang.module';
+import { TuVotModule } from './tu-vot/tu-vot.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DonHangModule } from './don-hang/don-hang.module';
     CatalogModule,
     CongKhaiModule,
     DonHangModule,
+    TuVotModule,
     AdminModule,
   ],
 })

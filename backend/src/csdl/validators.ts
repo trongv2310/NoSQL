@@ -3,6 +3,7 @@ import { THE_DANH_GIA } from '../common/danh-gia';
 import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TAY_THUAN, TOI_DA_BUOI_MOI_TUAN, TRINH_DO } from '../common/ho-so-choi';
 import { TRANG_THAI } from '../schemas/don-hang.schema';
 import { Quyen } from '../schemas/tai-khoan.schema';
+import { DON_VI_CANG, LOAI_SU_KIEN, NGUON_VOT, NOI_CANG, TOI_DA_CHU_KY_NGAY, TOI_DA_LICH_SU_NHUNG } from '../schemas/vot-ca-nhan.schema';
 
 /**
  * Bộ kiểm tra dữ liệu ($jsonSchema, kèm $expr cho ràng buộc giữa các trường) gắn thẳng vào collection bằng `collMod`.
@@ -31,6 +32,24 @@ const chuoi = (maxLength?: number, minLength?: number) => ({
 
 /** Chuỗi băm bcrypt (`$2a$`, `$2b$`, `$2y$`…, 60 ký tự). Mật khẩu dạng chữ thường không bao giờ lọt vào CSDL. */
 export const MAU_BCRYPT = '^\\$2[abxy]\\$\\d{2}\\$[./A-Za-z0-9]{53}$';
+
+/** Mức căng lưu theo lbs. 5–100 lbs là khoảng chặn lỗi nhập (gõ thừa số 0...), không phải khuyến nghị. */
+const MUC_CANG_LBS = { bsonType: 'number', minimum: 5, maximum: 100 } as const;
+const LAN_CANG_NHUNG = {
+  bsonType: 'object',
+  required: ['_id', 'ngay', 'mucCangLbs', 'giaTriNhap', 'donViNhap', 'noiCang'],
+  additionalProperties: false,
+  properties: {
+    _id: ID,
+    ngay: NGAY,
+    mucCangLbs: MUC_CANG_LBS,
+    giaTriNhap: { bsonType: 'number', minimum: 0, exclusiveMinimum: true },
+    donViNhap: { enum: [...DON_VI_CANG] },
+    tenDay: chuoi(60),
+    noiCang: { enum: [...NOI_CANG] },
+    vuotMucNSX: { bsonType: 'bool' },
+  },
+};
 
 export interface DinhNghiaValidator {
   /** Một câu giải thích ràng buộc, in ra khi chạy `db:setup` và dùng trong báo cáo. */
@@ -252,6 +271,90 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           email: chuoi(100),
           maQuyen: { enum: [Quyen.Admin, Quyen.NhanVien, Quyen.KhachHang] },
           ngayTao: NGAY,
+        },
+      },
+    },
+  },
+
+  votcanhans: {
+    moTa:
+      'Hộ chiếu vợt thuộc một khách hàng; nhúng tối đa 10 lần căng gần nhất; mức căng 5–100 lbs; chu kỳ nhắc 1–365 ngày; ' +
+      'soLanCang không nhỏ hơn số lần nhúng và khoảng căng nhà sản xuất hợp lệ (min ≤ max).',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['khachHang', 'nguon', 'ten', 'soLanCang', 'lichSuCang'],
+        properties: {
+          khachHang: ID,
+          nguon: { enum: [...NGUON_VOT] },
+          sanPham: ID_HOAC_NULL,
+          bienThe: ID_HOAC_NULL,
+          donHang: ID_HOAC_NULL,
+          ten: chuoi(80, 1),
+          soSerial: chuoi(40, 1),
+          maNguon: chuoi(120, 1),
+          thongSoChup: {
+            bsonType: 'object',
+            additionalProperties: false,
+            properties: { sucCangMinLbs: SO_KHONG_AM, sucCangMaxLbs: SO_KHONG_AM, trongLuongU: SO_NGUYEN_KHONG_AM },
+          },
+          ngayMua: NGAY,
+          chuKyNhacNgay: { bsonType: 'number', minimum: 1, maximum: TOI_DA_CHU_KY_NGAY, multipleOf: 1 },
+          lanCangGanNhat: LAN_CANG_NHUNG,
+          hanNhacLuc: NGAY,
+          soLanCang: SO_NGUYEN_KHONG_AM,
+          lichSuCang: { bsonType: 'array', maxItems: TOI_DA_LICH_SU_NHUNG, items: LAN_CANG_NHUNG },
+          suKien: {
+            bsonType: 'array',
+            items: {
+              bsonType: 'object',
+              required: ['loai', 'ngay'],
+              properties: { loai: { enum: [...LOAI_SU_KIEN] }, ngay: NGAY, ghiChu: chuoi(200) },
+            },
+          },
+          ghiChu: chuoi(200),
+          taoLuc: NGAY,
+          deletedAt: NGAY_HOAC_NULL,
+        },
+      },
+      $expr: {
+        $and: [
+          { $gte: ['$soLanCang', { $size: { $ifNull: ['$lichSuCang', []] } }] },
+          {
+            $or: [
+              { $eq: [{ $type: '$thongSoChup.sucCangMinLbs' }, 'missing'] },
+              { $eq: [{ $type: '$thongSoChup.sucCangMaxLbs' }, 'missing'] },
+              { $lte: ['$thongSoChup.sucCangMinLbs', '$thongSoChup.sucCangMaxLbs'] },
+            ],
+          },
+        ],
+      },
+    },
+  },
+
+  lancangs: {
+    moTa: 'Mỗi lần căng thuộc một hộ chiếu và một khách hàng; mức căng 5–100 lbs; đơn vị nhập kg|lbs; nơi căng shop|ngoài.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['votCaNhan', 'khachHang', 'ngay', 'mucCangLbs', 'giaTriNhap', 'donViNhap', 'noiCang'],
+        properties: {
+          votCaNhan: ID,
+          khachHang: ID,
+          ngay: NGAY,
+          mucCangLbs: MUC_CANG_LBS,
+          giaTriNhap: { bsonType: 'number', minimum: 0, exclusiveMinimum: true },
+          donViNhap: { enum: [...DON_VI_CANG] },
+          tenDay: chuoi(60),
+          noiCang: { enum: [...NOI_CANG] },
+          nguoiDanhChup: {
+            bsonType: 'object',
+            additionalProperties: false,
+            properties: { trinhDo: { enum: [...TRINH_DO] }, loiChoi: { enum: [...LOI_CHOI] } },
+          },
+          vuotMucNSX: { bsonType: 'bool' },
+          laDuLieuMau: { bsonType: 'bool' },
+          taoLuc: NGAY,
         },
       },
     },
