@@ -17,6 +17,7 @@ import { CauHinh, CauHinhSchema, TinTuc, TinTucSchema, TranDau, TranDauSchema } 
 import { LanCang, LanCangSchema, VotCaNhan, VotCaNhanSchema } from './vot-ca-nhan.schema';
 import { LichCang, LichCangSchema } from './lich-cang.schema';
 import { GioiHanTanSuat, GioiHanTanSuatSchema } from './gioi-han.schema';
+import { LuotXem, LuotXemSchema } from './luot-xem.schema';
 
 export * from './tai-khoan.schema';
 export * from './khach-hang.schema';
@@ -27,6 +28,7 @@ export * from './ban-tin.schema';
 export * from './vot-ca-nhan.schema';
 export * from './lich-cang.schema';
 export * from './gioi-han.schema';
+export * from './luot-xem.schema';
 
 export const ALL_MODELS: ModelDefinition[] = [
   { name: TaiKhoan.name, schema: TaiKhoanSchema },
@@ -54,4 +56,5 @@ export const ALL_MODELS: ModelDefinition[] = [
   { name: LanCang.name, schema: LanCangSchema },
   { name: LichCang.name, schema: LichCangSchema },
   { name: GioiHanTanSuat.name, schema: GioiHanTanSuatSchema },
+  { name: LuotXem.name, schema: LuotXemSchema },
 ];

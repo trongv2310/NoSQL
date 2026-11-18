@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { hienDuLieuMau, locPhanHoiCongKhai, tongKetDanhGia } from '../common/danh-gia';
@@ -14,7 +14,7 @@ import { demTheoKhoang, phanBoGia, pipelineDanhSach } from './danh-sach-pipeline
 import { goiYKhiGo, KetQuaTim, timKiemSanPham } from './tim-kiem';
 import { BoLocThongSo, LOI_CHOI_KHOA, NHOM_CAN_BANG, NHOM_DO_CUNG, gopThongSoBienThe } from './vot-thong-so';
 import {
-  ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, PhanHoi, SanPham,
+  ChiTietSanPham, Hang, KhuyenMai, LoaiSanPham, LuotXem, PhanHoi, SanPham,
 } from '../schemas';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -57,7 +57,16 @@ export class CatalogService {
     @InjectModel(Hang.name) private readonly hangModel: Model<Hang>,
     @InjectModel(LoaiSanPham.name) private readonly loaiModel: Model<LoaiSanPham>,
     @InjectModel(KhuyenMai.name) private readonly khuyenMaiModel: Model<KhuyenMai>,
+    @Optional() @InjectModel(LuotXem.name) private readonly luotXemModel?: Model<LuotXem>,
   ) {}
+
+  /** Ghi một lượt xem vào time series `luotxems` (chỉ sản phẩm đang bán). Trả false khi không ghi. */
+  async ghiLuotXem(id: string, luc = new Date()): Promise<boolean> {
+    const sanPham = parseObjectId(id, 'Mã sản phẩm');
+    if (!this.luotXemModel || !(await this.sanPhamModel.exists({ _id: sanPham, deletedAt: null }))) return false;
+    await this.luotXemModel.create({ luc, sanPham });
+    return true;
+  }
 
   /** Toàn bộ sản phẩm đang kinh doanh (chưa xóa mềm), đã populate quan hệ. Danh mục nhỏ nên lọc trong bộ nhớ. */
   async tatCaSanPham(): Promise<any[]> {

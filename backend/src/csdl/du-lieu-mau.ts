@@ -145,3 +145,33 @@ export function sinhDuLieuMau(phienBan: PhienBanVot[], opts: { hat?: number; soN
   }
   return { khachhangs, votcanhans, lancangs, phanhois };
 }
+
+/**
+ * Lượt xem mẫu cho time series `luotxems`: `soNgay` ngày gần nhất, mỗi sản phẩm có độ "hot" riêng (phân bố lệch: vài sản phẩm được
+ * xem rất nhiều), cuối tuần đông hơn, giờ xem dồn vào buổi trưa và tối, và vài sản phẩm "bùng lên" trong tuần gần nhất.
+ * Mọi tài liệu gắn `laDuLieuMau: true` (báo cáo mặc định bỏ qua).
+ */
+export function sinhLuotXemMau(sanPhams: unknown[], opts: { hat?: number; soNgay?: number; now?: Date } = {}) {
+  const g = taoNgauNhien(opts.hat ?? 20261118);
+  const now = opts.now ?? new Date();
+  const soNgay = opts.soNgay ?? 60;
+  const hot = sanPhams.map((_, i) => 12 / (1 + i * 0.6) + g.r() * 2); // đã xáo bên dưới nên "hạng" không trùng thứ tự đầu vào
+  for (let i = hot.length - 1; i > 0; i--) { const j = Math.floor(g.r() * (i + 1)); [hot[i], hot[j]] = [hot[j], hot[i]]; }
+  const bungLen = new Set(sanPhams.filter(() => g.r() < 0.1));
+  const GIO = [7, 8, 11, 12, 12, 13, 17, 19, 20, 20, 21, 21, 22, 22, 23];
+  const docs: { luc: Date; sanPham: unknown; laDuLieuMau: true }[] = [];
+  for (let d = soNgay - 1; d >= 0; d--) {
+    const ngay = new Date(now.getTime() - d * 86_400_000);
+    const cuoiTuan = [0, 6].includes(ngay.getDay()) ? 1.5 : 1;
+    sanPhams.forEach((sp, i) => {
+      const heSo = cuoiTuan * (bungLen.has(sp) && d < 7 ? 3 : 1) * (0.8 + 0.4 * (1 - d / soNgay)); // xu hướng tăng nhẹ
+      const so = Math.max(0, Math.round(hot[i] * heSo + g.chuan() * 1.5));
+      for (let k = 0; k < so; k++) {
+        const luc = new Date(ngay);
+        luc.setHours(g.chon(GIO), g.nguyen(0, 59), g.nguyen(0, 59), 0);
+        if (luc <= now) docs.push({ luc, sanPham: sp, laDuLieuMau: true });
+      }
+    });
+  }
+  return docs.sort((a, b) => +a.luc - +b.luc); // chèn theo thứ tự thời gian như dữ liệu thật: bucket được lấp đầy liên tục
+}

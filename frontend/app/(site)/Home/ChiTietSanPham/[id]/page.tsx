@@ -70,6 +70,18 @@ export default function ChiTietSanPhamPage() {
   const [dangGuiDanhGia, setDangGuiDanhGia] = useState(false);
   const [danhGiaMoi, setDanhGiaMoi] = useState<(Pick<ChiTiet, "danhGias" | "trungBinhDanhGia" | "soDanhGia"> & { sanPhamId: string }) | null>(null);
 
+  // Ghi một lượt xem vào time series luotxems; cùng trình duyệt mở lại sản phẩm trong 30 phút thì không tính thêm.
+  useEffect(() => {
+    if (!id) return;
+    const khoa = `luot-xem:${id}`;
+    try {
+      const truoc = Number(sessionStorage.getItem(khoa) ?? 0);
+      if (Date.now() - truoc < 30 * 60_000) return;
+      sessionStorage.setItem(khoa, String(Date.now()));
+    } catch { /* trình duyệt chặn sessionStorage: vẫn ghi */ }
+    fetch(`/api/san-pham/${encodeURIComponent(id)}/luot-xem`, { method: "POST", keepalive: true }).catch(() => {});
+  }, [id]);
+
   useEffect(() => {
     if (data) {
       document.title = `${data.sanPham.tenSanPham} - Cửa Hàng Cầu Lông`;

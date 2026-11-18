@@ -42,8 +42,43 @@ async function main() {
     if (!mt.coTransaction) console.warn(`CẢNH BÁO: ${CANH_BAO_STANDALONE}`);
     if (thu) console.log('Chế độ --dry-run: chỉ kiểm tra, không ghi gì.\n');
 
+    // 0. Time series: phải tạo ĐÚNG kiểu ngay từ đầu (không đổi được collection thường thành time series), nên tạo trước mọi bước khác.
+    console.log('== Time series ==');
+    const daCo = new Map((await db.listCollections({}, { nameOnly: false }).toArray()).map((c: any) => [c.name, c]));
+    for (const { schema } of ALL_MODELS) {
+      const ts = schema.get('timeseries') as Record<string, unknown> | undefined;
+      if (!ts) continue;
+      const ten = schema.get('collection') as string;
+      const hetHan = schema.get('expireAfterSeconds') as number | undefined;
+      const c = daCo.get(ten);
+      if (!c) {
+        console.log(`  ${ten}: chưa có → ${thu ? 'sẽ tạo' : 'tạo'} time series ${JSON.stringify(ts)}${hetHan ? `, tự xoá sau ${hetHan / 86_400} ngày` : ''}`);
+        if (!thu) await db.createCollection(ten, { timeseries: ts as never, ...(hetHan ? { expireAfterSeconds: hetHan } : {}) });
+      } else if (c.type !== 'timeseries') {
+        coLoi = true;
+        console.error(`  ${ten}: đang là collection THƯỜNG, không đổi được thành time series. Sao lưu, xoá (db.${ten}.drop()) rồi chạy lại.`);
+      } else {
+        const o = c.options ?? {};
+        const lech = ['timeField', 'metaField', 'granularity'].filter((k) => ts[k] !== o.timeseries?.[k]);
+        const CAP = ['seconds', 'minutes', 'hours'];
+        if (lech.length === 1 && lech[0] === 'granularity' && CAP.indexOf(String(ts.granularity)) > CAP.indexOf(String(o.timeseries?.granularity))) {
+          // granularity chỉ được TĂNG (seconds → minutes → hours); bucket cũ giữ nguyên, bucket mới theo mức mới.
+          console.log(`  ${ten}: granularity ${o.timeseries?.granularity} → ${thu ? 'sẽ đổi' : 'đổi'} thành ${ts.granularity}`);
+          if (!thu) await db.command({ collMod: ten, timeseries: { granularity: ts.granularity } });
+          lech.length = 0;
+        } else if (lech.length) {
+          coLoi = true;
+          console.error(`  ${ten}: khác khai báo ở ${lech.join(', ')}; không đổi tại chỗ được (trừ tăng granularity). Sao lưu, xoá rồi chạy lại.`);
+        }
+        if (hetHan && Number(o.expireAfterSeconds) !== hetHan) {
+          console.log(`  ${ten}: thời hạn giữ ${o.expireAfterSeconds ?? 'không có'} giây → ${thu ? 'sẽ đặt' : 'đặt'} ${hetHan}`);
+          if (!thu) await db.command({ collMod: ten, expireAfterSeconds: hetHan });
+        } else if (!lech.length) console.log(`  ${ten}: đúng khai báo.`);
+      }
+    }
+
     // 1. Validator
-    console.log('== Validator ($jsonSchema) ==');
+    console.log('\n== Validator ($jsonSchema) ==');
     const thongTin = new Map((await db.listCollections({}, { nameOnly: false }).toArray()).map((c: any) => [c.name, c]));
     for (const [ten, def] of Object.entries(VALIDATORS)) {
       const hienCo = thongTin.get(ten);
