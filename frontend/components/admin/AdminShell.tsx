@@ -14,14 +14,14 @@ const MUC: { nhom: string; muc: [string, string, string, boolean][] }[] = [
   { nhom: "Tổng quan", muc: [["/admin", "fa-chart-pie", "Thống kê", false]] },
   {
     nhom: "Bán hàng",
-    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm", true], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng", false], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi", true]],
+    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm", true], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng", false], ["/admin/lich-cang", "fa-calendar-check", "Lịch căng cước", false], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi", true]],
   },
   { nhom: "Nội dung", muc: [["/admin/ban-tin", "fa-newspaper", "Bảng tin", false], ["/admin/tran-dau", "fa-table-tennis-paddle-ball", "Kết quả trận đấu", false]] },
   { nhom: "Hệ thống", muc: [["/admin/tai-khoan", "fa-users-gear", "Tài khoản", true], ["/admin/logo", "fa-image", "Logo hệ thống", true], ["/admin/thong-bao", "fa-triangle-exclamation", "Cảnh báo đánh giá", false]] },
 ];
 
 const TIEU_DE: [string, string][] = [
-  ["/admin/san-pham", "Quản lý sản phẩm"], ["/admin/bien-the", "Quản lý sản phẩm"], ["/admin/don-hang", "Quản lý đơn hàng"],
+  ["/admin/san-pham", "Quản lý sản phẩm"], ["/admin/bien-the", "Quản lý sản phẩm"], ["/admin/don-hang", "Quản lý đơn hàng"], ["/admin/lich-cang", "Lịch căng cước"],
   ["/admin/khuyen-mai", "Quản lý khuyến mãi"], ["/admin/ban-tin", "Quản lý bảng tin"], ["/admin/tran-dau", "Kết quả trận đấu"],
   ["/admin/tai-khoan", "Quản lý tài khoản"], ["/admin/logo", "Quản lý Logo"], ["/admin/thong-bao", "Cảnh báo đánh giá"],
 ];

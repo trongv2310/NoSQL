@@ -3,6 +3,7 @@ import { THE_DANH_GIA } from '../common/danh-gia';
 import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TAY_THUAN, TOI_DA_BUOI_MOI_TUAN, TRINH_DO } from '../common/ho-so-choi';
 import { TRANG_THAI } from '../schemas/don-hang.schema';
 import { Quyen } from '../schemas/tai-khoan.schema';
+import { TRANG_THAI_DAT_CHO } from '../schemas/lich-cang.schema';
 import { DON_VI_CANG, LOAI_SU_KIEN, NGUON_VOT, NOI_CANG, TOI_DA_CHU_KY_NGAY, TOI_DA_LICH_SU_NHUNG } from '../schemas/vot-ca-nhan.schema';
 
 /**
@@ -356,6 +357,50 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           laDuLieuMau: { bsonType: 'bool' },
           taoLuc: NGAY,
         },
+      },
+    },
+  },
+
+  lichcangs: {
+    moTa:
+      'Mỗi khung giờ một document; số chỗ đang giữ không vượt sức chứa và luôn bằng số chỗ đặt chưa huỷ; mỗi chỗ đặt có mức căng 5–100 lbs.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['ngay', 'sucChua', 'soDaDat', 'datCho'],
+        properties: {
+          ngay: NGAY,
+          sucChua: { bsonType: 'number', minimum: 1, maximum: 10, multipleOf: 1 },
+          soDaDat: SO_NGUYEN_KHONG_AM,
+          datCho: {
+            bsonType: 'array',
+            maxItems: 50,
+            items: {
+              bsonType: 'object',
+              required: ['_id', 'khachHang', 'votCaNhan', 'mucCangLbs', 'giaTriNhap', 'donViNhap', 'trangThai'],
+              properties: {
+                _id: ID,
+                khachHang: ID,
+                votCaNhan: ID,
+                tenVot: chuoi(80),
+                tenKhach: chuoi(100),
+                mucCangLbs: MUC_CANG_LBS,
+                giaTriNhap: { bsonType: 'number', minimum: 0, exclusiveMinimum: true },
+                donViNhap: { enum: [...DON_VI_CANG] },
+                tenDay: chuoi(60),
+                trangThai: { enum: [...TRANG_THAI_DAT_CHO] },
+                lanCang: ID_HOAC_NULL,
+                taoLuc: NGAY,
+              },
+            },
+          },
+        },
+      },
+      $expr: {
+        $and: [
+          { $lte: ['$soDaDat', '$sucChua'] },
+          { $eq: ['$soDaDat', { $size: { $filter: { input: '$datCho', cond: { $ne: ['$$this.trangThai', 'huy'] } } } }] },
+        ],
       },
     },
   },

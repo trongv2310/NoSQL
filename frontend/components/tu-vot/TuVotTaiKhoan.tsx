@@ -8,6 +8,7 @@ import { Page } from "@/components/Ui";
 import s from "@/components/product/bento.module.css";
 import { api, apiDelete, apiPost, loiTuApi } from "@/lib/api";
 import { homNayDiaPhuong, loiNhac, tinhNhac } from "@/lib/tu-vot";
+import { DatLichCang, LichCuaToiDs, type KhungGio, type LichCuaToi } from "./LichCang";
 import { docTu, xoaHanTu } from "./tu-vot-store";
 
 /** Hộ chiếu cây vợt (votcanhans) như API trả về. Ngày là ISO; ngày căng lưu 00:00 UTC của ngày lịch người dùng chọn. */
@@ -70,6 +71,9 @@ export function TuVotTaiKhoan() {
   const [loi, setLoi] = useState<string | null>(null);
   const [moGhi, setMoGhi] = useState<string | null>(null);
   const [moLichSu, setMoLichSu] = useState<{ id: string; ds: LanCang[] } | null>(null);
+  const [moDatLich, setMoDatLich] = useState<string | null>(null);
+  const [khung, setKhung] = useState<KhungGio[]>([]);
+  const [lichCuaToi, setLichCuaToi] = useState<LichCuaToi[]>([]);
   const [form, setForm] = useState({ ten: "", soSerial: "", chuKy: "", sanPhamId: null as string | null, bienTheId: null as string | null });
   const [soVotTrinhDuyet, setSoVotTrinhDuyet] = useState(0);
   const [dangChuyen, setDangChuyen] = useState(false);
@@ -79,6 +83,8 @@ export function TuVotTaiKhoan() {
     try {
       const r = await api<{ vot: HoChieu[]; coTransaction: boolean }>("/tu-vot");
       setDs(r.vot); setCoTransaction(r.coTransaction); setLoi(null);
+      const [k, l] = await Promise.all([api<KhungGio[]>("/lich-cang/khung"), api<{ lich: LichCuaToi[] }>("/lich-cang/cua-toi")]);
+      setKhung(k); setLichCuaToi(l.lich);
     } catch (e) { setLoi(loiTuApi(e)); }
   }, []);
   useEffect(() => {
@@ -155,6 +161,8 @@ export function TuVotTaiKhoan() {
       {denHan.length > 0 && <div className={`${s.thongBao} ${s.thongBaoCanh}`} role="status"><strong>Đến lịch nhắc ({denHan.length}):</strong> {denHan.map((v) => v.ten).join(", ")}.</div>}
       {loi && <p className={`${s.thongBao} ${s.thongBaoLoi}`} role="alert">{loi}</p>}
 
+      <LichCuaToiDs ds={lichCuaToi} onDoi={tai} />
+
       <form onSubmit={themVot} className={s.the} style={{ marginTop: 12 }} aria-label="Thêm vợt vào tủ">
         <h2 className="h5" style={{ margin: 0 }}>Thêm vợt</h2>
         <div className={s.luoiForm}>
@@ -190,9 +198,11 @@ export function TuVotTaiKhoan() {
                 </div>
                 <div className={s.hang}>
                   <button type="button" className={`${s.nut} ${s.nutChinh}`} aria-expanded={moGhi === v._id} onClick={() => setMoGhi(moGhi === v._id ? null : v._id)}>Ghi lần căng</button>
+                  <button type="button" className={s.nut} aria-expanded={moDatLich === v._id} onClick={() => setMoDatLich(moDatLich === v._id ? null : v._id)}>Đặt lịch căng tại shop</button>
                   <button type="button" className={s.nut} aria-expanded={moLichSu?.id === v._id} onClick={() => xemLichSu(v)}>Sổ căng ({v.soLanCang})</button>
                   <button type="button" className={s.nut} onClick={() => xoa(v)}>Xoá</button>
                 </div>
+                {moDatLich === v._id && <DatLichCang votId={v._id} toiDaLbs={v.thongSoChup?.sucCangMaxLbs} khung={khung} onXong={async () => { setMoDatLich(null); await tai(); }} />}
                 {moGhi === v._id && <FormLanCang vot={v} onXong={async (tb) => { flash("success", tb); setMoGhi(null); await tai(); }} />}
                 {moLichSu?.id === v._id && (
                   <table className="table table-sm small mb-0">

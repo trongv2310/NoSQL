@@ -4,7 +4,7 @@ import { ClientSession, Connection, Model, Types } from 'mongoose';
 import { docMoiTruong } from '../csdl/moi-truong';
 import { ChiTietSanPham, KhachHang, LanCang, SanPham, VotCaNhan } from '../schemas';
 import {
-  kiemTraLanCang, NhapLanCang, pipelineDoiChuKy, pipelineGhiLanCang, thongSoChupTuThuocTinh, vuotMucNSX,
+  kiemTraLanCang, LanCangDaKiem, NhapLanCang, pipelineDoiChuKy, pipelineGhiLanCang, thongSoChupTuThuocTinh, vuotMucNSX,
 } from './so-cang';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -157,31 +157,37 @@ export class TuVotService {
   async ghiLanCang(khachHang: Types.ObjectId, id: string, nhap: NhapLanCang) {
     const kt = kiemTraLanCang(nhap, homNayUtc());
     if (!kt.ok) throw new BadRequestException(Object.values(kt.loi));
-    const vot = await this.layVot(khachHang, id);
+    const { kq, coTransaction } = await this.trongTransaction((session) => this.ghiLanCangTrongPhien(khachHang, id, kt.lan, session));
+    return { vot: await this.layVot(khachHang, id), vuotMucNSX: kq.vuotMucNSX, toiDaLbs: kq.toiDaLbs, coTransaction };
+  }
+
+  /**
+   * Lõi ghi lần căng (đã kiểm dữ liệu). Có `session` → chạy trong transaction của người gọi (vd. hoàn tất lịch căng tại shop),
+   * không tự bù trừ vì transaction sẽ huỷ cả gói. Không có `session` → bù trừ: xoá lần căng vừa thêm nếu bước cập nhật hộ chiếu lỗi.
+   */
+  async ghiLanCangTrongPhien(khachHang: Types.ObjectId, id: string, lan: LanCangDaKiem, session?: ClientSession) {
+    if (!Types.ObjectId.isValid(id)) throw new BadRequestException('Mã vợt không hợp lệ.');
+    const vot = await this.votModel.findOne({ _id: id, khachHang, deletedAt: null }).session(session ?? null).lean();
+    if (!vot) throw new NotFoundException('Không tìm thấy vợt trong tủ của bạn.');
     const toiDa = vot.thongSoChup?.sucCangMaxLbs;
-    const vuot = vuotMucNSX(kt.lan.mucCangLbs, toiDa);
-    if (vuot && kt.lan.noiCang === 'shop') {
-      throw new BadRequestException(`Mức ${kt.lan.mucCangLbs} lbs vượt mức tối đa nhà sản xuất ghi cho phiên bản này (${toiDa} lbs). Shop không căng vượt mức này.`);
+    const vuot = vuotMucNSX(lan.mucCangLbs, toiDa);
+    if (vuot && lan.noiCang === 'shop') {
+      throw new BadRequestException(`Mức ${lan.mucCangLbs} lbs vượt mức tối đa nhà sản xuất ghi cho phiên bản này (${toiDa} lbs). Shop không căng vượt mức này.`);
     }
-    const kh = await this.khachHangModel.findById(khachHang, { hoSoChoi: 1 }).lean();
+    const kh = await this.khachHangModel.findById(khachHang, { hoSoChoi: 1 }).session(session ?? null).lean();
     const nguoiDanhChup = kh?.hoSoChoi?.trinhDo || kh?.hoSoChoi?.loiChoi
       ? { ...(kh.hoSoChoi.trinhDo ? { trinhDo: kh.hoSoChoi.trinhDo } : {}), ...(kh.hoSoChoi.loiChoi ? { loiChoi: kh.hoSoChoi.loiChoi } : {}) }
       : undefined;
     const _id = new Types.ObjectId();
-    const nhung = { _id, ...kt.lan, vuotMucNSX: vuot };
-    const loc = { _id: vot._id, khachHang, deletedAt: null };
-
-    const { coTransaction } = await this.trongTransaction(async (session) => {
-      await this.lanCangModel.create([{ _id, votCaNhan: vot._id, khachHang, ...kt.lan, vuotMucNSX: vuot, ...(nguoiDanhChup ? { nguoiDanhChup } : {}) }], { session });
-      try {
-        const r = await this.votModel.updateOne(loc, pipelineGhiLanCang(nhung), { session, updatePipeline: true });
-        if (!r.matchedCount) throw new NotFoundException('Vợt vừa bị xoá khỏi tủ.');
-      } catch (e) {
-        if (!session) await this.lanCangModel.deleteOne({ _id }).catch((x) => this.logger.error(`Không bù trừ được lần căng ${_id}: ${x.message}`));
-        throw e;
-      }
-    });
-    return { vot: await this.layVot(khachHang, id), vuotMucNSX: vuot, toiDaLbs: toiDa ?? null, coTransaction };
+    await this.lanCangModel.create([{ _id, votCaNhan: vot._id, khachHang, ...lan, vuotMucNSX: vuot, ...(nguoiDanhChup ? { nguoiDanhChup } : {}) }], { session });
+    try {
+      const r = await this.votModel.updateOne({ _id: vot._id, khachHang, deletedAt: null }, pipelineGhiLanCang({ _id, ...lan, vuotMucNSX: vuot }), { session, updatePipeline: true });
+      if (!r.matchedCount) throw new NotFoundException('Vợt vừa bị xoá khỏi tủ.');
+    } catch (e) {
+      if (!session) await this.lanCangModel.deleteOne({ _id }).catch((x) => this.logger.error(`Không bù trừ được lần căng ${_id}: ${x.message}`));
+      throw e;
+    }
+    return { lanCangId: _id, vuotMucNSX: vuot, toiDaLbs: toiDa ?? null };
   }
 
   async lichSuCang(khachHang: Types.ObjectId, id: string) {
