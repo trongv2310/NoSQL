@@ -4,6 +4,14 @@ import { thuocTinhTuThongSo, ThuocTinh } from '../catalog/thuoc-tinh';
 import { THE_DANH_GIA } from '../common/danh-gia';
 import { CHAN_THUONG, LOI_CHOI, NOI_DUNG, TRINH_DO } from '../common/ho-so-choi';
 
+@Schema({ _id: false })
+export class DanhGiaTongHop {
+  @Prop({ type: Number, default: 0 }) so: number;
+  @Prop({ type: Number, default: 0 }) tong: number;
+  @Prop({ type: Number, default: null }) trungBinh?: number | null;
+}
+export const DanhGiaTongHopSchema = SchemaFactory.createForClass(DanhGiaTongHop);
+
 @Schema({ collection: 'sanphams' })
 export class SanPham {
   @Prop({ required: true, maxlength: 100, index: true })
@@ -45,6 +53,10 @@ export class SanPham {
    */
   @Prop({ type: Date, default: null })
   deletedAt?: Date | null;
+
+  /** Computed pattern: tổng hợp đánh giá công khai thật (xem phan-hoi/tong-hop-danh-gia.ts). */
+  @Prop({ type: DanhGiaTongHopSchema, default: undefined })
+  danhGiaTongHop?: DanhGiaTongHop;
 }
 export type SanPhamDocument = HydratedDocument<SanPham>;
 export const SanPhamSchema = SchemaFactory.createForClass(SanPham);

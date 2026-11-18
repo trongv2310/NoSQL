@@ -1,8 +1,10 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, NotFoundException, Param, Post, Query } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Transform, Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
-import { Model, Types } from 'mongoose';
+import { Connection, Model, Types } from 'mongoose';
+import { GiaoDich } from '../csdl/giao-dich';
+import { pipelineCongDanhGia } from './tong-hop-danh-gia';
 import { CurrentUser } from '../auth/auth.decorators';
 import { CanDangNhap } from '../auth/auth.guards';
 import type { NguoiDung } from '../auth/auth.types';
@@ -52,7 +54,12 @@ export class PhanHoiController {
     @InjectModel(KhachHang.name) private readonly khachHangModel: Model<KhachHang>,
     @InjectModel(ChiTietSanPham.name) private readonly chiTietModel: Model<ChiTietSanPham>,
     @InjectModel(DonHang.name) private readonly donHangModel: Model<DonHang>,
-  ) {}
+    @InjectConnection() conn: Connection,
+  ) {
+    this.giaoDich = new GiaoDich(conn);
+  }
+
+  private readonly giaoDich: GiaoDich;
 
   @Post()
   @CanDangNhap()
@@ -72,17 +79,22 @@ export class PhanHoiController {
       khachHang: kh._id, trangThai: TRANG_THAI.HoanThanh, 'chiTiet.sanPham': new Types.ObjectId(dto.sanPhamId),
     }));
     const nguoiDanh = chupNguoiDanh(kh.hoSoChoi, { chiaSeHoSo: dto.chiaSeHoSo ?? true, chiaSeChanThuong: dto.chiaSeChanThuong ?? false });
-    await this.phanHoiModel.create({
-      khachHang: kh._id,
-      sanPham: dto.sanPhamId,
-      danhGia: dto.danhGia,
-      noiDung: dto.noiDung,
-      // Gửi qua tài khoản khách hàng thật trên hệ thống nên được tính là đã xác minh (khác dữ liệu mẫu/import).
-      daXacMinh: true,
-      daMuaHang,
-      ...(dto.bienTheId ? { bienThe: dto.bienTheId } : {}),
-      ...(nguoiDanh ? { nguoiDanh } : {}),
-      ...(dto.the?.length ? { the: [...new Set(dto.the)] } : {}),
+    // Thêm đánh giá + cộng vào tổng hợp lưu sẵn trên sản phẩm (computed pattern): chung MỘT transaction khi có replica set.
+    // Standalone: hai lệnh nối tiếp; nếu bước cộng lỗi thì `npm run db:tinh-lai-danh-gia` tính lại đúng từ phanhois.
+    await this.giaoDich.chay(async (session) => {
+      await this.phanHoiModel.create([{
+        khachHang: kh._id,
+        sanPham: dto.sanPhamId,
+        danhGia: dto.danhGia,
+        noiDung: dto.noiDung,
+        // Gửi qua tài khoản khách hàng thật trên hệ thống nên được tính là đã xác minh (khác dữ liệu mẫu/import).
+        daXacMinh: true,
+        daMuaHang,
+        ...(dto.bienTheId ? { bienThe: dto.bienTheId } : {}),
+        ...(nguoiDanh ? { nguoiDanh } : {}),
+        ...(dto.the?.length ? { the: [...new Set(dto.the)] } : {}),
+      }], { session });
+      await this.sanPhamModel.updateOne({ _id: dto.sanPhamId }, pipelineCongDanhGia(dto.danhGia), { session, updatePipeline: true });
     });
     return { message: 'Gửi đánh giá thành công!', daMuaHang, kemHoSo: !!nguoiDanh };
   }

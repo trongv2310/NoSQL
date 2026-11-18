@@ -79,7 +79,28 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           coMau: { bsonType: 'bool' },
           ngayTao: NGAY,
           deletedAt: NGAY_HOAC_NULL,
+          danhGiaTongHop: {
+            bsonType: 'object',
+            required: ['so', 'tong'],
+            properties: {
+              so: SO_NGUYEN_KHONG_AM,
+              tong: SO_NGUYEN_KHONG_AM,
+              trungBinh: { bsonType: ['number', 'null'], minimum: 1, maximum: 5 },
+            },
+          },
         },
+      },
+      // Computed pattern: tổng điểm nằm giữa 1×số đánh giá và 5×số đánh giá (chưa có tổng hợp thì bỏ qua).
+      $expr: {
+        $or: [
+          { $eq: [{ $type: '$danhGiaTongHop' }, 'missing'] },
+          {
+            $and: [
+              { $gte: ['$danhGiaTongHop.tong', '$danhGiaTongHop.so'] },
+              { $lte: ['$danhGiaTongHop.tong', { $multiply: ['$danhGiaTongHop.so', 5] }] },
+            ],
+          },
+        ],
       },
     },
   },

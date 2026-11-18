@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { locPhanHoiCongKhai, tongKetDanhGia } from '../common/danh-gia';
+import { hienDuLieuMau, locPhanHoiCongKhai, tongKetDanhGia } from '../common/danh-gia';
+import { docTongHop } from '../phan-hoi/tong-hop-danh-gia';
 import { bienTheView, idOf, sanPhamView } from '../common/mappers';
 import { dangGiamGia, giaSauKhuyenMai } from '../common/pricing';
 import { parseObjectId, phanTrang } from '../common/helpers';
@@ -58,6 +59,16 @@ export class CatalogService {
 
   /** Toàn bộ sản phẩm đang kinh doanh (chưa xóa mềm), đã populate quan hệ. Danh mục nhỏ nên lọc trong bộ nhớ. */
   async tatCaSanPham(): Promise<any[]> {
+    if (!hienDuLieuMau()) {
+      // Computed pattern: điểm và số đánh giá đã lưu sẵn trên sản phẩm (sanphams.danhGiaTongHop), không phải gom phanhois mỗi lần.
+      const ds = (await this.sanPhamModel
+        .find({ deletedAt: null })
+        .populate('loai hang khuyenMai nhaCungCap')
+        .sort({ ngayTao: -1, _id: -1 })
+        .lean()) as any[];
+      return ds.map((sp) => ({ ...sp, ...docTongHop(sp) }));
+    }
+    // Máy demo (HIEN_DU_LIEU_MAU=true): tổng hợp lưu sẵn chỉ tính đánh giá thật, nên gom lại có tính cả dữ liệu mẫu.
     const [ds, diem] = await Promise.all([
       this.sanPhamModel
         .find({ deletedAt: null })
