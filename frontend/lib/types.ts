@@ -77,3 +77,13 @@ export interface KetQuaGopV { chiTietId: string; tenSanPham: string | null; yeuC
 export interface DongBoGioV extends GioHangV { taiKhoanId: string; cartCount: number; daApDungTruoc: boolean; ketQua: KetQuaGopV[] }
 
 export interface LienHeV { dienThoai: string | null; email: string | null; diaChi: string | null; gioMoCua: string | null }
+
+/** Gợi ý mua cùng (GET /goi-y/*, công khai): chỉ kết quả sản phẩm, không có lợi nhuận/hạng/K. `gia` là giá hiện hành; `chiTietMacDinh` = id biến thể còn hàng để thêm vào giỏ. */
+export interface SanPhamGoiY { id: string; tenSanPham: string; hinhAnhDaiDien?: string; gia: number; chiTietMacDinh: string }
+export interface ComboGoiY { khoa: string; tongGia: number; sanPhams: SanPhamGoiY[] }
+
+/** Khai thác Top-K (chỉ Admin, /admin/khai-thac). `loiNhuan` là utility thuật toán tính trên đơn đã hoàn thành. */
+export interface SanPhamTrongTap { id: string; tenSanPham: string; hinhAnhDaiDien?: string }
+export interface DongKetQuaTopK { hang: number; sanPhams: SanPhamTrongTap[]; tenTap: string; loiNhuan: number; khoa: string }
+export interface KetQuaTopK { k: number; soThang: number; soDonXet: number; soBatch: number; biCat: boolean; thoiGianMs: number; chayLuc: string; ketQua: DongKetQuaTopK[] }
+export interface GoiYDaLuuV { coDuLieu: boolean; k?: number; soThang?: number; capNhatLuc?: string; ketQua: DongKetQuaTopK[] }

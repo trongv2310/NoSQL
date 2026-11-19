@@ -109,3 +109,25 @@ test("C-4: chỉ quản trị có quyền xóa; nhân viên, khách, chưa đăn
   assert.equal(coQuyenXoa(ADMIN), true);
   for (const q of [NV, KHACH, null, undefined, 0, 4, NaN, "1"]) assert.equal(coQuyenXoa(q), false, String(q));
 });
+
+test("T-802: menu và đường dẫn Combo bán chạy chỉ dành cho quản trị", () => {
+  assert.equal(mucMenuTheoQuyen(ADMIN, "/admin/khai-thac"), true);
+  assert.equal(mucMenuTheoQuyen(NV, "/admin/khai-thac"), false);
+  assert.equal(duongDanDuocPhep(ADMIN, "/admin/khai-thac"), true);
+  assert.equal(duongDanDuocPhep(NV, "/admin/khai-thac"), false);
+});
+
+test("Combo bán chạy: /admin/khai-thac chỉ quản trị (trang, trang con, menu); nhân viên, khách, chưa đăng nhập bị chặn", () => {
+  const KT = ["/admin/khai-thac", "/admin/khai-thac/", "/admin/khai-thac/abc", "/admin/khai-thac?k=5"];
+  for (const p of KT) {
+    assert.equal(duongDanDuocPhep(ADMIN, p), true, `admin ${p}`);
+    for (const q of [NV, KHACH, null, undefined]) assert.equal(duongDanDuocPhep(q, p), false, `${String(q)} ${p}`);
+  }
+  for (const p of ["/admin/khai-thac/../don-hang", "/admin//khai-thac", "/admin/khai%2Fthac"]) assert.equal(duongDanDuocPhep(NV, p), false, p);
+  assert.equal(mucMenuTheoQuyen(ADMIN, "/admin/khai-thac"), true);
+  for (const q of [NV, KHACH, null, undefined]) assert.equal(mucMenuTheoQuyen(q, "/admin/khai-thac"), false, String(q));
+  // Thêm mục này không làm đổi các quyền cũ.
+  for (const p of NV_DUOC) assert.equal(duongDanDuocPhep(NV, p), true, p);
+  assert.equal(canChuyenVeTrangNhanVien(NV, "/admin/khai-thac"), false, "không chuyển trang, hiện khối không có quyền");
+  assert.equal(trangSauDangNhap(NV, true), "/admin/don-hang");
+});

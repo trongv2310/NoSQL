@@ -1699,3 +1699,34 @@ footer::before {
  .pdp-related-heading h2 { font-size: 1.25rem; }
 }
 body:has(.pdp-lightbox[open]) { overflow: hidden; }
+
+/* Gợi ý mua cùng (Top-K, phía khách): khối "Combo mua chung" ở trang chủ và "Thường được mua cùng" ở trang chi tiết. Không có mức giảm combo. */
+.goi-y-luoi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.goi-y-combo { display: flex; flex-direction: column; gap: 12px; padding: 18px; background: #fff; border: 1px solid #dbe5de; border-radius: 14px; min-width: 0; }
+.goi-y-combo-ten { margin: 0; font-size: 1rem; font-weight: 700; color: #234e34; }
+.goi-y-combo-mon { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.goi-y-combo-mon li { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.goi-y-anh, .goi-y-the-anh { display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f3f6f4; border-radius: 10px; }
+.goi-y-anh { width: 56px; height: 56px; }
+.goi-y-anh img, .goi-y-the-anh img { width: 100%; height: 100%; object-fit: contain; }
+.goi-y-ten { font-size: .88rem; font-weight: 600; color: #1f2d25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.goi-y-ten:hover { color: #2c744c; }
+.goi-y-gia { font-size: .85rem; font-weight: 600; color: #3b4943; white-space: nowrap; }
+.goi-y-tong { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid #e1e9e3; font-size: .9rem; color: #3b4943; }
+.goi-y-tong strong { font-size: 1.25rem; color: #b83c0a; }
+.goi-y-trang-thai { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .82rem; color: #3b4943; }
+.goi-y-xong { color: #1b6b3f; font-weight: 600; }
+.goi-y-thong-bao { margin: 0; padding: 8px 10px; border-radius: 8px; background: #eef6f0; color: #1f4a30; font-size: .82rem; }
+.goi-y-thong-bao.goi-y-loi { background: #fdf0ea; color: #8a2f08; }
+.goi-y-nut { margin-top: auto; background: #0f7550; border: 1px solid #0f7550; color: #fff; font-weight: 700; border-radius: 10px; padding: 10px 14px; }
+.goi-y-nut:hover:not(:disabled) { background: #0b5c40; color: #fff; }
+.goi-y-nut:disabled { opacity: .65; cursor: not-allowed; }
+.goi-y-the-luoi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.goi-y-the { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #fff; border: 1px solid #e1e9e3; border-radius: 14px; color: inherit; min-width: 0; }
+.goi-y-the:hover { border-color: #2c744c; }
+.goi-y-the-anh { aspect-ratio: 1 / 1; width: 100%; }
+.goi-y-the-ten { font-size: .88rem; font-weight: 600; color: #1f2d25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.goi-y-the-gia { font-size: .95rem; color: #b83c0a; }
+.goi-y-the:focus-visible, .goi-y-ten:focus-visible, .goi-y-nut:focus-visible { outline: 3px solid #0f7550; outline-offset: 2px; }
+@media (max-width: 991px) { .goi-y-luoi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) { .goi-y-luoi { grid-template-columns: minmax(0, 1fr); } .goi-y-the-luoi { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }

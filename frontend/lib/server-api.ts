@@ -32,6 +32,9 @@ export const layTrangChuSanPham = cache(async (): Promise<SanPhamLanding[] | nul
   return d?.sanPhams ?? null;
 });
 
+/** Combo mua chung (Top-K, công khai: chỉ kết quả sản phẩm). Thân phản hồi chưa được tin: `chonComboHienThi` (lib/goi-y.ts) làm sạch trước khi hiển thị. */
+export const layGoiYCombo = cache(() => layApi<unknown>("/goi-y/combo", LAM_MOI_SAN_PHAM_GIAY));
+
 export interface NoiDungLanding {
   danhGia: { id: string; noiDung: string; danhGia: number; tenKhachHang: string; tenSanPham: string | null }[];
   dsNoiBat: TinV[];

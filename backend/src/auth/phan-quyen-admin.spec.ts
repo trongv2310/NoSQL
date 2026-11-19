@@ -10,6 +10,9 @@ import { Quyen } from '../schemas';
 import { SuKienController } from '../su-kien/su-kien.controller';
 import { AdminLichCangController } from '../tu-vot/lich-cang.controller';
 import { AccessGuard, ROLES_KEY } from './auth.guards';
+import { PATH_METADATA } from '@nestjs/common/constants';
+import * as KhaiThacAdmin from '../khai-thac/khai-thac-admin.controller';
+import * as KhaiThacCongKhai from '../khai-thac/khai-thac-cong-khai.controller';
 
 const A = [Quyen.Admin];
 const AN = [Quyen.Admin, Quyen.NhanVien];
@@ -47,6 +50,38 @@ describe('Quyền hiện tại của endpoint quản trị', () => {
       return typeof handler === 'function' && Reflect.getMetadata(METHOD_METADATA, handler) !== undefined;
     });
     expect(actual.sort()).toEqual([...methods].sort());
+  });
+});
+
+describe('Top-K: phân quyền API theo CONTRACT-D2', () => {
+  const guard = new AccessGuard(reflector);
+  const timRoute = (exports: Record<string, unknown>, prefix: string, path: string, method: number) => {
+    const controller = Object.values(exports).find((x) => typeof x === 'function' && Reflect.getMetadata(PATH_METADATA, x) === prefix) as Function | undefined;
+    expect(controller, `thiếu controller ${prefix}`).toBeDefined();
+    const proto = controller!.prototype as Record<string, unknown>;
+    const name = Object.getOwnPropertyNames(proto).find((key) => {
+      const f = proto[key];
+      return typeof f === 'function' && Reflect.getMetadata(PATH_METADATA, f) === path && Reflect.getMetadata(METHOD_METADATA, f) === method;
+    });
+    expect(name, `thiếu ${prefix}/${path}`).toBeDefined();
+    return { controller: controller!, handler: proto[name!] as Function };
+  };
+  const ctx = (controller: Function, handler: Function, role?: Quyen) => ({
+    getHandler: () => handler, getClass: () => controller,
+    switchToHttp: () => ({ getRequest: () => ({ user: role === undefined ? undefined : { maQuyen: role } }) }),
+  }) as unknown as ExecutionContext;
+
+  it.each([['top-k', 1], ['goi-y-da-luu', 0]])('admin/khai-thac/%s chỉ cho Admin', (path, method) => {
+    const { controller, handler } = timRoute(KhaiThacAdmin, 'admin/khai-thac', path, method);
+    expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual([Quyen.Admin]);
+    expect(guard.canActivate(ctx(controller, handler, Quyen.Admin))).toBe(true);
+    for (const role of [Quyen.NhanVien, Quyen.KhachHang]) expect(() => guard.canActivate(ctx(controller, handler, role))).toThrow(ForbiddenException);
+    expect(() => guard.canActivate(ctx(controller, handler))).toThrow(UnauthorizedException);
+  });
+
+  it.each(['combo', 'san-pham/:id'])('goi-y/%s công khai không yêu cầu phiên', (path) => {
+    const { controller, handler } = timRoute(KhaiThacCongKhai, 'goi-y', path, 0);
+    expect(guard.canActivate(ctx(controller, handler))).toBe(true);
   });
 });
 

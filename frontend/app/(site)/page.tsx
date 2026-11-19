@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ComboMuaChung } from "@/components/ComboMuaChung";
 import { Catalog } from "@/components/landing/Catalog";
 import { CongCu, DaiSoLieu } from "@/components/quay/CongCu";
 import { DanhMucBento, TamGia, ThuongHieu } from "@/components/quay/GianHang";
@@ -36,6 +37,7 @@ export default function TrangChu() {
         <DanhMucBento />
         <LoiChoi />
         <KhuyenMai />
+        <ComboMuaChung />
         <TamGia />
         <ThuongHieu />
         <KeHang />

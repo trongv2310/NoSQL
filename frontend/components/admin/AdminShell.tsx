@@ -17,7 +17,7 @@ const MUC: { nhom: string; muc: [string, string, string][] }[] = [
   { nhom: "Tổng quan", muc: [["/admin", "fa-chart-pie", "Thống kê"], ["/admin/bao-cao-csdl", "fa-chart-column", "Báo cáo sổ căng & đánh giá"]] },
   {
     nhom: "Bán hàng",
-    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm"], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng"], ["/admin/lich-cang", "fa-calendar-check", "Lịch căng cước"], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi"]],
+    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm"], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng"], ["/admin/lich-cang", "fa-calendar-check", "Lịch căng cước"], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi"], ["/admin/khai-thac", "fa-fire", "Combo bán chạy"]],
   },
   { nhom: "Nội dung", muc: [["/admin/ban-tin", "fa-newspaper", "Bảng tin"], ["/admin/tran-dau", "fa-table-tennis-paddle-ball", "Kết quả trận đấu"]] },
   { nhom: "Hệ thống", muc: [["/admin/tai-khoan", "fa-users-gear", "Tài khoản"], ["/admin/logo", "fa-image", "Logo hệ thống"], ["/admin/thong-bao", "fa-triangle-exclamation", "Cảnh báo đánh giá"]] },
@@ -25,7 +25,7 @@ const MUC: { nhom: string; muc: [string, string, string][] }[] = [
 
 const TIEU_DE: [string, string][] = [
   ["/admin/san-pham", "Quản lý sản phẩm"], ["/admin/bien-the", "Quản lý sản phẩm"], ["/admin/don-hang", "Quản lý đơn hàng"], ["/admin/lich-cang", "Lịch căng cước"], ["/admin/bao-cao-csdl", "Báo cáo sổ căng & đánh giá"],
-  ["/admin/khuyen-mai", "Quản lý khuyến mãi"], ["/admin/ban-tin", "Quản lý bảng tin"], ["/admin/tran-dau", "Kết quả trận đấu"],
+  ["/admin/khuyen-mai", "Quản lý khuyến mãi"], ["/admin/khai-thac", "Combo bán chạy"], ["/admin/ban-tin", "Quản lý bảng tin"], ["/admin/tran-dau", "Kết quả trận đấu"],
   ["/admin/tai-khoan", "Quản lý tài khoản"], ["/admin/logo", "Quản lý Logo"], ["/admin/thong-bao", "Cảnh báo đánh giá"],
 ];
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { bayVaoGio } from "@/lib/cart-motion";
+import { GoiYMuaCung } from "@/components/ComboGoiY";
 import { RelatedProducts } from "@/components/RelatedProducts";
 import { ProductGallery } from "@/components/ProductGallery";
 import { TEN_ANH_MORPH, anhDaBam } from "@/lib/morph";
@@ -369,6 +370,7 @@ export default function ChiTietSanPhamPage() {
           "Phiên bản nào đang còn hàng?",
           "Phí giao hàng và đổi trả thế nào?",
         ]} />
+      <GoiYMuaCung key={`goi-y-${sp.id}`} sanPhamId={sp.id} />
       {sp.loai && <RelatedProducts key={sp.id} sanPhamId={sp.id} loai={sp.loai} />}
       <div className={`pdp-sticky-buy${hienThanhMua ? " is-on" : ""}`} role="region" aria-label="Mua nhanh" hidden={!hienThanhMua}>
         <div className="pdp-sticky-price">

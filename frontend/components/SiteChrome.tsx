@@ -126,6 +126,7 @@ export function Header() {
           ["/admin/tai-khoan", "fa-users", "Quản lý tài khoản"],
           ["/admin/don-hang", "fa-file-invoice", "Quản lý Đơn hàng"],
           ["/admin/khuyen-mai", "fa-tags", "Quản lý Khuyến mãi"],
+          ["/admin/khai-thac", "fa-fire", "Combo bán chạy"],
           ["/admin", "fa-chart-line", "Dashboard"],
           ["/admin/thong-bao", "fa-bell", "Thông Báo Đánh Giá Thấp"],
         ]

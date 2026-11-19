@@ -1,6 +1,7 @@
 /**
  * Quyền vào khu quản trị theo vai trò (`maQuyen`: 1 = Quản trị, 2 = Nhân viên, 3 = Khách). Chỉ để chọn giao diện; hàng rào thật là `@Roles` ở backend.
  * Nhân viên chỉ vào Sản phẩm (kèm biến thể), Đơn hàng, Bảng tin, Trận đấu; Quản trị vào mọi `/admin/**`. Mặc định từ chối: vai trò lạ, đường dẫn lạ → false.
+ * `/admin/khai-thac` (Combo bán chạy, Top-K) chỉ dành cho Quản trị: không nằm trong danh sách nhân viên nên tự bị chặn và không có trong menu nhân viên.
  */
 
 /** Trang đích của nhân viên sau đăng nhập (và khi gõ `/admin`). */
