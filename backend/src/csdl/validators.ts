@@ -508,6 +508,7 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           tiSo: chuoi(60),
           doiThang: { enum: ['A', 'B', null] },
           ngayThiDau: NGAY,
+          hienThi: { bsonType: 'bool' },
         },
       },
       $expr: { $ne: [{ $toLower: { $trim: { input: '$doiA' } } }, { $toLower: { $trim: { input: '$doiB' } } }] },

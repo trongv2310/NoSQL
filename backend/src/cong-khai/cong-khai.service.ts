@@ -89,11 +89,11 @@ export class CongKhaiService {
   }
 
   private tinQuery(filter: Record<string, any>) {
-    return this.tinModel.find(filter).populate({ path: 'sanPham', populate: 'khuyenMai' }).populate('tranDau');
+    return this.tinModel.find(filter).populate({ path: 'sanPham', populate: 'khuyenMai' }).populate({ path: 'tranDau', match: { hienThi: { $ne: false } } });
   }
 
   private async tranMoi(soLuong: number) {
-    const trans = await this.tranModel.find().sort({ ngayThiDau: -1, _id: -1 }).limit(soLuong).lean();
+    const trans = await this.tranModel.find({ hienThi: { $ne: false } }).sort({ ngayThiDau: -1, _id: -1 }).limit(soLuong).lean();
     const tins = await this.tinModel
       .find(this.daDang({ tranDau: { $in: trans.map((t) => t._id) } }), { tieuDe: 1, tranDau: 1 })
       .sort({ ngayDang: -1 })
@@ -246,7 +246,7 @@ export class CongKhaiService {
       this.tinQuery(filter).sort({ ngayDang: -1, _id: -1 }).lean() as Promise<any[]>,
       this.tinModel.aggregate([{ $match: this.daDang() }, { $group: { _id: '$loaiTin', so: { $sum: 1 } } }]),
       this.tinModel.aggregate([{ $match: this.daDang() }, { $group: { _id: null, t: { $sum: '$luotXem' } } }]),
-      this.tranModel.countDocuments(),
+      this.tranModel.countDocuments({ hienThi: { $ne: false } }),
     ]);
     const trang = phanTrang(danhSach, page, 8);
     const dem: Record<string, number> = Object.fromEntries(demLoai.map((x) => [x._id, x.so]));
@@ -273,7 +273,7 @@ export class CongKhaiService {
     const tin: any = await this.tinModel
       .findOne({ ...this.daDang(), _id: oid })
       .populate({ path: 'sanPham', populate: 'khuyenMai' })
-      .populate('tranDau')
+      .populate({ path: 'tranDau', match: { hienThi: { $ne: false } } })
       .populate('tacGia', 'tenDangNhap')
       .lean();
     if (!tin) {

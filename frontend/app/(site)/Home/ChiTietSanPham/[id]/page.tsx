@@ -25,6 +25,7 @@ import { useApp } from "@/components/AppProviders";
 import { ErrorBox, Loading, Page, Stars } from "@/components/Ui";
 import { api, apiPost, loiTuApi } from "@/lib/api";
 import { THONG_BAO_DOI_TAI_KHOAN, laLoiSaiTaiKhoan } from "@/components/product/useThemBienThe";
+import { anhChinhChiTiet } from "@/lib/anh-upload";
 import { imgUrl, ngay, vnd } from "@/lib/format";
 import { soLuongTrongGio, layGio, themVaoGio as themVaoGioKhach } from "@/lib/gio-khach";
 import { useApi } from "@/lib/hooks";
@@ -57,6 +58,8 @@ export default function ChiTietSanPhamPage() {
   const { data, error, loading } = useApi<ChiTiet>(`/san-pham/${id}`);
   const [mauId, setMauId] = useState<string | null>(null);
   const [sizeId, setSizeId] = useState<string | null>(null);
+  // Khách đã tự bấm chọn màu/size (khác với biến thể được chọn sẵn ở effect dưới). Gắn với đúng đợt dữ liệu `data`, nên đổi sản phẩm hoặc tải lại dữ liệu thì tự về "chưa chọn" mà không cần effect.
+  const [daChonTren, setDaChonTren] = useState<ChiTiet | null>(null);
   const [soLuong, setSoLuong] = useState(1);
   const anhSanPham = useRef<HTMLImageElement>(null);
   const nutThem = useRef<HTMLButtonElement>(null);
@@ -145,7 +148,8 @@ export default function ChiTietSanPhamPage() {
   const giaGocHienThi = bienThe?.giaBan ?? sp.giaGoc;
   const conHang = !!bienThe && bienThe.soLuongTon > 0;
   const vuotTon = !!bienThe && soLuong > bienThe.soLuongTon;
-  const anh = imgUrl(bienThe?.hinhAnh ?? sp.hinhAnhDaiDien);
+  const daChonPhienBan = daChonTren === data;
+  const anh = imgUrl(anhChinhChiTiet({ anhDaiDien: sp.hinhAnhDaiDien, anhBienThe: bienThe?.hinhAnh, daChonPhienBan }));
   const anhHienThi = anhXem?.sanPhamId === id && anhXem.bienTheId === bienThe?.id ? anhXem.url : anh;
   const cacAnh = [...new Set([imgUrl(sp.hinhAnhDaiDien), ...data.bienThes.map((b) => imgUrl(b.hinhAnh || sp.hinhAnhDaiDien))])];
   const chonTab = (moi: TabSanPham) => setTab(moi);
@@ -230,6 +234,7 @@ export default function ChiTietSanPhamPage() {
               <div className="fw-semibold mb-1">Màu sắc</div>
               <div className="d-flex flex-wrap gap-2">
                 {data.mauSacs.map((m) => <button key={m.id} type="button" className={`btn btn-sm ${mauId === m.id ? "btn-primary" : "btn-outline-secondary"}`} aria-pressed={mauId === m.id} onClick={() => {
+                  setDaChonTren(data);
                   setMauId(m.id);
                   const cacMau = data.bienThes.filter((b) => b.mau?.id === m.id);
                   const tiep = cacMau.find((b) => b.size?.id === sizeId && b.soLuongTon > 0) ?? cacMau.find((b) => b.soLuongTon > 0) ?? cacMau[0];
@@ -244,7 +249,7 @@ export default function ChiTietSanPhamPage() {
               <div className="d-flex flex-wrap gap-2">
                 {data.sizes.map((s) => {
                   const co = data.bienThes.some((b) => b.size?.id === s.id && (data.mauSacs.length === 0 || b.mau?.id === mauId));
-                  return <button key={s.id} type="button" disabled={!co} aria-pressed={sizeId === s.id} className={`btn btn-sm ${sizeId === s.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => setSizeId(s.id)}>{s.tenSize}</button>;
+                  return <button key={s.id} type="button" disabled={!co} aria-pressed={sizeId === s.id} className={`btn btn-sm ${sizeId === s.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => { setDaChonTren(data); setSizeId(s.id); }}>{s.tenSize}</button>;
                 })}
               </div>
             </div>

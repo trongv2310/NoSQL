@@ -40,7 +40,7 @@ export default function QuanLyTaiKhoanPage() {
               <tr key={t.id}><td className="fw-semibold">{t.tenDangNhap}</td><td>{t.hoTen ?? "—"}</td><td>{t.email}</td>
                 <td><span className={`badge ${t.maQuyen === 1 ? "bg-danger" : t.maQuyen === 2 ? "bg-info" : "bg-secondary"}`}>{t.tenQuyen}</span></td><td>{ngay(t.ngayTao)}</td>
                 <td className="text-end text-nowrap"><Link href={`/admin/tai-khoan/${t.id}/edit`} className="btn btn-sm btn-outline-primary me-1"><i className="fa-solid fa-pen" /></Link>
-                  <button className="btn btn-sm btn-outline-danger" disabled={t.id === user?.id} onClick={() => xoa(t)}><i className="fa-solid fa-trash" /></button></td></tr>))}</tbody>
+                  <button className="btn btn-sm btn-outline-danger" disabled={t.id === user?.id || t.maQuyen === 1} title={t.maQuyen === 1 ? "Không được xóa tài khoản quản trị." : undefined} onClick={() => xoa(t)}><i className="fa-solid fa-trash" /></button></td></tr>))}</tbody>
           </table></div>
           <Pagination trang={data} />
         </>)}

@@ -1,9 +1,11 @@
-import { BadRequestException } from '@nestjs/common';
+import 'dotenv/config';
+import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname, isAbsolute, join, relative, sep } from 'path';
 import { randomBytes } from 'crypto';
+import { catchError, defer, throwError } from 'rxjs';
 
 export const UPLOAD_ROOT = process.env.UPLOAD_DIR ?? join(process.cwd(), 'uploads');
 const CHO_PHEP = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
@@ -41,7 +43,25 @@ export function xoaAnhUpload(duongDan?: string | null): void {
     return;
   }
   const full = join(UPLOAD_ROOT, duongDan.slice('uploads/'.length));
-  if (existsSync(full)) {
-    unlinkSync(full);
+  try {
+    if (existsSync(full)) unlinkSync(full);
+  } catch {
+    // DB đã lưu; lỗi dọn ảnh không được làm hỏng request.
+  }
+}
+
+@Injectable()
+export class DonAnhKhiLoi implements NestInterceptor {
+  static readonly daLuu = new WeakSet<Express.Multer.File>();
+
+  intercept(context: ExecutionContext, next: CallHandler) {
+    return defer(() => next.handle()).pipe(catchError((error: unknown) => {
+      const file = context.switchToHttp().getRequest<{ file?: Express.Multer.File }>().file;
+      if (file?.path && !DonAnhKhiLoi.daLuu.has(file)) {
+        const path = relative(UPLOAD_ROOT, file.path);
+        if (!isAbsolute(path)) xoaAnhUpload(`uploads/${path.split(sep).join('/')}`);
+      }
+      return throwError(() => error);
+    }));
   }
 }

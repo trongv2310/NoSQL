@@ -70,6 +70,7 @@ export class AdminVanHanhController {
   }
 
   @Get('thong-bao')
+  @Roles(Quyen.Admin)
   async thongBao() {
     const ds: any[] = await this.phanHoiModel
       .find({ danhGia: { $lte: 2 } })
@@ -88,11 +89,13 @@ export class AdminVanHanhController {
   }
 
   @Get('thong-bao/so-luong')
+  @Roles(Quyen.Admin)
   async soThongBao() {
     return { count: await this.phanHoiModel.countDocuments({ danhGia: { $lte: 2 } }) };
   }
 
   @Get('dashboard')
+  @Roles(Quyen.Admin)
   async dashboard(@Query('nam') namQuery?: string) {
     let nam = Number(namQuery) || new Date().getFullYear();
     if (nam < 2000 || nam > 2100) {

@@ -5,7 +5,7 @@ import { Quyen } from '../schemas';
 import { SuKienService } from './su-kien.service';
 
 /** Thông báo trực tiếp cho trang quản trị: Server-Sent Events, nguồn là change stream của MongoDB (xem su-kien.service.ts). */
-@Roles(Quyen.Admin, Quyen.NhanVien)
+@Roles(Quyen.Admin)
 @Controller('admin/su-kien')
 export class SuKienController {
   constructor(private readonly suKien: SuKienService) {}

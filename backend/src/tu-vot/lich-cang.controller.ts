@@ -48,7 +48,7 @@ export class LichCangController {
 }
 
 /** Nhân viên/quản trị: xem lịch và đánh dấu đã căng xong (ghi luôn vào sổ căng của khách). */
-@Roles(Quyen.Admin, Quyen.NhanVien)
+@Roles(Quyen.Admin)
 @Controller('admin/lich-cang')
 export class AdminLichCangController {
   constructor(private readonly lich: LichCangService) {}

@@ -9,7 +9,7 @@ import {
 } from './bao-cao-csdl';
 
 /** Báo cáo thống kê từ sổ căng cước và đánh giá theo nhóm người chơi (M6). `?mau=1` để tính cả dữ liệu mẫu. */
-@Roles(Quyen.Admin, Quyen.NhanVien)
+@Roles(Quyen.Admin)
 @Controller('admin/bao-cao-csdl')
 export class AdminBaoCaoController {
   constructor(

@@ -157,6 +157,7 @@ export class AdminBanTinController {
   }
 
   @Delete(':id')
+  @Roles(Quyen.Admin)
   async xoa(@Param('id') id: string) {
     const r = await this.model.updateOne({ _id: parseObjectId(id, 'Tin'), deletedAt: null }, { $set: { deletedAt: new Date() } });
     if (!r.matchedCount) {

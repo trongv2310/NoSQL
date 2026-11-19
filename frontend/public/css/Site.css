@@ -254,6 +254,9 @@ ul { list-style: none; padding: 0; margin: 0; }
     transition: opacity .18s ease, transform .18s ease, visibility .18s;
 }
 
+/* Cầu nối vùng chuột qua khe giữa nút và menu (8px top + 8px translateY khi mở bằng style inline) để rê chuột xuống không làm mất menu. */
+.user-menu::before { content: ""; position: absolute; left: 0; right: 0; top: -17px; height: 17px; }
+
 .user-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
 .user-menu hr { margin: 6px 4px; }

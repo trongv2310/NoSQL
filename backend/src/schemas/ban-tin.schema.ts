@@ -23,6 +23,7 @@ export class TranDau {
   @Prop({ maxlength: 120 }) diaDiem?: string;
   @Prop({ maxlength: 150 }) nguonTin?: string;
   @Prop({ maxlength: 300 }) lienKetNguon?: string;
+  @Prop({ default: true }) hienThi: boolean;
 }
 export type TranDauDocument = HydratedDocument<TranDau>;
 export const TranDauSchema = SchemaFactory.createForClass(TranDau);

@@ -6,19 +6,21 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { giuFocusTrongVung } from "@/lib/bay-focus";
 import { apiPost } from "@/lib/api";
 import { imgUrl } from "@/lib/format";
+import { TRANG_NHAN_VIEN, canChuyenVeTrangNhanVien, duongDanDuocPhep, mucMenuTheoQuyen } from "@/lib/quyen-admin";
 import { useApp } from "../AppProviders";
 import { LoginForm } from "../AuthForms";
 import { Loading } from "../Ui";
 import { ThongBaoTrucTiep } from "./ThongBaoTrucTiep";
 
-const MUC: { nhom: string; muc: [string, string, string, boolean][] }[] = [
-  { nhom: "Tổng quan", muc: [["/admin", "fa-chart-pie", "Thống kê", false], ["/admin/bao-cao-csdl", "fa-chart-column", "Báo cáo sổ căng & đánh giá", false]] },
+/** Mục nào hiện với vai trò nào do `mucMenuTheoQuyen` (lib/quyen-admin.ts) quyết định. */
+const MUC: { nhom: string; muc: [string, string, string][] }[] = [
+  { nhom: "Tổng quan", muc: [["/admin", "fa-chart-pie", "Thống kê"], ["/admin/bao-cao-csdl", "fa-chart-column", "Báo cáo sổ căng & đánh giá"]] },
   {
     nhom: "Bán hàng",
-    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm", true], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng", false], ["/admin/lich-cang", "fa-calendar-check", "Lịch căng cước", false], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi", true]],
+    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm"], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng"], ["/admin/lich-cang", "fa-calendar-check", "Lịch căng cước"], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi"]],
   },
-  { nhom: "Nội dung", muc: [["/admin/ban-tin", "fa-newspaper", "Bảng tin", false], ["/admin/tran-dau", "fa-table-tennis-paddle-ball", "Kết quả trận đấu", false]] },
-  { nhom: "Hệ thống", muc: [["/admin/tai-khoan", "fa-users-gear", "Tài khoản", true], ["/admin/logo", "fa-image", "Logo hệ thống", true], ["/admin/thong-bao", "fa-triangle-exclamation", "Cảnh báo đánh giá", false]] },
+  { nhom: "Nội dung", muc: [["/admin/ban-tin", "fa-newspaper", "Bảng tin"], ["/admin/tran-dau", "fa-table-tennis-paddle-ball", "Kết quả trận đấu"]] },
+  { nhom: "Hệ thống", muc: [["/admin/tai-khoan", "fa-users-gear", "Tài khoản"], ["/admin/logo", "fa-image", "Logo hệ thống"], ["/admin/thong-bao", "fa-triangle-exclamation", "Cảnh báo đánh giá"]] },
 ];
 
 const TIEU_DE: [string, string][] = [
@@ -51,6 +53,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     setMo(false);
   }, [pathname]);
 
+  // Nhân viên gõ đúng /admin (Thống kê, không được vào) thì đưa về trang đơn hàng.
+  const veTrangNhanVien = canChuyenVeTrangNhanVien(user?.maQuyen, pathname);
+  useEffect(() => {
+    if (veTrangNhanVien) router.replace(TRANG_NHAN_VIEN);
+  }, [veTrangNhanVien, router]);
+
   if (!ready) return <div className="p-5"><Loading /></div>;
 
   if (!user || user.maQuyen === 3) {
@@ -66,6 +74,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   const laAdmin = user.maQuyen === 1;
+  const duocVao = duongDanDuocPhep(user.maQuyen, pathname);
   const tieuDe = pathname === "/admin" ? "Thống kê & báo cáo" : (TIEU_DE.find(([p]) => pathname.startsWith(p))?.[1] ?? "Bảng điều khiển");
   const dangXuat = async () => {
     await apiPost("/auth/dang-xuat");
@@ -83,10 +92,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <span><span className="brand-name d-block">{site.tenSite}</span><span className="brand-sub d-block">Trang quản trị</span></span>
         </Link>
         <nav className="admin-nav">
-          {MUC.map((n) => (
+          {MUC.map((n) => ({ ...n, muc: n.muc.filter(([href]) => mucMenuTheoQuyen(user.maQuyen, href)) })).filter((n) => n.muc.length > 0).map((n) => (
             <div key={n.nhom}>
               <div className="admin-nav-label">{n.nhom}</div>
-              {n.muc.filter(([, , , chiAdmin]) => laAdmin || !chiAdmin).map(([href, icon, nhan]) => (
+              {n.muc.map(([href, icon, nhan]) => (
                 <Link key={href} href={href} className={`admin-link ${(href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)) ? "active" : ""}`}>
                   <i className={`fa-solid ${icon}`} /> {nhan}
                 </Link>
@@ -107,14 +116,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <h1>{tieuDe}</h1>
           </div>
           <div className="d-flex align-items-center">
-          <ThongBaoTrucTiep />
+          {laAdmin && <ThongBaoTrucTiep />}
           <div className="admin-user">
             <div className="meta text-end"><div className="name">{user.hoTen}</div><div className="role">{laAdmin ? "Quản trị viên" : "Nhân viên"}</div></div>
             <div className="admin-avatar">{user.hoTen.charAt(0).toUpperCase()}</div>
           </div>
           </div>
         </header>
-        <main className="admin-content"><Suspense fallback={<Loading />}>{children}</Suspense></main>
+        <main className="admin-content">
+          {duocVao ? <Suspense fallback={<Loading />}>{children}</Suspense>
+            : veTrangNhanVien ? <Loading />
+              : (
+                <div className="card-custom p-4" role="alert">
+                  <p className="mb-3">Bạn không có quyền truy cập trang này.</p>
+                  <Link href={TRANG_NHAN_VIEN} className="btn btn-primary">Về trang đơn hàng</Link>
+                </div>
+              )}
+        </main>
       </div>
     </div>
   );

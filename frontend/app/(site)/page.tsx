@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  * Dữ liệu lấy ở server nên HTML đã có sản phẩm; server không lấy được thì client tự tải lại với trạng thái loading/lỗi/thử lại, từng khu độc lập.
  * Mã cảnh 3D cũ (components/landing/World…) được giữ nguyên trong repo nhưng không gắn vào trang.
  */
-export const revalidate = 120;
+export const revalidate = 10;
 
 export default function TrangChu() {
   return (

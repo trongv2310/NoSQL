@@ -90,7 +90,7 @@ export class AuthService {
       throw new UnauthorizedException('Tài khoản không có quyền truy cập vào trang quản trị.');
     }
     if (!quanTri && tk.maQuyen === Quyen.Admin) {
-      throw new UnauthorizedException('Tài khoản Quản trị viên vui lòng đăng nhập tại trang quản trị (/admin).');
+      throw new UnauthorizedException('Tài khoản Quản trị viên vui lòng đăng nhập tại trang quản trị.');
     }
     return { token: this.taoToken(tk), user: await this.layNguoiDung(tk) };
   }

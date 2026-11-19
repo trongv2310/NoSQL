@@ -1,13 +1,72 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useApp } from "../AppProviders";
 import { ErrorBox, Loading } from "../Ui";
 import { Field, SubmitBar } from "./Common";
 import { api, loiTuApi } from "@/lib/api";
+import { kiemTraAnh } from "@/lib/anh-upload";
 import { useApi } from "@/lib/hooks";
 import { imgUrl } from "@/lib/format";
+
+const thaUrl = (r: MutableRefObject<string | null>) => {
+  if (r.current) URL.revokeObjectURL(r.current);
+  r.current = null;
+};
+
+/**
+ * Ô chọn ảnh dùng chung (sản phẩm, biến thể): kiểm tra file bằng `kiemTraAnh` trước khi nhận (file lỗi không được giữ, ô nhập bị xóa),
+ * xem trước ảnh mới, nút "Bỏ ảnh đã chọn". `anhCu` hiện khi chưa chọn file. Tự giải phóng URL xem trước khi đổi file/bỏ chọn/gỡ component.
+ */
+export function ChonAnh({ label, hint, file, onChange, anhCu, cao = 80 }: {
+  label: string; hint?: string; file: File | null; onChange: (f: File | null) => void; anhCu?: string; cao?: number;
+}) {
+  const oNhap = useRef<HTMLInputElement>(null);
+  const urlRef = useRef<string | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
+  const [loi, setLoi] = useState<string | null>(null);
+
+  // Cha đặt lại file về null (bỏ chọn, gửi xong): xóa tên file còn sót trong ô nhập và giải phóng ảnh xem trước.
+  useEffect(() => {
+    if (!file) {
+      thaUrl(urlRef);
+      if (oNhap.current) oNhap.current.value = "";
+    }
+  }, [file]);
+  useEffect(() => () => thaUrl(urlRef), []);
+
+  const chon = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const moi = e.target.files?.[0] ?? null;
+    const l = kiemTraAnh(moi);
+    thaUrl(urlRef);
+    setLoi(l);
+    if (!moi || l) {
+      e.target.value = "";
+      setUrl(null);
+      onChange(null);
+      return;
+    }
+    urlRef.current = URL.createObjectURL(moi);
+    setUrl(urlRef.current);
+    onChange(moi);
+  };
+  const boChon = () => {
+    setLoi(null);
+    thaUrl(urlRef);
+    setUrl(null);
+    onChange(null);
+  };
+
+  return (
+    <Field label={label} hint={hint}>
+      {file && url ? <img src={url} alt="Ảnh mới chọn" height={cao} className="d-block mb-2" /> : (!file && anhCu && <img src={anhCu} alt="" height={cao} className="d-block mb-2" />)}
+      <input ref={oNhap} type="file" accept="image/*" className="form-control" onChange={chon} />
+      {loi && <div className="text-danger small mt-1" role="alert">{loi}</div>}
+      {file && <button type="button" className="btn btn-sm btn-outline-secondary mt-2" onClick={boChon}>Bỏ ảnh đã chọn</button>}
+    </Field>
+  );
+}
 
 interface FormData_ {
   loaiSanPhams: { id: string; tenLoai: string }[]; nhaCungCaps: { id: string; tenNhaCungCap: string }[];
@@ -73,10 +132,7 @@ export function ProductForm({ id }: { id?: string }) {
         <label className="form-check"><input type="checkbox" className="form-check-input" checked={f.coMau} onChange={(e) => setF({ ...f, coMau: e.target.checked })} /> <span className="form-check-label">Có nhiều màu</span></label>
         <label className="form-check"><input type="checkbox" className="form-check-input" checked={f.coSize} onChange={(e) => setF({ ...f, coSize: e.target.checked })} /> <span className="form-check-label">Có nhiều size</span></label>
       </div>
-      <Field label="Ảnh đại diện" hint="JPG/PNG/WEBP/GIF, tối đa 5MB.">
-        {id && sua.data && !file && (  <img src={imgUrl(sua.data.sanPham.hinhAnhDaiDien)} alt="" height={80} className="d-block mb-2" />)}
-        <input type="file" accept="image/*" className="form-control" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-      </Field>
+      <ChonAnh label="Ảnh đại diện" hint="JPG/PNG/WEBP/GIF, tối đa 5MB." file={file} onChange={setFile} anhCu={id && sua.data ? imgUrl(sua.data.sanPham.hinhAnhDaiDien) : undefined} cao={80} />
       <SubmitBar dang={dang} cancel="/admin/san-pham" text={id ? "Cập nhật" : "Thêm sản phẩm"} />
     </form>
   );
