@@ -60,6 +60,24 @@ export interface DinhNghiaValidator {
 }
 
 export const VALIDATORS: Record<string, DinhNghiaValidator> = {
+  goiysanphams: {
+    moTa: 'Tập gợi ý có ít nhất hai sản phẩm, hạng và tham số khai thác nguyên trong giới hạn.',
+    validator: {
+      $jsonSchema: {
+        bsonType: 'object',
+        required: ['khoa', 'sanPham', 'loiNhuan', 'hang', 'k', 'soThang', 'taoLuc'],
+        properties: {
+          khoa: chuoi(undefined, 1),
+          sanPham: { bsonType: 'array', minItems: 2, uniqueItems: true, items: ID },
+          loiNhuan: SO_KHONG_AM,
+          hang: { bsonType: 'number', minimum: 1, multipleOf: 1 },
+          k: { bsonType: 'number', minimum: 1, maximum: 50, multipleOf: 1 },
+          soThang: { bsonType: 'number', minimum: 1, maximum: 12, multipleOf: 1 },
+          taoLuc: NGAY,
+        },
+      },
+    },
+  },
   sanphams: {
     moTa: 'Tên 1–100 ký tự, giá gốc không âm, các khoá ngoại là ObjectId, xoá mềm là ngày hoặc null, trường tìm kiếm chỉ chữ không dấu.',
     validator: {
@@ -508,6 +526,7 @@ export const VALIDATORS: Record<string, DinhNghiaValidator> = {
           tiSo: chuoi(60),
           doiThang: { enum: ['A', 'B', null] },
           ngayThiDau: NGAY,
+          hienThi: { bsonType: 'bool' },
         },
       },
       $expr: { $ne: [{ $toLower: { $trim: { input: '$doiA' } } }, { $toLower: { $trim: { input: '$doiB' } } }] },

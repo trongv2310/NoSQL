@@ -7,6 +7,7 @@ import { FilterBar, ListState, PageBar, Pagination } from "@/components/admin/Co
 import { apiDelete, apiPost, loiTuApi } from "@/lib/api";
 import { ngay } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
+import { coQuyenXoa } from "@/lib/quyen-admin";
 import type { TinV, Trang } from "@/lib/types";
 
 const LOAI: [string, string][] = [["", "Tất cả loại"], ["san-pham-hot", "Sản phẩm hot"], ["san-pham-moi", "Sản phẩm mới"], ["tran-dau", "Trận đấu"], ["tuyen-thu", "Tuyển thủ"], ["giai-dau", "Giải đấu"]];
@@ -15,7 +16,8 @@ export default function QuanLyBanTinPage() {
   const sp = useSearchParams();
   const q = sp.toString();
   const { data, error, loading, reload } = useApi<Trang<TinV>>(`/admin/ban-tin${q ? `?${q}` : ""}`);
-  const { flash } = useApp();
+  const { user, flash } = useApp();
+  const xoaDuoc = coQuyenXoa(user?.maQuyen); // nhân viên không xóa; ẩn/hiện bằng công tắc Hiển thị
 
   const toggle = async (t: TinV, field: "noiBat" | "hienThi") => {
     try {
@@ -52,7 +54,7 @@ export default function QuanLyBanTinPage() {
                 <td className="text-center"><div className="form-check form-switch d-inline-block"><input type="checkbox" className="form-check-input" checked={t.noiBat} onChange={() => toggle(t, "noiBat")} aria-label="Nổi bật" /></div></td>
                 <td className="text-center"><div className="form-check form-switch d-inline-block"><input type="checkbox" className="form-check-input" checked={t.hienThi} onChange={() => toggle(t, "hienThi")} aria-label="Hiển thị" /></div></td>
                 <td className="text-end">{t.luotXem}</td>
-                <td className="text-end text-nowrap"><Link href={`/admin/ban-tin/${t.id}/edit`} className="btn btn-sm btn-outline-primary me-1"><i className="fa-solid fa-pen" /></Link><button className="btn btn-sm btn-outline-danger" onClick={() => xoa(t)}><i className="fa-solid fa-trash" /></button></td></tr>))}</tbody>
+                <td className="text-end text-nowrap"><Link href={`/admin/ban-tin/${t.id}/edit`} className="btn btn-sm btn-outline-primary me-1"><i className="fa-solid fa-pen" /></Link>{xoaDuoc && <button className="btn btn-sm btn-outline-danger" onClick={() => xoa(t)}><i className="fa-solid fa-trash" /></button>}</td></tr>))}</tbody>
           </table></div>
           <Pagination trang={data} />
         </>)}

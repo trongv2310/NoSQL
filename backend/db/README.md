@@ -15,6 +15,7 @@ Thư mục này gồm hướng dẫn vận hành và các file truy vấn mẫu 
 | `src/common/gioi-han-tan-suat.ts` | Chặn đăng nhập sai: bộ đếm upsert + `$inc` theo cửa sổ 15 phút, TTL index tự xoá |
 | `src/schemas/luot-xem.schema.ts` | Time series `luotxems` (lượt xem sản phẩm), tự xoá sau 180 ngày |
 | `src/su-kien/` | Change stream → SSE: thông báo đơn mới / sắp hết hàng cho admin, resume token trong `theodoisukiens` |
+| `src/khai-thac/`, `src/schemas/goi-y.schema.ts` | Combo bán chạy: khai thác Top-K (vertical list, TWU, cửa sổ trượt theo tháng) trên đơn "Đã hoàn thành", lưu vào `goiysanphams` (unique `khoa`, ghi bằng `bulkWrite` upsert); API admin `/admin/khai-thac/*`, API khách `/goi-y/*`. Sau khi pull chạy `npm run db:setup` để có validator + index |
 | `db/bat-replica-set.ps1` | Bật/tắt replica set `rs0` cho dịch vụ MongoDB trên Windows |
 | `src/csdl/moi-truong.ts` | Đọc phiên bản MongoDB, có replica set hay không (in lúc API khởi động) |
 | `src/catalog/thuoc-tinh.ts` | Attribute pattern: đọc `thongSo` (chuỗi) thành `thuocTinh` [{k, v}] dạng số; dựng điều kiện lọc `$elemMatch` |

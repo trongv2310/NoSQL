@@ -1,16 +1,16 @@
 import {
-  BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, UploadedFile, UseInterceptors,
+  BadRequestException, Body, ConflictException, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, Put, Query, UploadedFile, UseInterceptors,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CurrentUser } from '../auth/auth.decorators';
 import { Roles } from '../auth/auth.guards';
 import type { NguoiDung } from '../auth/auth.types';
 import { likeRegex, parseObjectId, phanTrang, toBool } from '../common/helpers';
 import { bienTheView, idOf, khuyenMaiView, sanPhamView } from '../common/mappers';
-import { anhInterceptor, duongDanTuongDoi, xoaAnhUpload } from '../common/upload';
+import { anhInterceptor, DonAnhKhiLoi, duongDanTuongDoi, xoaAnhUpload } from '../common/upload';
 import {
   ChiTietSanPham, DonHang, GioHang, Hang, KhuyenMai, LichSuThayDoiGia, LoaiSanPham, MauSac,
   NhaCungCap, Quyen, SanPham, Size,
@@ -64,7 +64,7 @@ export class BienTheDto {
   soLuongTonDaTai?: number;
 }
 
-@Roles(Quyen.Admin)
+@Roles(Quyen.Admin, Quyen.NhanVien)
 @Controller('admin')
 export class AdminSanPhamController {
   constructor(
@@ -80,6 +80,19 @@ export class AdminSanPhamController {
     @InjectModel(DonHang.name) private readonly donModel: Model<DonHang>,
     @InjectModel(LichSuThayDoiGia.name) private readonly lichSuModel: Model<LichSuThayDoiGia>,
   ) {}
+
+  private async xoaAnhNeuKhongConDung(duongDan?: string | null, boQuaSanPham?: Types.ObjectId, boQuaBienThe?: Types.ObjectId) {
+    if (!duongDan?.startsWith('uploads/')) return;
+    try {
+      const [soSanPham, soBienThe] = await Promise.all([
+        this.spModel.countDocuments({ hinhAnhDaiDien: duongDan, ...(boQuaSanPham ? { _id: { $ne: boQuaSanPham } } : {}) }),
+        this.ctModel.countDocuments({ hinhAnh: duongDan, ...(boQuaBienThe ? { _id: { $ne: boQuaBienThe } } : {}) }),
+      ]);
+      if (soSanPham + soBienThe === 0) xoaAnhUpload(duongDan);
+    } catch {
+      // DB đã ghi; không chắc hết tham chiếu thì giữ file và không làm hỏng request.
+    }
+  }
 
   private async duLieuForm() {
     const [loais, nccs, hangs, kms] = await Promise.all([
@@ -115,7 +128,7 @@ export class AdminSanPhamController {
 
   @Get('san-pham')
   async danhSach(@Query() q: Record<string, any>) {
-    const filter: Record<string, any> = { deletedAt: null };
+    const filter: Record<string, any> = { deletedAt: q.an === '1' || q.an === 'true' ? { $ne: null } : null };
     if (q.maLoai) {
       filter.loai = parseObjectId(q.maLoai, 'Loại');
     }
@@ -140,7 +153,7 @@ export class AdminSanPhamController {
     const tonMap = new Map(ton.map((x) => [String(x._id), x.t]));
     return {
       ...trang,
-      items: trang.items.map((s) => ({ ...sanPhamView(s), tongTonKho: tonMap.get(String(s._id)) ?? 0 })),
+      items: trang.items.map((s) => ({ ...sanPhamView(s), tongTonKho: tonMap.get(String(s._id)) ?? 0, daAn: s.deletedAt != null })),
       ...(await this.duLieuForm()),
     };
   }
@@ -178,7 +191,7 @@ export class AdminSanPhamController {
   }
 
   @Post('san-pham')
-  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'sp'))
+  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'sp'), DonAnhKhiLoi)
   async tao(@Body() dto: SanPhamDto, @UploadedFile() file?: Express.Multer.File) {
     const sp = await this.spModel.create({
       ...dto,
@@ -193,9 +206,10 @@ export class AdminSanPhamController {
   }
 
   @Put('san-pham/:id')
-  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'sp'))
+  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'sp'), DonAnhKhiLoi)
   async capNhat(@Param('id') id: string, @Body() dto: SanPhamDto, @UploadedFile() file?: Express.Multer.File) {
     const sp: any = await this.layKhongXoa(id);
+    const anhCu = sp.hinhAnhDaiDien;
     const update: Record<string, any> = { ...dto, khuyenMai: dto.khuyenMai ?? null };
     const anhMoi = duongDanTuongDoi('sanpham', file);
     if (anhMoi) {
@@ -203,18 +217,43 @@ export class AdminSanPhamController {
     }
     await this.spModel.updateOne({ _id: sp._id }, { $set: update });
     if (anhMoi) {
-      xoaAnhUpload(sp.hinhAnhDaiDien);
+      if (file) DonAnhKhiLoi.daLuu.add(file);
+      if (anhCu) await this.ctModel.updateMany({ sanPham: sp._id, hinhAnh: anhCu }, { $set: { hinhAnh: anhMoi } });
+      await this.xoaAnhNeuKhongConDung(anhCu, sp._id);
     }
     return { message: 'Cập nhật sản phẩm thành công!' };
   }
 
-  /** Xóa mềm: sản phẩm ngừng kinh doanh nhưng đơn cũ vẫn còn dữ liệu. Giỏ hàng chứa sản phẩm này bị dọn. */
-  @Delete('san-pham/:id')
-  async xoa(@Param('id') id: string) {
-    const sp: any = await this.layKhongXoa(id);
+  private async anSanPham(sp: any) {
     const bienThes = await this.ctModel.find({ sanPham: sp._id }, { _id: 1 }).lean();
     await this.gioModel.deleteMany({ chiTietSanPham: { $in: bienThes.map((b) => b._id) } });
     await this.spModel.updateOne({ _id: sp._id }, { $set: { deletedAt: new Date() } });
+  }
+
+  @Post('san-pham/:id/an')
+  @HttpCode(200)
+  async an(@Param('id') id: string) {
+    const sp = await this.spModel.findOne({ _id: parseObjectId(id, 'Sản phẩm') }).lean();
+    if (!sp) throw new NotFoundException('Không tìm thấy sản phẩm.');
+    if (sp.deletedAt == null) await this.anSanPham(sp);
+    return { message: `Đã ẩn sản phẩm "${sp.tenSanPham}" thành công!` };
+  }
+
+  @Post('san-pham/:id/hien')
+  @HttpCode(200)
+  async hien(@Param('id') id: string) {
+    const sp = await this.spModel.findOne({ _id: parseObjectId(id, 'Sản phẩm') }).lean();
+    if (!sp) throw new NotFoundException('Không tìm thấy sản phẩm.');
+    if (sp.deletedAt != null) await this.spModel.updateOne({ _id: sp._id }, { $set: { deletedAt: null } });
+    return { message: `Đã hiện sản phẩm "${sp.tenSanPham}" thành công!` };
+  }
+
+  /** Xóa mềm: sản phẩm ngừng kinh doanh nhưng đơn cũ vẫn còn dữ liệu. Giỏ hàng chứa sản phẩm này bị dọn. */
+  @Delete('san-pham/:id')
+  @Roles(Quyen.Admin)
+  async xoa(@Param('id') id: string) {
+    const sp: any = await this.layKhongXoa(id);
+    await this.anSanPham(sp);
     return { message: `Đã xóa sản phẩm "${sp.tenSanPham}" thành công!` };
   }
 
@@ -236,7 +275,7 @@ export class AdminSanPhamController {
   }
 
   @Post('san-pham/:id/bien-the')
-  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'bt'))
+  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'bt'), DonAnhKhiLoi)
   async themBienThe(@Param('id') id: string, @Body() dto: BienTheDto, @UploadedFile() file?: Express.Multer.File) {
     const sp: any = await this.layKhongXoa(id);
     await this.kiemTraSku(dto.sku);
@@ -257,7 +296,7 @@ export class AdminSanPhamController {
   }
 
   @Put('bien-the/:maChiTiet')
-  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'bt'))
+  @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'bt'), DonAnhKhiLoi)
   async capNhatBienThe(
     @CurrentUser() user: NguoiDung, @Param('maChiTiet') ma: string, @Body() dto: BienTheDto, @UploadedFile() file?: Express.Multer.File,
   ) {
@@ -289,7 +328,9 @@ export class AdminSanPhamController {
       throw new ConflictException(`Tồn kho vừa thay đổi (hiện còn ${hienTai.soLuongTon}, lúc mở form là ${dto.soLuongTonDaTai}). Hãy tải lại trang rồi nhập lại số lượng.`);
     }
     if (anhMoi) {
-      xoaAnhUpload(anhCu);
+      // Ảnh mới đã thuộc DB; giữ lại nếu bước ghi lịch sử phía sau lỗi.
+      if (file) DonAnhKhiLoi.daLuu.add(file);
+      await this.xoaAnhNeuKhongConDung(anhCu, undefined, bt._id);
     }
     if (giaCu !== undefined && giaCu !== dto.giaBan) {
       await this.lichSuModel.create({ chiTiet: bt._id, giaCu, giaMoi: dto.giaBan, nguoiThayDoi: user.tenDangNhap });
@@ -298,6 +339,7 @@ export class AdminSanPhamController {
   }
 
   @Delete('bien-the/:maChiTiet')
+  @Roles(Quyen.Admin)
   async xoaBienThe(@Param('maChiTiet') ma: string) {
     const bt: any = await this.ctModel.findById(parseObjectId(ma, 'Biến thể'));
     if (!bt) {
@@ -310,7 +352,7 @@ export class AdminSanPhamController {
     }
     await this.gioModel.deleteMany({ chiTietSanPham: bt._id });
     await bt.deleteOne();
-    xoaAnhUpload(bt.hinhAnh);
+    await this.xoaAnhNeuKhongConDung(bt.hinhAnh, undefined, bt._id);
     return { sanPhamId: idOf(bt.sanPham), message: `Đã xóa biến thể SKU "${bt.sku}".` };
   }
 }

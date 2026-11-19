@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useApp } from "@/components/AppProviders";
 import { FilterBar, ListState, PageBar, Pagination } from "@/components/admin/Common";
-import { apiDelete, loiTuApi } from "@/lib/api";
+import { apiDelete, apiPost, loiTuApi } from "@/lib/api";
 import { imgUrl, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
+import { coQuyenXoa } from "@/lib/quyen-admin";
 import type { SanPhamV, Trang } from "@/lib/types";
 
 interface Data extends Trang<SanPhamV> {
@@ -18,7 +19,21 @@ export default function QuanLySanPhamPage() {
   const sp = useSearchParams();
   const q = sp.toString();
   const { data, error, loading, reload } = useApi<Data>(`/admin/san-pham${q ? `?${q}` : ""}`);
-  const { flash } = useApp();
+  const { user, flash } = useApp();
+  const xoaDuoc = coQuyenXoa(user?.maQuyen); // nhân viên không xóa mà "Ẩn"
+  const dangXemAn = sp.get("an") === "1"; // chế độ "Đang ẩn" (CONTRACT C-4: GET /admin/san-pham?an=1)
+
+  // Ẩn / hiện lại theo CONTRACT C-4: POST /admin/san-pham/:id/an|hien (BE T-302 chưa có lúc viết: gọi sẽ 404 cho tới khi xong).
+  const doiAn = async (s: SanPhamV, thao: "an" | "hien") => {
+    if (thao === "an" && !confirm(`Ẩn sản phẩm "${s.tenSanPham}"? Khách sẽ không thấy sản phẩm và nó bị gỡ khỏi giỏ hàng. Bạn có thể hiện lại sau.`)) return;
+    try {
+      const r = await apiPost<{ message: string }>(`/admin/san-pham/${s.id}/${thao}`);
+      flash("success", r.message);
+      await reload();
+    } catch (e) {
+      flash("danger", loiTuApi(e));
+    }
+  };
 
   const xoa = async (s: SanPhamV) => {
     if (!confirm(`Xóa sản phẩm "${s.tenSanPham}"? Sản phẩm sẽ ngừng kinh doanh và bị gỡ khỏi giỏ hàng.`)) return;
@@ -37,12 +52,13 @@ export default function QuanLySanPhamPage() {
       <FilterBar>
         {(set, get) => (
           <>
+            <select className="form-select w-auto" aria-label="Trạng thái hiển thị" value={get("an")} onChange={(e) => set("an", e.target.value)}><option value="">Đang bán</option><option value="1">Đang ẩn</option></select>
             <select className="form-select w-auto" value={get("maLoai")} onChange={(e) => set("maLoai", e.target.value)}><option value="">Tất cả loại</option>{data?.loaiSanPhams.map((l) => <option key={l.id} value={l.id}>{l.tenLoai}</option>)}</select>
             <select className="form-select w-auto" value={get("maHang")} onChange={(e) => set("maHang", e.target.value)}><option value="">Tất cả hãng</option>{data?.hangs.map((h) => <option key={h.id} value={h.id}>{h.tenHang}</option>)}</select>
           </>
         )}
       </FilterBar>
-      <ListState loading={loading} error={error} data={data} empty="Chưa có sản phẩm nào.">
+      <ListState loading={loading} error={error} data={data} empty={dangXemAn ? "Không có sản phẩm nào đang ẩn." : "Chưa có sản phẩm nào."}>
         {data && (
           <>
             <div className="table-responsive card-custom"><table className="table align-middle mb-0">
@@ -50,13 +66,19 @@ export default function QuanLySanPhamPage() {
               <tbody>{data.items.map((s) => (
                 <tr key={s.id}>
                   <td>{ }<img src={imgUrl(s.hinhAnhDaiDien)} alt="" width={48} height={48} style={{ objectFit: "contain" }} /></td>
-                  <td><Link href={`/admin/san-pham/${s.id}`} className="fw-semibold text-decoration-none">{s.tenSanPham}</Link>{s.khuyenMai && <span className="badge bg-danger ms-2">-{Math.round(s.khuyenMai.phanTramGiam)}%</span>}</td>
+                  <td>{dangXemAn ? <span className="fw-semibold">{s.tenSanPham}</span> : <Link href={`/admin/san-pham/${s.id}`} className="fw-semibold text-decoration-none">{s.tenSanPham}</Link>}{s.khuyenMai && <span className="badge bg-danger ms-2">-{Math.round(s.khuyenMai.phanTramGiam)}%</span>}{s.daAn && <span className="badge bg-secondary ms-2">Đang ẩn</span>}</td>
                   <td className="text-nowrap">{s.loai?.tenLoai}</td><td className="text-nowrap">{s.hang?.tenHang}</td><td className="text-end text-nowrap">{vnd(s.giaGoc)}</td>
                   <td className="text-end">{s.tongTonKho === 0 ? <span className="badge bg-danger">Hết hàng</span> : s.tongTonKho}</td>
                   <td className="text-end text-nowrap">
-                    <Link href={`/admin/san-pham/${s.id}`} className="btn btn-sm btn-outline-secondary me-1" title="Biến thể"><i className="fa-solid fa-layer-group" /></Link>
-                    <Link href={`/admin/san-pham/${s.id}/edit`} className="btn btn-sm btn-outline-primary me-1" title="Sửa"><i className="fa-solid fa-pen" /></Link>
-                    <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={() => xoa(s)}><i className="fa-solid fa-trash" /></button>
+                    {dangXemAn || s.daAn ? (
+                      <button className="btn btn-sm btn-outline-success" onClick={() => doiAn(s, "hien")}><i className="fa-solid fa-eye" /> Hiện lại</button>
+                    ) : (<>
+                      <Link href={`/admin/san-pham/${s.id}`} className="btn btn-sm btn-outline-secondary me-1" title="Biến thể"><i className="fa-solid fa-layer-group" /></Link>
+                      <Link href={`/admin/san-pham/${s.id}/edit`} className="btn btn-sm btn-outline-primary me-1" title="Sửa"><i className="fa-solid fa-pen" /></Link>
+                      {xoaDuoc
+                        ? <button className="btn btn-sm btn-outline-danger" title="Xóa" onClick={() => xoa(s)}><i className="fa-solid fa-trash" /></button>
+                        : <button className="btn btn-sm btn-outline-warning" title="Ẩn" aria-label={`Ẩn sản phẩm ${s.tenSanPham}`} onClick={() => doiAn(s, "an")}><i className="fa-solid fa-eye-slash" /></button>}
+                    </>)}
                   </td>
                 </tr>))}</tbody>
             </table></div>

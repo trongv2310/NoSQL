@@ -10,6 +10,8 @@ export interface SanPhamV {
   hinhAnhDaiDien: string; loai: { id: string; tenLoai: string } | null; hang: { id: string; tenHang: string } | null;
   nhaCungCap: { id: string; tenNhaCungCap: string } | null; khuyenMai: KhuyenMaiV | null;
   coSize: boolean; coMau: boolean;
+  /** Chỉ API admin (`GET /admin/san-pham`): sản phẩm đang ẩn; thiếu thì coi như false. */
+  daAn?: boolean;
   /** null = chưa có đánh giá đã xác minh (không được hiểu là 5 sao). */
   trungBinhDanhGia: number | null; soDanhGia?: number; ngayTao: string; tongTonKho?: number;
   /** Chỉ vợt: thông số đã gộp qua mọi phiên bản (trường các phiên bản khác nhau nằm ở `thongSoKhacNhau`, không lấy bừa một giá trị). */
@@ -28,6 +30,8 @@ export interface TranDauV {
   id: string; tenGiaiDau: string; vong: string; noiDung: string; doiA: string; doiB: string; tiSo: string | null;
   doiThang: string | null; tenDoiThang: string | null; ngayThiDau: string; diaDiem: string | null; nguonTin: string | null;
   lienKetNguon: string | null; tinTucs: { id: string; tieuDe: string }[]; soTin?: number;
+  /** Chỉ API admin: `false` = đang ẩn khỏi khách; thiếu thì coi như hiển thị. */
+  hienThi?: boolean;
 }
 
 export interface TinV {
@@ -73,3 +77,13 @@ export interface KetQuaGopV { chiTietId: string; tenSanPham: string | null; yeuC
 export interface DongBoGioV extends GioHangV { taiKhoanId: string; cartCount: number; daApDungTruoc: boolean; ketQua: KetQuaGopV[] }
 
 export interface LienHeV { dienThoai: string | null; email: string | null; diaChi: string | null; gioMoCua: string | null }
+
+/** Gợi ý mua cùng (GET /goi-y/*, công khai): chỉ kết quả sản phẩm, không có lợi nhuận/hạng/K. `gia` là giá hiện hành; `chiTietMacDinh` = id biến thể còn hàng để thêm vào giỏ. */
+export interface SanPhamGoiY { id: string; tenSanPham: string; hinhAnhDaiDien?: string; gia: number; chiTietMacDinh: string }
+export interface ComboGoiY { khoa: string; tongGia: number; sanPhams: SanPhamGoiY[] }
+
+/** Khai thác Top-K (chỉ Admin, /admin/khai-thac). `loiNhuan` là utility thuật toán tính trên đơn đã hoàn thành. */
+export interface SanPhamTrongTap { id: string; tenSanPham: string; hinhAnhDaiDien?: string }
+export interface DongKetQuaTopK { hang: number; sanPhams: SanPhamTrongTap[]; tenTap: string; loiNhuan: number; khoa: string }
+export interface KetQuaTopK { k: number; soThang: number; soDonXet: number; soBatch: number; biCat: boolean; thoiGianMs: number; chayLuc: string; ketQua: DongKetQuaTopK[] }
+export interface GoiYDaLuuV { coDuLieu: boolean; k?: number; soThang?: number; capNhatLuc?: string; ketQua: DongKetQuaTopK[] }

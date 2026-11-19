@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { DonHangModule } from './don-hang/don-hang.module';
 import { SuKienModule } from './su-kien/su-kien.module';
 import { TuVotModule } from './tu-vot/tu-vot.module';
+import { KhaiThacModule } from './khai-thac/khai-thac.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TuVotModule } from './tu-vot/tu-vot.module';
     TuVotModule,
     AdminModule,
     SuKienModule,
+    KhaiThacModule,
   ],
 })
 export class AppModule {}

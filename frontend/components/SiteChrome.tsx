@@ -76,6 +76,7 @@ export function Header() {
   const nganKeo = useRef<HTMLElement>(null);
   const dongMenu = () => { setMoMenu(false); nutMoMenu.current?.focus(); };
   const [moUser, setMoUser] = useState(false);
+  const userDropdown = useRef<HTMLDivElement>(null);
   const [loaiActive, setLoaiActive] = useState("Vot");
   const [moSub, setMoSub] = useState(false);
   const [menuDong, setMenuDong] = useState(false);
@@ -91,6 +92,16 @@ export function Header() {
     document.addEventListener("keydown", khiPhim);
     return () => document.removeEventListener("keydown", khiPhim);
   }, [moMenu]);
+
+  // Menu người dùng mở: bấm ra ngoài hoặc nhấn Escape thì đóng (chỉ gắn listener khi đang mở).
+  useEffect(() => {
+    if (!moUser) return;
+    const khiBam = (e: PointerEvent) => { if (!userDropdown.current?.contains(e.target as Node)) setMoUser(false); };
+    const khiPhim = (e: KeyboardEvent) => { if (e.key === "Escape") setMoUser(false); };
+    document.addEventListener("pointerdown", khiBam);
+    document.addEventListener("keydown", khiPhim);
+    return () => { document.removeEventListener("pointerdown", khiBam); document.removeEventListener("keydown", khiPhim); };
+  }, [moUser]);
 
   // Đóng menu di động mỗi khi chuyển trang.
   useEffect(() => {
@@ -115,14 +126,16 @@ export function Header() {
           ["/admin/tai-khoan", "fa-users", "Quản lý tài khoản"],
           ["/admin/don-hang", "fa-file-invoice", "Quản lý Đơn hàng"],
           ["/admin/khuyen-mai", "fa-tags", "Quản lý Khuyến mãi"],
+          ["/admin/khai-thac", "fa-fire", "Combo bán chạy"],
           ["/admin", "fa-chart-line", "Dashboard"],
           ["/admin/thong-bao", "fa-bell", "Thông Báo Đánh Giá Thấp"],
         ]
       : maQuyen === 2
         ? [
+            ["/admin/san-pham", "fa-boxes-stacked", "Quản lý Sản phẩm"],
             ["/admin/don-hang", "fa-file-invoice", "Quản lý Đơn hàng"],
-            ["/admin", "fa-chart-line", "Dashboard"],
-            ["/admin/thong-bao", "fa-bell", "Thông Báo Đánh Giá Thấp"],
+            ["/admin/ban-tin", "fa-newspaper", "Quản lý Bảng tin"],
+            ["/admin/tran-dau", "fa-table-tennis-paddle-ball", "Quản lý Trận đấu"],
           ]
         : [];
 
@@ -193,11 +206,11 @@ export function Header() {
                   <Link href="/TaiKhoan/DangKy" className="auth-btn register-btn"><span>Đăng ký</span></Link>
                 </div>
               ) : (
-                <div className="user-dropdown" onMouseLeave={() => setMoUser(false)}>
+                <div ref={userDropdown} className="user-dropdown" onMouseLeave={() => setMoUser(false)}>
                   <button className="user-btn" type="button" onClick={() => setMoUser((v) => !v)}>
                     <i className="fa-solid fa-user" /><span>Xin chào, {user.hoTen}</span><i className="fa-solid fa-chevron-down" />
                   </button>
-                  <div className="user-menu" style={moUser ? { display: "block", opacity: 1, visibility: "visible" } : undefined}>
+                  <div className="user-menu" onClick={() => setMoUser(false)} style={moUser ? { display: "block", opacity: 1, visibility: "visible" } : undefined}>
                     {adminLinks.map(([href, icon, text]) => (
                       <Link key={href} href={href} className="user-menu-item is-admin"><i className={`fa-solid ${icon}`} /> {text}</Link>
                     ))}

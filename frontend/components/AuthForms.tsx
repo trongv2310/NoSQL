@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Shuttle } from "@/components/PageHero";
 import { ErrorBox } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
+import { trangSauDangNhap } from "@/lib/quyen-admin";
 import { type NguoiDungV, useApp } from "./AppProviders";
 
 import { returnUrlAnToan } from "@/lib/url-an-toan";
@@ -47,7 +48,7 @@ export function LoginForm({ quanTri = false }: { quanTri?: boolean }) {
       const r = await apiPost<{ user: NguoiDungV }>(quanTri ? "/auth/admin/dang-nhap" : "/auth/dang-nhap", { tenDangNhap, matKhau });
       setUser(r.user);
       flash("success", `Xin chào ${r.user.hoTen}!`);
-      const mac = quanTri ? "/admin" : r.user.maQuyen === 2 ? "/admin" : "/";
+      const mac = trangSauDangNhap(r.user.maQuyen, quanTri);
       router.push(returnUrl && !returnUrl.startsWith("/TaiKhoan/") ? returnUrl : mac);
     } catch (err) {
       setLoi(loiTuApi(err));

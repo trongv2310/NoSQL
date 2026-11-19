@@ -35,10 +35,11 @@ export function TaiKhoanForm({ id }: { id?: string }) {
     e.preventDefault();
     setDang(true);
     setLoi(null);
-    // Tên đăng nhập không được đổi khi sửa nên không gửi lên.
-    const { tenDangNhap, ...conLai } = f;
+    // Tên đăng nhập và vai trò không được đổi khi sửa nên không gửi lên.
+    const { tenDangNhap, maQuyen, ...conLai } = f;
     const body = id ? conLai : f;
     void tenDangNhap;
+    void maQuyen;
     try {
       const r = await (id ? apiPut<{ message: string }>(`/admin/tai-khoan/${id}`, body) : apiPost<{ message: string }>("/admin/tai-khoan", body));
       flash("success", r.message);
@@ -58,7 +59,9 @@ export function TaiKhoanForm({ id }: { id?: string }) {
         <div className="col-md-6"><Field label="Họ tên *"><input className="form-control" required maxLength={100} value={f.hoTen} onChange={dat("hoTen")} /></Field></div>
         <div className="col-md-6"><Field label="Email *"><input type="email" className="form-control" required value={f.email} onChange={dat("email")} /></Field></div>
         <div className="col-md-6"><Field label="Số điện thoại"><input className="form-control" pattern="0[0-9]{9,10}" title="Bắt đầu bằng 0, 10–11 chữ số" value={f.soDienThoai} onChange={dat("soDienThoai")} /></Field></div>
-        <div className="col-md-6"><Field label="Phân quyền *"><select className="form-select" required value={f.maQuyen} onChange={dat("maQuyen")}>{(cu.data?.phanQuyens ?? QUYEN).map((q) => <option key={q.maQuyen} value={q.maQuyen}>{q.tenQuyen}</option>)}</select></Field></div>
+        <div className="col-md-6">{id
+          ? <Field label="Phân quyền"><div className="form-control-plaintext">{(cu.data?.phanQuyens ?? QUYEN).find((q) => q.maQuyen === cu.data?.maQuyen)?.tenQuyen ?? "—"}</div></Field>
+          : <Field label="Phân quyền *"><select className="form-select" required value={f.maQuyen} onChange={dat("maQuyen")}>{QUYEN.filter((q) => q.maQuyen !== 1).map((q) => <option key={q.maQuyen} value={q.maQuyen}>{q.tenQuyen}</option>)}</select></Field>}</div>
         <div className="col-12"><Field label="Địa chỉ"><input className="form-control" maxLength={255} value={f.diaChi} onChange={dat("diaChi")} /></Field></div>
       </div>
       <SubmitBar dang={dang} cancel="/admin/tai-khoan" text={id ? "Cập nhật" : "Tạo tài khoản"} />

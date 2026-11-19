@@ -50,6 +50,27 @@ npm run data:export           # xuất lại bộ dữ liệu sau khi chỉnh (c
 
 Chi tiết (nội dung từng collection, `mongoimport`, lưu ý hạn khuyến mãi…) xem `backend/seed-data/mongodb/README.md`.
 
+### Combo bán chạy (gợi ý mua cùng) — cập nhật sau khi pull
+
+Tính năng này thêm collection `goiysanphams` (schema `backend/src/schemas/goi-y.schema.ts`) và module `backend/src/khai-thac/`
+(thuật toán Top-K `VertTopKDS`, port từ bản C#). Ai đã có CSDL từ trước, **sau khi pull** làm đủ 3 bước:
+
+```bash
+cd backend
+npm install                   # chỉ cần khi package.json đổi (lần này không có package mới)
+npm run db:setup              # tạo collection goiysanphams + validator + index unique theo "khoa" (chạy lại nhiều lần vẫn an toàn;
+                              # muốn xem trước thì chạy npm run db:setup:dry)
+npm run build && node dist/main   # hoặc dừng backend cũ rồi chạy lại npm run start:dev
+```
+
+- **Phải khởi động lại backend** sau khi pull. Backend cũ còn chạy bản `dist` cũ sẽ báo `Cannot GET /api/admin/khai-thac/goi-y-da-luu`.
+- Máy mới hoàn toàn: `seed:reset` / `data:import:reset` tự tạo index cho mọi schema nhưng **không** áp validator, nên vẫn chạy `npm run db:setup` sau khi nạp dữ liệu.
+- **Combo ban đầu rỗng.** Admin vào `/admin/khai-thac` (menu "Combo bán chạy") → "Phân tích" để xem bảng xếp hạng → "Áp dụng làm combo cho khách" để lưu.
+  Sau đó khách mới thấy "Combo mua chung" ở trang chủ và "Thường được mua cùng" ở trang chi tiết (trang chủ cập nhật sau tối đa vài chục giây). Bộ dữ liệu cố định `backend/seed-data/mongodb` không chứa `goiysanphams`.
+- Thuật toán chỉ xét đơn **"Đã hoàn thành"** có từ 2 sản phẩm khác nhau trong những tháng gần nhất. Dữ liệu mẫu ít đơn kiểu này thì trang báo rỗng (không phải lỗi); tạo vài đơn hoàn thành nhiều món rồi "Phân tích" lại.
+- Chỉ **Admin** thấy/dùng trang này (nhân viên và khách không có mục menu, API trả 403). Phía khách không lộ lợi nhuận hay thứ hạng.
+- Tùy chọn: `KHAI_THAC_TU_DONG_PHUT=<số phút>` trong `backend/.env` bật tự tính lại và lưu combo định kỳ (mặc định tắt).
+
 ## Ánh xạ Laravel → NestJS
 
 | Laravel | NestJS / MongoDB |

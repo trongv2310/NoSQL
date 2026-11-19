@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useApp } from "@/components/AppProviders";
 import { Field, SubmitBar } from "@/components/admin/Common";
+import { ChonAnh } from "@/components/admin/ProductForm";
 import { ErrorBox, Loading } from "@/components/Ui";
 import { api, loiTuApi } from "@/lib/api";
 import { imgUrl } from "@/lib/format";
@@ -74,10 +75,7 @@ export default function SuaBienThePage() {
             <div className="col-md-4" key={k}><Field label={nhan}><input className="form-control" value={f[k]} onChange={dat(k)} /></Field></div>
           ))}
         </div>
-        <Field label="Ảnh biến thể">
-          {!file && (  <img src={imgUrl(data.bienThe.hinhAnh)} alt="" height={70} className="d-block mb-2" />)}
-          <input type="file" accept="image/*" className="form-control" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-        </Field>
+        <ChonAnh label="Ảnh biến thể" file={file} onChange={setFile} anhCu={imgUrl(data.bienThe.hinhAnh)} cao={70} />
         <SubmitBar dang={dang} cancel={`/admin/san-pham/${data.sanPham.id}`} text="Cập nhật" />
       </form>
     </>

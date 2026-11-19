@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useApp } from "@/components/AppProviders";
 import { Field } from "@/components/admin/Common";
+import { ChonAnh } from "@/components/admin/ProductForm";
 import { ErrorBox, Loading } from "@/components/Ui";
 import { api, apiDelete, loiTuApi } from "@/lib/api";
 import { imgUrl, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
+import { coQuyenXoa } from "@/lib/quyen-admin";
 import type { BienTheV, SanPhamV } from "@/lib/types";
 
 interface Data {
@@ -19,7 +21,8 @@ interface Data {
 export default function ChiTietSanPhamAdminPage() {
   const { id } = useParams<{ id: string }>();
   const { data, error, loading, reload } = useApi<Data>(`/admin/san-pham/${id}`);
-  const { flash } = useApp();
+  const { user, flash } = useApp();
+  const xoaDuoc = coQuyenXoa(user?.maQuyen); // nhân viên chỉ sửa biến thể, không xóa (biến thể chưa có khái niệm ẩn)
   const [f, setF] = useState({ mau: "", size: "", giaBan: "", soLuongTon: "0", sku: "" });
   const [file, setFile] = useState<File | null>(null);
   const [dang, setDang] = useState(false);
@@ -87,7 +90,7 @@ export default function ChiTietSanPhamAdminPage() {
               <td className="text-end">{b.soLuongTon === 0 ? <span className="badge bg-danger">0</span> : b.soLuongTon}</td>
               <td className="text-end text-nowrap">
                 <Link href={`/admin/bien-the/${b.id}/edit`} className="btn btn-sm btn-outline-primary me-1"><i className="fa-solid fa-pen" /></Link>
-                <button className="btn btn-sm btn-outline-danger" onClick={() => xoa(b)}><i className="fa-solid fa-trash" /></button>
+                {xoaDuoc && <button className="btn btn-sm btn-outline-danger" onClick={() => xoa(b)}><i className="fa-solid fa-trash" /></button>}
               </td>
             </tr>))}
         </tbody>
@@ -102,7 +105,7 @@ export default function ChiTietSanPhamAdminPage() {
           <div className="col-md-2"><Field label="Giá bán *"><input type="number" min={0} className="form-control" required value={f.giaBan} onChange={(e) => setF({ ...f, giaBan: e.target.value })} /></Field></div>
           <div className="col-md-2"><Field label="Tồn kho *"><input type="number" min={0} className="form-control" required value={f.soLuongTon} onChange={(e) => setF({ ...f, soLuongTon: e.target.value })} /></Field></div>
           <div className="col-md-2"><Field label="SKU *"><input className="form-control" required maxLength={50} value={f.sku} onChange={(e) => setF({ ...f, sku: e.target.value })} /></Field></div>
-          <div className="col-md-6"><Field label="Ảnh biến thể"><input type="file" accept="image/*" className="form-control" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></Field></div>
+          <div className="col-md-6"><ChonAnh label="Ảnh biến thể" file={file} onChange={setFile} cao={70} /></div>
         </div>
         <button className="btn btn-primary" disabled={dang}><i className="fa-solid fa-plus" /> Thêm biến thể</button>
       </form>

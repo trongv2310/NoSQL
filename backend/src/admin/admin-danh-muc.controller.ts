@@ -1,12 +1,12 @@
 import {
-  BadRequestException, Body, ConflictException, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query,
+  BadRequestException, Body, ConflictException, Controller, Delete, ForbiddenException, Get, HttpCode, NotFoundException, Param, Post, Put, Query,
   UploadedFile, UseInterceptors,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Transform, Type } from 'class-transformer';
 import {
-  IsDateString, IsEmail, IsIn, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength,
+  IsBoolean, IsDateString, IsEmail, IsIn, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength,
 } from 'class-validator';
 import { Model } from 'mongoose';
 import { CurrentUser } from '../auth/auth.decorators';
@@ -117,6 +117,10 @@ export class TranDauDto {
   }) lienKetNguon?: string;
 }
 
+export class TrangThaiTranDauDto {
+  @IsBoolean({ message: 'Trạng thái hiển thị phải là boolean.' }) value: boolean;
+}
+
 @Roles(Quyen.Admin, Quyen.NhanVien)
 @Controller('admin/tran-dau')
 export class AdminTranDauController {
@@ -145,7 +149,7 @@ export class AdminTranDauController {
     const dem = await this.tinModel.aggregate<{ _id: any; n: number }>([{ $match: { deletedAt: null, tranDau: { $ne: null } } }, { $group: { _id: '$tranDau', n: { $sum: 1 } } }]);
     const demMap = new Map(dem.map((d) => [String(d._id), d.n]));
     const trang = phanTrang(all, Number(q.page) || 1, 10);
-    return { ...trang, items: trang.items.map((t) => ({ ...tranDauView(t), soTin: demMap.get(String(t._id)) ?? 0 })) };
+    return { ...trang, items: trang.items.map((t) => ({ ...tranDauView(t), hienThi: t.hienThi !== false, soTin: demMap.get(String(t._id)) ?? 0 })) };
   }
 
   @Get(':id')
@@ -154,7 +158,7 @@ export class AdminTranDauController {
     if (!t) {
       throw new NotFoundException('Không tìm thấy trận đấu.');
     }
-    return { ...tranDauView(t), soTin: await this.tinModel.countDocuments({ deletedAt: null, tranDau: t._id }) };
+    return { ...tranDauView(t), hienThi: t.hienThi !== false, soTin: await this.tinModel.countDocuments({ deletedAt: null, tranDau: t._id }) };
   }
 
   @Post()
@@ -175,6 +179,7 @@ export class AdminTranDauController {
   }
 
   @Delete(':id')
+  @Roles(Quyen.Admin)
   async xoa(@Param('id') id: string) {
     const oid = parseObjectId(id, 'Trận đấu');
     const r = await this.model.deleteOne({ _id: oid });
@@ -184,6 +189,14 @@ export class AdminTranDauController {
     await this.tinModel.updateMany({ tranDau: oid }, { $set: { tranDau: null } });
     return { message: 'Đã xóa trận đấu.' };
   }
+
+  @Post(':id/toggle-status')
+  @HttpCode(200)
+  async doiTrangThai(@Param('id') id: string, @Body() dto: TrangThaiTranDauDto) {
+    const r = await this.model.updateOne({ _id: parseObjectId(id, 'Trận đấu') }, { $set: { hienThi: dto.value } });
+    if (!r.matchedCount) throw new NotFoundException('Không tìm thấy trận đấu.');
+    return { message: dto.value ? 'Đã hiện trận đấu.' : 'Đã ẩn trận đấu.' };
+  }
 }
 
 /* -------------------------------- Tài khoản ------------------------------- */
@@ -192,7 +205,7 @@ export class TaiKhoanDto {
   tenDangNhap?: string;
   @rong() @IsOptional() @IsString() @MinLength(6, { message: 'Mật khẩu tối thiểu 6 ký tự.' }) @MaxLength(100) matKhau?: string;
   @IsEmail({}, { message: 'Email không hợp lệ.' }) @MaxLength(100) email: string;
-  @Type(() => Number) @IsIn([1, 2, 3], { message: 'Phân quyền không hợp lệ.' }) maQuyen: number;
+  @IsOptional() @Type(() => Number) @IsIn([1, 2, 3], { message: 'Phân quyền không hợp lệ.' }) maQuyen?: number;
   @IsString() @IsNotEmpty({ message: 'Vui lòng nhập họ tên.' }) @MaxLength(100) hoTen: string;
   @rong() @IsOptional() @Matches(SDT_REGEX, { message: SDT_MESSAGE }) soDienThoai?: string;
   @rong() @IsOptional() @IsString() @MaxLength(255) diaChi?: string;
@@ -258,6 +271,12 @@ export class AdminTaiKhoanController {
 
   @Post()
   async tao(@Body() dto: TaiKhoanDto) {
+    if (dto.maQuyen === Quyen.Admin) {
+      throw new BadRequestException('Không được tạo thêm tài khoản quản trị.');
+    }
+    if (dto.maQuyen !== Quyen.NhanVien && dto.maQuyen !== Quyen.KhachHang) {
+      throw new BadRequestException('Phân quyền không hợp lệ.');
+    }
     if (!dto.tenDangNhap || !dto.matKhau) {
       throw new BadRequestException('Vui lòng nhập tên đăng nhập và mật khẩu.');
     }
@@ -280,7 +299,7 @@ export class AdminTaiKhoanController {
   }
 
   @Put(':id')
-  async capNhat(@CurrentUser() user: NguoiDung, @Param('id') id: string, @Body() dto: TaiKhoanDto) {
+  async capNhat(@CurrentUser() _user: NguoiDung, @Param('id') id: string, @Body() dto: TaiKhoanDto) {
     if (dto.tenDangNhap) {
       throw new BadRequestException('Không được thay đổi tên đăng nhập.');
     }
@@ -288,14 +307,13 @@ export class AdminTaiKhoanController {
     if (!tk) {
       throw new NotFoundException('Không tìm thấy tài khoản.');
     }
-    if (String(tk._id) === user.id && dto.maQuyen !== Quyen.Admin) {
-      throw new BadRequestException('Bạn không thể tự thay đổi quyền Quản trị của chính mình.');
+    if (dto.maQuyen !== undefined && dto.maQuyen !== tk.maQuyen) {
+      throw new BadRequestException('Không được đổi vai trò của tài khoản.');
     }
     if (dto.email !== tk.email && (await this.tkModel.exists({ email: dto.email, _id: { $ne: tk._id } }))) {
       throw new ConflictException('Email đã được sử dụng.');
     }
     tk.email = dto.email;
-    tk.maQuyen = dto.maQuyen;
     if (dto.matKhau) {
       tk.matKhau = await bcrypt.hash(dto.matKhau, 10);
     }
@@ -314,6 +332,10 @@ export class AdminTaiKhoanController {
     const oid = parseObjectId(id, 'Tài khoản');
     if (String(oid) === user.id) {
       throw new ForbiddenException('Bạn không thể xóa tài khoản đang đăng nhập.');
+    }
+    const tk = await this.tkModel.findById(oid);
+    if (tk?.maQuyen === Quyen.Admin) {
+      throw new BadRequestException('Không được xóa tài khoản quản trị.');
     }
     const r = await this.tkModel.deleteOne({ _id: oid });
     if (!r.deletedCount) {
