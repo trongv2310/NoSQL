@@ -57,12 +57,12 @@ function O({ cls, href, tieuDe, dong, hinh, nhan }: { cls: string; href: string;
   );
 }
 
-const anh = (src: string, viTri: string, sizes: string, cls = "") => (
-  <Image src={src} alt="" fill sizes={sizes} className={`${s.anhImg} ${cls}`} style={{ objectPosition: viTri }} />
+const anh = (src: string, viTri: string, sizes: string) => (
+  <Image src={src} alt="" fill sizes={sizes} className={s.anhImg} style={{ objectPosition: viTri }} />
 );
 
 /**
- * Năm công cụ của shop, mỗi ô là ảnh thật + tên + một dòng. Ô "So sánh vợt" ghép ảnh 3 cây vợt còn hàng thật trong kho; ô "Trạm căng cước"
+ * Năm công cụ của shop, mỗi ô là ảnh thật + tên + một dòng (ảnh căng cước: Wikimedia Commons, xem public/images/CREDITS.txt). Ô "So sánh vợt" ghép ảnh 3 cây vợt còn hàng thật trong kho; ô "Trạm căng cước"
  * dẫn tới một cây vợt thật có ghi sức căng và hiện đúng khoảng căng đó.
  */
 export function CongCu() {
@@ -85,7 +85,7 @@ export function CongCu() {
         <O cls={s.o3} href="/tu-vot" tieuDe="Tủ vợt của tôi" dong="Nhớ ngày căng, nhắc căng lại"
           hinh={anh("/images/landing/cat-vot.webp", "50% 22%", "(max-width: 767px) 100vw, 25vw")} />
         <O cls={s.o4} href={lienKetCang(vot)} tieuDe="Trạm căng cước" dong="Căng đúng mức nhà sản xuất cho phép"
-          hinh={anh("/images/banner2.png", "68% 40%", "(max-width: 767px) 100vw, 58vw", s.canhLuoi)}
+          hinh={anh("/images/thuc-te/cang-cuoc.webp", "50% 55%", "(max-width: 767px) 100vw, 58vw")}
           nhan={vot?.thongSoVot?.sucCang ? <span className={s.nhanCang}>{vot.thongSoVot.sucCang}</span> : undefined} />
         <O cls={s.o5} href="#hoi-nguoi-ban" tieuDe="Hỏi người bán" dong="Hỏi giá, tồn kho, khuyến mãi"
           hinh={anh("/images/landing/cat-aoquan.webp", "50% 18%", "(max-width: 767px) 100vw, 42vw")} />

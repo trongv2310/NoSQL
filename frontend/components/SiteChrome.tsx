@@ -52,14 +52,15 @@ function useGoiYTim(tuKhoa: string): GoiYTim | null {
   const [kq, setKq] = useState<GoiYTim | null>(null);
   useEffect(() => {
     const q = tuKhoa.trim();
-    if (q.length < 2) { setKq(null); return; }
+    if (q.length < 2) return;
     let conHieuLuc = true;
     const hen = setTimeout(() => {
       apiGet<GoiYTim>(`/san-pham/goi-y?q=${encodeURIComponent(q)}`).then((r) => { if (conHieuLuc) setKq(r); }).catch(() => { if (conHieuLuc) setKq(null); });
     }, 200);
     return () => { conHieuLuc = false; clearTimeout(hen); };
   }, [tuKhoa]);
-  return kq;
+  // Từ khoá ngắn hơn 2 ký tự: không hiện gợi ý (kết quả cũ, nếu có, bị bỏ qua ngay lúc render).
+  return tuKhoa.trim().length < 2 ? null : kq;
 }
 
 const spUrl = (p: Record<string, string>) => `/SanPham/Index?${new URLSearchParams(p).toString()}`;
@@ -337,6 +338,13 @@ export function Header() {
   );
 }
 
+const HANG_FOOTER = [
+  { slug: "yonex", ten: "Yonex", q: "Yonex" },
+  { slug: "lining", ten: "Li-Ning", q: "Lining" },
+  { slug: "victor", ten: "Victor", q: "Victor" },
+  { slug: "mizuno", ten: "Mizuno", q: "Mizuno" },
+];
+
 export function Footer() {
   const { site } = useApp();
   const lh = site.lienHe;
@@ -344,15 +352,30 @@ export function Footer() {
   return (
     <>
     <div className="sf-trust-wrap">
-        <ul className="sf-trust" aria-label="Cam kết của cửa hàng">
-          {[
-            ["fa-medal", "Thương hiệu trong cửa hàng", "Yonex, Li-Ning, Victor, Mizuno"],
-            ["fa-truck-fast", "Đặt online", "Theo dõi trạng thái đơn sau khi đặt"],
-            ["fa-wallet", "Thanh toán linh hoạt", "Trả khi nhận hàng (COD) hoặc ví MoMo"],
-            ["fa-robot", "Trợ lý AI tư vấn", "Gợi ý vợt, giày theo ngân sách của bạn"],
-          ].map(([icon, ten, mota]) => (
-            <li key={ten}><span><i className={`fa-solid ${icon}`} aria-hidden="true" /></span><div><b>{ten}</b><small>{mota}</small></div></li>
-          ))}
+        {/* Thông tin thật của shop: logo các hãng đang bán (bấm vào ra danh sách), cách thanh toán có thật, nơi theo dõi đơn và hỏi người bán. */}
+        <ul className="sf-trust" aria-label="Mua hàng tại shop">
+          <li className="sf-trust-hang">
+            <span className="sf-trust-nhan">Hãng đang bán</span>
+            <span className="sf-trust-logo">
+              {HANG_FOOTER.map((h) => (
+                <Link key={h.slug} href={`/SanPham/Index?hang=${h.q}`} aria-label={`Sản phẩm ${h.ten}`}>
+                  { }<img src={`/images/brands/${h.slug}.svg`} alt={h.ten} height={22} loading="lazy" />
+                </Link>
+              ))}
+            </span>
+          </li>
+          <li>
+            <span className="sf-trust-nhan">Thanh toán</span>
+            <span className="sf-trust-tt"><b className="sf-trust-cod">COD</b>{ }<img src="/images/momo-logo.png" alt="Ví MoMo" height={24} loading="lazy" /></span>
+          </li>
+          <li>
+            <span className="sf-trust-nhan">Đơn hàng</span>
+            <Link href="/DonHang/Index" className="sf-trust-lk">Theo dõi đơn <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
+          </li>
+          <li>
+            <span className="sf-trust-nhan">Cần tư vấn</span>
+            <Link href="/#hoi-nguoi-ban" className="sf-trust-lk">Hỏi người bán <i className="fa-solid fa-arrow-right" aria-hidden="true" /></Link>
+          </li>
         </ul>
     </div>
     <footer className="sf-footer">

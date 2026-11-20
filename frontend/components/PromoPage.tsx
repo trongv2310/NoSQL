@@ -31,6 +31,32 @@ function ConLai({ den }: { den: string | null }) {
   return <span className={`pm-chip ${gap ? "is-urgent" : ""}`}><i className={`fa-solid ${gap ? "fa-bolt" : "fa-hourglass-half"}`} aria-hidden="true" /> {ngayCon <= 0 ? "Hôm nay là ngày cuối" : `Còn ${ngayCon.toLocaleString("vi-VN")} ngày`}</span>;
 }
 
+const phanTramSp = (s: SanPhamV) => (s.giaGoc > 0 ? Math.round((1 - s.giaSauKhuyenMai / s.giaGoc) * 100) : 0);
+
+/**
+ * Ô lấp chỗ trống khi một chương trình có ít hơn 4 sản phẩm: ảnh thật (quả cầu lông, Wikimedia Commons, xem public/images/CREDITS.txt) làm nền,
+ * số sản phẩm đang giảm ở CÁC CHƯƠNG TRÌNH KHÁC và ảnh của 3 món giảm nhiều nhất trong số đó, đều lấy từ dữ liệu khuyến mãi của trang.
+ */
+function ThemUuDai({ khac }: { khac: SanPhamV[] }) {
+  const top = [...khac].sort((a, b) => phanTramSp(b) - phanTramSp(a)).slice(0, 3);
+  return (
+    <Link href="/SanPham/Index?giam_gia=1" className="pm-more sf-reveal" title="Ảnh: Ivan Radic, CC BY 2.0 (Wikimedia Commons)">
+      { }
+      <img className="pm-more-anh" src="/images/thuc-te/qua-cau.webp" alt="" loading="lazy" />
+      <span className="pm-more-chu">
+        <strong>{khac.length > 0 ? <>Thêm {khac.length} món đang giảm</> : "Xem tất cả sản phẩm"}</strong>
+        {top.length > 0 && (
+          <span className="pm-more-sp" aria-hidden="true">
+            { }
+            {top.map((x) => <span key={x.id}><img src={imgUrl(x.hinhAnhDaiDien)} alt="" loading="lazy" /><em>-{phanTramSp(x)}%</em></span>)}
+          </span>
+        )}
+        <b>Xem tất cả <i className="fa-solid fa-arrow-right" aria-hidden="true" /></b>
+      </span>
+    </Link>
+  );
+}
+
 /** Trang khuyến mãi dùng chung cho /KhuyenMai/Index và /SanPham/KhuyenMai. */
 export function PromoPage() {
   const { data, error, loading } = useApi<{ khuyenMais: KhuyenMaiV[]; sanPhams: SanPhamV[] }>("/san-pham/khuyen-mai");
@@ -159,12 +185,7 @@ export function PromoPage() {
                     {n.sps.map((s) => <div key={s.id} className="col-6 col-md-4 col-lg-3"><ProductCard sp={s} /></div>)}
                     {n.sps.length < 4 && (
                       <div className={`col-12 col-md-${n.sps.length === 1 ? 8 : 4} col-lg-${(4 - n.sps.length) * 3}`}>
-                        <Link href="/SanPham/Index?giam_gia=1" className="pm-more sf-reveal">
-                          <span className="pm-more-icon"><i className="fa-solid fa-bag-shopping" aria-hidden="true" /></span>
-                          <strong>Còn nhiều ưu đãi khác đang chờ bạn</strong>
-                          <small>Xem toàn bộ sản phẩm đang giảm giá và chọn món hợp lối chơi.</small>
-                          <b>Xem sản phẩm giảm giá <i className="fa-solid fa-arrow-right" aria-hidden="true" /></b>
-                        </Link>
+                        <ThemUuDai khac={(data?.sanPhams ?? []).filter((x) => x.khuyenMai?.id !== n.km.id)} />
                       </div>
                     )}
                   </div>

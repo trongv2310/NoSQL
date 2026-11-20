@@ -172,7 +172,7 @@ html { scroll-behavior: smooth; }
     position: relative;
     z-index: 2;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
     gap: 14px;
     margin: 0;
     padding: 18px;
@@ -182,13 +182,21 @@ html { scroll-behavior: smooth; }
     border-radius: 24px;
     box-shadow: var(--shadow-pop);
 }
-.sf-trust li { display: flex; align-items: center; gap: 14px; padding: 6px 10px; border-radius: 16px; transition: background-color .2s ease, transform .3s var(--ease-spring); }
-.sf-trust li:hover { background: var(--brand-50); transform: translateY(-2px); }
-.sf-trust li > span { flex: 0 0 auto; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: var(--grad-brand); font-size: 1.1rem; }
-.sf-trust li:nth-child(2) > span { background: var(--grad-hot); }
-.sf-trust li:nth-child(4) > span { background: linear-gradient(135deg, #2b74b8, #1e5a93); }
-.sf-trust b { display: block; color: var(--ink); font-size: .92rem; }
-.sf-trust small { display: block; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+.sf-trust li { display: grid; align-content: center; gap: 6px; min-width: 0; padding: 4px 18px; border-left: 1px solid var(--line); }
+.sf-trust li:first-child { border-left: 0; }
+.sf-trust-nhan { font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.sf-trust-logo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.sf-trust-logo a { display: inline-flex; padding: 2px; border-radius: 6px; opacity: .9; transition: opacity .2s ease; }
+.sf-trust-logo a:hover { opacity: 1; }
+.sf-trust-logo img { display: block; width: auto; height: 22px; }
+.sf-trust-tt { display: flex; align-items: center; gap: 10px; }
+.sf-trust-cod { padding: 3px 10px; border: 1.5px solid var(--ink); border-radius: 6px; font-size: .78rem; font-weight: 800; letter-spacing: .06em; color: var(--ink); }
+.sf-trust-tt img { display: block; width: auto; height: 24px; border-radius: 5px; }
+.sf-trust-lk { display: inline-flex; align-items: center; gap: 8px; font-size: .95rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+.sf-trust-lk i { font-size: .8rem; color: var(--brand); transition: transform .2s ease; }
+.sf-trust-lk:hover { color: var(--brand); }
+.sf-trust-lk:hover i { transform: translateX(4px); }
+.sf-trust a:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; border-radius: 6px; }
 .sf-footer .footer-content { grid-template-columns: 1.35fr 1.2fr 1fr 1fr; gap: 44px; padding-top: 56px; }
 .sf-footer .footer-section h4 { position: relative; padding-bottom: 12px; }
 .sf-footer .footer-section h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 28px; height: 3px; border-radius: 3px; background: var(--hot); }
@@ -310,7 +318,8 @@ html { scroll-behavior: smooth; }
     .sf-hero-inner { grid-template-columns: 1fr; gap: 24px; padding-top: 36px; padding-bottom: 44px; }
     .sf-hero-shuttle.s1 { right: 6%; top: 10%; width: 56px; }
     .sf-hero-shuttle.s2 { display: none; }
-    .sf-trust { grid-template-columns: 1fr 1fr; }
+    .sf-trust { grid-template-columns: 1fr 1fr; row-gap: 16px; }
+    .sf-trust li:nth-child(3) { border-left: 0; }
     .sf-footer .footer-content { grid-template-columns: 1fr 1fr; gap: 32px; }
     .main-header { backdrop-filter: none; background: #fff; }
 }
@@ -322,7 +331,11 @@ html { scroll-behavior: smooth; }
 @media (max-width: 575px) {
     .sf-brand-text small { display: none; }
     .sf-brand-text b { font-size: .9rem; }
-    .sf-trust { grid-template-columns: 1fr; padding: 12px; }
+    .sf-trust { grid-template-columns: 1fr 1fr; padding: 14px; }
+    .sf-trust li { padding: 4px 10px; }
+    .sf-trust-hang { grid-column: 1 / -1; }
+    .sf-trust li:nth-child(2), .sf-trust li:nth-child(4) { border-left: 0; }
+    .sf-trust li:nth-child(3) { border-left: 1px solid var(--line); }
     .sf-footer .footer-content { grid-template-columns: 1fr; }
     .sf-hero h1 { font-size: 1.9rem; }
     .sf-to-top { left: 14px; bottom: 16px; width: 42px; height: 42px; }

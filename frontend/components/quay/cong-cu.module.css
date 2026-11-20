@@ -25,9 +25,6 @@
 .anh { position: absolute; inset: 0; }
 .anhImg { object-fit: cover; transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .o:hover .anhImg { transform: scale(1.04); }
-/* Trạm căng cước: phóng vào mặt lưới của cây vợt trong ảnh (bỏ phần chữ quảng cáo). */
-.canhLuoi { transform: scale(2.3); transform-origin: 66% 36%; }
-.o:hover .canhLuoi { transform: scale(2.38); }
 .anh::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 32, 23, 0) 38%, rgba(7, 32, 23, 0.55) 66%, rgba(7, 32, 23, 0.92) 100%); }
 
 /* Ô so sánh: ba ảnh vợt thật đặt cạnh nhau trên nền sáng */
@@ -65,5 +62,4 @@
 @media (prefers-reduced-motion: reduce) {
   .o, .anhImg, .oDong i { transition: none; }
   .o:hover, .o:hover .anhImg { transform: none; }
-  .o:hover .canhLuoi { transform: scale(2.3); }
 }
