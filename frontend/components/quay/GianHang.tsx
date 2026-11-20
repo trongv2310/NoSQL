@@ -12,12 +12,6 @@ import s from "./gian-hang.module.css";
 
 const THU_TU_LOAI: KhoaLoai[] = ["vot", "giay", "aoquan", "phukien"];
 const ANH_LOAI: Record<KhoaLoai, string> = { vot: "cat-vot", giay: "cat-giay", aoquan: "cat-aoquan", phukien: "cat-phukien" };
-const MO_TA_LOAI: Record<KhoaLoai, string> = {
-  vot: "Chọn theo lối chơi, độ cân bằng, độ cứng",
-  giay: "Giày cầu lông theo size và màu",
-  aoquan: "Áo, quần cầu lông theo size",
-  phukien: "Cầu, quấn cán và đồ dùng đi kèm",
-};
 
 /** Danh mục dạng mosaic: vợt là ô lớn. Số sản phẩm, số còn hàng, số đang giảm và giá thấp nhất đều đếm từ dữ liệu. */
 export function DanhMucBento() {
@@ -36,12 +30,10 @@ export function DanhMucBento() {
                 <span className={s.manhPhu} aria-hidden="true" />
                 <span className={s.manhChu}>
                   <b className={`${s.manhTen} ${fontTieuDe.className}`}>{LOAI[khoa].ten}</b>
-                  <span className={s.manhMoTa}>{MO_TA_LOAI[khoa]}</span>
                   {ok && d.so > 0 && (
                     <span className={s.manhSo}>
                       <span>{d.so} sản phẩm</span>
                       {d.giaTu !== null && <span>từ {vnd(d.giaTu)}</span>}
-                      {d.soDangGiam > 0 && <span className={s.manhGiam}>{d.soDangGiam} đang giảm</span>}
                     </span>
                   )}
                 </span>
@@ -60,7 +52,7 @@ export function TamGia() {
   const tam = useMemo(() => votTheoTamGia(kho.items), [kho.items]);
   const max = Math.max(1, ...tam.map((t) => t.so));
   return (
-    <Khu id="tam-gia" nen="xam" kicker="Theo ngân sách" tieuDe="Vợt còn hàng theo tầm giá" moTa="Số vợt đếm từ kho theo giá đang bán (đã trừ khuyến mãi). Bấm vào một tầm để xem danh sách đã lọc giá.">
+    <Khu id="tam-gia" nen="xam" kicker="Theo ngân sách" tieuDe="Vợt còn hàng theo tầm giá">
       <DuLieuKhu>
         {() => (
           <ol className={s.thang}>
@@ -74,10 +66,10 @@ export function TamGia() {
                 <h3 className={`${s.bacTen} ${fontTieuDe.className}`}>{t.ns.nhan}</h3>
                 <p className={s.bacMoTa}>
                   {t.so > 0 && t.giaThapNhat !== null && t.giaCaoNhat !== null
-                    ? <>{t.so} vợt còn hàng, giá từ {vnd(t.giaThapNhat)}{t.giaCaoNhat !== t.giaThapNhat ? <> đến {vnd(t.giaCaoNhat)}</> : null}.</>
-                    : "Hiện chưa có vợt còn hàng trong tầm giá này."}
+                    ? <>Từ {vnd(t.giaThapNhat)}</>
+                    : "Chưa có vợt còn hàng"}
                 </p>
-                {t.so > 0 && <Link href={lienKetVotTheoGia(t.ns)} className={s.bacLienKet}>Xem vợt {t.ns.nhan.toLocaleLowerCase("vi")} <span aria-hidden="true">→</span></Link>}
+                {t.so > 0 && <Link href={lienKetVotTheoGia(t.ns)} className={s.bacLienKet}>Xem {t.so} vợt <span aria-hidden="true">→</span><span className="visually-hidden"> {t.ns.nhan.toLocaleLowerCase("vi")}</span></Link>}
               </li>
             ))}
           </ol>
@@ -87,31 +79,31 @@ export function TamGia() {
   );
 }
 
-const MAU_LOAI: Record<KhoaLoai, string> = { vot: "#8fe0bd", giay: "#ff8a2a", aoquan: "#f1e6c8", phukien: "#5d8a75" };
+/** Logo SVG có sẵn trong public/images/brands, theo tên hãng viết thường bỏ dấu cách. Hãng chưa có logo thì hiện tên dạng chữ. */
+const CO_LOGO = new Set(["lining", "mizuno", "victor", "yonex"]);
+const logoHang = (ten: string) => { const k = ten.toLowerCase().replace(/[^a-z]/g, ""); return CO_LOGO.has(k) ? `/images/brands/${k}.svg` : null; };
 
-/** Thương hiệu trong kho: tên hãng, số sản phẩm và cơ cấu theo loại đếm từ dữ liệu. Chữ thương hiệu là tên hãng dạng chữ, không dùng logo. */
+/** Thương hiệu trong kho: logo hãng, số sản phẩm và giá thấp nhất, đếm từ dữ liệu đang bán. */
 export function ThuongHieu() {
   const kho = useCatalog();
   const hang = useMemo(() => demTheoHang(kho.items), [kho.items]);
   return (
-    <Khu id="thuong-hieu" nen="toi" kicker="Thương hiệu" tieuDe="Các hãng đang có trong kho" moTa="Tên hãng và số sản phẩm đếm từ danh sách đang bán. Bấm vào một hãng để xem sản phẩm của hãng đó.">
+    <Khu id="thuong-hieu" nen="toi" kicker="Thương hiệu" tieuDe="Các hãng đang có trong kho">
       <DuLieuKhu>
         {() => hang.length === 0 ? null : (
           <ul className={s.hang}>
             {hang.map((h) => {
-              const loai = THU_TU_LOAI.filter((k) => h.theoLoai[k]);
+              const logo = logoHang(h.ten);
               return (
                 <li key={h.ten} className={`${s.hangO} sf-reveal`}>
-                  <Link href={lienKetHang(h.ten)} className={s.hangLienKet} aria-label={`${h.ten}: ${h.soSanPham} sản phẩm`}>
-                    <span className={`${s.hangTen} ${fontTieuDe.className}`}>{h.ten}</span>
-                    <span className={s.hangSo}><b className={fontTieuDe.className}>{h.soSanPham}</b> sản phẩm</span>
-                    <span className={s.coCau} aria-hidden="true">
-                      {loai.map((k) => <i key={k} style={{ flexGrow: h.theoLoai[k], background: MAU_LOAI[k] }} />)}
+                  <Link href={lienKetHang(h.ten)} className={s.hangLienKet} aria-label={`${h.ten}: ${h.soSanPham} sản phẩm, từ ${vnd(h.giaTu)}`}>
+                    <span className={s.hangLogo}>
+                      {/* SVG tĩnh: thẻ img thường (next/image không tối ưu SVG). */}
+                      {logo ? <img src={logo} alt="" /> : <span className={`${s.hangTen} ${fontTieuDe.className}`}>{h.ten}</span>}
                     </span>
-                    <span className={s.chuThich}>{loai.map((k) => <span key={k}><i style={{ background: MAU_LOAI[k] }} aria-hidden="true" />{LOAI[k].tenNgan} {h.theoLoai[k]}</span>)}</span>
                     <span className={s.hangChan}>
-                      <span>Từ {vnd(h.giaTu)}</span>
-                      {h.soDangGiam > 0 && <span className={s.hangGiam}>{h.soDangGiam} đang giảm</span>}
+                      <span><b className={fontTieuDe.className}>{h.soSanPham}</b> sản phẩm</span>
+                      <span>từ {vnd(h.giaTu)}</span>
                     </span>
                   </Link>
                 </li>

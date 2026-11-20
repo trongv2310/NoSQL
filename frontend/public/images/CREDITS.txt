@@ -9,3 +9,11 @@ pk_cau_cao_cap.jpg    - "Badminton Ball (12337125033)" - Tim Reckmann - CC BY 2.
 pk_day_cuon_can.jpg   - "Badminton Undergrip Flat" (cat khung) - 14harryl - CC BY 3.0
                         https://commons.wikimedia.org/wiki/File:Badminton_Undergrip_Flat.jpg
 Anh da duoc thu nho/cat khung; giay phep CC BY yeu cau ghi cong tac gia nhu tren.
+
+Anh thuc te (Wikimedia Commons), thu muc thuc-te/
+=====================================
+thuc-te/cang-cuoc.webp - "Recordage badminton" - Clement Bucco-Lechat - CC BY-SA 3.0
+                         https://commons.wikimedia.org/wiki/File:Recordage_badminton.JPG
+thuc-te/qua-cau.webp   - "Badminton shuttlecock close-up (47541589452)" - Ivan Radic - CC BY 2.0
+                         https://commons.wikimedia.org/wiki/File:Badminton_shuttlecock_close-up_(47541589452).jpg
+Anh duoc thu nho xuong 1280px va chuyen sang WebP. Ban sua doi cua anh CC BY-SA 3.0 van theo giay phep CC BY-SA 3.0.

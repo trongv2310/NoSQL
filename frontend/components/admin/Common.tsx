@@ -1,23 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Children, cloneElement, isValidElement, useId, useState } from "react";
 import { ErrorBox, Pagination } from "../Ui";
 import type { Trang } from "@/lib/types";
 
 export function PageBar({ title, action }: { title?: string; action?: { href: string; text: string } }) {
   return (
-    <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-      <h4 className="mb-0">{title}</h4>
-      {action && <Link href={action.href} className="btn btn-primary"><i className="fa-solid fa-plus" /> {action.text}</Link>}
+    <div className="admin-section-bar">
+      {title && <h2>{title}</h2>}
+      {action && <Link href={action.href} className="btn btn-primary"><i className="fa-solid fa-plus" aria-hidden="true" /> {action.text}</Link>}
     </div>
   );
 }
 
-/** Thanh tìm kiếm + bộ lọc đặt trên query string (?keyword=&...), giữ nguyên khi phân trang. */
-export function FilterBar({ children, fields = ["keyword"] }: { children?: (set: (k: string, v: string) => void, get: (k: string) => string) => React.ReactNode; fields?: string[] }) {
+/** Thanh tìm kiếm và bộ lọc theo URL, giữ bộ lọc khi phân trang. */
+export function FilterBar({ children, fields = ["keyword"], placeholder = "Tìm kiếm…", keep = [] }: {
+  children?: (set: (k: string, v: string) => void, get: (k: string) => string) => React.ReactNode;
+  fields?: string[];
+  placeholder?: string;
+  keep?: string[];
+}) {
   const sp = useSearchParams();
+  const path = usePathname();
   const router = useRouter();
   const keywordUrl = sp.get("keyword") ?? "";
   const [keyword, setKeyword] = useState(keywordUrl);
@@ -27,23 +33,58 @@ export function FilterBar({ children, fields = ["keyword"] }: { children?: (set:
     const q = new URLSearchParams(sp.toString());
     mut(q);
     q.delete("page");
-    router.push(`?${q.toString()}`);
+    const query = q.toString();
+    router.push(query ? path + "?" + query : path, { scroll: false });
   };
+  const coLoc = [...sp.keys()].some((k) => k !== "page" && !keep.includes(k));
   return (
-    <form className="d-flex flex-wrap gap-2 mb-3" onSubmit={(e) => { e.preventDefault(); di((q) => (keyword.trim() ? q.set("keyword", keyword.trim()) : q.delete("keyword"))); }}>
-      {fields.includes("keyword") && <input className="form-control w-auto" style={{ minWidth: 220 }} placeholder="Tìm kiếm..." value={keyword} onChange={(e) => setKeyword(e.target.value)} />}
+    <form className="admin-filterbar" role="search" aria-label="Tìm và lọc danh sách"
+      onSubmit={(e) => { e.preventDefault(); di((q) => (keyword.trim() ? q.set("keyword", keyword.trim()) : q.delete("keyword"))); }}>
+      {fields.includes("keyword") && <input className="form-control admin-filter-input" type="search" aria-label={placeholder}
+        placeholder={placeholder} value={keyword} onChange={(e) => setKeyword(e.target.value)} />}
       {children?.((k, v) => di((q) => (v ? q.set(k, v) : q.delete(k))), (k) => sp.get(k) ?? "")}
-      <button className="btn btn-outline-primary" type="submit"><i className="fa-solid fa-magnifying-glass" /> Tìm</button>
+      {fields.includes("keyword") && <button className="btn btn-outline-primary" type="submit"><i className="fa-solid fa-magnifying-glass" aria-hidden="true" /> Tìm</button>}
+      {coLoc && <button className="btn btn-outline-secondary" type="button" onClick={() => {
+        setKeyword("");
+        di((q) => [...q.keys()].forEach((key) => { if (!keep.includes(key)) q.delete(key); }));
+      }}>Xóa bộ lọc</button>}
     </form>
   );
 }
 
-export function ListState<T>({ loading, error, data, empty, children }: { loading: boolean; error: string | null; data: (Trang<T> | T[] | null); empty?: string; children: React.ReactNode }) {
-  if (loading && !data) return <div className="text-center text-muted py-4"><i className="fa-solid fa-spinner fa-spin" /> Đang tải...</div>;
-  if (error) return <ErrorBox message={error} />;
+export function FilterLinks({ label, field, options }: { label: string; field: string; options: { value: string; label: string }[] }) {
+  const path = usePathname();
+  const search = useSearchParams();
+  const active = search.get(field) ?? "";
+  return <nav className="admin-segments mb-3" aria-label={label}>
+    {options.map(({ value, label }) => {
+      const params = new URLSearchParams(search.toString());
+      params.delete("page");
+      if (value) params.set(field, value);
+      else params.delete(field);
+      const query = params.toString();
+      return <Link key={value} href={query ? path + "?" + query : path} scroll={false} aria-current={active === value ? "true" : undefined}>{label}</Link>;
+    })}
+  </nav>;
+}
+
+export function ListState<T>({ loading, error, data, empty, children, retry }: {
+  loading: boolean; error: string | null; data: Trang<T> | T[] | null; empty?: string; children: React.ReactNode; retry?: () => void;
+}) {
+  if (loading && !data) return <div className="card-custom admin-list-empty" role="status">Đang tải danh sách…</div>;
+  if (error && !loading) return <div className="card-custom p-3"><ErrorBox message={error} />
+    {retry && <button type="button" className="btn btn-outline-primary" onClick={retry}>Thử lại</button>}
+  </div>;
   const len = Array.isArray(data) ? data.length : (data?.items.length ?? 0);
-  if (data && len === 0) return <div className="text-center text-muted py-4">{empty ?? "Không có dữ liệu."}</div>;
-  return <>{children}</>;
+  const total = Array.isArray(data) ? data.length : data?.total ?? 0;
+  if (data && len === 0 && !loading) return <div className="card-custom admin-list-empty" role="status">
+    <i className="fa-solid fa-inbox" aria-hidden="true" /><strong>Không có kết quả</strong>
+    <p>{empty ?? "Thử đổi từ khóa hoặc bộ lọc."}</p>
+  </div>;
+  return <div aria-busy={loading}>
+    <div className="admin-list-info" role="status">{loading ? "Đang cập nhật danh sách…" : total.toLocaleString("vi-VN") + " kết quả"}</div>
+    {children}
+  </div>;
 }
 
 export { Pagination };

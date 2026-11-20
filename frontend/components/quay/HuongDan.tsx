@@ -62,15 +62,15 @@ function Icon({ ten }: { ten: "chon" | "gio" | "the" | "don" }) {
 }
 
 const BUOC = [
-  { icon: "chon", ten: "Chọn sản phẩm", mota: "Xem theo danh mục, hãng hoặc tìm kiếm. Số hàng còn lại của từng phiên bản (màu, size) hiện ngay ở trang sản phẩm.", lk: { href: "/SanPham/Index", nhan: "Xem sản phẩm" } },
-  { icon: "gio", ten: "Thêm vào giỏ", mota: "Chưa cần đăng nhập: giỏ lưu trên trình duyệt này. Giá và tồn kho được tính lại mỗi lần bạn xem giỏ.", lk: { href: "/Home/ViewCart", nhan: "Xem giỏ hàng" } },
-  { icon: "the", ten: "Thanh toán COD hoặc MoMo", mota: "Chỉ bước này cần tài khoản, và giỏ của bạn được chuyển vào tài khoản. Điền thông tin nhận hàng rồi chọn trả khi nhận hàng (COD) hoặc ví MoMo.", lk: { href: "/ChinhSach/huong-dan-mua-hang", nhan: "Hướng dẫn chi tiết" } },
-  { icon: "don", ten: "Theo dõi đơn", mota: "Nhận mã đơn và xem trạng thái ở mục Đơn hàng của tôi. Đơn còn ở Chờ xác nhận, Chờ thanh toán MoMo hoặc Đang xử lý thì bạn tự hủy được.", lk: { href: "/DonHang/Index", nhan: "Đơn hàng của tôi" } },
+  { icon: "chon", ten: "Chọn sản phẩm", mota: "Theo danh mục, hãng hoặc tìm kiếm.", lk: { href: "/SanPham/Index", nhan: "Xem sản phẩm" } },
+  { icon: "gio", ten: "Thêm vào giỏ", mota: "Không cần đăng nhập.", lk: { href: "/Home/ViewCart", nhan: "Xem giỏ hàng" } },
+  { icon: "the", ten: "Thanh toán COD hoặc MoMo", mota: "Trả khi nhận hàng hoặc ví MoMo.", lk: { href: "/ChinhSach/huong-dan-mua-hang", nhan: "Hướng dẫn chi tiết" } },
+  { icon: "don", ten: "Theo dõi đơn", mota: "Xem trạng thái, tự hủy khi chưa giao.", lk: { href: "/DonHang/Index", nhan: "Đơn hàng của tôi" } },
 ] as const;
 
 export function QuyTrinh() {
   return (
-    <Khu id="quy-trinh" nen="xam" kicker="Mua hàng" tieuDe="Từ chọn vợt đến nhận hàng, bốn bước">
+    <Khu id="quy-trinh" nen="xam" kicker="Mua hàng" tieuDe="Mua hàng trong bốn bước">
       <ol className={s.buoc}>
         {BUOC.map((b, i) => (
           <li key={b.ten} className={`${s.buocO} sf-reveal`}>

@@ -19,7 +19,8 @@ const NHAN_CAN_BANG: Record<number, string> = { [-2]: "Rất nhẹ đầu", [-1]
  * Hai nút chuyển chế độ (bàn phím/cảm ứng đều dùng được); chuyển động tắt khi người dùng chọn giảm chuyển động. Không có số mm, gram hay điểm "năng lực".
  * Thiếu dữ liệu thì hình chỉ vẽ phần có và chú thích nói rõ phần chưa có thông tin.
  */
-export function DnaVot({ ts, nhanPhienBan }: { ts?: ThongSoVotV | null; nhanPhienBan: string }) {
+/** `gon`: chỉ giữ hình (dùng ở trang chủ); lời giải thích vẫn còn cho trình đọc màn hình. */
+export function DnaVot({ ts, nhanPhienBan, gon = false }: { ts?: ThongSoVotV | null; nhanPhienBan: string; gon?: boolean }) {
   const [che, setChe] = useState<Che>("can-bang");
   const moTaId = useId();
   const bacCb = bacCanBang(ts ?? null);
@@ -59,7 +60,7 @@ export function DnaVot({ ts, nhanPhienBan }: { ts?: ThongSoVotV | null; nhanPhie
           </g>
         )}
       </svg>
-      <figcaption id={moTaId} className={s.dnaMoTa} aria-live="polite">
+      <figcaption id={moTaId} className={gon ? "visually-hidden" : s.dnaMoTa} aria-live="polite">
         {moTa}
         {!co && <span> Hỏi người bán nếu bạn cần biết thêm.</span>}
       </figcaption>

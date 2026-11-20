@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { useCatalog } from "@/components/landing/CatalogProvider";
 import { fontTieuDe } from "@/components/landing/fonts";
 import { ProductCard } from "@/components/product/ProductCard";
-import { ngay, vnd } from "@/lib/format";
+import { vnd } from "@/lib/format";
 import { LOAI, chonKhuyenMai, chonTheoLoai, conNhieuHang, demTheoLoai, khuyenMaiConHang, laVot, type KhoaLoai } from "@/lib/landing-data";
 import { DuLieuKhu, Khu } from "./KhuChung";
 import s from "./khuyen-mai.module.css";
@@ -33,10 +33,10 @@ export function KhuyenMai() {
           <>
             {ct.length > 0 && (
               <ul className={s.chuongTrinh} aria-label="Chương trình khuyến mãi đang áp dụng">
-                {ct.map((c) => (
+                {ct.slice(0, 3).map((c) => (
                   <li key={c.id} className={s.ct}>
                     <b>{c.ten}</b>
-                    <span>giảm tới {c.giamToiDa}%{c.ngayKetThuc ? ` · đến ${ngay(c.ngayKetThuc)}` : ""} · {c.soSanPham} sản phẩm còn hàng</span>
+                    <span>giảm tới {c.giamToiDa}%</span>
                   </li>
                 ))}
               </ul>
@@ -90,7 +90,7 @@ export function ConNhieuHang() {
   const max = Math.max(1, ...ds.map((sp) => sp.tongTonKho));
   if (kho.trangThai === "ok" && ds.length === 0) return null;
   return (
-    <Khu id="con-nhieu-hang" nen="xam" kicker="Tồn kho" tieuDe="Còn nhiều hàng trong kho" moTa="Năm sản phẩm có số lượng tồn cao nhất lúc này, cộng dồn mọi phiên bản màu và size.">
+    <Khu id="con-nhieu-hang" nen="xam" kicker="Tồn kho" tieuDe="Còn nhiều hàng trong kho">
       <DuLieuKhu>
         {() => (
           <ol className={s.xepHang}>

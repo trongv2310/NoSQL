@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ComboMuaChung } from "@/components/ComboMuaChung";
+import { BannerTrangChu } from "@/components/quay/BannerTrangChu";
 import { Catalog } from "@/components/landing/Catalog";
 import { CongCu, DaiSoLieu } from "@/components/quay/CongCu";
 import { DanhMucBento, TamGia, ThuongHieu } from "@/components/quay/GianHang";
@@ -18,7 +19,8 @@ export const metadata: Metadata = {
 };
 
 /**
- * Trang chủ "Quầy tư vấn": nền sáng, không có cảnh 3D/WebGL. Màn hình đầu là bộ chọn + 3 vợt thật; bên dưới là các khu có nhịp khác nhau:
+ * Trang chủ "Quầy tư vấn": nền sáng, không có cảnh 3D/WebGL. Đầu trang là banner (giới thiệu shop, ưu đãi đang chạy, ảnh quảng cáo gắn sản phẩm thật),
+ * tiếp theo là bộ chọn + 3 vợt thật; bên dưới là các khu có nhịp khác nhau:
  * số liệu kho, công cụ của shop, danh mục, chọn theo lối chơi (Racket DNA), khuyến mãi, tầm giá, thương hiệu, kệ giày/áo quần/phụ kiện, tồn kho,
  * Bảng tin, hỏi người bán, quy trình mua hàng, câu hỏi thường gặp. Mọi con số và danh sách đều đếm/chọn từ dữ liệu thật (lib/landing-data.ts).
  * Trang tĩnh làm mới theo hạn của dữ liệu giá/tồn kho (literal để Next đọc lúc build; bằng LAM_MOI_SAN_PHAM_GIAY trong lib/server-api.ts).
@@ -31,6 +33,7 @@ export default function TrangChu() {
   return (
     <main>
       <Catalog>
+        <BannerTrangChu />
         <QuayTuVan />
         <DaiSoLieu />
         <CongCu />

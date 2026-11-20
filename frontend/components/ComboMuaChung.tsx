@@ -11,7 +11,7 @@ export async function ComboMuaChung() {
   const combos = chonComboHienThi(await layGoiYCombo());
   if (combos.length === 0) return null;
   return (
-    <Khu id="combo-mua-chung" kicker="Mua chung" tieuDe="Combo mua chung" moTa="Những bộ sản phẩm khách thường mua cùng nhau, còn hàng. Giá là tổng giá hiện hành của từng món.">
+    <Khu id="combo-mua-chung" kicker="Mua chung" tieuDe="Combo mua chung">
       <LuoiCombo combos={combos} />
     </Khu>
   );
