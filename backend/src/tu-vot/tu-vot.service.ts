@@ -74,8 +74,14 @@ export class TuVotService {
     return vot;
   }
 
-  danhSach(khachHang: Types.ObjectId) {
-    return this.votModel.find({ khachHang, deletedAt: null }).sort({ taoLuc: -1 }).lean();
+  /** Tủ vợt của khách, kèm ảnh đại diện của sản phẩm gốc (nếu cây vợt gắn với sản phẩm trong cửa hàng) để giao diện hiện ảnh thật. */
+  async danhSach(khachHang: Types.ObjectId) {
+    const ds = await this.votModel.find({ khachHang, deletedAt: null }).sort({ taoLuc: -1 }).lean();
+    const idSp = [...new Set(ds.filter((v) => v.sanPham).map((v) => String(v.sanPham)))];
+    if (!idSp.length) return ds;
+    const sps = await this.sanPhamModel.find({ _id: { $in: idSp } }, { hinhAnhDaiDien: 1 }).lean();
+    const anh = new Map(sps.map((s: any) => [String(s._id), s.hinhAnhDaiDien as string | undefined]));
+    return ds.map((v) => ({ ...v, ...(v.sanPham && anh.get(String(v.sanPham)) ? { anh: anh.get(String(v.sanPham)) } : {}) }));
   }
 
   /** Thông tin sản phẩm/phiên bản đi kèm (nếu chọn từ cửa hàng): kiểm phiên bản thuộc sản phẩm và chụp khoảng căng. */
