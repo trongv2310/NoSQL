@@ -7,25 +7,25 @@ import { useApp } from "@/components/AppProviders";
 import { useCatalog } from "@/components/landing/CatalogProvider";
 import { fontTieuDe } from "@/components/landing/fonts";
 import { ProductImage } from "@/components/landing/ProductImage";
-import { ngay, vnd } from "@/lib/format";
-import { LOAI, chonKhuyenMai, khuyenMaiConHang, phanTramGiam, thongKeKho, type SanPhamLanding } from "@/lib/landing-data";
+import { vnd } from "@/lib/format";
+import { LOAI, chonKhuyenMai, khuyenMaiConHang, phanTramGiam, type SanPhamLanding } from "@/lib/landing-data";
 import s from "./banner.module.css";
 
 const THOI_GIAN_MOI_TRANG = 7000;
 
 /** Ảnh quảng cáo có sẵn trong public/images, mỗi ảnh gắn với sản phẩm THẬT trong kho (tìm theo tên/hãng/loại). Không tìm được món còn hàng thì bỏ trang đó. */
-const ANH_QUANG_CAO: { anh: string; alt: string; tim: (sp: SanPhamLanding) => boolean; nhom?: boolean; kicker: string; thePhai?: boolean }[] = [
+const ANH_QUANG_CAO: { anh: string; alt: string; tim: (sp: SanPhamLanding) => boolean; nhom?: boolean; thePhai?: boolean }[] = [
   {
-    anh: "/images/banner3.png", alt: "Ảnh quảng cáo vợt Yonex Nanoflare 1000", kicker: "Vợt nổi bật",
+    anh: "/images/banner3.png", alt: "Ảnh quảng cáo vợt Yonex Nanoflare 1000",
     tim: (sp) => /nanoflare\s*1000/i.test(sp.tenSanPham),
   },
   {
     // Chữ lớn của ảnh nằm bên trái nên thẻ sản phẩm đặt bên phải.
-    anh: "/images/banner2.png", alt: "Ảnh quảng cáo vợt Yonex Astrox 99", kicker: "Vợt nổi bật", thePhai: true,
+    anh: "/images/banner2.png", alt: "Ảnh quảng cáo vợt Yonex Astrox 99", thePhai: true,
     tim: (sp) => /astrox\s*99/i.test(sp.tenSanPham),
   },
   {
-    anh: "/images/banner1.png", alt: "Ảnh quảng cáo giày cầu lông Yonex", kicker: "Giày Yonex", nhom: true,
+    anh: "/images/banner1.png", alt: "Ảnh quảng cáo giày cầu lông Yonex", nhom: true,
     tim: (sp) => /yonex/i.test(sp.hang?.tenHang ?? "") && /giày|giay/i.test(sp.loai?.tenLoai ?? ""),
   },
 ];
@@ -36,7 +36,7 @@ const chiTiet = (sp: SanPhamLanding) => `/Home/ChiTietSanPham/${sp.id}`;
 type Trang =
   | { loai: "gioi-thieu"; khoa: string }
   | { loai: "uu-dai"; khoa: string }
-  | { loai: "quang-cao"; khoa: string; anh: string; alt: string; kicker: string; ds: SanPhamLanding[]; nhom: boolean; thePhai: boolean };
+  | { loai: "quang-cao"; khoa: string; anh: string; alt: string; ds: SanPhamLanding[]; nhom: boolean; thePhai: boolean };
 
 /**
  * Banner đầu trang chủ: băng trình chiếu gồm trang giới thiệu shop, trang ưu đãi đang chạy và các ảnh quảng cáo gắn với sản phẩm thật.
@@ -47,7 +47,6 @@ type Trang =
 export function BannerTrangChu() {
   const { site } = useApp();
   const kho = useCatalog();
-  const thongKe = useMemo(() => thongKeKho(kho.items), [kho.items]);
   const { chuongTrinh, giamToiDa } = useMemo(() => khuyenMaiConHang(kho.items), [kho.items]);
   const spGiam = useMemo(() => chonKhuyenMai(kho.items, 3), [kho.items]);
 
@@ -57,7 +56,7 @@ export function BannerTrangChu() {
     if (spGiam.length) ds.push({ loai: "uu-dai", khoa: "uu-dai" });
     for (const a of ANH_QUANG_CAO) {
       const khop = kho.items.filter((sp) => a.tim(sp) && conHang(sp)).sort((x, y) => y.giaSauKhuyenMai - x.giaSauKhuyenMai);
-      if (khop.length) ds.push({ loai: "quang-cao", khoa: a.anh, anh: a.anh, alt: a.alt, kicker: a.kicker, ds: khop, nhom: !!a.nhom, thePhai: !!a.thePhai });
+      if (khop.length) ds.push({ loai: "quang-cao", khoa: a.anh, anh: a.anh, alt: a.alt, ds: khop, nhom: !!a.nhom, thePhai: !!a.thePhai });
     }
     return ds;
   }, [kho.items, kho.trangThai, spGiam.length]);
@@ -120,8 +119,8 @@ export function BannerTrangChu() {
             aria-label={`Trang ${hienTai + 1} trên ${trang.length}. Dùng phím mũi tên trái, phải để chuyển trang.`}>
             {trang.map((t, i) => (
               <div key={t.khoa} className={s.trang} role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${trang.length}`} aria-hidden={i !== hienTai} inert={i !== hienTai}>
-                {t.loai === "gioi-thieu" && <TrangGioiThieu tenSite={site.tenSite} thongKe={kho.trangThai === "ok" ? thongKe : null} uuTien />}
-                {t.loai === "uu-dai" && <TrangUuDai giamToiDa={giamToiDa} chuongTrinh={chuongTrinh.slice(0, 3)} ds={spGiam} />}
+                {t.loai === "gioi-thieu" && <TrangGioiThieu tenSite={site.tenSite} uuTien />}
+                {t.loai === "uu-dai" && <TrangUuDai giamToiDa={giamToiDa} chuongTrinh={chuongTrinh} ds={spGiam} />}
                 {t.loai === "quang-cao" && <TrangQuangCao t={t} />}
               </div>
             ))}
@@ -155,24 +154,16 @@ export function BannerTrangChu() {
   );
 }
 
-function TrangGioiThieu({ tenSite, thongKe, uuTien }: { tenSite: string; thongKe: ReturnType<typeof thongKeKho> | null; uuTien?: boolean }) {
+function TrangGioiThieu({ tenSite, uuTien }: { tenSite: string; uuTien?: boolean }) {
   return (
     <div className={s.gioiThieu}>
       <Image src="/images/landing/hero-court.webp" alt="" fill priority={uuTien} sizes="(max-width: 1320px) 100vw, 1290px" className={s.nenAnh} />
       <div className={s.gioiThieuNoiDung}>
         <p className={s.kicker}>{tenSite}</p>
-        <p className={`${s.tieuDe} ${fontTieuDe.className}`}>Đồ cầu lông chọn theo đúng lối chơi của bạn</p>
-        <p className={s.moTa}>Vợt, giày, trang phục và phụ kiện. Giá và tồn kho lấy thẳng từ kho của shop; thêm vào giỏ không cần đăng nhập.</p>
-        {thongKe && (
-          <ul className={s.soLieu} aria-label="Trong kho hôm nay">
-            <li><b>{thongKe.soSanPham}</b><span>sản phẩm</span></li>
-            <li><b>{thongKe.soVot}</b><span>mẫu vợt</span></li>
-            <li><b>{thongKe.soHang}</b><span>thương hiệu</span></li>
-          </ul>
-        )}
+        <p className={`${s.tieuDe} ${fontTieuDe.className}`}>Đúng vợt, đúng lối chơi</p>
         <div className={s.nut}>
-          <a href="#quay-tu-van" className={s.nutChinh}>Chọn vợt theo lối chơi</a>
-          <Link href="/SanPham/Index" className={s.nutPhu}>Xem tất cả sản phẩm</Link>
+          <a href="#quay-tu-van" className={s.nutChinh}>Chọn vợt cho bạn</a>
+          <Link href="/SanPham/Index" className={s.nutPhu}>Xem sản phẩm</Link>
         </div>
       </div>
     </div>
@@ -185,13 +176,9 @@ function TrangUuDai({ giamToiDa, chuongTrinh, ds }: { giamToiDa: number; chuongT
       <div className={s.uuDaiChu}>
         <p className={`${s.kicker} ${s.kickerAm}`}>Ưu đãi đang chạy</p>
         <p className={`${s.tieuDe} ${s.tieuDeAm} ${fontTieuDe.className}`}>Giảm tới <span>{giamToiDa}%</span></p>
-        <ul className={s.chuongTrinh}>
-          {chuongTrinh.map((c) => (
-            <li key={c.id}><b>{c.ten}</b> · giảm tới {c.giamToiDa}%{c.ngayKetThuc ? ` · đến ${ngay(c.ngayKetThuc)}` : ""}</li>
-          ))}
-        </ul>
+        {chuongTrinh[0] && <p className={s.chuongTrinh}>{chuongTrinh[0].ten}</p>}
         <div className={s.nut}>
-          <Link href="/KhuyenMai/Index" className={s.nutChinh}>Xem tất cả ưu đãi</Link>
+          <Link href="/KhuyenMai/Index" className={s.nutChinh}>Xem ưu đãi</Link>
         </div>
       </div>
       <ul className={s.uuDaiSp}>
@@ -220,12 +207,10 @@ function TrangQuangCao({ t }: { t: Extract<Trang, { loai: "quang-cao" }> }) {
       <Image src={t.anh} alt="" fill sizes="(max-width: 1320px) 100vw, 1290px" className={s.qcNen} aria-hidden="true" />
       <Image src={t.anh} alt={t.alt} fill sizes="(max-width: 1320px) 100vw, 1290px" className={s.qcAnh} />
       <Link href={href} className={`${s.qcThe} ${t.thePhai ? s.qcThePhai : ""}`}>
-        <span className={s.qcKicker}>{t.kicker}</span>
         {t.nhom
-          ? <><span className={s.qcTen}>{t.ds.length} mẫu giày Yonex còn hàng</span><span className={s.qcGia}>Từ <b>{vnd(giaThap)}</b></span></>
-          : <><span className={s.qcTen}>{dau.tenSanPham}</span>
-            <span className={s.qcGia}><b>{vnd(dau.giaSauKhuyenMai)}</b>{dau.giaSauKhuyenMai < dau.giaGoc && <s>{vnd(dau.giaGoc)}</s>}</span></>}
-        <span className={s.qcXem}>{t.nhom ? "Xem giày Yonex" : "Xem sản phẩm"} <span aria-hidden="true">→</span></span>
+          ? <><span className={s.qcTen}>Giày Yonex</span><span className={s.qcGia}>Từ <b>{vnd(giaThap)}</b> <span aria-hidden="true">→</span></span></>
+          : <><span className={s.qcTen}>{dau.tenSanPham.replace(/^Vợt Cầu Lông\s+/i, "")}</span>
+            <span className={s.qcGia}><b>{vnd(dau.giaSauKhuyenMai)}</b>{dau.giaSauKhuyenMai < dau.giaGoc && <s>{vnd(dau.giaGoc)}</s>} <span aria-hidden="true">→</span></span></>}
       </Link>
     </div>
   );

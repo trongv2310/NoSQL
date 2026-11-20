@@ -65,7 +65,6 @@ export function QuayTuVan() {
         <header className={s.dau}>
           <p className={s.kicker}>Quầy tư vấn</p>
           <h1 id="quay-tieu-de" className={s.h1}>Bạn chơi thế nào? <span>Shop chọn giúp 3 cây vợt.</span></h1>
-          <p className={s.lede}>Chọn lối chơi, trình độ, ngân sách: shop đưa ra 3 cây còn hàng kèm lý do từ thông số trong kho.</p>
         </header>
 
         <div className={s.luoi}>

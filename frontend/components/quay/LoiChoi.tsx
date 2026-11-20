@@ -12,13 +12,6 @@ import { DuLieuKhu, Khu } from "./KhuChung";
 import { lienKetVotTheoHoSo } from "./QuayTuVan";
 import s from "./loi-choi.module.css";
 
-/** Điều kiện thông số mà shop dùng để xếp một vợt vào lối chơi (cùng quy tắc với bộ chọn và với bộ lọc `loi_choi` của danh sách). */
-const QUY_TAC: Record<KhoaLoiChoi, string> = {
-  cong: "Vợt nặng đầu (từ mức \"hơi nặng đầu\" trở lên) và có ghi độ cứng.",
-  toc: "Vợt nhẹ đầu và có ghi độ cứng.",
-  toan: "Vợt cân bằng hoặc hơi nặng đầu và có ghi độ cứng.",
-};
-
 /**
  * Khu "Chọn vợt theo lối chơi": chọn một trong ba lối chơi, xem Racket DNA của một cây vợt thật hợp lối chơi đó (chấm cân bằng, độ cứng thân tính từ chữ
  * ghi trong kho) và danh sách vài cây còn hàng. Số vợt hợp là số đếm thật. Lối chơi ở đây chỉ để xem; nút "Dùng ở Quầy tư vấn" mới ghi vào hồ sơ người chơi.
@@ -40,7 +33,7 @@ export function LoiChoi() {
   };
 
   return (
-    <Khu id="loi-choi" kicker="Theo lối chơi" tieuDe="Chọn vợt theo lối chơi" moTa="Chọn một lối chơi để xem vợt còn hàng hợp lối đó. Shop xếp vợt vào lối chơi bằng thông số ghi trong kho, không bằng cảm tính.">
+    <Khu id="loi-choi" kicker="Theo lối chơi" tieuDe="Chọn vợt theo lối chơi">
       <div className={`${s.tab} sf-reveal`} role="group" aria-label="Lối chơi">
         {PHONG_CACH.map((p) => (
           <button key={p.khoa} type="button" className={s.tabNut} aria-pressed={lc === p.khoa} onClick={() => { setChonLc(p.khoa); setChonVot(null); }}>
@@ -57,11 +50,10 @@ export function LoiChoi() {
             <div className={`${s.dna} sf-reveal`}>
               <p className={s.dnaDau}>Racket DNA {dangXem && <span>· {dangXem.sp.tenSanPham.replace(/^Vợt Cầu Lông\s+/i, "")}</span>}</p>
               {dangXem ? (
-                <DnaVot key={dangXem.sp.id} ts={dangXem.sp.thongSoVot} nhanPhienBan={dangXem.sp.tenSanPham} />
+                <DnaVot key={dangXem.sp.id} ts={dangXem.sp.thongSoVot} nhanPhienBan={dangXem.sp.tenSanPham} gon />
               ) : (
                 <p className={s.trong}>Hiện chưa có vợt còn hàng kèm thông số hợp lối chơi này.</p>
               )}
-              <p className={s.quyTac}><b>Shop xếp vào lối {pc.ten}:</b> {QUY_TAC[lc]}</p>
             </div>
 
             <div className={s.ds}>

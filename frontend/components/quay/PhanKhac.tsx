@@ -17,7 +17,7 @@ export function HoiNguoiBanTrangChu() {
   return (
     <section className={`${k.khu} ${k.vienTren}`} aria-label="Hỏi người bán">
       <div className="container" id="hoi-nguoi-ban">
-        <HoiNguoiBan mota="Hỏi bằng lời của bạn: shop tra giá, tồn kho, khuyến mãi và gợi ý theo dữ liệu đang có. Chưa có thông tin thì shop nói là chưa có, không đoán." goiY={goiY} />
+        <HoiNguoiBan mota="Hỏi giá, tồn kho, khuyến mãi hay nhờ chọn vợt." goiY={goiY} />
       </div>
     </section>
   );
