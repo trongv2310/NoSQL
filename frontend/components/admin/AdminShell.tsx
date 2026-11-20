@@ -12,22 +12,99 @@ import { LoginForm } from "../AuthForms";
 import { Loading } from "../Ui";
 import { ThongBaoTrucTiep } from "./ThongBaoTrucTiep";
 
-/** Mục nào hiện với vai trò nào do `mucMenuTheoQuyen` (lib/quyen-admin.ts) quyết định. */
-const MUC: { nhom: string; muc: [string, string, string][] }[] = [
-  { nhom: "Tổng quan", muc: [["/admin", "fa-chart-pie", "Thống kê"], ["/admin/bao-cao-csdl", "fa-chart-column", "Báo cáo sổ căng & đánh giá"]] },
+type Muc = { href: string; icon: string; nhan: string; moTa: string };
+
+/** Mục nào hiện với vai trò nào do mucMenuTheoQuyen quyết định. */
+const MUC: { nhom: string; muc: Muc[] }[] = [
   {
-    nhom: "Bán hàng",
-    muc: [["/admin/san-pham", "fa-box-archive", "Sản phẩm"], ["/admin/don-hang", "fa-file-invoice-dollar", "Đơn hàng"], ["/admin/lich-cang", "fa-calendar-check", "Lịch căng cước"], ["/admin/khuyen-mai", "fa-tags", "Khuyến mãi"], ["/admin/khai-thac", "fa-fire", "Combo bán chạy"]],
+    nhom: "Điều hành", muc: [
+      { href: "/admin", icon: "fa-gauge-high", nhan: "Tổng quan", moTa: "Theo dõi doanh thu và những việc cần xem trong cửa hàng." },
+      { href: "/admin/don-hang", icon: "fa-receipt", nhan: "Đơn hàng", moTa: "Tìm đơn, kiểm tra thông tin giao hàng và cập nhật tiến độ." },
+      { href: "/admin/lich-cang", icon: "fa-calendar-check", nhan: "Lịch căng cước", moTa: "Xem chỗ đang chờ và xác nhận đã căng xong cho khách." },
+      { href: "/admin/bao-cao-csdl", icon: "fa-chart-column", nhan: "Báo cáo sổ căng & đánh giá", moTa: "Xem thói quen căng cước, đánh giá vợt và lượt xem sản phẩm." },
+    ],
   },
-  { nhom: "Nội dung", muc: [["/admin/ban-tin", "fa-newspaper", "Bảng tin"], ["/admin/tran-dau", "fa-table-tennis-paddle-ball", "Kết quả trận đấu"]] },
-  { nhom: "Hệ thống", muc: [["/admin/tai-khoan", "fa-users-gear", "Tài khoản"], ["/admin/logo", "fa-image", "Logo hệ thống"], ["/admin/thong-bao", "fa-triangle-exclamation", "Cảnh báo đánh giá"]] },
+  {
+    nhom: "Danh mục & ưu đãi", muc: [
+      { href: "/admin/san-pham", icon: "fa-box-archive", nhan: "Sản phẩm", moTa: "Quản lý danh mục, phiên bản và tồn kho." },
+      { href: "/admin/khuyen-mai", icon: "fa-tags", nhan: "Khuyến mãi", moTa: "Xem thời hạn, mức giảm và sản phẩm thuộc từng chương trình." },
+      { href: "/admin/khai-thac", icon: "fa-fire", nhan: "Combo bán chạy", moTa: "Phân tích sản phẩm mua cùng và chọn combo để khách xem." },
+    ],
+  },
+  {
+    nhom: "Nội dung", muc: [
+      { href: "/admin/ban-tin", icon: "fa-newspaper", nhan: "Bảng tin", moTa: "Soạn bài, chọn bài nổi bật và kiểm soát nội dung công khai." },
+      { href: "/admin/tran-dau", icon: "fa-table-tennis-paddle-ball", nhan: "Kết quả trận đấu", moTa: "Cập nhật tỷ số và trận đấu dùng trong bảng tin." },
+    ],
+  },
+  {
+    nhom: "Hệ thống", muc: [
+      { href: "/admin/tai-khoan", icon: "fa-users-gear", nhan: "Tài khoản", moTa: "Tìm tài khoản và xem theo vai trò." },
+      { href: "/admin/logo", icon: "fa-image", nhan: "Tên và logo cửa hàng", moTa: "Xem trước nhận diện cửa hàng trước khi lưu." },
+      { href: "/admin/thong-bao", icon: "fa-triangle-exclamation", nhan: "Cảnh báo đánh giá", moTa: "Đọc các phản hồi thấp điểm để biết sản phẩm nào cần xem lại." },
+    ],
+  },
 ];
 
-const TIEU_DE: [string, string][] = [
-  ["/admin/san-pham", "Quản lý sản phẩm"], ["/admin/bien-the", "Quản lý sản phẩm"], ["/admin/don-hang", "Quản lý đơn hàng"], ["/admin/lich-cang", "Lịch căng cước"], ["/admin/bao-cao-csdl", "Báo cáo sổ căng & đánh giá"],
-  ["/admin/khuyen-mai", "Quản lý khuyến mãi"], ["/admin/khai-thac", "Combo bán chạy"], ["/admin/ban-tin", "Quản lý bảng tin"], ["/admin/tran-dau", "Kết quả trận đấu"],
-  ["/admin/tai-khoan", "Quản lý tài khoản"], ["/admin/logo", "Quản lý Logo"], ["/admin/thong-bao", "Cảnh báo đánh giá"],
-];
+const khop = (path: string, href: string) => path === href || (href !== "/admin" && path.startsWith(href + "/"));
+const boDau = (value: string) => value.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").replace(/đ/g, "d").trim();
+
+function TimMuc({ muc }: { muc: Muc[] }) {
+  const [tuKhoa, setTuKhoa] = useState("");
+  const dialog = useRef<HTMLDialogElement>(null);
+  const oTim = useRef<HTMLInputElement>(null);
+  const nut = useRef<HTMLButtonElement>(null);
+  const mo = () => {
+    if (dialog.current?.open) return;
+    setTuKhoa("");
+    dialog.current?.showModal();
+    oTim.current?.focus();
+  };
+
+  useEffect(() => {
+    const phimTat = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        nut.current?.click();
+      }
+    };
+    window.addEventListener("keydown", phimTat);
+    return () => window.removeEventListener("keydown", phimTat);
+  }, []);
+
+  const loc = boDau(tuKhoa);
+  const ketQua = muc.filter((m) => boDau(m.nhan + " " + m.moTa).includes(loc));
+  return (
+    <>
+      <button ref={nut} type="button" className="admin-find" onClick={mo} aria-label="Tìm mục quản trị" aria-haspopup="dialog">
+        <i className="fa-solid fa-magnifying-glass" aria-hidden="true" /><span>Tìm mục quản trị</span><kbd>Ctrl K</kbd>
+      </button>
+      <dialog ref={dialog} className="admin-search-dialog" aria-labelledby="admin-search-title" onClose={() => nut.current?.focus()}>
+        <div className="admin-search-header">
+          <h2 id="admin-search-title">Tìm mục quản trị</h2>
+          <button type="button" className="admin-icon-button" aria-label="Đóng tìm kiếm" onClick={() => dialog.current?.close()}>
+            <i className="fa-solid fa-xmark" aria-hidden="true" />
+          </button>
+        </div>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          if (loc && ketQua.length) dialog.current?.querySelector<HTMLAnchorElement>("nav a")?.click();
+        }}>
+          <input ref={oTim} type="search" className="form-control" value={tuKhoa} autoComplete="off"
+            onChange={(e) => setTuKhoa(e.target.value)} aria-label="Tên mục quản trị" placeholder="Ví dụ: đơn hàng, tồn kho…" />
+        </form>
+        {ketQua.length ? (
+          <nav aria-label="Kết quả tìm mục quản trị">
+            {ketQua.map((m) => <Link href={m.href} key={m.href} onClick={() => dialog.current?.close()}>
+              <i className={"fa-solid " + m.icon} aria-hidden="true" />
+              <span><strong>{m.nhan}</strong><small>{m.moTa}</small></span>
+            </Link>)}
+          </nav>
+        ) : <p className="admin-search-empty" role="status">Không tìm thấy mục phù hợp.</p>}
+      </dialog>
+    </>
+  );
+}
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const { user, ready, site, setUser, flash } = useApp();
@@ -41,6 +118,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     if (!mo) return;
     thanhBen.current?.querySelector<HTMLElement>("a, button")?.focus();
     const khiPhim = (e: KeyboardEvent) => {
+      if (document.querySelector(".admin-search-dialog[open]")) return;
       if (e.key === "Escape") { setMo(false); nutMo.current?.focus(); }
       else giuFocusTrongVung(e, thanhBen.current);
     };
@@ -63,11 +141,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   if (!user || user.maQuyen === 3) {
     return (
-      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh", background: "#f4f6f8" }}>
-        <div className="w-100 p-3">
+      <div className="admin-login">
+        <div className="admin-login-inner">
           {user && <div className="alert alert-danger mx-auto" style={{ maxWidth: 440 }}>Bạn không có quyền truy cập vào trang quản trị.</div>}
           <Suspense fallback={null}><LoginForm quanTri /></Suspense>
-          <p className="text-center mt-3"><Link href="/">← Về trang cửa hàng</Link></p>
+          <p className="text-center mt-3"><Link href="/">Về trang cửa hàng</Link></p>
         </div>
       </div>
     );
@@ -75,7 +153,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   const laAdmin = user.maQuyen === 1;
   const duocVao = duongDanDuocPhep(user.maQuyen, pathname);
-  const tieuDe = pathname === "/admin" ? "Thống kê & báo cáo" : (TIEU_DE.find(([p]) => pathname.startsWith(p))?.[1] ?? "Bảng điều khiển");
+  const dsMenu = MUC.map((n) => ({ ...n, muc: n.muc.filter((m) => mucMenuTheoQuyen(user.maQuyen, m.href)) })).filter((n) => n.muc.length);
+  const path = pathname.replace(/\/$/, "");
+  const pathMenu = khop(path, "/admin/bien-the") ? "/admin/san-pham" : path;
+  const nhom = dsMenu.find((n) => n.muc.some((m) => khop(pathMenu, m.href)));
+  const muc = nhom?.muc.find((m) => khop(pathMenu, m.href));
   const dangXuat = async () => {
     await apiPost("/auth/dang-xuat");
     setUser(null);
@@ -86,45 +168,54 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="admin-body">
       <aside id="admin-sidebar" ref={thanhBen} className={`admin-sidebar ${mo ? "open show" : ""}`}>
-        <Link href="/admin" className="admin-brand">
-          { }
-          <img src={imgUrl(site.logo, "images/HUIT.jpg")} alt="Logo" />
+        <Link href={laAdmin ? "/admin" : TRANG_NHAN_VIEN} className="admin-brand">
+          <img src={imgUrl(site.logo, "images/HUIT.jpg")} alt="" />
           <span><span className="brand-name d-block">{site.tenSite}</span><span className="brand-sub d-block">Trang quản trị</span></span>
         </Link>
-        <nav className="admin-nav">
-          {MUC.map((n) => ({ ...n, muc: n.muc.filter(([href]) => mucMenuTheoQuyen(user.maQuyen, href)) })).filter((n) => n.muc.length > 0).map((n) => (
+        <nav className="admin-nav" aria-label="Điều hướng quản trị">
+          {dsMenu.map((n) => (
             <div key={n.nhom}>
               <div className="admin-nav-label">{n.nhom}</div>
-              {n.muc.map(([href, icon, nhan]) => (
-                <Link key={href} href={href} className={`admin-link ${(href === "/admin" ? pathname === "/admin" : pathname.startsWith(href)) ? "active" : ""}`}>
-                  <i className={`fa-solid ${icon}`} /> {nhan}
+              {n.muc.map(({ href, icon, nhan }) => (
+                <Link key={href} href={href} aria-current={khop(pathMenu, href) ? (path === href ? "page" : "location") : undefined}
+                  className={khop(pathMenu, href) ? "admin-link active" : "admin-link"}>
+                  <i className={"fa-solid " + icon} aria-hidden="true" /><span>{nhan}</span>
                 </Link>
               ))}
             </div>
           ))}
         </nav>
         <div className="admin-sidebar-foot">
-          <Link href={laAdmin ? "/TaiKhoan/DoiMatKhau" : "/"} className="admin-link"><i className={`fa-solid ${laAdmin ? "fa-key" : "fa-arrow-up-right-from-square"}`} /> {laAdmin ? "Đổi mật khẩu" : "Xem trang khách hàng"}</Link>
-          <button type="button" className="admin-link danger" onClick={dangXuat}><i className="fa-solid fa-right-from-bracket" /> Đăng xuất</button>
+          <Link href="/" className="admin-link"><i className="fa-solid fa-store" aria-hidden="true" /> Xem cửa hàng</Link>
+          {laAdmin && <Link href="/TaiKhoan/DoiMatKhau" className="admin-link"><i className="fa-solid fa-key" aria-hidden="true" /> Đổi mật khẩu</Link>}
+          <button type="button" className="admin-link danger" onClick={dangXuat}><i className="fa-solid fa-right-from-bracket" aria-hidden="true" /> Đăng xuất</button>
         </div>
       </aside>
       <div className={`admin-backdrop ${mo ? "show active" : ""}`} onClick={() => { setMo(false); nutMo.current?.focus(); }} />
       <div className="admin-main">
         <header className="admin-topbar">
-          <div className="d-flex align-items-center gap-3">
+          <div className="admin-topbar-start">
             <button ref={nutMo} type="button" className="admin-toggle" aria-label="Mở menu" aria-expanded={mo} aria-controls="admin-sidebar" onClick={() => setMo((v) => !v)}><i className="fa-solid fa-bars" /></button>
-            <h1>{tieuDe}</h1>
+            <span className="admin-topbar-section">{nhom?.nhom ?? "Quản trị"}</span>
           </div>
-          <div className="d-flex align-items-center">
-          {laAdmin && <ThongBaoTrucTiep />}
-          <div className="admin-user">
-            <div className="meta text-end"><div className="name">{user.hoTen}</div><div className="role">{laAdmin ? "Quản trị viên" : "Nhân viên"}</div></div>
-            <div className="admin-avatar">{user.hoTen.charAt(0).toUpperCase()}</div>
-          </div>
+          <div className="admin-topbar-actions">
+            <TimMuc muc={dsMenu.flatMap((n) => n.muc)} />
+            {laAdmin && <ThongBaoTrucTiep />}
+            <div className="admin-user">
+              <div className="meta text-end"><div className="name">{user.hoTen}</div><div className="role">{laAdmin ? "Quản trị viên" : "Nhân viên"}</div></div>
+              <div className="admin-avatar" aria-hidden="true">{user.hoTen.charAt(0).toUpperCase()}</div>
+            </div>
           </div>
         </header>
         <main className="admin-content">
-          {duocVao ? <Suspense fallback={<Loading />}>{children}</Suspense>
+          {duocVao ? <>
+            <div className="admin-page-heading">
+              {muc && path !== muc.href && <Link className="admin-section-back" href={muc.href}><i className="fa-solid fa-chevron-left" aria-hidden="true" /> {muc.nhan}</Link>}
+              <h1>{muc?.nhan ?? "Bảng điều khiển"}</h1>
+              {muc && path === muc.href && <p>{muc.moTa}</p>}
+            </div>
+            <Suspense fallback={<Loading />}>{children}</Suspense>
+          </>
             : veTrangNhanVien ? <Loading />
               : (
                 <div className="card-custom p-4" role="alert">

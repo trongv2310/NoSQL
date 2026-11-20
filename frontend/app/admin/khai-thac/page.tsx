@@ -2,12 +2,12 @@
 
 import { useRef, useState } from "react";
 import { useApp } from "@/components/AppProviders";
-import { Field, PageBar } from "@/components/admin/Common";
+import { Field } from "@/components/admin/Common";
 import { ErrorBox } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
 import { ngayGio, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
-import { K_TOI_DA, THANG_TOI_DA, dinhDangThoiGian, kiemTraThamSo } from "@/lib/khai-thac";
+import { K_TOI_DA, THANG_TOI_DA, kiemTraThamSo } from "@/lib/khai-thac";
 import type { DongKetQuaTopK, GoiYDaLuuV, KetQuaTopK } from "@/lib/types";
 
 /** POST /admin/khai-thac/top-k trả thêm `thanhCong` và `daLuuGoiY` ngoài kết quả. */
@@ -26,13 +26,13 @@ function BangKetQua({ ds }: { ds: DongKetQuaTopK[] }) {
   return (
     <div className="table-responsive">
       <table className="table align-middle mb-0">
-        <thead><tr><th style={{ width: 110 }}>Xếp hạng</th><th>Bộ sản phẩm</th><th className="text-end" style={{ width: 190 }}>Lợi nhuận tính toán</th></tr></thead>
+        <thead><tr><th style={{ width: 110 }}>Xếp hạng</th><th>Bộ sản phẩm</th><th className="text-end" style={{ width: 190 }}>Doanh số mua cùng</th></tr></thead>
         <tbody>
           {ds.map((d) => (
             <tr key={d.khoa}>
               <td><HuyHieuHang hang={d.hang} /></td>
               <td className="fw-semibold">{d.tenTap}</td>
-              <td className="text-end fw-bold text-danger">{vnd(d.loiNhuan)}</td>
+              <td className="text-end fw-bold text-nowrap">{vnd(d.loiNhuan)}</td>
             </tr>
           ))}
         </tbody>
@@ -92,13 +92,10 @@ export default function KhaiThacTopKPage() {
 
   return (
     <>
-      <PageBar title="Combo bán chạy: bộ sản phẩm hay được mua cùng" />
-      <p className="text-muted">
-        Tìm các bộ sản phẩm (từ 2 món) khách hay mua cùng nhau và mang lại lợi nhuận cao nhất, dựa trên các đơn hàng <strong>Đã hoàn thành</strong> trong những tháng gần đây.
-        &quot;Phân tích&quot; chỉ tính và hiển thị, không đổi gì cho khách; chỉ khi bấm &quot;Áp dụng làm combo cho khách&quot; thì kết quả mới được lưu để khách thấy combo.
-      </p>
-
-      <form className="card-custom p-3 mb-3" onSubmit={phanTich} noValidate>
+      <form className="card-custom admin-report-card mb-3" onSubmit={phanTich} noValidate>
+        <header><h2>Phân tích đơn đã hoàn thành</h2>
+          <p>Doanh số mua cùng là tổng thành tiền của các món trong bộ, trên những đơn có đủ bộ đó. Phân tích cho bạn xem trước các gợi ý.</p>
+        </header>
         <div className="row g-3 align-items-end">
           <div className="col-6 col-md-3">
             <Field label="Số combo cần xem" hint={`Từ 1 đến ${K_TOI_DA}.`}>
@@ -116,10 +113,6 @@ export default function KhaiThacTopKPage() {
             <button type="submit" className="btn btn-primary" disabled={dangChay} aria-busy={dang === "phan-tich"}>
               <i className={`fa-solid ${dang === "phan-tich" ? "fa-spinner fa-spin" : "fa-magnifying-glass-chart"}`} aria-hidden="true" /> {dang === "phan-tich" ? "Đang phân tích…" : "Phân tích"}
             </button>
-            <button type="button" className="btn btn-success" disabled={dangChay || !kq || kq.ketQua.length === 0} aria-busy={dang === "ap-dung"} onClick={apDung}
-              title={!kq ? "Hãy bấm Phân tích trước." : kq.ketQua.length === 0 ? "Không có kết quả để áp dụng." : undefined}>
-              <i className={`fa-solid ${dang === "ap-dung" ? "fa-spinner fa-spin" : "fa-bullhorn"}`} aria-hidden="true" /> {dang === "ap-dung" ? "Đang áp dụng…" : "Áp dụng làm combo cho khách"}
-            </button>
           </div>
         </div>
       </form>
@@ -128,21 +121,26 @@ export default function KhaiThacTopKPage() {
       {loi && <ErrorBox message={loi} />}
 
       {kq && (
-        <section className="card-custom p-3 mb-4" aria-labelledby="kt-ket-qua">
-          <h5 id="kt-ket-qua" className="mb-1">Kết quả: {kq.k} combo bán chạy nhất trong {kq.soThang} tháng gần nhất</h5>
-          <p className="text-muted small mb-3">
-            Đã xét <strong>{kq.soDonXet}</strong> đơn · <strong>{kq.soBatch}</strong> đợt (theo tháng) · {dinhDangThoiGian(kq.thoiGianMs)} · chạy lúc {ngayGio(kq.chayLuc)}
-            {kq.daLuuGoiY && <> · <span className="badge bg-success">Đã áp dụng cho khách</span></>}
-          </p>
+        <section className="card-custom admin-report-card mb-3" aria-labelledby="kt-ket-qua">
+          <header className="admin-section-bar">
+            <div><h2 id="kt-ket-qua">Kết quả phân tích</h2>
+              <p>{kq.ketQua.length} combo tìm được trong {kq.soThang} tháng · Đã xét {kq.soDonXet} đơn · {ngayGio(kq.chayLuc)}
+                {kq.daLuuGoiY && <> · <span className="badge bg-success">Đã áp dụng</span></>}
+              </p>
+            </div>
+            {kq.ketQua.length > 0 && <button type="button" className="btn btn-primary" disabled={dangChay} aria-busy={dang === "ap-dung"} onClick={apDung}>
+              {dang === "ap-dung" ? "Đang áp dụng…" : "Áp dụng làm combo cho khách"}
+            </button>}
+          </header>
           {kq.biCat && <div className="alert alert-warning" role="alert"><i className="fa-solid fa-triangle-exclamation" aria-hidden="true" /> Số đơn hàng vượt giới hạn mỗi lần chạy nên chỉ các đơn mới nhất được xét; kết quả có thể thiếu đơn cũ.</div>}
           {kq.ketQua.length === 0
-            ? <div className="text-center text-muted py-4">Không có dữ liệu để tìm combo: cần đơn &quot;Đã hoàn thành&quot; có ít nhất 2 sản phẩm khác nhau trong {kq.soThang} tháng gần nhất, và dữ liệu phải trải đủ số tháng đã chọn.</div>
+            ? <p className="admin-report-empty">Chưa tìm được bộ sản phẩm mua cùng. Thử chọn khoảng dài hơn hoặc kiểm tra các đơn đã hoàn thành có từ hai sản phẩm khác nhau.</p>
             : <BangKetQua ds={kq.ketQua} />}
         </section>
       )}
 
-      <section className="card-custom p-3" aria-labelledby="kt-da-luu" aria-busy={daLuu.loading}>
-        <h5 id="kt-da-luu" className="mb-1">Combo đang áp dụng cho khách</h5>
+      <section className="card-custom admin-report-card" aria-labelledby="kt-da-luu" aria-busy={daLuu.loading}>
+        <header><h2 id="kt-da-luu">Combo đang áp dụng cho khách</h2></header>
         {daLuu.loading && !luu ? <div className="text-muted py-3"><i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> Đang tải...</div>
           : daLuu.error ? (
             <div className="py-2"><ErrorBox message={daLuu.error} /><button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => void daLuu.reload()}>Thử lại</button></div>
@@ -151,8 +149,8 @@ export default function KhaiThacTopKPage() {
           ) : (
             <>
               <p className="text-muted small mb-3">
-                {luu.k !== undefined && <>{luu.k} combo</>}{luu.soThang !== undefined && <> · {luu.soThang} tháng</>}{luu.capNhatLuc && <> · cập nhật {ngayGio(luu.capNhatLuc)}</>}
-                {" "}· Khách thấy tối đa 3 combo đầu còn hàng, không thấy lợi nhuận hay xếp hạng.
+                {luu.ketQua.length} combo đã lưu{luu.capNhatLuc && <> · Cập nhật {ngayGio(luu.capNhatLuc)}</>}.
+                Trang khách hiển thị tối đa ba combo có ít nhất hai món còn hàng.
               </p>
               <BangKetQua ds={luu.ketQua} />
             </>

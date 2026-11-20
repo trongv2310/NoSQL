@@ -10,44 +10,68 @@ import { useApi } from "@/lib/hooks";
 interface Cho { _id: string; tenKhach?: string; tenVot?: string; giaTriNhap: number; donViNhap: "kg" | "lbs"; mucCangLbs: number; tenDay?: string; trangThai: "cho" | "xong" | "huy" }
 interface Khung { _id: string; ngay: string; sucChua: number; soDaDat: number; datCho: Cho[] }
 
-/**
- * Lịch căng cước tại shop (nhân viên). "Đã căng xong" ghi luôn lần căng vào sổ căng (hộ chiếu vợt) của khách,
- * trong MỘT transaction nếu MongoDB chạy replica set.
- */
+const TRANG_THAI = {
+  cho: { nhan: "Đang chờ", badge: "bg-warning text-dark" },
+  xong: { nhan: "Đã căng xong", badge: "bg-success" },
+  huy: { nhan: "Đã hủy", badge: "bg-secondary" },
+} as const;
+
 export default function LichCangAdminPage() {
   const { flash } = useApp();
   const { data, error, loading, reload } = useApi<Khung[]>("/admin/lich-cang");
   const [dang, setDang] = useState<string | null>(null);
+  const [loc, setLoc] = useState<Cho["trangThai"] | "">("cho");
   const xong = async (k: Khung, c: Cho) => {
+    if (dang !== null) return;
     setDang(c._id);
     try {
-      const r = await apiPost<{ message: string; coTransaction: boolean }>(`/admin/lich-cang/${k._id}/${c._id}/xong`);
-      flash("success", `${r.message}${r.coTransaction ? " (transaction)" : ""}`);
+      const r = await apiPost<{ message: string }>(`/admin/lich-cang/${k._id}/${c._id}/xong`);
+      flash("success", r.message);
       await reload();
     } catch (e) { flash("danger", loiTuApi(e)); } finally { setDang(null); }
   };
-  if (loading) return <Loading />;
-  if (error || !data) return <ErrorBox message={error ?? "Lỗi tải lịch căng"} />;
-  const NHAN = { cho: "Đang chờ", xong: "Đã căng xong", huy: "Khách đã huỷ" } as const;
-  return (
-    <>
-      <h5 className="mb-3">Lịch căng cước tại shop (từ hôm qua đến 7 ngày tới)</h5>
-      {data.length === 0 ? <div className="text-center text-muted py-4">Chưa có lịch nào.</div> : data.map((k) => (
-        <div key={k._id} className="card-custom p-3 mb-2">
-          <div className="d-flex justify-content-between flex-wrap"><strong>{nhanKhung(k.ngay)}</strong><small className="text-muted">{k.soDaDat}/{k.sucChua} chỗ</small></div>
-          <table className="table table-sm mb-0 mt-2">
-            <thead><tr><th>Khách</th><th>Vợt</th><th>Mức căng</th><th>Dây</th><th>Trạng thái</th><th /></tr></thead>
-            <tbody>{k.datCho.map((c) => (
+  const dem = { cho: 0, xong: 0, huy: 0 };
+  for (const { datCho } of data ?? []) for (const c of datCho) dem[c.trangThai]++;
+  const lich = (data ?? []).map((khung) => ({ khung, choXem: khung.datCho.filter((c) => !loc || loc === c.trangThai) })).filter((x) => x.choXem.length);
+  return <>
+    <div className="admin-section-bar">
+      <p className="text-muted mb-0">Từ hôm qua đến 7 ngày tới</p>
+      <button type="button" className="btn btn-outline-primary" disabled={loading || dang !== null} onClick={() => void reload()}><i className="fa-solid fa-rotate" aria-hidden="true" /> Làm mới</button>
+    </div>
+    <div className="admin-segments mb-3" role="group" aria-label="Trạng thái lịch căng">
+      <button type="button" aria-pressed={!loc} onClick={() => setLoc("")}>Tất cả · {dem.cho + dem.xong + dem.huy}</button>
+      {(["cho", "xong", "huy"] as const).map((id) => <button type="button" key={id} aria-pressed={id === loc} onClick={() => setLoc(id)}>
+        {TRANG_THAI[id].nhan} · {dem[id]}
+      </button>)}
+    </div>
+    {error && !loading ? <div className="card-custom p-3"><ErrorBox message={error} />
+      <button type="button" className="btn btn-outline-primary" onClick={() => void reload()}>Thử lại</button>
+    </div> : loading && !data ? <Loading /> : !lich.length ? (
+      <div className="admin-list-empty card-custom" role="status"><i className="fa-solid fa-calendar-check" aria-hidden="true" />
+        <strong>{loc ? `Chưa có lịch ${TRANG_THAI[loc].nhan.toLowerCase()}` : "Chưa có lịch căng cước"}</strong>
+        {loc && dem.cho + dem.xong + dem.huy > 0 && <button type="button" className="btn btn-outline-primary" onClick={() => setLoc("")}>Xem tất cả lịch</button>}
+      </div>
+    ) : <div aria-busy={loading}>{lich.map(({ khung, choXem }) => (
+      <section key={khung._id} className="card-custom admin-booking-slot">
+        <header><h2>{nhanKhung(khung.ngay)}</h2><span className={khung.soDaDat >= khung.sucChua ? "badge bg-warning text-dark" : "badge bg-success"}>
+          {khung.soDaDat}/{khung.sucChua} chỗ đã đặt
+        </span></header>
+        <div className="table-responsive">
+          <table className="table align-middle mb-0">
+            <thead><tr><th>Khách</th><th>Vợt</th><th>Mức căng</th><th>Dây</th><th>Trạng thái</th><th className="text-end">Thao tác</th></tr></thead>
+            <tbody>{choXem.map((c) => (
               <tr key={c._id}>
-                <td>{c.tenKhach ?? "—"}</td><td>{c.tenVot ?? "—"}</td>
-                <td>{c.giaTriNhap} {c.donViNhap}{c.donViNhap === "kg" ? ` (${c.mucCangLbs} lbs)` : ""}</td>
-                <td>{c.tenDay ?? "—"}</td><td>{NHAN[c.trangThai]}</td>
-                <td>{c.trangThai === "cho" && <button className="btn btn-sm btn-success" disabled={dang === c._id} onClick={() => xong(k, c)}>Đã căng xong</button>}</td>
+                <td className="fw-semibold">{c.tenKhach ?? "—"}</td><td>{c.tenVot ?? "—"}</td>
+                <td className="text-nowrap">{c.giaTriNhap} {c.donViNhap}{c.donViNhap === "kg" && <small className="d-block text-muted">{c.mucCangLbs} lbs</small>}</td>
+                <td>{c.tenDay ?? "—"}</td><td><span className={"badge " + TRANG_THAI[c.trangThai].badge}>{TRANG_THAI[c.trangThai].nhan}</span></td>
+                <td className="text-end">{c.trangThai === "cho" && <button type="button" className="btn btn-sm btn-primary" disabled={dang !== null} onClick={() => void xong(khung, c)}>
+                  {dang === c._id ? "Đang ghi sổ…" : "Xác nhận đã căng"}
+                </button>}</td>
               </tr>
             ))}</tbody>
           </table>
         </div>
-      ))}
-    </>
-  );
+      </section>
+    ))}</div>}
+  </>;
 }

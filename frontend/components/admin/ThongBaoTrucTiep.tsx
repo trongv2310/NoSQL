@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { apiGet } from "@/lib/api";
 import { vnd } from "@/lib/format";
@@ -32,9 +32,8 @@ export function ThongBaoTrucTiep() {
   const [noi, setNoi] = useState<SuKien[]>([]);
   const [chuaDoc, setChuaDoc] = useState(0);
   const [mo, setMo] = useState(false);
-  const moLuc = useRef(Date.now());
-
   useEffect(() => {
+    const moLuc = Date.now();
     let es: EventSource | null = null;
     let huy = false;
     apiGet<TrangThai>("/admin/su-kien/trang-thai").then((t) => {
@@ -45,7 +44,7 @@ export function ThongBaoTrucTiep() {
       const nhan = (e: MessageEvent) => {
         const s = JSON.parse(e.data) as SuKien;
         setDs((cu) => (cu.some((x) => khoa(x) === khoa(s)) ? cu : [s, ...cu].slice(0, 20)));
-        if (new Date(s.luc).getTime() >= moLuc.current - 2000) {
+        if (new Date(s.luc).getTime() >= moLuc - 2000) {
           setChuaDoc((n) => n + 1);
           setNoi((cu) => [s, ...cu].slice(0, 3));
           setTimeout(() => setNoi((cu) => cu.filter((x) => x !== s)), 8000);
@@ -58,7 +57,7 @@ export function ThongBaoTrucTiep() {
   }, []);
 
   if (!trangThai) return null;
-  const tieuDe = trangThai.hoTro ? "Thông báo trực tiếp (change stream MongoDB)" : `Thông báo trực tiếp đang tắt: ${trangThai.lyDo ?? ""}`;
+  const tieuDe = trangThai.hoTro ? "Thông báo trực tiếp" : "Thông báo trực tiếp hiện không khả dụng";
   return (
     <div className="position-relative me-2">
       <button type="button" className="btn btn-light position-relative" title={tieuDe} aria-label={tieuDe} aria-expanded={mo}
@@ -67,8 +66,8 @@ export function ThongBaoTrucTiep() {
         {chuaDoc > 0 && <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{chuaDoc}</span>}
       </button>
       {mo && (
-        <div className="card shadow position-absolute end-0 mt-2 p-2 small" style={{ width: 340, zIndex: 1050 }}>
-          {!trangThai.hoTro ? <p className="mb-0 text-muted">{trangThai.lyDo}</p>
+        <div className="card shadow position-absolute end-0 mt-2 p-3 small admin-notification-popover">
+          {!trangThai.hoTro ? <p className="mb-0 text-muted">Hiện chưa nhận được thông báo mới tự động. Bạn vẫn có thể xem đơn hàng và tồn kho trong từng mục.</p>
             : ds.length === 0 ? <p className="mb-0 text-muted">Chưa có sự kiện nào. Đơn mới và sản phẩm sắp hết hàng sẽ hiện ở đây ngay khi xảy ra.</p>
               : <ul className="list-unstyled mb-0">{ds.map((s) => <li key={khoa(s)} className="py-1 border-bottom"><span className="text-muted me-2">{gio(s.luc)}</span><NoiDung s={s} /></li>)}</ul>}
         </div>
