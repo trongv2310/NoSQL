@@ -8,17 +8,16 @@ import { Empty, ErrorBox, ProductCard } from "@/components/Ui";
 import { imgUrl, ngay, vnd } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
 import type { KhuyenMaiV, SanPhamV } from "@/lib/types";
+import { fontTieuDe } from "@/components/landing/fonts";
 
 interface Nhom { km: KhuyenMaiV; sps: SanPhamV[]; tietKiemMax: number; spNoiBat: SanPhamV | null }
 
 const NGAY_MS = 86_400_000;
-/** Bốn bảng màu xoay vòng cho từng chương trình để trang không bị đơn điệu. */
-const TONE = ["hot", "brand", "navy", "plum"] as const;
 
 const phanTram = (km: KhuyenMaiV) => Math.round(km.phanTramGiam);
 const tietKiem = (s: SanPhamV) => Math.max(0, s.giaGoc - s.giaSauKhuyenMai);
 
-/** Chip "Còn N ngày" — tính ở client sau khi mount để không lệch múi giờ/SSR. */
+/** "Còn N ngày" — tính ở client sau khi mount để không lệch múi giờ/SSR; còn ≤ 7 ngày thì tô cam. */
 function ConLai({ den }: { den: string | null }) {
   const [ngayCon, setNgayCon] = useState<number | null>(null);
   useEffect(() => {
@@ -28,7 +27,7 @@ function ConLai({ den }: { den: string | null }) {
   }, [den]);
   if (ngayCon === null) return null;
   const gap = ngayCon <= 7;
-  return <span className={`pm-chip ${gap ? "is-urgent" : ""}`}><i className={`fa-solid ${gap ? "fa-bolt" : "fa-hourglass-half"}`} aria-hidden="true" /> {ngayCon <= 0 ? "Hôm nay là ngày cuối" : `Còn ${ngayCon.toLocaleString("vi-VN")} ngày`}</span>;
+  return <span className={gap ? "is-gap" : undefined}>{ngayCon <= 0 ? "Hôm nay là ngày cuối" : `Còn ${ngayCon.toLocaleString("vi-VN")} ngày`}</span>;
 }
 
 const phanTramSp = (s: SanPhamV) => (s.giaGoc > 0 ? Math.round((1 - s.giaSauKhuyenMai / s.giaGoc) * 100) : 0);
@@ -131,9 +130,9 @@ export function PromoPage() {
             <>
               {coHang.length > 1 && (
                 <nav className="pm-tabs" aria-label="Chọn chương trình khuyến mãi">
-                  {coHang.map((n, i) => (
-                    <button key={n.km.id} type="button" className={`pm-tab tone-${TONE[i % TONE.length]}${dangXem === n.km.id ? " is-on" : ""}`} aria-current={dangXem === n.km.id ? "true" : undefined} onClick={() => nhay(n.km.id)}>
-                      <b>-{phanTram(n.km)}%</b><span>{n.km.tenChuongTrinh}</span>
+                  {coHang.map((n) => (
+                    <button key={n.km.id} type="button" className={`pm-tab${dangXem === n.km.id ? " is-on" : ""}`} aria-current={dangXem === n.km.id ? "true" : undefined} onClick={() => nhay(n.km.id)}>
+                      <span>{n.km.tenChuongTrinh}</span><b>-{phanTram(n.km)}%</b>
                     </button>
                   ))}
                 </nav>
@@ -166,19 +165,19 @@ export function PromoPage() {
                 </div>
               )}
 
-              {coHang.map((n, i) => (
-                <section key={n.km.id} id={`km-${n.km.id}`} className={`pm-block tone-${TONE[i % TONE.length]}`}>
+              {coHang.map((n) => (
+                <section key={n.km.id} id={`km-${n.km.id}`} className="pm-block">
                   <header className="pm-head sf-reveal">
-                    <span className="pm-medal" aria-label={`Giảm ${phanTram(n.km)} phần trăm`}><b>-{phanTram(n.km)}%</b><small>GIẢM</small></span>
+                    <span className={`pm-medal ${fontTieuDe.className}`} aria-label={`Giảm ${phanTram(n.km)} phần trăm`}>-{phanTram(n.km)}%</span>
                     <div className="pm-head-text">
                       <h2>{n.km.tenChuongTrinh}</h2>
                       {n.km.moTa && <p>{n.km.moTa}</p>}
-                      <div className="pm-chips">
-                        <span className="pm-chip"><i className="fa-regular fa-calendar" aria-hidden="true" /> {ngay(n.km.ngayBatDau)} – {ngay(n.km.ngayKetThuc)}</span>
+                      <p className="pm-meta">
+                        <span>{ngay(n.km.ngayBatDau)} – {ngay(n.km.ngayKetThuc)}</span>
                         <ConLai den={n.km.ngayKetThuc} />
-                        {n.km.giamToiDa ? <span className="pm-chip"><i className="fa-solid fa-circle-info" aria-hidden="true" /> Giảm tối đa {vnd(n.km.giamToiDa)}</span> : null}
-                        <span className="pm-chip is-ok"><i className="fa-solid fa-boxes-stacked" aria-hidden="true" /> {n.sps.length} sản phẩm</span>
-                      </div>
+                        {n.km.giamToiDa ? <span>Giảm tối đa {vnd(n.km.giamToiDa)}</span> : null}
+                        <span>{n.sps.length} sản phẩm</span>
+                      </p>
                     </div>
                   </header>
                   <div className="row g-3 pm-grid">
