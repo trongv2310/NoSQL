@@ -1,0 +1,13 @@
+{
+  "name": "kiem-thu-ui",
+  "private": true,
+  "description": "Kiểm thử giao diện (Playwright) cho Shop Cầu Lông: điều hướng, lỗi console, ảnh hỏng, responsive, accessibility (axe), luồng mua hàng và quản trị.",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.63.0"
+  }
+}
