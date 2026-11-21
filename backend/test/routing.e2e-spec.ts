@@ -90,7 +90,8 @@ describe('Định tuyến, phân quyền và validation (không cần MongoDB)',
   });
 
   it('nhân viên (quyền 2) không vào được chức năng chỉ dành cho admin', async () => {
-    for (const url of ['/api/admin/tai-khoan', '/api/admin/san-pham', '/api/admin/khuyen-mai', '/api/admin/logo']) {
+    // /api/admin/san-pham đã mở quyền xem cho nhân viên (commit 9486011) nên không còn trong danh sách này.
+    for (const url of ['/api/admin/tai-khoan', '/api/admin/dashboard', '/api/admin/khuyen-mai', '/api/admin/logo']) {
       const res = await request(app.getHttpServer()).get(url).set('Cookie', `token=${tokenNhanVien}`).expect(403);
       expect(String(res.body.message)).toContain('Quản trị viên');
     }

@@ -85,7 +85,8 @@ export class DonHangController {
   @Get('checkout')
   @CanDangNhap()
   async checkout(@CurrentUser() user: NguoiDung) {
-    await this.gioKhongRong(user);
+    // Giỏ trống vẫn trả 200 (items rỗng) để trang thanh toán tự chuyển về giỏ hàng, không sinh request lỗi đỏ trong console.
+    // Việc chặn đặt hàng với giỏ trống nằm ở POST /checkout và POST /momo (vẫn trả 400).
     return this.gioHang.xem(user.id);
   }
 
@@ -220,7 +221,7 @@ export class DonHangController {
     const kh = await this.gioHang.khachHangId(user.id);
     const don = await this.donHangModel.findOne({ soDonHang, khachHang: kh }).lean();
     if (!don) {
-      throw new BadRequestException('Không tìm thấy đơn hàng.');
+      throw new NotFoundException('Không tìm thấy đơn hàng.');
     }
     return donHangView(don);
   }

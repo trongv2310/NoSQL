@@ -32,6 +32,24 @@ export function phanTrang<T>(all: T[], page: number, perPage: number): Trang<T> 
   return { items: all.slice((p - 1) * perPage, p * perPage), total, page: p, perPage, pages };
 }
 
+/**
+ * Phân trang NGAY TRONG MongoDB: đếm bằng countDocuments rồi chỉ đọc đúng một trang bằng skip/limit,
+ * thay vì tải hết rồi cắt trong bộ nhớ như phanTrang. Trang vượt quá số trang được kéo về trang cuối (giống phanTrang).
+ * `docTrang(skip, limit)` nhận vị trí đã tính và trả các document của trang.
+ */
+export async function phanTrangDb<T>(
+  dem: () => Promise<number>,
+  docTrang: (skip: number, limit: number) => Promise<T[]>,
+  page: number,
+  perPage: number,
+): Promise<Trang<T>> {
+  const total = await dem();
+  const pages = Math.max(1, Math.ceil(total / perPage));
+  const p = Math.min(Math.max(1, Math.floor(page) || 1), pages);
+  const items = total ? await docTrang((p - 1) * perPage, perPage) : [];
+  return { items, total, page: p, perPage, pages };
+}
+
 export function toBool(v: unknown): boolean {
   return v === true || v === 'true' || v === '1' || v === 1 || v === 'on';
 }

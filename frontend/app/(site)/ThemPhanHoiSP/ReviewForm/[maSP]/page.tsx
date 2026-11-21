@@ -35,7 +35,7 @@ export default function ReviewFormPage() {
   return (
     <Page>
       <div className="card mx-auto" style={{ maxWidth: 560 }}><form className="card-body" onSubmit={gui}>
-        <h4 className="mb-3">Đánh giá sản phẩm</h4>
+        <h1 className="h4 mb-3">Đánh giá sản phẩm</h1>
         {loi && <ErrorBox message={loi} />}
         <div className="mb-3" role="group" aria-labelledby="rv-sao">
           <label className="form-label" id="rv-sao">Số sao</label>

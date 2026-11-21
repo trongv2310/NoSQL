@@ -71,7 +71,7 @@ export function BangDiem({ ds, tieuDe }: { ds: TranDauV[]; tieuDe: string }) {
           {(["A", "B"] as const).map((k) => (
             <div key={k} className={`nw-team${t.doiThang === k ? " is-win" : ""}`}>
               <span>{k === "A" ? t.doiA : t.doiB}</span>
-              {t.doiThang === k && <i className="fa-solid fa-trophy" aria-label="Đội thắng" />}
+              {t.doiThang === k && <i className="fa-solid fa-trophy" role="img" aria-label="Đội thắng" />}
             </div>
           ))}
           {t.tiSo && <div className="nw-sets">{t.tiSo.split(",").map((set) => <b key={set}>{set.trim()}</b>)}</div>}

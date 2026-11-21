@@ -11,6 +11,8 @@ vi.mock('fs', async (original) => ({
 }));
 
 const ID = '64b000000000000000000010';
+/** Model loại / nhà cung cấp / hãng / khuyến mãi giả: bản ghi được tham chiếu luôn tồn tại (kiemTraThamChieu chạy trước khi ghi). */
+const coThat = () => ({ exists: vi.fn().mockResolvedValue({ _id: 'co' }) });
 const SP_ID = new Types.ObjectId(ID);
 const ANH_CU = 'uploads/sanpham/cu.jpg';
 const ANH_MOI = 'uploads/sanpham/sp_moi.jpg';
@@ -23,7 +25,7 @@ function dungController(anhCu: string | null | undefined) {
     countDocuments: vi.fn().mockResolvedValue(0),
   };
   const bt = { updateMany: vi.fn().mockResolvedValue({ matchedCount: 1 }), countDocuments: vi.fn().mockResolvedValue(0) };
-  const ctrl = new AdminSanPhamController(sp as never, bt as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never);
+  const ctrl = new AdminSanPhamController(sp as never, bt as never, coThat() as never, coThat() as never, coThat() as never, coThat() as never, {} as never, {} as never, {} as never, {} as never, {} as never);
   const input = Object.assign(new SanPhamDto(), { tenSanPham: 'Vợt mới', giaGoc: 2000, moTa: 'Mô tả mới' });
   const file = { filename: 'sp_moi.jpg', path: join(UPLOAD_ROOT, 'sanpham', 'sp_moi.jpg') } as Express.Multer.File;
   const context = { switchToHttp: () => ({ getRequest: () => ({ file }) }) } as unknown as ExecutionContext;
@@ -126,7 +128,7 @@ it('T-407: đổi ảnh hai lần chỉ cập nhật biến thể cùng sản ph
   const bt = { countDocuments: vi.fn().mockResolvedValue(0), updateMany: vi.fn(async (filter: { sanPham: Types.ObjectId; hinhAnh: string }, update: { $set: { hinhAnh: string } }) => {
     for (const b of bienThes) if (b.sanPham.equals(filter.sanPham) && b.hinhAnh === filter.hinhAnh) b.hinhAnh = update.$set.hinhAnh;
   }) };
-  const ctrl = new AdminSanPhamController(sp as never, bt as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never);
+  const ctrl = new AdminSanPhamController(sp as never, bt as never, coThat() as never, coThat() as never, coThat() as never, coThat() as never, {} as never, {} as never, {} as never, {} as never, {} as never);
   const input = Object.assign(new SanPhamDto(), { tenSanPham: 'Vợt' });
   await ctrl.capNhat(ID, input, { filename: 'moi1.jpg' } as Express.Multer.File);
   expect(bienThes.map((b) => b.hinhAnh)).toEqual(['uploads/sanpham/moi1.jpg', 'uploads/sanpham/moi1.jpg', anhRieng, 'a.jpg']);
@@ -159,7 +161,7 @@ function anhDungChung() {
   };
   const gio = { deleteMany: vi.fn().mockResolvedValue({}) };
   const don = { exists: vi.fn().mockResolvedValue(false) };
-  const ctrl = new AdminSanPhamController(sp as never, bt as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, gio as never, don as never, {} as never);
+  const ctrl = new AdminSanPhamController(sp as never, bt as never, coThat() as never, coThat() as never, coThat() as never, coThat() as never, {} as never, {} as never, gio as never, don as never, {} as never);
   const input = Object.assign(new BienTheDto(), { sku: 'L', giaBan: 1000, soLuongTon: 5, soLuongTonDaTai: 5 });
   const file = { filename: 'bt_moi.jpg' } as Express.Multer.File;
   const sua = () => ctrl.capNhatBienThe({ id: ID, tenDangNhap: 'admin', maQuyen: 1 }, row._id.toHexString(), input, file);
@@ -274,7 +276,7 @@ it('T-606: đổi lần lượt L, M, XL giữ ảnh chung đến khi tham chi�
     countDocuments: vi.fn(async (f: { hinhAnh: string; _id: { $ne: Types.ObjectId } }) =>
       bienThes.filter((b) => b.hinhAnh === f.hinhAnh && !b._id.equals(f._id.$ne)).length),
   };
-  const ctrl = new AdminSanPhamController(sp as never, bt as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never);
+  const ctrl = new AdminSanPhamController(sp as never, bt as never, coThat() as never, coThat() as never, coThat() as never, coThat() as never, {} as never, {} as never, {} as never, {} as never, {} as never);
   for (let i = 0; i < ids.length; i++) {
     if (i === 2) spRow.hinhAnhDaiDien = 'uploads/sanpham/anh-khac.jpg';
     const input = Object.assign(new BienTheDto(), { sku: bienThes[i].sku, giaBan: 1000, soLuongTon: 5, soLuongTonDaTai: 5 });

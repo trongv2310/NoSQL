@@ -7,6 +7,7 @@
 .nw-search i { color: rgba(255, 255, 255, .7); }
 .nw-search input { flex: 1; min-width: 0; padding: 8px 6px; border: 0; background: transparent; color: #fff; outline: none; }
 .nw-search input::placeholder { color: rgba(255, 255, 255, .6); }
+.nw-search input:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 999px; }
 .nw-search button { padding: 9px 20px; border: 0; border-radius: 999px; background: var(--grad-hot); color: #fff; font-weight: 700; font-size: .84rem; }
 .sf-hero.is-navy .sf-kicker { color: #bfe6f5; }
 

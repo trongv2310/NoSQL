@@ -122,7 +122,16 @@ async function main() {
       for (const kb of ss.thieu) {
         console.log(`  ${ten}: thiếu ${JSON.stringify(kb[0])}${kb[1]?.name ? ` (${kb[1].name})` : ''} → ${thu ? 'sẽ tạo' : 'tạo'}`);
         // Tạo từng index còn thiếu (không gọi createIndexes của model: nó sẽ lỗi nếu collection còn một index "lệch" chưa xử lý).
-        if (!thu) await db.collection(ten).createIndex(kb[0] as never, (kb[1] ?? {}) as never);
+        if (!thu) {
+          try {
+            await db.collection(ten).createIndex(kb[0] as never, (kb[1] ?? {}) as never);
+          } catch (e) {
+            // Index unique mới (vd. mot_danh_gia_moi_khach) không tạo được khi dữ liệu cũ đã có bản trùng: báo rõ, không dừng cả lệnh.
+            if ((e as { code?: number }).code !== 11000) throw e;
+            coLoi = true;
+            console.error(`  ${ten}: không tạo được index unique ${JSON.stringify(kb[0])} vì dữ liệu đang có bản trùng. Xoá bản trùng rồi chạy lại.`);
+          }
+        }
       }
       for (const l of ss.lech) {
         coLoi = true;

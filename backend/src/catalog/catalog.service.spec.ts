@@ -69,8 +69,11 @@ describe.runIf(coMongo)('đánh giá và khuyến mãi công khai (MongoDB thậ
     await ctModel.create({ sanPham: sp._id, sku: `SKU-${tenDb}-${seq}`, soLuongTon: 5 });
     return sp;
   };
-  const danhGia = (sp: { _id: Types.ObjectId }, sao: number, daXacMinh?: boolean) =>
-    phModel.create({ sanPham: sp._id, khachHang: khach, danhGia: sao, noiDung: `Đánh giá ${sao} sao rất chi tiết`, ...(daXacMinh === undefined ? {} : { daXacMinh }) });
+  // Lần đầu dùng khách mặc định, các lần sau mỗi đánh giá một khách mới: index unique mot_danh_gia_moi_khach chỉ cho mỗi khách
+  // MỘT đánh giá đã xác minh trên một sản phẩm.
+  let soDanhGia = 0;
+  const danhGia = async (sp: { _id: Types.ObjectId }, sao: number, daXacMinh?: boolean) =>
+    phModel.create({ sanPham: sp._id, khachHang: soDanhGia++ === 0 ? khach : (await khModel.create({ hoTen: `Khách ${soDanhGia}` }))._id, danhGia: sao, noiDung: `Đánh giá ${sao} sao rất chi tiết`, ...(daXacMinh === undefined ? {} : { daXacMinh }) });
   const trongDanhSach = async (sp: { _id: Types.ObjectId }) => (await catalog.tatCaSanPham()).find((x) => String(x._id) === String(sp._id));
 
   it('sản phẩm chưa có đánh giá nào có điểm null chứ không phải 5 sao', async () => {
