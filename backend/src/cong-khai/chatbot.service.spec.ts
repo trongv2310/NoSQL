@@ -78,6 +78,29 @@ describe('ChatbotService – chế độ tra cứu (không có GEMINI_API_KEY)',
     expect(r3.products[0].ten).toContain('Thruster');
   });
 
+  it('"món rẻ nhất shop": xếp theo giá trên cả cửa hàng, không mang dòng sản phẩm của lượt trước', async () => {
+    const conHang = ((await (taoService() as any).layKho()) as any[]).filter((sp) => sp.tonKho > 0).sort((a, b) => a.gia - b.gia);
+    const chat = phien(taoService());
+    await chat('Astrox 99 giá bao nhiêu');
+    const r = await chat('Giá của món đồ rẻ nhất shop');
+    expect(r.nguon).toBe('tra-cuu');
+    expect(r.products[0].ten).toBe(conHang[0].ten);
+    expect(r.products.map((p) => p.gia)).toEqual([...r.products.map((p) => p.gia)].sort((a, b) => a - b));
+    expect(r.reply).toContain(conHang[0].ten);
+    expect(r.context.tuKhoa).toBeUndefined();
+  });
+
+  it('"vợt rẻ nhất" / "vợt đắt nhất": đúng mẫu cực trị trong loại, không bị hiểu là đặt hàng', async () => {
+    const kho = ((await (taoService() as any).layKho()) as any[]).filter((sp) => sp.loai === 'vot' && sp.tonKho > 0);
+    const chat = phien(taoService());
+    const re = await chat('vợt rẻ nhất');
+    expect(re.products[0].ten).toBe([...kho].sort((a, b) => a.gia - b.gia)[0].ten);
+    expect(re.products.every((p) => p.loai === 'vợt')).toBe(true);
+    const dat = await chat('vợt đắt nhất');
+    expect(dat.yDinh).toBe('tu_van');
+    expect(dat.products[0].ten).toBe([...kho].sort((a, b) => b.gia - a.gia)[0].ten);
+  });
+
   it('giữ ngữ cảnh: "mẫu khác", "còn hàng không?", "cái thứ 2"', async () => {
     const chat = phien(taoService());
     const r1 = await chat('tư vấn vợt');

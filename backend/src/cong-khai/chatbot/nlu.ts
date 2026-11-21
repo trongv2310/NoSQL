@@ -68,6 +68,10 @@ export interface KetQuaPhanTich {
   chuDeChinhSach?: ChuDeChinhSach;
   chuDeHuongDan?: ChuDeHuongDan;
   nhacKhuyenMai: boolean;
+  /** Khách hỏi mẫu rẻ nhất / đắt nhất: phải xếp hẳn theo giá, không chỉ ưu tiên nhẹ như "giá rẻ". */
+  cucTri?: SapXep;
+  /** Câu hỏi về cả shop ("món đồ rẻ nhất shop"): không thừa hưởng loại/hãng/dòng của các lượt trước. */
+  caShop: boolean;
 }
 
 export interface TuDienPhanTich {
@@ -326,6 +330,19 @@ export function nhanThuTu(t: string): number | 'cuoi' | undefined {
 const SO_CHU: Record<string, number> = { mot: 1, hai: 2, ba: 3, bon: 4, sau: 6, bay: 7, tam: 8, chin: 9, muoi: 10 };
 const DON_VI_DEM = 'cay|doi|cai|chiec|cuon|ong|hop|bo|san pham|mon';
 
+/** "rẻ nhất", "giá thấp nhất" -> 're'; "đắt nhất", "giá cao nhất" -> 'cao' (trừ "đánh giá cao nhất"). */
+export function nhanCucTri(t: string): SapXep | undefined {
+  if (coCum(t, 're nhat', 're the nhat', 'gia thap nhat', 'thap nhat', 'it tien nhat', 'mem nhat')) return 're';
+  const khongTinhDanhGia = t.replace(/danh gia (cao|tot) nhat/g, ' ');
+  if (coCum(khongTinhDanhGia, 'dat nhat', 'mac nhat', 'gia cao nhat', 'nhieu tien nhat', 'dat tien nhat', 'dat the nhat')) return 'cao';
+  return undefined;
+}
+
+/** Khách nói về toàn bộ cửa hàng chứ không phải loại hàng đang bàn. */
+export function nhanCaShop(t: string): boolean {
+  return coCum(t, 'shop', 'cua hang', 'ca shop', 'toan shop', 'mon do', 'mon hang', 'mat hang', 'san pham', 'do nao', 'mon nao', 'thu gi', 'tat ca', 'toan bo', 'do (?:re|dat|mac)');
+}
+
 /** Số lượng khách nêu khi đặt hàng: "số lượng 2", "2 cây", "hai đôi", "x3", "mua 2". */
 export function nhanSoLuong(t: string): number | undefined {
   const so = (s: string) => (/^\d+$/.test(s) ? parseInt(s, 10) : SO_CHU[s]);
@@ -417,6 +434,8 @@ export function phanTich(van: string, tuDien: TuDienPhanTich, soSanPhamKhopTen =
     : coCum(t, 'dat hon', 'cao cap hon', 'tot hon', 'xin hon', 'cao hon', 'manh hon', 'nhieu tien hon')
       ? 'dat_hon'
       : undefined;
+  const cucTri = nhanCucTri(t);
+  const caShop = nhanCaShop(t);
   const nhacKhuyenMai = coCum(t, 'khuyen mai', 'giam gia', 'sale', 'uu dai', 'voucher', 'ma giam', 'black friday', 'xa kho', 'giam sau', 'dang giam', 'dang sale', 'khuyen mai nao', 'km', 'ma khuyen mai', 'chuong trinh');
 
   const chuDeCS = nhanChuDeChinhSach(t);
@@ -424,7 +443,7 @@ export function phanTich(van: string, tuDien: TuDienPhanTich, soSanPhamKhopTen =
   const lienQuanSanPham = !!(slot.loai || slot.hang || slot.tuKhoa || soSanPhamKhopTen > 0 || daiTu || thuTu !== undefined);
 
   const soLuong = nhanSoLuong(t);
-  const base = { chuan: t, slot, datLai, xemThem, soDonHang, soLuong, thuTu, daiTu, tuongDoi, nhacKhuyenMai };
+  const base = { chuan: t, slot, datLai, xemThem, soDonHang, soLuong, thuTu, daiTu, tuongDoi, nhacKhuyenMai, cucTri, caShop };
   const ra = (yDinh: YDinh, them: Partial<KetQuaPhanTich> = {}): KetQuaPhanTich => ({ ...base, yDinh, ...them });
 
   const tu = tachTu(t);
@@ -433,7 +452,8 @@ export function phanTich(van: string, tuDien: TuDienPhanTich, soSanPhamKhopTen =
   const hoiThongTin = coCum(t, 'gia bao nhieu', 'bao nhieu tien', 'con hang', 'het hang', 'don hang cua', 'don da dat', 'don vua dat', 'trang thai', 'kiem tra', 'tra cuu', 'theo doi', 'so sanh');
   const cueDat = coCum(t, 'dat hang', 'dat mua', 'dat giup', 'dat cho', 'dat luon', 'dat ngay', 'mua ngay', 'mua luon', 'mua giup', 'mua cho', 'lay cho', 'lay luon', 'chot don', 'order', 'them vao gio', 'cho vao gio', 'bo vao gio', 'thanh toan luon', 'muon dat', 'toi dat', 'minh dat', 'cho minh dat');
   const cueMua = coCum(t, 'muon mua', 'can mua', 'mua', 'lay');
-  const datTheoSanPham = coCum(t, 'dat') && lienQuanSanPham && !hoiThongTin;
+  // "đắt nhất", "đắt hơn", "đắt tiền" bỏ dấu cũng thành "dat": không được hiểu là "đặt hàng".
+  const datTheoSanPham = coCum(t.replace(/dat (nhat|hon|tien|qua|the|vay|ghe|lam)/g, ' '), 'dat') && lienQuanSanPham && !hoiThongTin;
   if (!chuDeCS && ((cueDat && !(hoiThongTin && !coCum(t, 'dat cho', 'dat giup', 'dat luon', 'dat ngay'))) || datTheoSanPham || (cueMua && (soSanPhamKhopTen > 0 || !!slot.tuKhoa) && !hoiThongTin))) {
     return ra('dat_hang');
   }
@@ -471,7 +491,7 @@ export function phanTich(van: string, tuDien: TuDienPhanTich, soSanPhamKhopTen =
   if (coCum(t, 'ban la ai', 'ban lam duoc gi', 'giup gi', 'giup duoc gi', 'huong dan', 'help', 'tro giup', 'ban biet gi', 'ban co the', 'chuc nang', 'ho tro gi') && !lienQuanSanPham) {
     return ra('tro_giup');
   }
-  const coTinHieuTuVan = coCum(t, ...TU_CHUNG_TU_VAN) || slot.giaMin !== undefined || slot.giaMax !== undefined || !!slot.trinhDo || !!slot.loiChoi || !!slot.nheTay || !!slot.sapXep || !!slot.kichCo;
+  const coTinHieuTuVan = coCum(t, ...TU_CHUNG_TU_VAN) || slot.giaMin !== undefined || slot.giaMax !== undefined || !!slot.trinhDo || !!slot.loiChoi || !!slot.nheTay || !!slot.sapXep || !!slot.kichCo || !!cucTri;
   if (lienQuanSanPham || coTinHieuTuVan || tuongDoi || xemThem) {
     if (soSanPhamKhopTen > 0 && !coTinHieuTuVan && !slot.loai) {
       return ra('hoi_gia'); // chỉ nhắc tên một mẫu: cho xem chi tiết/giá của mẫu đó
