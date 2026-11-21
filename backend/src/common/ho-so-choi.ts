@@ -1,9 +1,6 @@
 /**
- * Hồ sơ người chơi (nhúng trong `khachhangs.hoSoChoi`): người chơi TỰ khai, mọi trường đều không bắt buộc.
- * Dùng để chọn đánh giá "từ người chơi giống bạn" (M3) và thống kê theo nhóm (M6). Không suy đoán gì từ hồ sơ.
- *
- * Vì sao nhúng thay vì tách collection: hồ sơ luôn đọc cùng khách hàng, nhỏ, không tăng mãi (mảng tối đa vài phần tử).
- * Thông tin chấn thương là dữ liệu sức khoẻ: chỉ chủ tài khoản xem được, không bao giờ trả về kèm tên ở API công khai.
+ * Hồ sơ nhúng trong `khachhangs.hoSoChoi`, gồm các trường tùy chọn do người chơi tự khai.
+ * API công khai không trả thông tin chấn thương.
  */
 
 /** Cùng khoá với hồ sơ ở Quầy tư vấn (frontend/lib/ho-so-choi.ts): Mới chơi / Chơi đều / Thi đấu. */
@@ -33,7 +30,7 @@ const MANG = ['noiDung', 'chanThuong'] as const;
 const DON = ['trinhDo', 'loiChoi', 'tayThuan', 'soBuoiMoiTuan'] as const;
 
 /**
- * Bản khai đầy đủ (PUT) → MỘT lệnh cập nhật trên trường con bằng ký pháp chấm (slide 35):
+ * Bản khai đầy đủ (PUT) → MỘT lệnh cập nhật trên trường con bằng ký pháp chấm:
  * trường có giá trị → `$set: { "hoSoChoi.x": ... }`; trường bỏ trống / null / mảng rỗng → `$unset: { "hoSoChoi.x": "" }`.
  * Không trường nào có giá trị → `$unset` cả `hoSoChoi` (không để lại object rỗng chỉ có ngày cập nhật).
  * Mảng được khử trùng lặp và sắp theo thứ tự cố định để cùng một lựa chọn luôn lưu ra cùng một mảng.

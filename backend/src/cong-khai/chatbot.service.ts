@@ -187,6 +187,10 @@ export class ChatbotService {
     const truoc = (yc.nguCanh.sanPhamIds ?? []).map((id) => theoId.get(id)).filter((x): x is SanPhamKho => !!x);
     const dsHang = dsHangTrongKho(kho);
 
+    if (pt.cucTri && (pt.yDinh === 'tu_van' || pt.yDinh === 'hoi_gia')) {
+      return this.xuLyCucTri(pt, trong, kho);
+    }
+
     switch (pt.yDinh) {
       case 'chao_hoi':
         return { ...trong, reply: TL.LOI_CHAO, chips: TL.GOI_Y_MO_DAU };
@@ -308,7 +312,7 @@ export class ChatbotService {
       const lamRo = TL.cauHoiLamRo(c)!;
       const daBiet = TL.ghiNhanThongTin(c);
       const ghiNhan = daBiet ? `Mình đã ghi nhận ${daBiet}. ` : 'Mình rất sẵn lòng tư vấn! ';
-      return { ...trong, reply: `${ghiNhan}${lamRo.cau}`, chips: lamRo.chips, duLieuAi: this.duLieuChung(`Khách muốn được tư vấn nhưng chưa nói loại sản phẩm. Hãy hỏi: ${lamRo.cau}`) };
+      return { ...trong, reply: `${ghiNhan}${lamRo.cau}`, chips: lamRo.chips, duLieuAi: this.duLieuChung(`Khách muốn được tư vấn nhưng chưa nói loại sản phẩm. Kho vẫn có đủ hàng, chỉ cần biết loại để lọc: KHÔNG nói là thiếu dữ liệu hay chưa có thông tin. Hãy hỏi: ${lamRo.cau}`) };
     }
     const tc: TieuChi = {
       loai: c.loai, nhom: c.nhom, hang: c.hang, giaMin: c.giaMin, giaMax: c.giaMax, trinhDo: c.trinhDo, loiChoi: c.loiChoi,
@@ -316,6 +320,55 @@ export class ChatbotService {
       loaiTru: pt.xemThem ? new Set(c.daGoiY ?? []) : undefined,
     };
     return this.ketQuaTuVan(trong, xepHang(kho, tc, SO_THE_TOI_DA));
+  }
+
+  /**
+   * "Món rẻ nhất shop", "vợt đắt nhất": xếp thẳng theo giá hiện tại (đã trừ khuyến mãi) trong các mẫu còn hàng.
+   * Câu nói về cả shop chỉ dùng điều kiện khách vừa nêu trong câu; câu ngắn kiểu "cái nào rẻ nhất?" thì hiểu trong phạm vi đang bàn.
+   * Đây là câu hỏi dữ kiện nên trả lời bằng tra cứu, không nhờ AI diễn đạt lại.
+   */
+  private xuLyCucTri(pt: KetQuaPhanTich, trong: KetQuaXuLy, kho: SanPhamKho[]): KetQuaXuLy {
+    const re = pt.cucTri === 're';
+    const nguon: NguCanh = pt.caShop ? pt.slot : trong.nguCanh;
+    const pv: NguCanh = { loai: nguon.loai, nhom: nguon.nhom, hang: nguon.hang, tuKhoa: nguon.tuKhoa, giaMin: nguon.giaMin, giaMax: nguon.giaMax, giaTam: nguon.giaTam };
+    const hangChuan = pv.hang ? chuanHoa(pv.hang) : '';
+    const khop = kho.filter(
+      (sp) =>
+        (!pv.loai || sp.loai === pv.loai) &&
+        (!pv.nhom || sp.nhom === pv.nhom) &&
+        (!hangChuan || chuanHoa(sp.hang ?? '') === hangChuan) &&
+        (!pv.tuKhoa?.length || pv.tuKhoa.some((k) => sp.tuKhoa.includes(k))) &&
+        (pv.giaMin === undefined || sp.gia >= pv.giaMin) &&
+        (pv.giaMax === undefined || sp.gia <= pv.giaMax),
+    );
+    const conHang = khop.filter((sp) => sp.tonKho > 0);
+    const ds = (conHang.length ? conHang : khop).sort((a, b) => (re ? a.gia - b.gia : b.gia - a.gia) || a.ten.localeCompare(b.ten, 'vi')).slice(0, SO_THE_TOI_DA);
+    const nguCanh: NguCanh = { ...pv, sapXep: pt.cucTri, daGoiY: trong.nguCanh.daGoiY, yDinhTruoc: trong.nguCanh.yDinhTruoc };
+    if (!ds.length) {
+      return { ...trong, nguCanh, reply: TL.loiKhongTimThay(pv), chips: TL.GOI_Y_MO_DAU };
+    }
+
+    const caCuaHang = !pv.loai && !pv.nhom && !pv.hang && !pv.tuKhoa?.length;
+    const nhan = re ? 'rẻ nhất' : 'đắt nhất';
+    const giaCua = (sp: SanPhamKho) => `${sp.giaCao > sp.gia ? 'từ ' : ''}${dinhDangTien(sp.gia)}`;
+    const dau = ds[0];
+    const giam = dau.phanTramGiam ? ` (đã giảm ${dau.phanTramGiam}% từ ${dinhDangTien(dau.giaGoc)})` : '';
+    const phamVi = caCuaHang && pv.giaMin === undefined && pv.giaMax === undefined ? 'Món' : TL.tomTatTieuChi(pv).replace(/^./, (x) => x.toUpperCase());
+    const dong = [
+      `${phamVi} ${nhan}${caCuaHang ? ' của shop' : ''}${conHang.length ? ' đang còn hàng' : ''} là **${dau.ten}**, giá ${giaCua(dau)}${giam}.`,
+      ds.length > 1 ? `Tiếp theo là: ${ds.slice(1).map((sp) => `${sp.ten} (${giaCua(sp)})`).join('; ')}.` : '',
+      conHang.length ? '' : 'Lưu ý: các mẫu này hiện đều tạm hết hàng.',
+    ];
+    const chips = caCuaHang
+      ? (['Vợt', 'Giày', 'Áo quần', 'Phụ kiện'] as const).map((x) => `${x} ${nhan}`)
+      : ['Còn hàng không?', ds.length > 1 ? 'So sánh các mẫu này' : 'Mẫu khác', re ? 'Món rẻ nhất shop' : 'Món đắt nhất shop'];
+    return {
+      ...trong,
+      nguCanh: this.ghiNhoSanPham(nguCanh, ds),
+      reply: dong.filter(Boolean).join('\n'),
+      the: ds.map((sp, i) => this.theSanPham(sp, i === 0 ? [`Giá ${re ? 'thấp' : 'cao'} nhất trong ${(conHang.length ? conHang : khop).length} mẫu${conHang.length ? ' còn hàng' : ''}`] : [])),
+      chips,
+    };
   }
 
   private ketQuaTuVan(trong: KetQuaXuLy, kq: KetQuaXepHang): KetQuaXuLy {

@@ -1,4 +1,4 @@
-/* Dải số liệu + lưới công cụ (bento 12 cột). Mỗi ô công cụ là ảnh thật phủ kín, chữ ngắn trên lớp phủ tối ở đáy ảnh. */
+/* Dải số liệu và lưới công cụ. */
 
 .dai { background: #fff; border-bottom: 1px solid #e3e9e5; min-height: 96px; }
 .daiTrong { padding-top: clamp(14px, 2vw, 22px); padding-bottom: clamp(14px, 2vw, 22px); }
@@ -9,57 +9,32 @@
 .soGiaTri { grid-row: 1; margin: 0; }
 .soGiaTri > span { font-size: clamp(2rem, 3.8vw, 3rem); font-weight: 800; line-height: 1; color: #0b3b2b; }
 
-.luoi { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: clamp(200px, 19vw, 260px); gap: clamp(12px, 1.6vw, 20px); margin: 0; padding: 0; list-style: none; }
-.o {
-  position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; overflow: hidden;
-  border-radius: 22px; background: #0b3b2b; box-shadow: 0 16px 36px -28px rgba(11, 59, 43, 0.7);
-  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease;
+.luoi {
+  --the-anh-cao: clamp(158px, 16vw, 222px);
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 20px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.o:hover { transform: translateY(-3px); box-shadow: 0 24px 44px -26px rgba(11, 59, 43, 0.75); }
-.o1 { grid-column: span 5; }
-.o2 { grid-column: span 4; }
-.o3 { grid-column: span 3; }
-.o4 { grid-column: span 7; }
-.o5 { grid-column: span 5; }
 
-.anh { position: absolute; inset: 0; }
-.anhImg { object-fit: cover; transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
-.o:hover .anhImg { transform: scale(1.04); }
-.anh::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 32, 23, 0) 38%, rgba(7, 32, 23, 0.55) 66%, rgba(7, 32, 23, 0.92) 100%); }
-
-/* Ô so sánh: ba ảnh vợt thật đặt cạnh nhau trên nền sáng */
-.baVot { position: absolute; inset: 0 0 34% 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 14px 0; background: #f3f6f4; }
-.o2 .anh { background: #f3f6f4; }
-.o2 .anh::after { background: linear-gradient(180deg, rgba(7, 32, 23, 0) 52%, rgba(7, 32, 23, 0.9) 72%, #0b3b2b 100%); }
-.motVot { position: relative; display: block; min-height: 0; border-radius: 12px; overflow: hidden; background: #fff; }
-.motVot img { object-fit: contain; }
-
-.chu { position: relative; z-index: 1; padding: clamp(14px, 1.6vw, 20px); color: #fff; }
-.oTen { margin: 0; font-size: clamp(1.4rem, 2vw, 1.8rem); font-weight: 800; line-height: 1.1; letter-spacing: 0.01em; color: #fff; }
-.oLienKet { color: inherit; text-decoration: none; }
-.oLienKet::after { content: ""; position: absolute; inset: 0; z-index: 2; }
-.oLienKet:focus-visible { outline: none; }
-.o:has(.oLienKet:focus-visible) { outline: 3px solid #0f7550; outline-offset: 3px; }
-.oDong { margin: 4px 0 0; font-size: 0.92rem; font-weight: 600; color: #d6e8de; }
-.oDong i { display: inline-block; font-style: normal; color: #f2a675; transition: transform 0.18s ease; }
-.o:hover .oDong i { transform: translateX(4px); }
-
-/* Nhãn khoảng căng thật của cây vợt được dẫn tới */
-.nhanCang { position: absolute; top: 14px; left: 14px; z-index: 1; padding: 4px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.92); color: #0b3b2b; font-size: 0.85rem; font-weight: 800; }
+.luoi > li { grid-column: span 2; min-width: 0; }
+.luoi > li:nth-child(-n + 3) { --the-anh-vi-tri: center 12%; }
+.luoi > li:nth-child(n + 4) { --the-anh-cao: clamp(175px, 18vw, 246px); grid-column: span 3; }
+.luoi > li:last-child { --the-anh-vi-tri: center 16%; }
 
 @media (max-width: 991px) {
-  .o1, .o2, .o3, .o5 { grid-column: span 6; }
-  .o4 { grid-column: span 12; }
+  .luoi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .luoi > li, .luoi > li:nth-child(n + 4) { --the-anh-cao: clamp(144px, 24vw, 202px); grid-column: span 1; }
+  .luoi > li:first-child { --the-anh-cao: clamp(195px, 32vw, 266px); grid-column: span 2; }
 }
 @media (max-width: 767px) {
   .daiLuoi { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 14px; }
   .soLieu:nth-child(3) { border-left: 0; padding-left: 0; }
   .dai { min-height: 150px; }
-  .luoi { grid-auto-rows: 190px; }
-  .o1, .o2, .o3, .o4, .o5 { grid-column: span 12; }
-  .o { border-radius: 18px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .o, .anhImg, .oDong i { transition: none; }
-  .o:hover, .o:hover .anhImg { transform: none; }
+@media (max-width: 575px) {
+  .luoi { grid-template-columns: minmax(0, 1fr); }
+  .luoi > li:first-child { grid-column: span 1; }
 }

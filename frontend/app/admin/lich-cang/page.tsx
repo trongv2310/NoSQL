@@ -16,18 +16,24 @@ const TRANG_THAI = {
   huy: { nhan: "Đã hủy", badge: "bg-secondary" },
 } as const;
 
+/** Đọc đồng hồ. Không gọi trực tiếp khi render: chỉ dùng để khởi tạo state và trong trình xử lý sự kiện. */
+const layBayGio = () => Date.now();
+
 export default function LichCangAdminPage() {
   const { flash } = useApp();
   const { data, error, loading, reload } = useApi<Khung[]>("/admin/lich-cang");
   const [dang, setDang] = useState<string | null>(null);
   const [loc, setLoc] = useState<Cho["trangThai"] | "">("cho");
+  // Mốc "bây giờ" để khoá nút xác nhận của khung chưa tới; cập nhật mỗi lần tải lại. Máy chủ vẫn tự kiểm tra lại.
+  const [bayGio, setBayGio] = useState(layBayGio);
+  const taiLai = async () => { setBayGio(layBayGio()); await reload(); };
   const xong = async (k: Khung, c: Cho) => {
     if (dang !== null) return;
     setDang(c._id);
     try {
       const r = await apiPost<{ message: string }>(`/admin/lich-cang/${k._id}/${c._id}/xong`);
       flash("success", r.message);
-      await reload();
+      await taiLai();
     } catch (e) { flash("danger", loiTuApi(e)); } finally { setDang(null); }
   };
   const dem = { cho: 0, xong: 0, huy: 0 };
@@ -36,7 +42,7 @@ export default function LichCangAdminPage() {
   return <>
     <div className="admin-section-bar">
       <p className="text-muted mb-0">Từ hôm qua đến 7 ngày tới</p>
-      <button type="button" className="btn btn-outline-primary" disabled={loading || dang !== null} onClick={() => void reload()}><i className="fa-solid fa-rotate" aria-hidden="true" /> Làm mới</button>
+      <button type="button" className="btn btn-outline-primary" disabled={loading || dang !== null} onClick={() => void taiLai()}><i className="fa-solid fa-rotate" aria-hidden="true" /> Làm mới</button>
     </div>
     <div className="admin-segments mb-3" role="group" aria-label="Trạng thái lịch căng">
       <button type="button" aria-pressed={!loc} onClick={() => setLoc("")}>Tất cả · {dem.cho + dem.xong + dem.huy}</button>
@@ -64,9 +70,11 @@ export default function LichCangAdminPage() {
                 <td className="fw-semibold">{c.tenKhach ?? "—"}</td><td>{c.tenVot ?? "—"}</td>
                 <td className="text-nowrap">{c.giaTriNhap} {c.donViNhap}{c.donViNhap === "kg" && <small className="d-block text-muted">{c.mucCangLbs} lbs</small>}</td>
                 <td>{c.tenDay ?? "—"}</td><td><span className={"badge " + TRANG_THAI[c.trangThai].badge}>{TRANG_THAI[c.trangThai].nhan}</span></td>
-                <td className="text-end">{c.trangThai === "cho" && <button type="button" className="btn btn-sm btn-primary" disabled={dang !== null} onClick={() => void xong(khung, c)}>
-                  {dang === c._id ? "Đang ghi sổ…" : "Xác nhận đã căng"}
-                </button>}</td>
+                <td className="text-end">{c.trangThai === "cho" && (new Date(khung.ngay).getTime() > bayGio
+                  ? <span className="text-muted small text-nowrap" title="Chỉ xác nhận đã căng khi khung giờ đã bắt đầu.">Chưa tới giờ hẹn</span>
+                  : <button type="button" className="btn btn-sm btn-primary" disabled={dang !== null} onClick={() => void xong(khung, c)}>
+                    {dang === c._id ? "Đang ghi sổ…" : "Xác nhận đã căng"}
+                  </button>)}</td>
               </tr>
             ))}</tbody>
           </table>

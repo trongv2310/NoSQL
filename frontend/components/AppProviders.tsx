@@ -168,7 +168,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   return (
     <AppCtx.Provider value={value}>
-      <div className="flash-dock" aria-label="Thông báo">
+      <div className="flash-dock" role="region" aria-label="Thông báo">
         {toast && <FlashNotice key={toast.id} kind={toast.kind} msg={toast.msg} onClose={dongThongBao} />}
       </div>
       {children}

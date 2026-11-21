@@ -2,12 +2,13 @@
    STOREFRONT — Bảng tin (trang danh sách, thẻ bài viết, bảng kết quả, cột phụ)
    ========================================================================== */
 .nw-wrap { margin-top: 26px !important; }
-.nw-search { display: flex; align-items: center; gap: 4px; width: min(100%, 340px); padding: 6px 6px 6px 18px; border-radius: 999px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28); backdrop-filter: blur(12px); transition: background-color .2s ease, box-shadow .2s ease; }
-.nw-search:focus-within { background: rgba(255, 255, 255, .24); box-shadow: 0 0 0 4px rgba(255, 255, 255, .12); }
-.nw-search i { color: rgba(255, 255, 255, .7); }
-.nw-search input { flex: 1; min-width: 0; padding: 8px 6px; border: 0; background: transparent; color: #fff; outline: none; }
-.nw-search input::placeholder { color: rgba(255, 255, 255, .6); }
-.nw-search button { padding: 9px 20px; border: 0; border-radius: 999px; background: var(--grad-hot); color: #fff; font-weight: 700; font-size: .84rem; }
+.nw-search { display: flex; align-items: center; gap: 6px; width: min(100%, 340px); padding: 3px 3px 3px 14px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); }
+.nw-search:focus-within { outline: 2px solid #1e5a93; outline-offset: 2px; }
+.nw-search i { color: var(--muted); }
+.nw-search input { flex: 1; min-width: 0; padding: 7px 6px; border: 0; background: transparent; color: var(--ink); outline: none; }
+.nw-search input::placeholder { color: var(--muted); }
+.nw-search button { padding: 8px 16px; border: 0; border-radius: 8px; background: #0f3b52; color: #fff; font-weight: 700; font-size: .84rem; }
+.nw-search button:hover { background: #1e5a93; }
 .sf-hero.is-navy .sf-kicker { color: #bfe6f5; }
 
 .nw-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }

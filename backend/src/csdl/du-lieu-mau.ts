@@ -1,17 +1,7 @@
 import { Types } from 'mongoose';
 import { TOI_DA_LICH_SU_NHUNG } from '../schemas/vot-ca-nhan.schema';
 
-/**
- * Sinh DỮ LIỆU MẪU để minh hoạ các truy vấn thống kê (M6). Mọi tài liệu đều gắn `laDuLieuMau: true`; số liệu công khai của cửa hàng
- * KHÔNG tính chúng (common/danh-gia.ts). Đây là dữ liệu GIẢ LẬP theo vài quy tắc đơn giản ghi ngay dưới đây, không phải khảo sát người
- * chơi thật, nên mọi kết luận rút ra từ nó chỉ để minh hoạ cách truy vấn:
- * - mức căng trung bình theo trình độ: mới chơi ~22 lbs, chơi đều ~24,5 lbs, thi đấu ~27 lbs (dao động ±1,5), kẹp trong khoảng nhà
- *   sản xuất của cây vợt; ~4% lần căng "ở ngoài" vượt mức tối đa;
- * - khoảng cách giữa hai lần căng ~ 90 / số buổi chơi mỗi tuần ngày (±30%);
- * - số sao: gốc 4; người mới chấm vợt nặng đầu + cứng thấp hơn 1; lối "tốc độ" thích vợt nhẹ đầu, lối "uy lực" thích vợt nặng đầu (+0,6);
- *   cộng nhiễu rồi làm tròn trong 1..5.
- * Sinh bằng bộ số giả ngẫu nhiên có hạt cố định: chạy lại ra đúng cùng dữ liệu.
- */
+/** Sinh dữ liệu mô phỏng với seed cố định và gắn cờ `laDuLieuMau` để các bộ lọc nhận biết. */
 
 export interface PhienBanVot {
   bienThe: Types.ObjectId;

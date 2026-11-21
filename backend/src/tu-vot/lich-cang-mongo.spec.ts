@@ -40,6 +40,8 @@ describe.skipIf(!CHE_DO.length).each(CHE_DO.length ? CHE_DO : [['bỏ qua', '']]
     await conn?.close();
   });
 
+  // Bấm "đã căng xong" lúc khung giờ đã bắt đầu (khung trong test luôn ở tương lai so với lúc chạy).
+  const sauGioHen = (ngay: Date) => new Date(ngay.getTime() + 30 * 60_000);
   const dat = (i: number, ngay: Date, giaTri = 25) => lich.datCho(khach[i], { ngay: ngay.toISOString(), votCaNhanId: String(vot[i]), giaTri, donVi: 'lbs' });
 
   it('5 người đặt CÙNG LÚC vào khung 2 chỗ → đúng 2 thành công, không bao giờ vượt sức chứa', async () => {
@@ -75,10 +77,20 @@ describe.skipIf(!CHE_DO.length).each(CHE_DO.length ? CHE_DO : [['bỏ qua', '']]
     expect((await Lich.findById(doc._id).lean<any>()).soDaDat).toBe(2);
   });
 
+  it('xác nhận trước giờ hẹn bị từ chối: chỗ vẫn "chờ", sổ căng không có lần căng mang ngày chưa tới', async () => {
+    const doc = await Lich.findOne({ ngay: khung[3] }).lean<any>();
+    const cho = doc.datCho.find((d: any) => d.trangThai === 'cho');
+    const truoc = await Lan.countDocuments();
+    await expect(lich.hoanTat(String(doc._id), String(cho._id), new Date(khung[3].getTime() - 60_000))).rejects.toThrow(/Chưa tới giờ hẹn/);
+    expect((await Lich.findById(doc._id).lean<any>()).datCho.find((d: any) => d._id.equals(cho._id)).trangThai).toBe('cho');
+    expect(await Lan.countDocuments()).toBe(truoc);
+    expect((await Vot.findById(cho.votCaNhan).lean<any>()).soLanCang).toBe(0);
+  });
+
   it(`hoàn tất ghi lần căng "tại shop" vào sổ; bấm lần hai bị từ chối (${cheDo})`, async () => {
     const doc = await Lich.findOne({ ngay: khung[3] }).lean<any>();
     const cho = doc.datCho.find((d: any) => d.trangThai === 'cho');
-    const r = await lich.hoanTat(String(doc._id), String(cho._id));
+    const r = await lich.hoanTat(String(doc._id), String(cho._id), sauGioHen(khung[3]));
     expect(r.coTransaction).toBe(cheDo === 'replica set');
     const v = await Vot.findById(cho.votCaNhan).lean<any>();
     expect(v.soLanCang).toBe(1);
@@ -87,7 +99,7 @@ describe.skipIf(!CHE_DO.length).each(CHE_DO.length ? CHE_DO : [['bỏ qua', '']]
     const sau = (await Lich.findById(doc._id).lean<any>()).datCho.find((d: any) => d._id.equals(cho._id));
     expect(sau).toMatchObject({ trangThai: 'xong' });
     expect(String(sau.lanCang)).toBe(String(r.lanCangId));
-    await expect(lich.hoanTat(String(doc._id), String(cho._id))).rejects.toThrow(/đang chờ/);
+    await expect(lich.hoanTat(String(doc._id), String(cho._id), sauGioHen(khung[3]))).rejects.toThrow(/đang chờ/);
   });
 
   it(`ghi sổ lỗi giữa chừng → chỗ vẫn "chờ", không có lần căng mồ côi (${cheDo === 'replica set' ? 'transaction huỷ' : 'trả trạng thái'})`, async () => {
@@ -97,7 +109,7 @@ describe.skipIf(!CHE_DO.length).each(CHE_DO.length ? CHE_DO : [['bỏ qua', '']]
     const goc = Vot.updateOne.bind(Vot);
     (Vot as any).updateOne = () => { throw new Error('lỗi giả lập'); };
     try {
-      await expect(lich.hoanTat(String(doc._id), String(cho._id))).rejects.toThrow('lỗi giả lập');
+      await expect(lich.hoanTat(String(doc._id), String(cho._id), sauGioHen(khung[3]))).rejects.toThrow('lỗi giả lập');
     } finally {
       (Vot as any).updateOne = goc;
     }

@@ -6,7 +6,7 @@ import { Roles } from '../auth/auth.guards';
 import { donHangView } from '../don-hang/don-hang.controller';
 import { OrderService } from '../don-hang/order.service';
 import { TRANG_THAI_KHONG_TINH_DOANH_THU } from '../don-hang/trang-thai';
-import { likeRegex, phanTrang } from '../common/helpers';
+import { likeRegex, phanTrangDb } from '../common/helpers';
 import { idOf } from '../common/mappers';
 import { DonHang, KhachHang, PhanHoi, Quyen, SanPham } from '../schemas';
 
@@ -45,11 +45,16 @@ export class AdminVanHanhController {
     if (q.trangThai) {
       filter.trangThai = String(q.trangThai);
     }
-    const [all, dsTrangThai] = await Promise.all([
-      this.donModel.find(filter).populate('khachHang').sort({ ngayDat: -1, soDonHang: -1 }).lean(),
+    const [trang, dsTrangThai] = await Promise.all([
+      phanTrangDb(
+        () => this.donModel.countDocuments(filter),
+        (skip, limit) =>
+          this.donModel.find(filter).populate('khachHang').sort({ ngayDat: -1, soDonHang: -1 }).skip(skip).limit(limit).lean(),
+        Number(q.page) || 1,
+        10,
+      ),
       this.donModel.distinct('trangThai'),
     ]);
-    const trang = phanTrang(all, Number(q.page) || 1, 10);
     return { ...trang, items: trang.items.map((d) => donHangView(d, false)), dsTrangThai: dsTrangThai.sort() };
   }
 

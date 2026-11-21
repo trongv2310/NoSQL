@@ -28,7 +28,7 @@ class IList {
   getTotalRu() { return [...this.batchSumRU.values()].reduce((sum, value) => sum + value, 0); }
 }
 
-/** VertTopKDS từ bản C#, với các sửa lỗi cắt nhánh theo T-806. */
+/** Bản TypeScript của thuật toán VertTopKDS từ C#. */
 export class VertTopKDS {
   private readonly slidingWindow: string[] = [];
   private readonly batchesData = new Map<string, GiaoDichDto[]>();

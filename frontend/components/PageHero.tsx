@@ -1,3 +1,4 @@
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 
 /** Quả cầu lông vẽ bằng SVG, dùng làm họa tiết trôi nhẹ trong banner và trạng thái chờ. */
@@ -20,16 +21,22 @@ export function Shuttle({ className = "" }: { className?: string }) {
 export interface Crumb { nhan: string; href?: string }
 
 /**
- * Banner đầu trang con: nền gradient + vạch sân, họa tiết cầu lông trôi, breadcrumb, tiêu đề và số liệu.
+ * Banner đầu trang con, có thể dùng ảnh hoặc nền vạch sân với họa tiết cầu lông.
  * Là server-safe (không dùng hook) nên dùng được ở cả trang server lẫn client.
  */
-export function PageHero({ kicker, title, sub, crumbs, stats, aside, tone = "green", compact = false }: {
+export function PageHero({ kicker, title, sub, crumbs, stats, aside, banner, tone = "green", compact = false }: {
   kicker?: string; title: React.ReactNode; sub?: React.ReactNode; crumbs?: Crumb[];
   stats?: { value: React.ReactNode; nhan: string }[]; aside?: React.ReactNode; tone?: "green" | "orange" | "navy"; compact?: boolean;
+  banner?: { image: StaticImageData; alt: string; titleInImage?: boolean; afterImage?: React.ReactNode };
 }) {
   return (
-    <section className={`sf-hero is-${tone}${compact ? " is-compact" : ""}`}>
-      <div className="sf-hero-bg" aria-hidden="true"><i className="sf-hero-glow" /><Shuttle className="sf-hero-shuttle s1" /><Shuttle className="sf-hero-shuttle s2" /></div>
+    <section className={`sf-hero is-${tone}${compact ? " is-compact" : ""}${banner ? " has-banner" : ""}`}>
+      {banner ? (
+        <Image className="sf-hero-banner" src={banner.image} alt={banner.alt} sizes="100vw" fetchPriority="high" loading="eager" />
+      ) : (
+        <div className="sf-hero-bg" aria-hidden="true"><i className="sf-hero-glow" /><Shuttle className="sf-hero-shuttle s1" /><Shuttle className="sf-hero-shuttle s2" /></div>
+      )}
+      {banner?.afterImage}
       <div className="container sf-hero-inner">
         <div className="sf-hero-copy">
           {crumbs && crumbs.length > 0 && (
@@ -38,7 +45,7 @@ export function PageHero({ kicker, title, sub, crumbs, stats, aside, tone = "gre
             </nav>
           )}
           {kicker && <span className="sf-kicker">{kicker}</span>}
-          <h1>{title}</h1>
+          <h1 className={banner?.titleInImage ? "sf-hero-image-title" : undefined}>{title}</h1>
           {sub && <p>{sub}</p>}
           {stats && stats.length > 0 && <dl className="sf-hero-stats">{stats.map((s) => <div key={s.nhan}><dt>{s.value}</dt><dd>{s.nhan}</dd></div>)}</dl>}
         </div>

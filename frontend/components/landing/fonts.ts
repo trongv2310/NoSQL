@@ -1,8 +1,5 @@
-import { Barlow_Condensed } from "next/font/google";
-
-/** Chữ tiêu đề riêng cho landing (đủ dấu tiếng Việt). Chỉ nạp ở trang dùng nó, không đụng font toàn site. */
-export const fontTieuDe = Barlow_Condensed({
-  subsets: ["vietnamese", "latin"],
-  weight: ["600", "700", "800"],
-  display: "swap",
-});
+/** Barlow Condensed được nạp cục bộ trong app/layout.tsx. */
+export const fontTieuDe = {
+  className: "font-tieu-de",
+  style: { fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif" },
+} as const;

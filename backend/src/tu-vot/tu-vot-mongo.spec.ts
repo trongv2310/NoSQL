@@ -131,6 +131,15 @@ describe.skipIf(!CHE_DO.length).each(CHE_DO.length ? CHE_DO : [['bỏ qua', '']]
     expect(ds[0]).toMatchObject({ ten: 'Vợt thử 4U', thongSoChup: { sucCangMaxLbs: 28 } });
   });
 
+  it('danh sách tủ vợt kèm ảnh đại diện của sản phẩm gốc; vợt tự thêm không có ảnh', async () => {
+    await SP.updateOne({ _id: sanPham }, { $set: { hinhAnhDaiDien: 'vot-thu.jpg' } });
+    const ds = await svc.danhSach(kh);
+    const muaTaiShop = ds.filter((v: any) => String(v.sanPham) === String(sanPham));
+    expect(muaTaiShop.length).toBeGreaterThan(0);
+    expect(muaTaiShop.every((v: any) => v.anh === 'vot-thu.jpg')).toBe(true);
+    expect(ds.filter((v: any) => !v.sanPham).every((v: any) => v.anh === undefined)).toBe(true);
+  });
+
   it('serial trùng → 409; validator chặn ghi thẳng sai luật', async () => {
     await svc.tao(kh, { ten: 'Có serial', soSerial: `SN-${cheDo}` });
     await expect(svc.tao(kh, { ten: 'Trùng serial', soSerial: `SN-${cheDo}` })).rejects.toThrow(/serial/);

@@ -1,4 +1,4 @@
-import { GIO_MO, khungGioSapToi, laKhungHopLe, ngayLichVN } from './lich-cang.service';
+import { GIO_MO, gioHenVN, khungGioSapToi, laKhungHopLe, ngayLichVN } from './lich-cang.service';
 
 describe('khung giờ căng tại shop (giờ Việt Nam)', () => {
   it('9 khung mỗi ngày, bỏ khung bắt đầu trong vòng 1 giờ tới', () => {
@@ -18,5 +18,10 @@ describe('khung giờ căng tại shop (giờ Việt Nam)', () => {
   it('khung 20:00 VN ngày 18 (13:00 UTC) và 9:00 VN ngày 19 (02:00 UTC ngày 19) đều quy đúng về ngày lịch VN', () => {
     expect(ngayLichVN(new Date('2026-11-18T13:00:00Z')).toISOString()).toBe('2026-11-18T00:00:00.000Z');
     expect(ngayLichVN(new Date('2026-11-18T17:30:00Z')).toISOString()).toBe('2026-11-19T00:00:00.000Z'); // 00:30 VN ngày 19
+  });
+
+  it('giờ hẹn trong thông báo hiện theo giờ Việt Nam, không theo múi giờ máy chủ', () => {
+    expect(gioHenVN(new Date('2026-11-24T02:00:00Z'))).toBe('09:00 24/11/2026');
+    expect(gioHenVN(new Date('2026-11-18T13:00:00Z'))).toBe('20:00 18/11/2026');
   });
 });

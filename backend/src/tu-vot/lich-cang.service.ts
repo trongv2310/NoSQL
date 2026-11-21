@@ -35,6 +35,13 @@ export const ngayLichVN = (t: Date) => {
   return new Date(Date.UTC(vn.getUTCFullYear(), vn.getUTCMonth(), vn.getUTCDate()));
 };
 
+/** Giờ hẹn theo giờ Việt Nam, dạng "09:00 24/11/2026" (dùng trong thông báo lỗi). */
+export const gioHenVN = (t: Date) => {
+  const vn = new Date(t.getTime() + LECH_VN_MS);
+  const hai = (n: number) => String(n).padStart(2, '0');
+  return `${hai(vn.getUTCHours())}:${hai(vn.getUTCMinutes())} ${vn.getUTCDate()}/${vn.getUTCMonth() + 1}/${vn.getUTCFullYear()}`;
+};
+
 export interface DatChoNhap {
   ngay: string;
   votCaNhanId: string;
@@ -140,14 +147,19 @@ export class LichCangService {
    * Nhân viên bấm "Đã căng xong": đổi chỗ sang "xong" VÀ ghi lần căng vào sổ của hộ chiếu (lancangs + votcanhans).
    * - Replica set: cả ba thao tác trong MỘT transaction.
    * - Standalone: đổi trạng thái có điều kiện trước (chặn bấm hai lần), ghi sổ sau; ghi sổ lỗi thì trả chỗ về "chờ".
+   * Chỉ xác nhận được khi khung giờ đã bắt đầu: lần căng được ghi theo ngày của khung, xác nhận sớm sẽ để lại trong sổ một lần căng
+   * mang ngày chưa tới và đẩy lịch nhắc của khách lệch theo.
    */
-  async hoanTat(lichId: string, datChoId: string) {
+  async hoanTat(lichId: string, datChoId: string, now = new Date()) {
     if (!Types.ObjectId.isValid(lichId) || !Types.ObjectId.isValid(datChoId)) throw new BadRequestException('Mã lịch không hợp lệ.');
     const loc = { _id: new Types.ObjectId(lichId), datCho: { $elemMatch: { _id: new Types.ObjectId(datChoId), trangThai: 'cho' } } };
     const { kq, coTransaction } = await this.tuVot.trongTransaction(async (session) => {
       const lich = await this.lichModel.findOne(loc, { ngay: 1, 'datCho.$': 1 }).session(session ?? null).lean();
       const cho: any = lich?.datCho?.[0];
       if (!lich || !cho) throw new NotFoundException('Không tìm thấy chỗ đang chờ (có thể đã hoàn tất hoặc bị huỷ).');
+      if (lich.ngay.getTime() > now.getTime()) {
+        throw new BadRequestException(`Chưa tới giờ hẹn (${gioHenVN(lich.ngay)}). Chỉ xác nhận đã căng khi khung giờ đã bắt đầu.`);
+      }
       const doi = await this.lichModel.updateOne(loc, { $set: { 'datCho.$.trangThai': 'xong' } }, { session });
       if (!doi.modifiedCount) throw new ConflictException('Chỗ này vừa được cập nhật.');
       try {

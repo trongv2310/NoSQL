@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, HttpCode, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Transform, Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsBoolean, IsIn, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
@@ -71,6 +71,10 @@ export class PhanHoiController {
     if (!kh) {
       throw new BadRequestException('Tài khoản của bạn không phải là khách hàng và không thể gửi đánh giá.');
     }
+    // Mỗi khách một đánh giá cho mỗi sản phẩm (index unique mot_danh_gia_moi_khach chặn nốt trường hợp hai request song song).
+    if (await this.phanHoiModel.exists({ khachHang: kh._id, sanPham: dto.sanPhamId, daXacMinh: true })) {
+      throw new ConflictException('Bạn đã đánh giá sản phẩm này rồi.');
+    }
     if (dto.bienTheId && !(await this.chiTietModel.exists({ _id: dto.bienTheId, sanPham: dto.sanPhamId }))) {
       throw new BadRequestException('Phiên bản không thuộc sản phẩm này.');
     }
@@ -95,6 +99,9 @@ export class PhanHoiController {
         ...(dto.the?.length ? { the: [...new Set(dto.the)] } : {}),
       }], { session });
       await this.sanPhamModel.updateOne({ _id: dto.sanPhamId }, pipelineCongDanhGia(dto.danhGia), { session, updatePipeline: true });
+    }).catch((e: { code?: number }) => {
+      if (e?.code === 11000) throw new ConflictException('Bạn đã đánh giá sản phẩm này rồi.');
+      throw e;
     });
     return { message: 'Gửi đánh giá thành công!', daMuaHang, kemHoSo: !!nguoiDanh };
   }

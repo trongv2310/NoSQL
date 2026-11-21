@@ -1,14 +1,6 @@
 /**
- * Bộ máy đồng bộ giỏ khách vào tài khoản sau đăng nhập. Tách khỏi React để kiểm thử được bằng `node:test`, và KHÔNG import gì
- * (kho giỏ và các lời gọi mạng được truyền vào) nên chạy được trực tiếp dưới Node.
- *
- * Bất biến chính (M1-R1-03):
- *  - Mỗi bản chụp trong hàng đợi thuộc về MỘT tài khoản; mỗi yêu cầu gửi lên kèm `taiKhoanId` của tài khoản đó và server đối chiếu với
- *    tài khoản của phiên đăng nhập (403 `sai_tai_khoan` nếu khác). Phản hồi cũng phải nêu đúng `taiKhoanId`, nếu không bản chụp
- *    KHÔNG bị xóa. Chỉ kiểm tra "người dùng giao diện còn là userId" là không đủ vì cookie có thể đổi ở thẻ khác hay giữa lúc chờ.
- *  - Trước mỗi bước có tác dụng phụ (chuyển giỏ khách sang hàng đợi, gửi bản chụp kế tiếp) đều kiểm tra `conDung()` đồng bộ; không còn
- *    đúng tài khoản thì dừng và GIỮ NGUYÊN hàng đợi.
- *  - Giỏ khách chỉ được chuyển vào hàng đợi của userId khi server xác nhận phiên hiện tại đúng là userId.
+ * Đồng bộ từng bản chụp vào tài khoản đã được máy chủ xác nhận.
+ * Kiểm tra phiên trước mỗi thao tác ghi. Chỉ xóa bản chụp khi phản hồi xác nhận đúng tài khoản.
  */
 
 export interface DongBoYeuCau { taiKhoanId: string; syncId: string; dong: { chiTietId: string; soLuong: number }[] }

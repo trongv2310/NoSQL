@@ -47,9 +47,11 @@ export default function CheckoutPage() {
     }
   }, [kh.data]);
 
+  // Giỏ trống: API trả 200 với items rỗng (server cũ trả 400) → quay về trang giỏ hàng.
+  const gioTrong = gio.status === 400 || (!!gio.data && gio.data.items.length === 0);
   useEffect(() => {
-    if (gio.status === 400) router.replace("/Home/ViewCart");
-  }, [gio.status, router]);
+    if (gioTrong) router.replace("/Home/ViewCart");
+  }, [gioTrong, router]);
 
   const dat = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
 
@@ -94,7 +96,7 @@ export default function CheckoutPage() {
     );
   }
   // Chưa có dữ liệu giỏ mà cũng chưa có lỗi (đang tải, hoặc vừa hết chờ đồng bộ và lượt tải đầu chưa bắt đầu): vẫn là đang tải.
-  if (!gio.data && !gio.error) return <Page><Loading /></Page>;
+  if ((!gio.data && !gio.error) || gioTrong) return <Page><Loading /></Page>;
   if (gio.error || !gio.data) return <Page><ErrorBox message={gio.error ?? "Giỏ hàng trống"} /></Page>;
 
   const dongLoi = gio.data.items.filter((it) => !it.sanPhamConKinhDoanh || it.bienThe.soLuongTon < it.soLuong);

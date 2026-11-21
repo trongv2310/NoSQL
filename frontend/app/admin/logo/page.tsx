@@ -15,7 +15,7 @@ export default function LogoPage() {
   const [file, setFile] = useState<File | null>(null);
   const [dang, setDang] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  // Địa chỉ xem trước tạo một lần cho mỗi tệp và được thu hồi khi đổi tệp/rời trang (trước đây tạo mới mỗi lần render, không thu hồi).
+  // Thu hồi URL xem trước khi đổi tệp hoặc rời trang.
   const [xemTruoc, setXemTruoc] = useState<string | null>(null);
   useEffect(() => {
     const u = file ? URL.createObjectURL(file) : null;

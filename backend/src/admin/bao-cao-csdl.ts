@@ -1,9 +1,6 @@
 import { PipelineStage } from 'mongoose';
 
-/**
- * Báo cáo thống kê cho quản trị (M6): mỗi hàm trả MỘT aggregation pipeline (test được, chạy được nguyên văn trong mongosh — xem
- * db/truy-van-mau/08-bao-cao.mongodb.js). `locMau` = điều kiện bỏ dữ liệu mẫu (rỗng khi muốn xem cả dữ liệu mẫu).
- */
+/** Pipeline thống kê dùng `locMau()` để chọn có tính dữ liệu mẫu hay không. */
 export type LocMau = Record<string, unknown>;
 export const locMau = (coMau: boolean): LocMau => (coMau ? {} : { laDuLieuMau: { $ne: true } });
 

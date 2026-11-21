@@ -3,11 +3,8 @@ import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { DON_VI_CANG } from './vot-ca-nhan.schema';
 
 /**
- * Lịch căng cước tại shop (M5). MỖI KHUNG GIỜ LÀ MỘT DOCUMENT chứa sức chứa và danh sách chỗ đã đặt (nhúng, tối đa vài chỗ):
- * - Đặt chỗ = MỘT lệnh có điều kiện `{ ngay, soDaDat: { $lt: sucChua } }` + `$push` + `$inc`. Nhiều người bấm cùng lúc cũng không
- *   vượt sức chứa, không cần khoá hay transaction: MongoDB bảo đảm cập nhật một document là nguyên tử.
- * - Khung chưa có ai đặt thì chưa có document; lần đặt đầu dùng upsert. Nếu khung đã đầy, điều kiện $lt không khớp → upsert định
- *   chèn document mới → đụng index unique `ngay` → lỗi 11000 = "hết chỗ" (một mẫu quen thuộc của MongoDB).
+ * Mỗi khung giờ là một document có sức chứa và mảng `datCho`.
+ * Đặt chỗ dùng cập nhật nguyên tử có điều kiện. Index unique trên `ngay` bảo vệ thao tác upsert.
  */
 export const TRANG_THAI_DAT_CHO = ['cho', 'xong', 'huy'] as const;
 export const SUC_CHUA_MAC_DINH = 2;

@@ -3,14 +3,8 @@ import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { LOI_CHOI, TRINH_DO } from '../common/ho-so-choi';
 
 /**
- * Hộ chiếu cây vợt (M4): MỘT cây vợt cụ thể của một khách hàng, kèm sổ căng cước.
- *
- * Thiết kế:
- * - Subset pattern: chỉ NHÚNG 10 lần căng gần nhất (`lichSuCang`) để mở tủ vợt là có ngay, không phải đọc thêm collection.
- *   Toàn bộ lịch sử nằm ở `lancangs` (tham chiếu), vì số lần căng tăng không giới hạn (document có trần 16 MB).
- * - Computed pattern: `lanCangGanNhat`, `hanNhacLuc`, `soLanCang` được tính sẵn lúc ghi để đọc và đánh index nhanh
- *   ("vợt nào đến hạn căng lại" là một truy vấn khoảng trên `hanNhacLuc`).
- * - `thongSoChup`: chụp mức căng tối đa/tối thiểu của phiên bản lúc tạo hộ chiếu (dữ liệu sản phẩm đổi về sau không ảnh hưởng).
+ * Hộ chiếu nhúng 10 lần căng gần nhất. Collection `lancangs` lưu toàn bộ lịch sử.
+ * Ngày nhắc và bộ đếm được cập nhật khi ghi. Khoảng căng của phiên bản được chụp lúc tạo hộ chiếu.
  */
 export const NGUON_VOT = ['mua-tai-shop', 'tu-nhap', 'chuyen-tu-trinh-duyet'] as const;
 export const NOI_CANG = ['shop', 'ngoai'] as const;
@@ -84,7 +78,7 @@ export const VotCaNhanSchema = SchemaFactory.createForClass(VotCaNhan);
 VotCaNhanSchema.index({ khachHang: 1, deletedAt: 1, taoLuc: -1 }, { name: 'tu_vot_cua_khach' });
 /** "Vợt đến hạn căng lại": truy vấn khoảng trên hanNhacLuc; sparse vì vợt không đặt nhắc thì không có trường này. */
 VotCaNhanSchema.index({ hanNhacLuc: 1 }, { name: 'han_nhac', sparse: true });
-/** Serial duy nhất toàn hệ thống, chỉ xét tài liệu CÓ serial (slide 96: unique + sparse; ở đây dùng partial cho chặt kiểu). */
+/** Index unique chỉ áp dụng cho số serial dạng chuỗi. */
 VotCaNhanSchema.index({ soSerial: 1 }, { name: 'so_serial', unique: true, partialFilterExpression: { soSerial: { $type: 'string' } } });
 /** Ghi lặp lại (chuyển từ trình duyệt, tạo từ đơn) không nhân đôi. */
 VotCaNhanSchema.index({ khachHang: 1, maNguon: 1 }, { name: 'ma_nguon', unique: true, partialFilterExpression: { maNguon: { $type: 'string' } } });

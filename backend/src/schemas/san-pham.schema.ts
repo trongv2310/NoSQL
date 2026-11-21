@@ -237,15 +237,23 @@ export class PhanHoi {
   @Prop({ type: Number, default: 0, min: 0 }) soHuuIch: number;
   /** Người viết có đơn ĐÃ HOÀN THÀNH chứa sản phẩm này tại thời điểm viết. */
   @Prop({ type: Boolean, default: false }) daMuaHang: boolean;
-  /** Dữ liệu sinh ra để minh hoạ thống kê (M6). Không tính vào số liệu công khai, xem common/danh-gia.ts. */
+  /** Cờ đánh giá mẫu. Bộ lọc công khai đọc cờ này trong common/danh-gia.ts. */
   @Prop({ type: Boolean, default: undefined }) laDuLieuMau?: boolean;
 }
 export type PhanHoiDocument = HydratedDocument<PhanHoi>;
 export const PhanHoiSchema = SchemaFactory.createForClass(PhanHoi);
-/** "Người chơi giống bạn": lọc theo sản phẩm + trình độ trong bản chụp, đọc kèm số sao (index kép, slide 90). */
+/** Index phục vụ lọc đánh giá theo sản phẩm và trình độ người viết. */
 PhanHoiSchema.index({ sanPham: 1, 'nguoiDanh.trinhDo': 1, danhGia: -1 }, { name: 'danh_gia_theo_nhom' });
 /**
  * Danh sách đánh giá công khai mới nhất của một sản phẩm. Index MỘT PHẦN (partial): chỉ chứa đánh giá đã xác minh. Khác sparse
  * (chỉ xét "có trường hay không"), partial lọc theo một điều kiện bất kỳ, nên đánh giá import/chưa xác minh không chiếm chỗ trong index.
  */
 PhanHoiSchema.index({ sanPham: 1, ngayPhanHoi: -1 }, { name: 'cong_khai_moi_nhat', partialFilterExpression: { daXacMinh: true } });
+/**
+ * Mỗi khách chỉ có MỘT đánh giá (đã xác minh) cho một sản phẩm: chống gửi lặp để kéo điểm trung bình. Unique + partial: dữ liệu mẫu/import
+ * (daXacMinh false, có thể không có khachHang) không bị ràng buộc. Hai request gửi song song thì request sau nhận lỗi trùng khoá (E11000).
+ */
+PhanHoiSchema.index(
+  { khachHang: 1, sanPham: 1 },
+  { name: 'mot_danh_gia_moi_khach', unique: true, partialFilterExpression: { daXacMinh: true, khachHang: { $exists: true } } },
+);

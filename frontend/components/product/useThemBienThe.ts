@@ -18,14 +18,8 @@ export const THONG_BAO_DOI_TAI_KHOAN = "Tài khoản đăng nhập đã đổi t
 const THONG_BAO_DA_VAO_GIO_CU = "Tài khoản đăng nhập đã đổi trong lúc thêm. Sản phẩm vừa rồi nằm trong giỏ của tài khoản trước, không phải tài khoản hiện tại.";
 
 /**
- * Thêm ĐÚNG phiên bản (id biến thể) vào giỏ, dùng lại giỏ của M1: khách chưa đăng nhập → giỏ trên trình duyệt (server tính lại giá/tồn),
- * đã đăng nhập → giỏ tài khoản qua API. Không có cài đặt giỏ nào mới; kiểm tra tồn/trần giống trang chi tiết.
- * `chuaRo`: true khi lỗi mạng (không biết máy chủ đã nhận món này chưa) để chỗ gọi không thêm trùng khi thử lại.
- *
- * Danh tính (M3-QA1-02): danh tính được đọc ĐỒNG BỘ tại thời điểm gọi (không dùng giá trị của lần render cũ) và gửi kèm `taiKhoanDuKien`, nên
- *  - tham số `chu` (danh tính lúc người dùng bắt đầu cả thao tác nhiều món) khác danh tính hiện tại → không gửi gì, trả `doiTaiKhoan`;
- *  - cookie đổi mà giao diện chưa kịp biết (đăng nhập ở thẻ khác) → máy chủ trả 403 `sai_tai_khoan` TRƯỚC khi ghi; hook hỏi lại phiên cho giao diện đúng;
- *  - phản hồi về sau khi giao diện đã sang danh tính khác → không đụng huy hiệu/thông báo của danh tính hiện tại.
+ * Đọc phiên hiện tại lúc thêm vợt và gửi kèm `taiKhoanDuKien` để máy chủ đối chiếu trước khi ghi.
+ * Phản hồi từ phiên cũ không cập nhật giỏ đang hiển thị. `chuaRo` báo kết quả chưa xác định khi lỗi mạng.
  */
 export function useThemBienTheKq() {
   const { ready, setCartCount, flash, taiKhoanHienTai, refreshUser } = useApp();

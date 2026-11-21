@@ -1,0 +1,123 @@
+.the {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.the:hover {
+  border-color: var(--brand-200);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+}
+
+.the:focus-visible {
+  outline: 3px solid var(--brand-700);
+  outline-offset: 3px;
+}
+
+.khungAnh {
+  position: relative;
+  height: var(--the-anh-cao, auto);
+  aspect-ratio: 3 / 2;
+  width: 100%;
+  overflow: hidden;
+  background: var(--brand-50);
+}
+
+.anh {
+  object-fit: cover;
+  object-position: var(--the-anh-vi-tri, center);
+  transition: transform .45s var(--ease-out);
+}
+
+.the:hover .anh { transform: scale(1.04); }
+
+.nhan {
+  position: absolute;
+  inset: 10px auto auto 10px;
+  max-width: calc(100% - 20px);
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--brand-900);
+  font-size: .75rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.noiDung {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(12px, 1.45vw, 18px);
+}
+
+.chu { min-width: 0; }
+
+.ten {
+  margin: 0;
+  color: var(--brand-900);
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+
+.moTa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  margin-top: 5px;
+  color: var(--ink-soft);
+  font-size: .84rem;
+  line-height: 1.35;
+}
+
+.muiTen {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.the:hover .muiTen, .the:focus-visible .muiTen {
+  background: var(--brand-700);
+  color: #fff;
+}
+
+@media (max-width: 575px) {
+  .the { border-radius: 14px; }
+  .noiDung { gap: 8px; }
+  .moTa { font-size: .79rem; }
+  .the:not([data-gon]) .muiTen { display: none; }
+
+  .the[data-gon] {
+    grid-template-columns: minmax(92px, 32%) minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    min-height: 98px;
+  }
+
+  .the[data-gon] .khungAnh { height: auto; aspect-ratio: auto; }
+  .the[data-gon] .muiTen { width: 24px; height: 24px; }
+  .the[data-gon] .nhan { inset: 6px auto auto 6px; max-width: calc(100% - 12px); padding-inline: 5px; font-size: .65rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .the, .anh, .muiTen { transition: none; }
+  .the:hover .anh { transform: none; }
+}

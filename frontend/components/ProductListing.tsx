@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import productBanner from "@/assets/banners/san-pham-victor-xanh.webp";
 import { datHoSo, useHoSo } from "@/components/HoSoChoi";
 import { HoiNguoiBan } from "@/components/HoiNguoiBan";
 import { KhaySoSanh } from "@/components/so-sanh/KhaySoSanh";
@@ -121,6 +122,10 @@ export function ProductListing() {
     const ten = boLoc?.dsLoai.find((l) => l.id === loaiId)?.tenLoai ?? tenLoaiChip(loaiId);
     return khoaLoai(ten) === "vot" || loaiId.toLowerCase() === LOAI.vot.slug.toLowerCase();
   })();
+  // `loai` trên URL có thể là id hoặc slug (Vot, Giay…): quy về id của loại tương ứng để dropdown hiện đúng lựa chọn.
+  const loaiChon = !loaiId ? "" : boLoc?.dsLoai.find((l) => l.id === loaiId)?.id
+    ?? boLoc?.dsLoai.find((l) => khoaLoai(l.tenLoai) !== null && khoaLoai(l.tenLoai) === khoaLoai(tenLoaiChip(loaiId)))?.id
+    ?? loaiId;
   const coFacet = FACET_PARAMS.some((k) => sp.has(k));
   const hienFacet = laVot || coFacet;
   loiChoiChon.forEach((v) => chips.push({ nhan: `Lối chơi ${NHAN_LOI_CHOI[v]}`, go: () => datFacet("loi_choi", v) }));
@@ -129,10 +134,11 @@ export function ProductListing() {
 
   return (
     <>
-      <PageHero compact tone="green" kicker="Dụng cụ cho trận đấu của bạn"
+      <PageHero
+        banner={{ image: productBanner, alt: "Bộ sưu tập tinh tuyển VICTOR. Tối giản mà táo bạo." }}
         crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Sản phẩm", href: "/SanPham/Index" }, ...(data?.tieuDe && data.tieuDe !== "Danh sách sản phẩm" ? [{ nhan: data.tieuDe }] : [])]}
         title={data?.tieuDe ?? "Danh sách sản phẩm"}
-        sub={data ? `${data.total} sản phẩm · Chọn theo hãng, ngân sách và nhu cầu` : "Đang tìm sản phẩm…"} />
+        sub={data ? `${data.total} sản phẩm` : "Đang tìm sản phẩm…"} />
     <Page className="ls-wrap">
       <div className="ls-toolbar">
         <button type="button" className="ls-filter-toggle" aria-expanded={moLoc} onClick={() => setMoLoc((v) => !v)}><i className="fa-solid fa-sliders" aria-hidden="true" /> Bộ lọc{chips.length > 0 && <b>{chips.length}</b>}</button>
@@ -166,13 +172,13 @@ export function ProductListing() {
       <div className="row g-4">
         <aside className={`col-lg-3 ls-side${moLoc ? " is-open" : ""}`}>
           <div className="card catalog-filters"><div className="card-body"><div className="catalog-filter-heading"><i className="fa-solid fa-sliders" aria-hidden="true" /> Bộ lọc sản phẩm</div>
-            <h6 className="fw-bold">Loại sản phẩm</h6>
-            <div className="d-flex flex-column gap-1 mb-3">
-              <button className={`btn btn-sm text-start ${!sp.get("loai") ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => dat("loai", null)}>Tất cả</button>
-              {boLoc?.dsLoai.map((l) => (
-                <button key={l.id} className={`btn btn-sm text-start ${sp.get("loai") === l.id ? "btn-primary" : "btn-outline-secondary"}`} onClick={() => dat("loai", l.id)}>{l.tenLoai}</button>
-              ))}
-            </div>
+            <h6 className="fw-bold"><label htmlFor="loc-loai" className="m-0">Loại sản phẩm</label></h6>
+            {/* Dropdown thay cho danh sách nút: danh sách loại dài làm thanh lọc (dính khi cuộn) cao hơn màn hình, phần dưới không xem được. */}
+            <select id="loc-loai" className="form-select form-select-sm rounded-3 mb-3" value={loaiChon} onChange={(e) => dat("loai", e.target.value || null)}>
+              <option value="">Tất cả</option>
+              {boLoc?.dsLoai.map((l) => <option key={l.id} value={l.id}>{l.tenLoai}</option>)}
+              {loaiId && !boLoc?.dsLoai.some((l) => l.id === loaiChon) && <option value={loaiId}>{tenLoaiChip(loaiId)}</option>}
+            </select>
             {hienFacet && (
               <div aria-label="Lọc theo thông số vợt">
                 <fieldset className="ls-facet">

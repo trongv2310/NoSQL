@@ -27,7 +27,7 @@ export interface DieuKienDanhSach {
   hangIds: string[];
   giamGia: boolean;
   conHang: boolean;
-  /** Sản phẩm khớp bộ lọc thông số vợt (M1), null = không lọc. */
+  /** `null` khi không áp dụng bộ lọc thông số. */
   spKhopThongSo: Set<string> | null;
   sapXep?: string;
   trang: number;

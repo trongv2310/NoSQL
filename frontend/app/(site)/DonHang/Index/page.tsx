@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import ordersBanner from "@/assets/banners/don-hang.webp";
 import { useApp } from "@/components/AppProviders";
 import { PageHero } from "@/components/PageHero";
 import { ChipTrangThai, OrderTrack } from "@/components/Steps";
@@ -39,8 +40,9 @@ export default function DonHangCuaToiPage() {
   const dangXuLy = data.filter((d) => d.trangThai !== "Đã hoàn thành" && !d.trangThai.startsWith("Đã hủy")).length;
   return (
     <>
-      <PageHero compact tone="green" kicker="Tài khoản" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Đơn hàng của tôi" }]}
-        title={<>Đơn hàng <em>của tôi</em></>} sub="Theo dõi trạng thái từng đơn và xem lại những gì bạn đã mua."
+      <PageHero crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Đơn hàng của tôi" }]}
+        banner={{ image: ordersBanner, alt: "Kiện hàng, hộp giày cầu lông và quả cầu trên nền xanh lá.", titleInImage: true }}
+        title="Đơn hàng của tôi"
         stats={[{ value: data.length, nhan: "Tổng số đơn" }, { value: dangXuLy, nhan: "Đang xử lý" }]} />
       <Page className="od-wrap">
         {data.length === 0 ? <Empty message="Bạn chưa có đơn hàng nào." linkUrl="/SanPham/Index" linkText="Mua sắm ngay" /> : data.map((d) => (

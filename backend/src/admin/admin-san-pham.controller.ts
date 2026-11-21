@@ -8,7 +8,7 @@ import { Model, Types } from 'mongoose';
 import { CurrentUser } from '../auth/auth.decorators';
 import { Roles } from '../auth/auth.guards';
 import type { NguoiDung } from '../auth/auth.types';
-import { likeRegex, parseObjectId, phanTrang, toBool } from '../common/helpers';
+import { likeRegex, parseObjectId, phanTrangDb, toBool } from '../common/helpers';
 import { bienTheView, idOf, khuyenMaiView, sanPhamView } from '../common/mappers';
 import { anhInterceptor, DonAnhKhiLoi, duongDanTuongDoi, xoaAnhUpload } from '../common/upload';
 import {
@@ -94,6 +94,23 @@ export class AdminSanPhamController {
     }
   }
 
+  /**
+   * MongoDB không có khóa ngoại: DTO chỉ kiểm định dạng ObjectId, nên phải tự kiểm loại / hãng / nhà cung cấp / khuyến mãi có thật
+   * trước khi ghi, tránh sản phẩm "mồ côi" (không có loại, hãng) lọt khỏi các bộ lọc của trang khách.
+   */
+  private async kiemTraThamChieu(dto: SanPhamDto) {
+    const [loai, hang, ncc, km] = await Promise.all([
+      this.loaiModel.exists({ _id: dto.loai }),
+      this.hangModel.exists({ _id: dto.hang }),
+      this.nccModel.exists({ _id: dto.nhaCungCap }),
+      dto.khuyenMai ? this.kmModel.exists({ _id: dto.khuyenMai }) : Promise.resolve(true),
+    ]);
+    if (!loai) throw new BadRequestException('Loại sản phẩm không tồn tại.');
+    if (!hang) throw new BadRequestException('Hãng sản xuất không tồn tại.');
+    if (!ncc) throw new BadRequestException('Nhà cung cấp không tồn tại.');
+    if (!km) throw new BadRequestException('Chương trình khuyến mãi không tồn tại.');
+  }
+
   private async duLieuForm() {
     const [loais, nccs, hangs, kms] = await Promise.all([
       this.loaiModel.find().sort({ tenLoai: 1 }).lean(),
@@ -144,8 +161,14 @@ export class AdminSanPhamController {
       ]);
       filter.$or = [{ tenSanPham: re }, { hang: { $in: hangs.map((h) => h._id) } }, { loai: { $in: loais.map((l) => l._id) } }];
     }
-    const all = await this.spModel.find(filter).populate('loai hang').sort({ ngayTao: -1, _id: -1 }).lean();
-    const trang = phanTrang(all, Number(q.page) || 1, 10);
+    // Phân trang trong MongoDB (skip/limit) và populate cả khuyenMai để giá hiển thị giống trang khách (đã trừ khuyến mãi).
+    const trang = await phanTrangDb(
+      () => this.spModel.countDocuments(filter),
+      (skip, limit) =>
+        this.spModel.find(filter).populate('loai hang khuyenMai').sort({ ngayTao: -1, _id: -1 }).skip(skip).limit(limit).lean(),
+      Number(q.page) || 1,
+      10,
+    );
     const ton = await this.ctModel.aggregate<{ _id: any; t: number }>([
       { $match: { sanPham: { $in: trang.items.map((s) => s._id) } } },
       { $group: { _id: '$sanPham', t: { $sum: '$soLuongTon' } } },
@@ -193,6 +216,7 @@ export class AdminSanPhamController {
   @Post('san-pham')
   @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'sp'), DonAnhKhiLoi)
   async tao(@Body() dto: SanPhamDto, @UploadedFile() file?: Express.Multer.File) {
+    await this.kiemTraThamChieu(dto);
     const sp = await this.spModel.create({
       ...dto,
       khuyenMai: dto.khuyenMai ?? null,
@@ -209,6 +233,7 @@ export class AdminSanPhamController {
   @UseInterceptors(anhInterceptor('HinhAnhUpload', 'sanpham', 'sp'), DonAnhKhiLoi)
   async capNhat(@Param('id') id: string, @Body() dto: SanPhamDto, @UploadedFile() file?: Express.Multer.File) {
     const sp: any = await this.layKhongXoa(id);
+    await this.kiemTraThamChieu(dto);
     const anhCu = sp.hinhAnhDaiDien;
     const update: Record<string, any> = { ...dto, khuyenMai: dto.khuyenMai ?? null };
     const anhMoi = duongDanTuongDoi('sanpham', file);

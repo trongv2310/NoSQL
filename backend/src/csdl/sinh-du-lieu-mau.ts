@@ -28,7 +28,7 @@ async function main() {
     if (nXem) console.log(`Đã xoá ${nXem} lượt xem mẫu cũ trong luotxems.`);
     if (args.includes('--xoa')) return;
 
-    // Phiên bản vợt có thông số dạng số (thuocTinh, M1) + tên sản phẩm còn kinh doanh.
+    // Phiên bản vợt có thông số dạng số (`thuocTinh`) + tên sản phẩm còn kinh doanh.
     const ds = await db.collection('chitietsanphams').aggregate([
       { $match: { 'thuocTinh.k': 'sucCangMaxLbs' } },
       { $lookup: { from: 'sanphams', localField: 'sanPham', foreignField: '_id', as: 'sp' } },

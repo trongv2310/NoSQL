@@ -178,3 +178,28 @@ describe('gopNguCanh', () => {
     expect(m).toEqual({ loai: 'giay' });
   });
 });
+
+describe('rẻ nhất / đắt nhất', () => {
+  it.each([
+    ['Giá của món đồ rẻ nhất shop', 're', true],
+    ['vợt rẻ nhất', 're', false],
+    ['giày giá thấp nhất', 're', false],
+    ['sản phẩm đắt nhất shop', 'cao', true],
+    ['vợt đắt nhất là cái nào', 'cao', false],
+  ])('"%s"', (cau, cucTri, caShop) => {
+    const pt = hoi(cau);
+    expect(pt.cucTri).toBe(cucTri);
+    expect(pt.caShop).toBe(caShop);
+    expect(pt.yDinh).toBe('tu_van');
+  });
+
+  it('"đánh giá cao nhất" không phải hỏi giá đắt nhất', () => {
+    expect(hoi('vợt được đánh giá cao nhất').cucTri).toBeUndefined();
+  });
+
+  it('"vợt giá rẻ" chỉ ưu tiên nhẹ, không phải cực trị', () => {
+    const pt = hoi('vợt giá rẻ');
+    expect(pt.slot.sapXep).toBe('re');
+    expect(pt.cucTri).toBeUndefined();
+  });
+});

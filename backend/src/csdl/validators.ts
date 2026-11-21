@@ -8,16 +8,8 @@ import { TRANG_THAI_DAT_CHO } from '../schemas/lich-cang.schema';
 import { DON_VI_CANG, LOAI_SU_KIEN, NGUON_VOT, NOI_CANG, TOI_DA_CHU_KY_NGAY, TOI_DA_LICH_SU_NHUNG } from '../schemas/vot-ca-nhan.schema';
 
 /**
- * Bộ kiểm tra dữ liệu ($jsonSchema, kèm $expr cho ràng buộc giữa các trường) gắn thẳng vào collection bằng `collMod`.
- *
- * Mongoose đã kiểm dữ liệu ở tầng ứng dụng, nhưng chỉ khi ghi qua model. Validator nằm trong MongoDB nên chặn được mọi đường ghi khác:
- * mongosh, Compass, script nhập liệu, một service quên kiểm. Đây là lớp chặn cuối, không thay cho kiểm tra ở API.
- *
- * Quy ước:
- * - Không đặt `additionalProperties: false`. Schema linh hoạt là điểm mạnh của MongoDB, và các mốc sau sẽ thêm trường mới.
- * - `required` chỉ gồm trường mà mọi đường ghi hiện có đều đặt (Mongoose `required` hoặc có `default`).
- * - Số dùng bsonType "number" (int/long/double/decimal). Trường đếm thêm `multipleOf: 1` để buộc là số nguyên.
- * - Mọi ràng buộc ở đây đã được đối chiếu với dữ liệu seed và một CSDL đang dùng (18/11/2026: 0 tài liệu vi phạm).
+ * Validator được áp ở MongoDB qua collMod, gồm kiểu trường và ràng buộc giữa các trường.
+ * Chỉ đặt required cho trường có trên mọi đường ghi. Giữ schema mở và dùng multipleOf: 1 cho trường đếm.
  */
 
 const SO_KHONG_AM = { bsonType: 'number', minimum: 0 } as const;

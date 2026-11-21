@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import promoBanner from "@/assets/banners/khuyen-mai.webp";
 import { Countdown, CountUp, Tilt } from "@/components/Motion";
 import { PageHero, ProductGridSkeleton } from "@/components/PageHero";
 import { Empty, ErrorBox, ProductCard } from "@/components/Ui";
@@ -32,10 +33,7 @@ function ConLai({ den }: { den: string | null }) {
 
 const phanTramSp = (s: SanPhamV) => (s.giaGoc > 0 ? Math.round((1 - s.giaSauKhuyenMai / s.giaGoc) * 100) : 0);
 
-/**
- * Ô lấp chỗ trống khi một chương trình có ít hơn 4 sản phẩm: ảnh thật (quả cầu lông, Wikimedia Commons, xem public/images/CREDITS.txt) làm nền,
- * số sản phẩm đang giảm ở CÁC CHƯƠNG TRÌNH KHÁC và ảnh của 3 món giảm nhiều nhất trong số đó, đều lấy từ dữ liệu khuyến mãi của trang.
- */
+/** Gợi ý sản phẩm từ các chương trình khác. Nguồn ảnh nền ghi trong public/images/CREDITS.txt. */
 function ThemUuDai({ khac }: { khac: SanPhamV[] }) {
   const top = [...khac].sort((a, b) => phanTramSp(b) - phanTramSp(a)).slice(0, 3);
   return (
@@ -94,33 +92,39 @@ export function PromoPage() {
 
   useEffect(() => { document.title = "Khuyến mãi & ưu đãi - Cửa Hàng Cầu Lông"; }, []);
 
-  const aside = ketThucSom?.km.ngayKetThuc ? (
+  const dongHo = ketThucSom?.km.ngayKetThuc ? (
     <div className="pm-hero-timer">
-      <span><i className="fa-solid fa-stopwatch" aria-hidden="true" /> Ưu đãi kết thúc sớm nhất</span>
-      <b>{ketThucSom.km.tenChuongTrinh}</b>
+      <div className="pm-timer-copy">
+        <span><i className="fa-solid fa-stopwatch" aria-hidden="true" /> Kết thúc sớm nhất</span>
+        <b>{ketThucSom.km.tenChuongTrinh}</b>
+      </div>
       <Countdown den={ketThucSom.km.ngayKetThuc} />
     </div>
   ) : null;
 
+  const daiKhuyenMai = nhoms.length > 0 && (
+    <div className="pm-ribbon" aria-hidden="true">
+      <div className="pm-ribbon-track">
+        {[0, 1].map((k) => (
+          <div key={k} className="pm-ribbon-set">
+            {nhoms.map((n) => <span key={n.km.id}><i className="fa-solid fa-fire" /> GIẢM {phanTram(n.km)}% · {n.km.tenChuongTrinh.toUpperCase()}</span>)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <PageHero tone="orange" kicker="Săn deal cầu lông" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Khuyến mãi" }]}
-        title={<>Ưu đãi <em>nóng hổi</em>,<br />chốt ngay kẻo lỡ</>}
-        sub="Giá đã được trừ sẵn khuyến mãi trên từng sản phẩm. Chọn chương trình bên dưới và xem ngay món bạn cần."
-        stats={data ? [{ value: <CountUp to={nhoms.length} />, nhan: "Chương trình" }, { value: <>{giamToiDa > 0 ? <>đến <CountUp to={giamToiDa} />%</> : "—"}</>, nhan: "Mức giảm cao nhất" }, { value: <CountUp to={tongSp} />, nhan: "Sản phẩm đang giảm" }] : undefined}
-        aside={aside} />
-
-      {nhoms.length > 0 && (
-        <div className="pm-ribbon" aria-hidden="true">
-          <div className="pm-ribbon-track">
-            {[0, 1].map((k) => (
-              <div key={k} className="pm-ribbon-set">
-                {nhoms.map((n) => <span key={`${k}-${n.km.id}`}><i className="fa-solid fa-fire" /> GIẢM {phanTram(n.km)}% · {n.km.tenChuongTrinh.toUpperCase()}</span>)}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <PageHero tone="orange" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Khuyến mãi" }]}
+        banner={{ image: promoBanner, alt: "Vợt, giày và quả cầu trên nền cam đất.", titleInImage: true, afterImage: daiKhuyenMai }}
+        title="Khuyến mãi"
+        stats={data ? [
+          { value: <CountUp to={nhoms.length} />, nhan: "Chương trình" },
+          { value: giamToiDa > 0 ? <><CountUp to={giamToiDa} />%</> : "—", nhan: "Giảm tối đa" },
+          { value: <CountUp to={tongSp} />, nhan: "Sản phẩm giảm" },
+        ] : undefined}
+        aside={dongHo} />
 
       <div className="container pm-wrap">
         {loading && !data ? <ProductGridSkeleton n={8} cot="col-6 col-lg-3" />

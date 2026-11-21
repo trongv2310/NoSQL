@@ -1,20 +1,8 @@
-/* Mosaic danh mục, bậc thang tầm giá, các ô thương hiệu (nền xanh đậm). */
+/* Danh mục, bậc thang tầm giá, các ô thương hiệu (nền xanh đậm). */
 
 /* ── Danh mục ── */
-.mosaic { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: clamp(170px, 17vw, 230px); gap: clamp(10px, 1.4vw, 18px); margin: 0; padding: 0; list-style: none; }
-.manh { position: relative; min-width: 0; border-radius: 22px; overflow: hidden; background: #0b3b2b; isolation: isolate; }
-.manhLon { grid-column: span 2; grid-row: span 2; }
-.manhRong { grid-column: span 2; }
-.manhLienKet { position: absolute; inset: 0; display: flex; align-items: flex-end; color: #fff; text-decoration: none; }
-.manhLienKet:focus-visible { outline: 3px solid #0f7550; outline-offset: -4px; border-radius: 22px; }
-.manhAnh { object-fit: cover; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
-.manhLienKet:hover .manhAnh { transform: scale(1.05); }
-.manhPhu { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 25, 18, 0) 18%, rgba(5, 25, 18, 0.62) 55%, rgba(5, 25, 18, 0.93) 100%); }
-.manhChu { position: relative; display: grid; gap: 4px; width: 100%; padding: clamp(12px, 1.6vw, 22px); }
-.manhTen { font-size: clamp(1.5rem, 2.4vw, 2.2rem); font-weight: 800; line-height: 1.05; letter-spacing: 0.01em; }
-.manhLon .manhTen { font-size: clamp(1.9rem, 3.4vw, 3rem); }
-.manhChu { text-shadow: 0 1px 8px rgba(5, 25, 18, 0.55); }
-.manhSo { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 2px; font-size: 0.82rem; font-weight: 700; color: #fff; }
+.danhMuc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 18px); margin: 0; padding: 0; list-style: none; }
+.danhMuc > li { min-width: 0; }
 
 /* ── Bậc thang tầm giá ── */
 .thang { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2vw, 28px); margin: 0; padding: 0; list-style: none; align-items: end; }
@@ -44,13 +32,9 @@
 
 @media (max-width: 991px) {
   .hang { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .mosaic { grid-auto-rows: clamp(150px, 24vw, 220px); }
+  .danhMuc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
-  .mosaic { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 170px; gap: 10px; }
-  .manhLon { grid-column: span 2; grid-row: span 1; }
-  .manhRong { grid-column: span 2; }
-  .manhLon .manhTen { font-size: 2rem; }
   .thang { gap: 10px; }
   .cotTrack { height: 110px; }
   .cot { border-radius: 10px 10px 0 0; }
@@ -64,6 +48,6 @@
   .hangTen { font-size: 1.7rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .manhAnh, .cot, .hangLienKet { transition: none; }
-  .manhLienKet:hover .manhAnh, .hangLienKet:hover { transform: none; }
+  .cot, .hangLienKet { transition: none; }
+  .hangLienKet:hover { transform: none; }
 }

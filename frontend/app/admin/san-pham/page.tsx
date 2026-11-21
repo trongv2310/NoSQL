@@ -21,9 +21,8 @@ export default function QuanLySanPhamPage() {
   const { data, error, loading, reload } = useApi<Data>(`/admin/san-pham${q ? `?${q}` : ""}`);
   const { user, flash } = useApp();
   const xoaDuoc = coQuyenXoa(user?.maQuyen); // nhân viên không xóa mà "Ẩn"
-  const dangXemAn = sp.get("an") === "1"; // chế độ "Đang ẩn" (CONTRACT C-4: GET /admin/san-pham?an=1)
+  const dangXemAn = sp.get("an") === "1";
 
-  // Ẩn / hiện lại theo CONTRACT C-4: POST /admin/san-pham/:id/an|hien (BE T-302 chưa có lúc viết: gọi sẽ 404 cho tới khi xong).
   const doiAn = async (s: SanPhamV, thao: "an" | "hien") => {
     if (thao === "an" && !confirm(`Ẩn sản phẩm "${s.tenSanPham}"? Khách sẽ không thấy sản phẩm và nó bị gỡ khỏi giỏ hàng. Bạn có thể hiện lại sau.`)) return;
     try {

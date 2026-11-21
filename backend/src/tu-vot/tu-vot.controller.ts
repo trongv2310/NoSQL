@@ -11,6 +11,18 @@ import { TuVotService } from './tu-vot.service';
 
 const NGAY = /^\d{4}-\d{2}-\d{2}$/;
 
+/**
+ * Định dạng trả về cho client như các API khác: có `id` dạng chuỗi, bỏ trường nội bộ của Mongoose (`__v`) và chủ sở hữu (`khachHang`,
+ * vốn chỉ là chính người đang đăng nhập). Giữ lại `_id` để không làm hỏng giao diện tủ vợt đang đọc trường này.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function xemTaiLieu<T extends Record<string, any> | null | undefined>(doc: T) {
+  if (!doc) return doc;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { __v, khachHang, ...con } = doc;
+  return { id: String(doc._id), ...con };
+}
+
 class TaoVotDto {
   @IsString() @MinLength(1, { message: 'Nhập tên cây vợt.' }) @MaxLength(80, { message: 'Tên vợt tối đa 80 ký tự.' })
   ten: string;
@@ -70,19 +82,19 @@ export class TuVotController {
   @Get()
   async danhSach(@CurrentUser() user: NguoiDung) {
     const kh = await this.tuVot.khachHangCua(user.id);
-    return { vot: await this.tuVot.danhSach(kh._id), coTransaction: await this.tuVot.dungTransaction() };
+    return { vot: (await this.tuVot.danhSach(kh._id)).map(xemTaiLieu), coTransaction: await this.tuVot.dungTransaction() };
   }
 
   @Post()
   async tao(@CurrentUser() user: NguoiDung, @Body() dto: TaoVotDto) {
     const kh = await this.tuVot.khachHangCua(user.id);
-    return { vot: await this.tuVot.tao(kh._id, dto), message: 'Đã thêm vợt vào tủ.' };
+    return { vot: xemTaiLieu(await this.tuVot.tao(kh._id, dto)), message: 'Đã thêm vợt vào tủ.' };
   }
 
   @Patch(':id')
   async sua(@CurrentUser() user: NguoiDung, @Param('id') id: string, @Body() dto: SuaVotDto) {
     const kh = await this.tuVot.khachHangCua(user.id);
-    return { vot: await this.tuVot.sua(kh._id, id, dto), message: 'Đã cập nhật vợt.' };
+    return { vot: xemTaiLieu(await this.tuVot.sua(kh._id, id, dto)), message: 'Đã cập nhật vợt.' };
   }
 
   @Delete(':id')
@@ -98,6 +110,7 @@ export class TuVotController {
     const r = await this.tuVot.ghiLanCang(kh._id, id, dto);
     return {
       ...r,
+      vot: xemTaiLieu(r.vot),
       message: r.vuotMucNSX
         ? `Đã ghi lần căng. Lưu ý: mức này cao hơn mức tối đa nhà sản xuất ghi (${r.toiDaLbs} lbs).`
         : 'Đã ghi lần căng.',
@@ -107,13 +120,13 @@ export class TuVotController {
   @Get(':id/lan-cang')
   async lichSu(@CurrentUser() user: NguoiDung, @Param('id') id: string) {
     const kh = await this.tuVot.khachHangCua(user.id);
-    return { lanCang: await this.tuVot.lichSuCang(kh._id, id) };
+    return { lanCang: (await this.tuVot.lichSuCang(kh._id, id)).map(xemTaiLieu) };
   }
 
   @Post(':id/su-kien')
   async suKien(@CurrentUser() user: NguoiDung, @Param('id') id: string, @Body() dto: SuKienDto) {
     const kh = await this.tuVot.khachHangCua(user.id);
-    return { vot: await this.tuVot.themSuKien(kh._id, id, dto), message: 'Đã ghi sự kiện.' };
+    return { vot: xemTaiLieu(await this.tuVot.themSuKien(kh._id, id, dto)), message: 'Đã ghi sự kiện.' };
   }
 
   @Post('chuyen-tu-trinh-duyet')

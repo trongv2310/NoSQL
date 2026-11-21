@@ -8,7 +8,7 @@ import {
   pipelineLuotXemTheoNgay, pipelineVotTheoTrinhDo, pipelineVuotMucNSX, pipelineXemNhieu,
 } from './bao-cao-csdl';
 
-/** Báo cáo thống kê từ sổ căng cước và đánh giá theo nhóm người chơi (M6). `?mau=1` để tính cả dữ liệu mẫu. */
+/** `?mau=1` bổ sung dữ liệu mẫu vào báo cáo. */
 @Roles(Quyen.Admin)
 @Controller('admin/bao-cao-csdl')
 export class AdminBaoCaoController {

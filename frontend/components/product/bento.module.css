@@ -1,4 +1,4 @@
-/* M3 — phiếu thông số Bento + Racket DNA + trạm căng cước + combo + so sánh + tủ vợt. Nền sáng catalogue, chữ xanh sân, cam chỉ cho hành động và con số đang chọn. */
+/* Phiếu thông số và công cụ trên trang chi tiết vợt. */
 
 /* ───────── Bento ───────── */
 .bento { display: grid; gap: 12px; }

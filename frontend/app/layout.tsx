@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
 import { AppProviders } from "@/components/AppProviders";
+// Font chữ và icon tự host từ npm (không phụ thuộc Google Fonts / CDN cdnjs: mất mạng vẫn build và hiển thị đủ).
+import "@fontsource/inter/300.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
+import "@fontsource/barlow-condensed/600.css";
+import "@fontsource/barlow-condensed/700.css";
+import "@fontsource/barlow-condensed/800.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 export const metadata: Metadata = {
   title: "Cửa Hàng Cầu Lông Online",
@@ -10,10 +20,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="vi" data-scroll-behavior="smooth">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
         <link href="/css/bootstrap.min.css" rel="stylesheet" />
         <link href="/css/theme.css" rel="stylesheet" />
       </head>

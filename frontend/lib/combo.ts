@@ -1,13 +1,6 @@
 /**
- * Thêm một bộ (vợt + quấn cán) vào giỏ từng món một, nói đúng món nào đã vào giỏ, món nào chưa.
- * - Bấm đúp / bấm lại khi đang chạy: dùng lại lần chạy hiện tại, không thêm trùng.
- * - Một món lỗi không làm hỏng món kia, và KHÔNG báo "trọn bộ" khi còn thiếu.
- * - Thử lại chỉ các món chưa vào giỏ; món đã thêm thành công không bao giờ bị thêm lần nữa.
- * - Lỗi mạng (không biết giỏ đã nhận hay chưa) được đánh dấu "chưa rõ": giao diện yêu cầu kiểm tra giỏ trước khi thử lại.
- * - Hàng rào danh tính/thời gian sống (`conHieuLuc`, `huy`): bộ này thuộc về MỘT tài khoản (hoặc khách) lúc bấm. Nếu danh tính đổi hoặc component bị gỡ,
- *   hoặc máy chủ báo phiên đã đổi (`doiTaiKhoan`), vòng lặp DỪNG: món chưa gửi không bao giờ được gửi nữa (không ghi vào tài khoản mới), món đã vào
- *   giỏ cũ vẫn là "xong" (không tự xóa/chuyển), và tổng kết là "gian-doan" chứ không bao giờ "tron-bo".
- * Không đụng cơ chế giỏ khách/đồng bộ của M1: `them` là hàm thêm một biến thể do chỗ gọi cung cấp (xem useThemBienThe).
+ * Thêm từng món vào giỏ và gộp các lần gọi đồng thời. Khi thử lại, chỉ gửi các món còn thiếu.
+ * Kết quả chưa rõ cần kiểm tra giỏ. Khi đổi tài khoản hoặc hủy thao tác, dừng gửi các món còn lại.
  */
 export type TrangThaiMon = "cho" | "dang" | "xong" | "loi" | "chua-ro" | "bo-qua";
 export interface MonCombo { khoa: string; nhan: string; trangThai: TrangThaiMon; thongBao?: string }

@@ -17,12 +17,7 @@ function docDuDinh(): { ds: DuDinhCang[]; hong: boolean } {
   return r.trangThai === "ok" ? { ds: lamSachDuDinh(r.giaTri), hong: false } : { ds: [], hong: r.trangThai === "hong" };
 }
 
-/**
- * Trạm căng cước (tham khảo): chọn mức căng TRONG khoảng nhà sản xuất ghi cho đúng phiên bản đang chọn. Chỉ dùng số có thật: đọc kg/lbs/khoảng,
- * không tự đặt mức tối thiểu khi nguồn chỉ có tối đa, không làm tròn vượt tối đa, đổi đơn vị theo 1 kg = 2,20462262 lbs. Thiếu thông tin thì
- * giải thích và dẫn tới "Hỏi người bán" thay vì dựng thanh trượt. KHÔNG thêm dòng hàng hay cước vào giỏ; "dự định" chỉ là ghi chú trên trình duyệt này,
- * không phải lần căng thực tế và không hứa đơn hàng đã bao gồm căng.
- */
+/** Dùng giới hạn căng của phiên bản đang chọn. Dự định căng chỉ lưu trên trình duyệt. */
 export function TramCangCuoc({ bienThe, tenVot }: { bienThe: BienTheV | null; tenVot: string }) {
   const doc = docSucCang(bienThe?.thongSo?.sucCang);
   const khoang = doc.ok ? doc.khoang : null;
