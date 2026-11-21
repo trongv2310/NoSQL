@@ -18,11 +18,7 @@ const TON_CHUA_BIET = 100;
 const NHAN_TRANG_THAI: Record<string, string> = { dang: "Đang thêm…", xong: "Đã vào giỏ", loi: "Chưa vào giỏ", "chua-ro": "Chưa rõ", "bo-qua": "Không thêm (đã dừng)" };
 const nutLienKet = { background: "none", border: 0, padding: 0, cursor: "pointer", textDecoration: "underline", font: "inherit" } as const;
 
-/**
- * Một combo mua chung: các món và tổng giá hiện hành (không có giảm giá riêng cho combo). "Thêm combo vào giỏ" thêm từng món `chiTietMacDinh` số lượng 1 bằng
- * `useThemBienTheKq` + `taoBoCombo` (cùng cơ chế giỏ như Vợt + quấn cán: khách chưa đăng nhập dùng giỏ trình duyệt, đã đăng nhập dùng giỏ tài khoản),
- * nên nói đúng món nào đã vào giỏ/chưa, bấm đúp không thêm trùng, thử lại chỉ món chưa thêm, và đổi tài khoản giữa chừng thì dừng.
- */
+/** Tổng giá dùng giá hiện hành của từng món. Việc thêm vào giỏ theo dõi kết quả riêng cho từng món. */
 function TheCombo({ combo }: { combo: ComboGoiY }) {
   const them = useThemBienTheKq();
   const { user, taiKhoanHienTai } = useApp();
@@ -123,10 +119,7 @@ function TheGoiY({ sp }: { sp: SanPhamGoiY }) {
   );
 }
 
-/**
- * "Thường được mua cùng" ở trang chi tiết: tối đa 4 sản phẩm từ GET /goi-y/san-pham/:id. Đang tải, lỗi, hoặc không có gợi ý thì ẩn cả khối
- * (không báo lỗi, không làm vỡ trang). Gắn `key={sanPhamId}` ở chỗ gọi để đổi sản phẩm thì tải lại từ đầu.
- */
+/** Khối gợi ý được dựng lại khi đổi mã sản phẩm qua key ở trang chi tiết. */
 export function GoiYMuaCung({ sanPhamId }: { sanPhamId: string }) {
   const { data, loading, error } = useApi<{ sanPhams: unknown }>(`/goi-y/san-pham/${encodeURIComponent(sanPhamId)}`);
   const ds = chonGoiYMuaCung(data, sanPhamId);

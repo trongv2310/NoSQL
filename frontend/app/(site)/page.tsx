@@ -18,15 +18,7 @@ export const metadata: Metadata = {
   openGraph: { title: "Cửa Hàng Cầu Lông — Quầy tư vấn vợt", description: MO_TA, locale: "vi_VN", type: "website" },
 };
 
-/**
- * Trang chủ "Quầy tư vấn": nền sáng, không có cảnh 3D/WebGL. Đầu trang là banner (giới thiệu shop, ưu đãi đang chạy, ảnh quảng cáo gắn sản phẩm thật),
- * tiếp theo là bộ chọn + 3 vợt thật; bên dưới là các khu có nhịp khác nhau:
- * số liệu kho, công cụ của shop, danh mục, chọn theo lối chơi (Racket DNA), khuyến mãi, tầm giá, thương hiệu, kệ giày/áo quần/phụ kiện, tồn kho,
- * Bảng tin, hỏi người bán, quy trình mua hàng, câu hỏi thường gặp. Mọi con số và danh sách đều đếm/chọn từ dữ liệu thật (lib/landing-data.ts).
- * Trang tĩnh làm mới theo hạn của dữ liệu giá/tồn kho (literal để Next đọc lúc build; bằng LAM_MOI_SAN_PHAM_GIAY trong lib/server-api.ts).
- * Dữ liệu lấy ở server nên HTML đã có sản phẩm; server không lấy được thì client tự tải lại với trạng thái loading/lỗi/thử lại, từng khu độc lập.
- * Mã cảnh 3D cũ (components/landing/World…) được giữ nguyên trong repo nhưng không gắn vào trang.
- */
+/** Giữ cùng thời gian làm mới với LAM_MOI_SAN_PHAM_GIAY trong lib/server-api.ts. */
 export const revalidate = 10;
 
 export default function TrangChu() {

@@ -1,12 +1,7 @@
 import { spawnSync } from 'child_process';
 import mongoose from 'mongoose';
 
-/**
- * Dùng chung cho sao lưu / phục hồi (slide 27–29: mongodump / mongorestore).
- * Có MongoDB Database Tools thì gọi thẳng mongodump/mongorestore. Không có (máy chỉ cài mongod + mongosh) thì dùng bản tự viết bằng
- * driver: mỗi collection một file Extended JSON dạng canonical (giữ đúng kiểu ObjectId/Date/Int/Double) + `_meta.json` ghi lại TUỲ CHỌN
- * COLLECTION (validator $jsonSchema) và INDEX, để phục hồi ra đúng cấu trúc chứ không chỉ dữ liệu.
- */
+/** Ưu tiên MongoDB Database Tools. Bản sao Extended JSON lưu cả tùy chọn collection và index trong _meta.json. */
 const { EJSON } = mongoose.mongo.BSON;
 
 export const TEN_META = '_meta.json';

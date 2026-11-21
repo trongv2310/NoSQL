@@ -4,12 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const giamChuyenDong = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/**
- * Gắn một lần ở layout của site. Làm ba việc, không đụng tới JSX của từng trang:
- * 1. Đánh dấu `html.sf-js` (CSS chỉ ẩn phần tử chờ hiện khi JS đã chạy, nên không bao giờ mất nội dung).
- * 2. Theo dõi mọi phần tử `.sf-reveal` (kể cả loại xuất hiện sau khi tải dữ liệu) và cho hiện dần khi cuộn tới.
- * 3. Cập nhật thanh tiến trình cuộn và nút "lên đầu trang".
- */
+/** Hiện nội dung khi cuộn và cập nhật tiến trình cuộn. Chỉ bắt đầu ẩn phần tử sau khi JavaScript khởi chạy. */
 export function SiteMotion() {
   const [nutLen, setNutLen] = useState(false);
   const thanh = useRef<HTMLDivElement>(null);

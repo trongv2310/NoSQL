@@ -4,7 +4,7 @@ import { cungThuocTinh, KHOA_THUOC_TINH, thuocTinhTuThongSo, ThuocTinh } from '.
 import { anMatKhau, laMayLocal } from '../seed/du-lieu-mongodb';
 
 /**
- * Tính lại `chitietsanphams.thuocTinh` từ `thongSo` cho dữ liệu đã có (biến thể tạo trước M1, hoặc bị sửa thẳng trong mongosh).
+ * Tính lại `chitietsanphams.thuocTinh` từ `thongSo` cho dữ liệu đã có (biến thể cũ hoặc được cập nhật trực tiếp trong MongoDB).
  *   npm run db:chuan-hoa-thong-so -- --dry-run   # chỉ báo cáo
  *   npm run db:chuan-hoa-thong-so                # ghi phần lệch
  * Chạy lại bao nhiêu lần cũng được: bản ghi đã đúng thì không bị ghi. Ghi lên MongoDB không phải máy này phải thêm --force.

@@ -1,15 +1,6 @@
 /**
- * Giỏ hàng của khách chưa đăng nhập, lưu trong localStorage.
- *
- * Chỉ lưu những gì trình duyệt thật sự biết: id biến thể, số lượng, thời điểm thêm và một mã đồng bộ (token). KHÔNG lưu giá, tên
- * hay tổng tiền: giá và tồn kho luôn do server tính lại qua POST /gio-hang/tinh, và khi đăng nhập giỏ được gộp vào tài khoản
- * qua POST /gio-hang/dong-bo.
- *
- * Tách bạch dữ liệu giữa các tài khoản:
- *  - Giỏ khách (`GIO`) chỉ là của người đang chưa đăng nhập. Khi đăng nhập, `chuyenSangCho` CHUYỂN nguyên giỏ đó sang một hàng đợi
- *    gắn với đúng id tài khoản (`CHO:<userId>`), nên khách mới thêm sau đó không dính vào lần đồng bộ cũ và tài khoản khác không
- *    bao giờ đọc được hàng đợi này.
- *  - Mỗi bản chụp trong hàng đợi giữ nguyên token của nó và chỉ bị xóa khi server xác nhận đã nhận chính bản chụp đó.
+ * Giỏ khách lưu mã biến thể, số lượng, thời điểm thêm và token đồng bộ trong localStorage.
+ * Server tính lại giá và tồn kho. Bản chụp chờ đồng bộ gắn với tài khoản và chỉ bị xóa khi server xác nhận.
  */
 
 export interface DongKhach { id: string; sl: number; ts: number }

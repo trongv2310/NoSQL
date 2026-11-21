@@ -7,10 +7,6 @@ import k from "./khu.module.css";
 type Nen = "trang" | "xam" | "am" | "toi";
 const LOP_NEN: Record<Nen, string> = { trang: "", xam: k.xam, am: k.am, toi: k.toi };
 
-/**
- * Khung một khu của trang chủ: đầu khu (kicker, tiêu đề, mô tả, liên kết) + nội dung. `nen` đổi nền xen kẽ để trang có nhịp.
- * Tiêu đề là h2 (h1 duy nhất của trang nằm ở Quầy tư vấn); `id` gắn cho aria-labelledby.
- */
 export function Khu({ id, nen = "trang", kicker, tieuDe, moTa, lienKet, children, className = "" }: {
   id: string; nen?: Nen; kicker?: string; tieuDe: string; moTa?: string; lienKet?: { href: string; nhan: string }; children: React.ReactNode; className?: string;
 }) {
@@ -31,10 +27,6 @@ export function Khu({ id, nen = "trang", kicker, tieuDe, moTa, lienKet, children
   );
 }
 
-/**
- * Dữ liệu sản phẩm dùng chung của trang chủ: đang tải thì hiện khung chờ (giữ chiều cao, không giật), lỗi thì báo kèm nút thử lại,
- * có dữ liệu thì dựng `children`. Trạng thái nằm trong từng khu nên một khu lỗi không làm hỏng khu khác.
- */
 export function DuLieuKhu({ cho, children }: { cho?: React.ReactNode; children: () => React.ReactNode }) {
   const kho = useCatalog();
   if (kho.trangThai === "loading") return <>{cho ?? <div className={k.khoiCho} aria-hidden="true" />}</>;

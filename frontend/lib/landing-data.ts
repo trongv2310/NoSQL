@@ -360,10 +360,7 @@ export function khuyenMaiConHang(ds: SanPhamLanding[]): { chuongTrinh: ChuongTri
   return { chuongTrinh: chuongTrinhGiam(con), giamToiDa: con.filter(dangGiam).reduce((m, sp) => Math.max(m, phanTramGiam(sp)), 0) };
 }
 
-/**
- * Vợt còn hàng THẬT SỰ hợp lối chơi (cùng quy tắc `loiChoiCuaThongSo` với bộ đếm): khu "Chọn vợt theo lối chơi" dùng hàm này, không dùng `votTheoPhongCach`
- * (hàm đó được phép nới cho đủ số lượng ở bộ chọn M3). Ít hơn `toiDa` thì trả ít hơn, không bù vợt không hợp.
- */
+/** Lọc theo đúng lối chơi trước khi xếp hạng để kết quả chỉ chứa các vợt phù hợp. */
 export function votHopLoiChoi(ds: SanPhamLanding[], lc: LoiChoi, toiDa = 4): GoiYVot[] {
   return votTheoPhongCach(ds.filter((sp) => loiChoiCuaThongSo(sp.thongSoVot).includes(lc)), lc, null, toiDa);
 }

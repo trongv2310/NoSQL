@@ -1,10 +1,4 @@
-/*
- * BRAND_THEME — hợp đồng màu của Landing 3D "Shop Cầu Lông" (Claude lập từ web hiện tại, 13/11/2026).
- * Nguồn: frontend/public/css/storefront.css (--grad-brand #0b3b2b → #0f5a3f → #148f5f, --hot #ff6a13), chữ màu ấm #ffc98a ở hero,
- * chữ phụ trên nền xanh đậm #a9c5b8 (footer), font Inter (thân) + Barlow Condensed (tiêu đề), tên shop từ GET /api/site: "Shop Cầu Lông".
- * Nền 3D phải TỐI (AdditiveBlending + bloom ngưỡng 0.86 + ACES uExp 0.62): BG_DEEP/BG_SURFACE nội suy cùng sắc độ xanh của web (H ≈ 158°).
- * Ánh xạ biến cũ của Kage: --ink → BG_DEEP, --ink-2 → BG_SURFACE, --vermilion → PRIMARY, --ember → ACCENT, --gold → METAL, --bone → TEXT_MAIN, --bone-dim → TEXT_DIM.
- */
+/* Bảng màu trải nghiệm 3D lấy từ storefront.css. Nền tối phù hợp với hiệu ứng bloom của cảnh. */
 window.BRAND_THEME = (function () {
   function mk(hex) {
     var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;

@@ -1,13 +1,9 @@
-/**
- * Trạm căng cước: đọc "sức căng" của một phiên bản vợt (chuỗi do cửa hàng nhập, ví dụ "20-28 lbs") thành khoảng số thật và đổi đơn vị
- * nhất quán (1 kg = 2,20462262 lbs). Chỉ dùng số nguồn có; thiếu cận dưới thì KHÔNG tự đặt min, thiếu đơn vị hoặc không đọc được thì nói
- * "chưa có thông tin" thay vì dựng thanh trượt. Cảnh báo chỉ so với giới hạn thực, không suy ra tiếng nổ/cổ tay/hiệu suất từ con số.
- */
+/** Đọc khoảng căng theo đơn vị của nhà sản xuất. Cận dưới có thể thiếu. */
 export const LBS_MOI_KG = 2.20462262;
 export type DonViCang = "kg" | "lbs";
 
 export interface KhoangCang {
-  /** Cận dưới nguồn ghi; `null` khi nguồn chỉ có mức tối đa (không tự bịa). */
+  /** Cận dưới nguồn ghi; `null` khi nguồn chỉ có mức tối đa. */
   min: number | null;
   max: number;
   /** Đơn vị gốc của nguồn; mọi tính toán giữ ở đơn vị này để không trôi số khi đổi qua lại. */

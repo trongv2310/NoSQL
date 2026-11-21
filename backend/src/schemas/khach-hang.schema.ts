@@ -44,8 +44,5 @@ export class KhachHang {
 }
 export type KhachHangDocument = HydratedDocument<KhachHang>;
 export const KhachHangSchema = SchemaFactory.createForClass(KhachHang);
-/**
- * Thống kê/so khớp theo nhóm người chơi (trình độ + nội dung đánh). SPARSE (slide 91–92): khách chưa khai hồ sơ không có hai
- * trường này nên không chiếm chỗ trong index.
- */
+/** Index sparse phục vụ truy vấn theo trình độ và nội dung đánh. */
 KhachHangSchema.index({ 'hoSoChoi.trinhDo': 1, 'hoSoChoi.noiDung': 1 }, { name: 'ho_so_choi', sparse: true });

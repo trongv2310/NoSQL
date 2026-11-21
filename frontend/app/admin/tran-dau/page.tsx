@@ -18,7 +18,6 @@ export default function QuanLyTranDauPage() {
   const xoaDuoc = coQuyenXoa(user?.maQuyen); // nhân viên không xóa, chỉ ẩn/hiện
   const daAn = (t: TranDauV) => t.hienThi === false; // thiếu field = đang hiển thị
 
-  // Ẩn / hiện lại theo CONTRACT C-4: POST /admin/tran-dau/:id/toggle-status { value } (BE T-502 chưa có lúc viết: gọi sẽ 404 cho tới khi xong).
   const doiAn = async (t: TranDauV, hienThi: boolean) => {
     if (!hienThi && !confirm(`Ẩn trận ${t.doiA} vs ${t.doiB}? Khách sẽ không thấy trận này. Bạn có thể hiện lại sau.`)) return;
     try {

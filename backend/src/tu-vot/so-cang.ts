@@ -106,7 +106,7 @@ export function pipelineDoiChuKy(chuKy: number | null): PipelineStage[] {
   return [{ $set: { chuKyNhacNgay: chuKy === null ? '$$REMOVE' : { $literal: chuKy } } }, TINH_HAN_NHAC] as PipelineStage[];
 }
 
-/** Chụp khoảng căng và số U của phiên bản từ `thuocTinh` (M1). Không có thì không chụp. */
+/** Lấy khoảng căng và trọng lượng U của phiên bản để lưu vào hộ chiếu. */
 export function thongSoChupTuThuocTinh(tt?: ThuocTinh[] | null): { sucCangMinLbs?: number; sucCangMaxLbs?: number; trongLuongU?: number } | undefined {
   const lay = (k: string) => (tt ?? []).find((t) => t.k === k && typeof t.v === 'number')?.v as number | undefined;
   const r = { sucCangMinLbs: lay('sucCangMinLbs'), sucCangMaxLbs: lay('sucCangMaxLbs'), trongLuongU: lay('trongLuongU') };

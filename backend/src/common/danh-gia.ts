@@ -9,7 +9,7 @@ export function locPhanHoiCongKhai(): Record<string, unknown> {
   return hienDuLieuMau() ? { daXacMinh: true } : { daXacMinh: true, laDuLieuMau: { $ne: true } };
 }
 
-/** Thẻ cảm nhận chọn sẵn khi viết đánh giá (lưu bằng $addToSet nên không trùng). */
+/** Các thẻ cảm nhận cho phép khi viết đánh giá. */
 export const THE_DANH_GIA = ['dap-uy-luc', 'phan-tat-nhanh', 'de-dieu-khien', 'nang-tay', 'rung-tay', 'em-tay', 'ben', 'dung-size'] as const;
 export type TheDanhGia = (typeof THE_DANH_GIA)[number];
 

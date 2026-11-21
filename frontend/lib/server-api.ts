@@ -12,11 +12,7 @@ const HAN_CHO_MS = 2500;
 export const LAM_MOI_SAN_PHAM_GIAY = 10;
 export const LAM_MOI_NOI_DUNG_GIAY = 600;
 
-/**
- * Gọi API công khai (không kèm cookie, nên không bao giờ gắn với một người dùng cụ thể).
- * Trả `null` khi API lỗi/chậm để giao diện tự rơi về nội dung tĩnh hoặc tự tải lại phía client,
- * không ném lỗi làm hỏng cả trang.
- */
+/** Gọi API công khai từ server và trả null khi lỗi hoặc quá thời gian chờ. */
 async function layApi<T>(duongDan: string, lamMoiGiay: number): Promise<T | null> {
   try {
     const res = await fetch(`${BACKEND_URL}/api${duongDan}`, { next: { revalidate: lamMoiGiay }, signal: AbortSignal.timeout(HAN_CHO_MS) });
@@ -41,5 +37,5 @@ export interface NoiDungLanding {
   tinMoi: TinV[];
 }
 
-/** Bài viết và đánh giá. Dùng chung API `/landing` hiện có (chưa có bằng chứng cần tách endpoint riêng). */
+/** Bài viết và đánh giá. Dùng chung API `/landing` hiện có. */
 export const layNoiDungLanding = cache(() => layApi<NoiDungLanding>("/landing", LAM_MOI_NOI_DUNG_GIAY));

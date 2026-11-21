@@ -1,12 +1,4 @@
-/**
- * Biểu đồ so sánh vợt: toàn bộ phần TÍNH (chuẩn hóa thang, tọa độ radar, thanh giá/tồn, mục "điểm khác biệt", gợi ý cặp vợt) là hàm thuần, không phụ thuộc React.
- *
- * Quy tắc trung thực dữ liệu:
- * - Chỉ dùng 5 thông số thật ghi trong kho (điểm cân bằng, độ cứng thân, trọng lượng U, chiều dài mm, sức căng tối đa) + giá + tồn kho.
- * - Thang là "thang minh họa theo thông số ghi trong kho": khoảng cố định cho mỗi thông số, KHÔNG phải điểm chất lượng; không có điểm sức mạnh/kiểm soát,
- *   không điểm tổng, không xếp hạng "tốt nhất". "Cao/thấp nhất" chỉ nói giá trị của thông số đó lớn/nhỏ hơn.
- * - Thiếu dữ liệu → vị trí `null` (không vẽ, không đặt giá trị thay). Sức căng khác đơn vị (kg và lbs) thì không dựng thang chung (giống `doiChieu`).
- */
+/** Chuẩn hóa thông số kho để vẽ biểu đồ. Thiếu dữ liệu hoặc khác đơn vị căng thì bỏ điểm tương ứng. */
 import type { HoSoDoiChieu } from "./so-sanh";
 
 export const GHI_CHU_THANG = "Thang minh họa theo thông số ghi trong kho: mỗi thông số có một khoảng cố định để dễ nhìn khoảng cách giữa các vợt. Đây không phải điểm chất lượng hay xếp hạng.";

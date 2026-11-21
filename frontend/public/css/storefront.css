@@ -244,6 +244,27 @@ html { scroll-behavior: smooth; }
 .sf-hero-stats dt { font-size: 1.8rem; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
 .sf-hero-stats dd { margin: 6px 0 0; font-size: .8rem; color: rgba(255, 255, 255, .7); }
 
+.sf-hero.has-banner { --hero-accent: var(--brand-text); background: var(--bg); color: var(--ink); }
+.sf-hero.has-banner.is-orange { --hero-accent: var(--accent-700); }
+.sf-hero.has-banner.is-navy { --hero-accent: #1e5a93; }
+.sf-hero-banner { display: block; width: 100%; height: auto; }
+.sf-hero.has-banner .sf-hero-inner { gap: 12px 24px; padding-block: 16px 6px; }
+.sf-hero.has-banner .sf-hero-aside { min-width: 0; }
+.sf-hero.has-banner .sf-hero-copy > * { animation: none; }
+.sf-hero.has-banner .sf-crumbs { margin-bottom: 8px; color: var(--muted); }
+.sf-hero.has-banner .sf-crumbs a { color: var(--muted); }
+.sf-hero.has-banner .sf-crumbs a:hover { color: var(--hero-accent); }
+.sf-hero.has-banner .sf-crumbs b { color: var(--ink); }
+.sf-hero.has-banner h1 { margin-bottom: 4px; color: var(--ink); font-size: clamp(1.2rem, 2vw, 1.6rem); }
+.sf-hero.has-banner p { color: var(--muted); font-size: .875rem; line-height: 1.5; }
+.sf-hero.has-banner .sf-hero-stats { margin: 10px 0 0; padding: 0; border: 0; gap: 6px; }
+.sf-hero.has-banner .sf-hero-stats > div { display: flex; align-items: baseline; gap: 6px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.sf-hero.has-banner .sf-hero-stats dt { color: var(--hero-accent); font-size: .875rem; font-variant-numeric: tabular-nums; }
+.sf-hero.has-banner .sf-hero-stats dd { margin: 0; color: var(--ink-soft); font-size: .75rem; }
+@media (min-width: 768px) {
+    .sf-hero-image-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+
 /* 6 ── Thẻ sản phẩm ──────────────────────────────────────────────────────── */
 .product-card { border-radius: 18px; border-color: #e4ebe7; box-shadow: var(--shadow-card); transition: transform .35s var(--ease-out), box-shadow .35s ease, border-color .25s ease; }
 .product-card:hover { transform: translateY(-7px); box-shadow: 0 26px 46px -22px rgba(11, 59, 43, .45); border-color: var(--brand-200); }

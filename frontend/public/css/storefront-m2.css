@@ -1,5 +1,5 @@
 /* ==========================================================================
-   M2 — Quầy tư vấn: hồ sơ trên header, khung "Hỏi người bán" nhúng, bộ lọc thông số ở danh sách, phiếu thông số ở trang chi tiết.
+   Quầy tư vấn: hồ sơ trên header, khung "Hỏi người bán" nhúng, bộ lọc thông số ở danh sách, phiếu thông số ở trang chi tiết.
    Nạp sau storefront-shop.css. Cam chỉ cho hành động chính và con số đang chọn.
    ========================================================================== */
 
@@ -61,7 +61,7 @@
 .sf-hoso + .header-actions { margin-left: -16px; }
 @media (max-width: 767px) { .sf-hoso + .header-actions { margin-left: auto; } }
 
-/* M3: công cụ trên trang chi tiết vợt */
+/* Công cụ trên trang chi tiết vợt */
 .pdp-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 10px 0 0; }
 .pdp-tool-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; border: 1.5px solid #b7d3c6; border-radius: 12px; background: #fff; color: #0b3b2b; font-size: 0.9rem; font-weight: 700; text-decoration: none; }
 .pdp-tool-link:hover { border-color: #0f7550; color: #0b3b2b; }
@@ -69,7 +69,7 @@
 .pdp-cong-cu { display: grid; gap: 16px; margin-top: 16px; }
 .pdp-cong-cu > section { margin: 0; }
 
-/* M3: lối vào So sánh / Tủ vợt trên thanh điều hướng; dấu đếm nằm tuyệt đối nên không làm đổi kích thước hàng điều hướng */
+/* Lối vào So sánh và Tủ vợt trên thanh điều hướng; dấu đếm nằm tuyệt đối nên không làm đổi kích thước hàng điều hướng */
 .nav-co-dem { position: relative; display: inline-block; }
 .nav-dem { position: absolute; top: -9px; right: -14px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: #0b3b2b; color: #fff; font-size: 0.66rem; font-weight: 800; line-height: 16px; text-align: center; }
 .nav-dem-nhac { background: #b83c0a; }

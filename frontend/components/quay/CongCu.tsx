@@ -1,14 +1,17 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { useMemo } from "react";
+import anhCangCuoc from "@/assets/trang-chu/cang-cuoc.webp";
+import anhChonVot from "@/assets/trang-chu/chon-vot.webp";
+import anhHoiNguoiBan from "@/assets/trang-chu/hoi-nguoi-ban.webp";
+import anhSoSanh from "@/assets/trang-chu/so-sanh.webp";
+import anhTuVot from "@/assets/trang-chu/tu-vot.webp";
 import { useCatalog } from "@/components/landing/CatalogProvider";
 import { fontTieuDe } from "@/components/landing/fonts";
-import { ProductImage } from "@/components/landing/ProductImage";
-import { laVot, thongKeKho, votCoSucCang, type SanPhamLanding } from "@/lib/landing-data";
+import { thongKeKho, votCoSucCang } from "@/lib/landing-data";
 import { Khu } from "./KhuChung";
 import { SoDem } from "./SoDem";
+import { TheDieuHuong } from "./TheDieuHuong";
 import s from "./cong-cu.module.css";
 
 /** Dải số liệu ngay dưới màn hình đầu: mọi con số đếm từ danh sách sản phẩm đang bán (xem `thongKeKho`), không số nào tự đặt. */
@@ -40,55 +43,30 @@ export function DaiSoLieu() {
   );
 }
 
-/** Một ô công cụ: ảnh thật phủ kín ô, chữ ngắn đặt trên lớp phủ tối ở đáy ảnh. Cả ô là một liên kết. */
-function O({ cls, href, tieuDe, dong, hinh, nhan }: { cls: string; href: string; tieuDe: string; dong: string; hinh: React.ReactNode; nhan?: React.ReactNode }) {
-  const trong = href.startsWith("#");
-  return (
-    <li className={`${s.o} ${cls} sf-reveal`}>
-      <div className={s.anh} aria-hidden="true">{hinh}</div>
-      {nhan}
-      <div className={s.chu}>
-        <h3 className={`${s.oTen} ${fontTieuDe.className}`}>
-          {trong ? <a href={href} className={s.oLienKet}>{tieuDe}</a> : <Link href={href} className={s.oLienKet}>{tieuDe}</Link>}
-        </h3>
-        <p className={s.oDong}>{dong} <i aria-hidden="true">→</i></p>
-      </div>
-    </li>
-  );
-}
-
-const anh = (src: string, viTri: string, sizes: string) => (
-  <Image src={src} alt="" fill sizes={sizes} className={s.anhImg} style={{ objectPosition: viTri }} />
-);
-
-/**
- * Năm công cụ của shop, mỗi ô là ảnh thật + tên + một dòng (ảnh căng cước: Wikimedia Commons, xem public/images/CREDITS.txt). Ô "So sánh vợt" ghép ảnh 3 cây vợt còn hàng thật trong kho; ô "Trạm căng cước"
- * dẫn tới một cây vợt thật có ghi sức căng và hiện đúng khoảng căng đó.
- */
+/** Ảnh minh họa cho từng công cụ. Trạm căng cước lấy liên kết và khoảng căng từ vợt còn hàng. */
 export function CongCu() {
   const kho = useCatalog();
   const vot = useMemo(() => votCoSucCang(kho.items), [kho.items]);
-  const baVot = useMemo(
-    () => kho.items.filter((sp) => laVot(sp) && sp.tongTonKho > 0 && sp.hinhAnhDaiDien).sort((a, b) => b.giaSauKhuyenMai - a.giaSauKhuyenMai).slice(0, 3),
-    [kho.items],
-  );
-  const lienKetCang = (sp: SanPhamLanding | null) => (sp ? `/Home/ChiTietSanPham/${sp.id}` : "/SanPham/Index?loai=Vot");
+  const muc = [
+    { href: "#quay-tu-van", tieuDe: "Chọn vợt theo lối chơi", moTa: "3 cây hợp bạn, còn hàng", anh: anhChonVot, sizes: "(max-width: 575px) 32vw, (max-width: 991px) 100vw, 33vw" },
+    { href: "/so-sanh", tieuDe: "So sánh vợt", moTa: "Đặt 2–3 cây cạnh nhau", anh: anhSoSanh, sizes: "(max-width: 575px) 32vw, (max-width: 991px) 50vw, 33vw" },
+    { href: "/tu-vot", tieuDe: "Tủ vợt của tôi", moTa: "Nhớ ngày căng, nhắc căng lại", anh: anhTuVot, sizes: "(max-width: 575px) 32vw, (max-width: 991px) 50vw, 33vw" },
+    {
+      href: vot ? `/Home/ChiTietSanPham/${vot.id}` : "/SanPham/Index?loai=Vot",
+      tieuDe: "Trạm căng cước", moTa: "Căng đúng mức nhà sản xuất cho phép", anh: anhCangCuoc,
+      sizes: "(max-width: 575px) 32vw, 50vw", nhan: vot?.thongSoVot?.sucCang,
+    },
+    { href: "#hoi-nguoi-ban", tieuDe: "Hỏi người bán", moTa: "Hỏi giá, tồn kho, khuyến mãi", anh: anhHoiNguoiBan, sizes: "(max-width: 575px) 32vw, 50vw" },
+  ];
+
   return (
     <Khu id="cong-cu" nen="xam" kicker="Công cụ của shop" tieuDe="Chọn đúng vợt trước khi mua">
-      <ul className={s.luoi}>
-        <O cls={s.o1} href="#quay-tu-van" tieuDe="Chọn vợt theo lối chơi" dong="3 cây hợp bạn, còn hàng"
-          hinh={anh("/images/landing/hero-matchpoint.webp", "62% 45%", "(max-width: 767px) 100vw, 42vw")} />
-        <O cls={s.o2} href="/so-sanh" tieuDe="So sánh vợt" dong="Đặt 2–3 cây cạnh nhau"
-          hinh={baVot.length === 3
-            ? <span className={s.baVot}>{baVot.map((sp) => <span key={sp.id} className={s.motVot}><ProductImage src={sp.hinhAnhDaiDien} alt="" sizes="160px" hoaNen /></span>)}</span>
-            : anh("/images/landing/hero-poster.webp", "75% 50%", "(max-width: 767px) 100vw, 34vw")} />
-        <O cls={s.o3} href="/tu-vot" tieuDe="Tủ vợt của tôi" dong="Nhớ ngày căng, nhắc căng lại"
-          hinh={anh("/images/landing/cat-vot.webp", "50% 22%", "(max-width: 767px) 100vw, 25vw")} />
-        <O cls={s.o4} href={lienKetCang(vot)} tieuDe="Trạm căng cước" dong="Căng đúng mức nhà sản xuất cho phép"
-          hinh={anh("/images/thuc-te/cang-cuoc.webp", "50% 55%", "(max-width: 767px) 100vw, 58vw")}
-          nhan={vot?.thongSoVot?.sucCang ? <span className={s.nhanCang}>{vot.thongSoVot.sucCang}</span> : undefined} />
-        <O cls={s.o5} href="#hoi-nguoi-ban" tieuDe="Hỏi người bán" dong="Hỏi giá, tồn kho, khuyến mãi"
-          hinh={anh("/images/landing/cat-aoquan.webp", "50% 18%", "(max-width: 767px) 100vw, 42vw")} />
+      <ul className={s.luoi} role="list">
+        {muc.map(({ moTa, ...the }) => (
+          <li key={the.tieuDe} className="sf-reveal">
+            <TheDieuHuong {...the} gonTrenDienThoai>{moTa}</TheDieuHuong>
+          </li>
+        ))}
       </ul>
     </Khu>
   );

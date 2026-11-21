@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import productBanner from "@/assets/banners/san-pham-victor-xanh.webp";
 import { datHoSo, useHoSo } from "@/components/HoSoChoi";
 import { HoiNguoiBan } from "@/components/HoiNguoiBan";
 import { KhaySoSanh } from "@/components/so-sanh/KhaySoSanh";
@@ -133,10 +134,11 @@ export function ProductListing() {
 
   return (
     <>
-      <PageHero compact tone="green" kicker="Dụng cụ cho trận đấu của bạn"
+      <PageHero
+        banner={{ image: productBanner, alt: "Bộ sưu tập tinh tuyển VICTOR. Tối giản mà táo bạo." }}
         crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Sản phẩm", href: "/SanPham/Index" }, ...(data?.tieuDe && data.tieuDe !== "Danh sách sản phẩm" ? [{ nhan: data.tieuDe }] : [])]}
         title={data?.tieuDe ?? "Danh sách sản phẩm"}
-        sub={data ? `${data.total} sản phẩm · Chọn theo hãng, ngân sách và nhu cầu` : "Đang tìm sản phẩm…"} />
+        sub={data ? `${data.total} sản phẩm` : "Đang tìm sản phẩm…"} />
     <Page className="ls-wrap">
       <div className="ls-toolbar">
         <button type="button" className="ls-filter-toggle" aria-expanded={moLoc} onClick={() => setMoLoc((v) => !v)}><i className="fa-solid fa-sliders" aria-hidden="true" /> Bộ lọc{chips.length > 0 && <b>{chips.length}</b>}</button>

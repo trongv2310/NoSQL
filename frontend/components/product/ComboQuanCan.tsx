@@ -15,11 +15,7 @@ interface LuaChonQuan { khoa: string; sanPham: SanPhamV; bien: BienTheV }
 const LA_QUAN_CAN = /(cuốn|quấn)\s*cán/i;
 const nhanBien = (b: BienTheV) => [b.mau?.tenMau, b.size?.tenSize].filter(Boolean).join(" / ");
 
-/**
- * Combo thật: vợt đang chọn + một loại quấn cán CÓ SẴN trong catalog (truy vấn từ API, giá/tồn lấy từ máy chủ). Tổng = giá hiện tại của hai món;
- * nếu quấn cán đang có khuyến mãi hợp lệ của chính sản phẩm thì giá đó đã nằm trong giá hiện tại, không có giảm giá riêng cho combo và không có
- * dịch vụ căng cước. Thêm từng món qua giỏ M1 và nói đúng món nào đã vào giỏ (xem lib/combo.ts: bấm đúp, lỗi một phần, thử lại món thiếu).
- */
+/** Ghép vợt đang chọn với quấn cán còn hàng. Tổng giá là giá hiện hành của hai món. */
 export function ComboQuanCan({ bienVot, tenVot }: { bienVot: BienTheV | null; tenVot: string }) {
   const them = useThemBienTheKq();
   const { user, taiKhoanHienTai } = useApp();

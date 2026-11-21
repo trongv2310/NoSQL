@@ -11,11 +11,7 @@ type TrangThai =
 
 const Ctx = createContext<TrangThai | null>(null);
 
-/**
- * Chia sẻ danh sách sản phẩm cho bộ chọn vợt và khu sản phẩm. Server đã lấy được dữ liệu thì dùng luôn (`initial`);
- * nếu server không lấy được (API lỗi/chậm lúc dựng trang) thì tự tải lại phía client, có trạng thái loading,
- * lỗi và nút thử lại.
- */
+/** Dùng dữ liệu từ server khi có. Client tự tải lại nếu server chưa lấy được. */
 /** Quá ngưỡng này mà API chưa trả lời thì báo "chậm" và cho thử lại, thay vì quay loading mãi. */
 const NGUONG_CHAM_MS = 8000;
 

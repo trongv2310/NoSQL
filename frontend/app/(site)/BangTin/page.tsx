@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import newsBanner from "@/assets/banners/bang-tin-axelsen-momota.webp";
 import { CountUp } from "@/components/Motion";
 import { BangDiem, NewsCard, NewsLead, SpMini, TinCard } from "@/components/News";
 import { PageHero } from "@/components/PageHero";
@@ -50,9 +51,9 @@ export default function BangTinPage() {
   return (
     <>
       <link href="/css/bangtin.css" rel="stylesheet" />
-      <PageHero compact tone="navy" kicker="Tin tức & kết quả" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Bảng tin" }]}
-        title={<>Bảng tin <em>cầu lông</em></>}
-        sub="Tin thi đấu, hồ sơ tuyển thủ và sản phẩm mới — cập nhật cho người chơi cầu lông."
+      <PageHero tone="navy" crumbs={[{ nhan: "Trang chủ", href: "/" }, { nhan: "Bảng tin" }]}
+        banner={{ image: newsBanner, alt: "Viktor Axelsen và Kento Momota trong tư thế chuẩn bị đánh cầu.", titleInImage: true }}
+        title="Bảng tin cầu lông"
         stats={data ? [{ value: <CountUp to={data.tong.tin} />, nhan: "Bài viết" }, { value: <CountUp to={data.tong.tran} />, nhan: "Trận đấu" }, { value: <CountUp to={data.tong.luotXem} />, nhan: "Lượt xem" }] : undefined}
         aside={
           <form className="nw-search" onSubmit={(e) => { e.preventDefault(); di(loai, keyword); }} role="search">

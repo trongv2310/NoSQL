@@ -1,43 +1,43 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
+import anhAoQuan from "@/assets/trang-chu/danh-muc-trang-phuc.webp";
+import anhGiay from "@/assets/trang-chu/danh-muc-giay.webp";
+import anhPhuKien from "@/assets/trang-chu/danh-muc-phu-kien.webp";
+import anhVot from "@/assets/trang-chu/danh-muc-vot.webp";
 import { useCatalog } from "@/components/landing/CatalogProvider";
 import { fontTieuDe } from "@/components/landing/fonts";
 import { vnd } from "@/lib/format";
 import { LOAI, demTheoHang, demTheoLoai, lienKetHang, lienKetVotTheoGia, votTheoTamGia, type KhoaLoai } from "@/lib/landing-data";
 import { DuLieuKhu, Khu } from "./KhuChung";
+import { TheDieuHuong } from "./TheDieuHuong";
 import s from "./gian-hang.module.css";
 
 const THU_TU_LOAI: KhoaLoai[] = ["vot", "giay", "aoquan", "phukien"];
-const ANH_LOAI: Record<KhoaLoai, string> = { vot: "cat-vot", giay: "cat-giay", aoquan: "cat-aoquan", phukien: "cat-phukien" };
+const ANH_LOAI = { vot: anhVot, giay: anhGiay, aoquan: anhAoQuan, phukien: anhPhuKien };
 
-/** Danh mục dạng mosaic: vợt là ô lớn. Số sản phẩm, số còn hàng, số đang giảm và giá thấp nhất đều đếm từ dữ liệu. */
+/** Số sản phẩm và giá thấp nhất trong từng danh mục dùng dữ liệu kho. */
 export function DanhMucBento() {
   const kho = useCatalog();
   const dem = useMemo(() => demTheoLoai(kho.items), [kho.items]);
   const ok = kho.trangThai === "ok";
   return (
     <Khu id="danh-muc" kicker="Danh mục" tieuDe="Bốn nhóm hàng của shop" lienKet={{ href: "/SanPham/Index", nhan: "Xem tất cả sản phẩm" }}>
-      <ul className={s.mosaic}>
-        {THU_TU_LOAI.map((khoa, i) => {
+      <ul className={s.danhMuc} role="list">
+        {THU_TU_LOAI.map((khoa) => {
           const d = dem[khoa];
           return (
-            <li key={khoa} className={`${s.manh} ${i === 0 ? s.manhLon : ""} ${i === 3 ? s.manhRong : ""} sf-reveal`}>
-              <Link href={`/SanPham/Index?loai=${LOAI[khoa].slug}`} className={s.manhLienKet}>
-                <Image src={`/images/landing/${ANH_LOAI[khoa]}.webp`} alt="" fill sizes={i === 0 ? "(max-width: 767px) 100vw, 50vw" : "(max-width: 767px) 50vw, 25vw"} className={s.manhAnh} />
-                <span className={s.manhPhu} aria-hidden="true" />
-                <span className={s.manhChu}>
-                  <b className={`${s.manhTen} ${fontTieuDe.className}`}>{LOAI[khoa].ten}</b>
-                  {ok && d.so > 0 && (
-                    <span className={s.manhSo}>
-                      <span>{d.so} sản phẩm</span>
-                      {d.giaTu !== null && <span>từ {vnd(d.giaTu)}</span>}
-                    </span>
-                  )}
-                </span>
-              </Link>
+            <li key={khoa} className="sf-reveal">
+              <TheDieuHuong href={`/SanPham/Index?loai=${LOAI[khoa].slug}`} tieuDe={LOAI[khoa].ten}
+                anh={ANH_LOAI[khoa]} sizes="(max-width: 991px) 50vw, 25vw">
+                {ok && d.so > 0 && (
+                  <>
+                    <span>{d.so} sản phẩm</span>
+                    {d.giaTu !== null && <strong>từ {vnd(d.giaTu)}</strong>}
+                  </>
+                )}
+              </TheDieuHuong>
             </li>
           );
         })}
