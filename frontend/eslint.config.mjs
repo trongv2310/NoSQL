@@ -20,6 +20,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Thư viện đã nén / file tĩnh (vd. public/trai-nghiem/vendor/three.min.js): không phải mã của dự án.
+    "public/**",
   ]),
 ]);
 

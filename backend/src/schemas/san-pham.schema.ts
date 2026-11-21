@@ -249,3 +249,11 @@ PhanHoiSchema.index({ sanPham: 1, 'nguoiDanh.trinhDo': 1, danhGia: -1 }, { name:
  * (chỉ xét "có trường hay không"), partial lọc theo một điều kiện bất kỳ, nên đánh giá import/chưa xác minh không chiếm chỗ trong index.
  */
 PhanHoiSchema.index({ sanPham: 1, ngayPhanHoi: -1 }, { name: 'cong_khai_moi_nhat', partialFilterExpression: { daXacMinh: true } });
+/**
+ * Mỗi khách chỉ có MỘT đánh giá (đã xác minh) cho một sản phẩm: chống gửi lặp để kéo điểm trung bình. Unique + partial: dữ liệu mẫu/import
+ * (daXacMinh false, có thể không có khachHang) không bị ràng buộc. Hai request gửi song song thì request sau nhận lỗi trùng khoá (E11000).
+ */
+PhanHoiSchema.index(
+  { khachHang: 1, sanPham: 1 },
+  { name: 'mot_danh_gia_moi_khach', unique: true, partialFilterExpression: { daXacMinh: true, khachHang: { $exists: true } } },
+);

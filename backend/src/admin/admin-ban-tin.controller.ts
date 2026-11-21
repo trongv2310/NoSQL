@@ -11,7 +11,7 @@ import { CurrentUser } from '../auth/auth.decorators';
 import { lamSachHtmlTin } from '../common/lam-sach-html';
 import { Roles } from '../auth/auth.guards';
 import type { NguoiDung } from '../auth/auth.types';
-import { likeRegex, parseObjectId, phanTrang, toBool } from '../common/helpers';
+import { likeRegex, parseObjectId, phanTrangDb, toBool } from '../common/helpers';
 import { idOf } from '../common/mappers';
 import { anhInterceptor, duongDanTuongDoi, xoaAnhUpload } from '../common/upload';
 import { ChatbotService } from '../cong-khai/chatbot.service';
@@ -101,14 +101,21 @@ export class AdminBanTinController {
         filter.ngayDang = { $gte: tu, $lte: den };
       }
     }
-    const all = await this.model
-      .find(filter)
-      .populate({ path: 'sanPham', select: 'tenSanPham hinhAnhDaiDien' })
-      .populate('tranDau')
-      .populate('tacGia', 'tenDangNhap')
-      .sort({ thuTu: 1, ngayDang: -1, _id: -1 })
-      .lean();
-    const trang = phanTrang(all, Number(q.page) || 1, 10);
+    const trang = await phanTrangDb(
+      () => this.model.countDocuments(filter),
+      (skip, limit) =>
+        this.model
+          .find(filter)
+          .populate({ path: 'sanPham', select: 'tenSanPham hinhAnhDaiDien' })
+          .populate('tranDau')
+          .populate('tacGia', 'tenDangNhap')
+          .sort({ thuTu: 1, ngayDang: -1, _id: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+      Number(q.page) || 1,
+      10,
+    );
     return { ...trang, items: trang.items.map(tinView), loai, keyword, dateRange };
   }
 

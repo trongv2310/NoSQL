@@ -14,7 +14,7 @@ import { SDT_MESSAGE, SDT_REGEX } from '../auth/auth.dto';
 import { Roles } from '../auth/auth.guards';
 import type { NguoiDung } from '../auth/auth.types';
 import { CauHinhService, LOGO_MAC_DINH } from '../cau-hinh/cau-hinh.service';
-import { likeRegex, parseObjectId, phanTrang } from '../common/helpers';
+import { likeRegex, parseObjectId, phanTrangDb } from '../common/helpers';
 import { idOf, khuyenMaiView } from '../common/mappers';
 import { anhInterceptor, duongDanTuongDoi } from '../common/upload';
 import { tranDauView } from '../cong-khai/cong-khai.service';
@@ -51,12 +51,18 @@ export class AdminKhuyenMaiController {
   @Get()
   async danhSach(@Query() q: Record<string, any>) {
     const keyword = String(q.keyword ?? '').trim();
-    const [all, dem] = await Promise.all([
-      this.kmModel.find(keyword ? { tenChuongTrinh: likeRegex(keyword) } : {}).sort({ ngayBatDau: -1 }).lean(),
-      this.spModel.aggregate<{ _id: any; n: number }>([{ $match: { deletedAt: null, khuyenMai: { $ne: null } } }, { $group: { _id: '$khuyenMai', n: { $sum: 1 } } }]),
+    const loc = keyword ? { tenChuongTrinh: likeRegex(keyword) } : {};
+    const trang = await phanTrangDb(
+      () => this.kmModel.countDocuments(loc),
+      (skip, limit) => this.kmModel.find(loc).sort({ ngayBatDau: -1, _id: -1 }).skip(skip).limit(limit).lean(),
+      Number(q.page) || 1,
+      10,
+    );
+    const dem = await this.spModel.aggregate<{ _id: any; n: number }>([
+      { $match: { deletedAt: null, khuyenMai: { $in: trang.items.map((k) => k._id) } } },
+      { $group: { _id: '$khuyenMai', n: { $sum: 1 } } },
     ]);
     const demMap = new Map(dem.map((d) => [String(d._id), d.n]));
-    const trang = phanTrang(all, Number(q.page) || 1, 10);
     return { ...trang, items: trang.items.map((k) => ({ ...khuyenMaiView(k), soSanPham: demMap.get(String(k._id)) ?? 0 })) };
   }
 
@@ -136,19 +142,40 @@ export class AdminTranDauController {
     if (dto.tiSo && !dto.doiThang) {
       throw new BadRequestException('Hãy chọn bên thắng khi đã nhập tỉ số.');
     }
+    if (dto.tiSo && dto.doiThang) {
+      // Bên thắng phải là bên thắng nhiều ván hơn theo tỉ số (vd. "10-21, 12-21" thì B thắng, không thể ghi A thắng).
+      let vanA = 0;
+      let vanB = 0;
+      for (const van of dto.tiSo.split(',')) {
+        const [a, b] = van.trim().split('-').map(Number);
+        if (a === b) throw new BadRequestException(`Ván ${van.trim()} không hợp lệ: một ván cầu lông không thể hòa.`);
+        if (a > b) vanA++;
+        else vanB++;
+      }
+      if (vanA === vanB) throw new BadRequestException('Tỉ số chưa phân định thắng thua (hai bên thắng số ván bằng nhau).');
+      const theoTiSo = vanA > vanB ? 'A' : 'B';
+      if (dto.doiThang !== theoTiSo) {
+        throw new BadRequestException(`Bên thắng không khớp tỉ số: theo tỉ số thì bên ${theoTiSo} thắng (${vanA}-${vanB} ván).`);
+      }
+    }
   }
 
   @Get()
   async danhSach(@Query() q: Record<string, any>) {
     const keyword = String(q.keyword ?? '').trim();
     const re = keyword ? likeRegex(keyword) : null;
-    const all = await this.model
-      .find(re ? { $or: [{ tenGiaiDau: re }, { noiDung: re }, { doiA: re }, { doiB: re }] } : {})
-      .sort({ ngayThiDau: -1, _id: -1 })
-      .lean();
-    const dem = await this.tinModel.aggregate<{ _id: any; n: number }>([{ $match: { deletedAt: null, tranDau: { $ne: null } } }, { $group: { _id: '$tranDau', n: { $sum: 1 } } }]);
+    const loc = re ? { $or: [{ tenGiaiDau: re }, { noiDung: re }, { doiA: re }, { doiB: re }] } : {};
+    const trang = await phanTrangDb(
+      () => this.model.countDocuments(loc),
+      (skip, limit) => this.model.find(loc).sort({ ngayThiDau: -1, _id: -1 }).skip(skip).limit(limit).lean(),
+      Number(q.page) || 1,
+      10,
+    );
+    const dem = await this.tinModel.aggregate<{ _id: any; n: number }>([
+      { $match: { deletedAt: null, tranDau: { $in: trang.items.map((t) => t._id) } } },
+      { $group: { _id: '$tranDau', n: { $sum: 1 } } },
+    ]);
     const demMap = new Map(dem.map((d) => [String(d._id), d.n]));
-    const trang = phanTrang(all, Number(q.page) || 1, 10);
     return { ...trang, items: trang.items.map((t) => ({ ...tranDauView(t), hienThi: t.hienThi !== false, soTin: demMap.get(String(t._id)) ?? 0 })) };
   }
 
@@ -253,8 +280,12 @@ export class AdminTaiKhoanController {
     if (q.maQuyen) {
       filter.maQuyen = Number(q.maQuyen);
     }
-    const all = await this.tkModel.find(filter).sort({ maQuyen: 1, _id: 1 }).lean();
-    const trang = phanTrang(all, Number(q.page) || 1, 10);
+    const trang = await phanTrangDb(
+      () => this.tkModel.countDocuments(filter),
+      (skip, limit) => this.tkModel.find(filter).sort({ maQuyen: 1, _id: 1 }).skip(skip).limit(limit).lean(),
+      Number(q.page) || 1,
+      10,
+    );
     const khs = await this.khModel.find({ taiKhoan: { $in: trang.items.map((t) => t._id) } }).lean();
     const khMap = new Map(khs.map((k) => [String(k.taiKhoan), k]));
     return { ...trang, items: trang.items.map((t) => this.view(t, khMap.get(String(t._id)))), phanQuyens: TEN_PHAN_QUYEN };

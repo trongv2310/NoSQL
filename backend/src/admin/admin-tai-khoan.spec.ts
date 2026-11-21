@@ -157,7 +157,8 @@ describe('AdminTaiKhoanController.xoa', () => {
 describe('AdminTaiKhoanController đọc tài khoản', () => {
   it('GET danh sách và chi tiết vẫn trả đủ ba quyền', async () => {
     const { ctrl, tk, kh, taiKhoan } = dungController();
-    Object.assign(tk, { find: () => ({ sort: () => ({ lean: async () => [taiKhoan] }) }) });
+    const q = { sort: () => q, skip: () => q, limit: () => q, lean: async () => [taiKhoan] };
+    Object.assign(tk, { find: () => q, countDocuments: async () => 1 });
     Object.assign(kh, { find: () => ({ lean: async () => [] }), findOne: () => ({ lean: async () => null }) });
     tk.findById.mockReturnValueOnce(Object.assign(Promise.resolve(taiKhoan), { lean: async () => taiKhoan }));
     const phanQuyens = [

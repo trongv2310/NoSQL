@@ -9,11 +9,18 @@ const ID = '64b000000000000000000010';
 const dto = (extra: Partial<TranDauDto> = {}) => Object.assign(new TranDauDto(), {
   tenGiaiDau: 'Giải A', vong: 'Chung kết', noiDung: 'Đơn nam', doiA: 'A', doiB: 'B', ngayThiDau: '2026-10-01', ...extra,
 });
+/** Query giả: sort → skip → limit → lean (danh sách phân trang ngay trong MongoDB). */
+function truyVan(rows: unknown[], sort = vi.fn()) {
+  const q = { boQua: 0, gioiHan: Infinity, sort: sort.mockImplementation(() => q), skip: (n: number) => { q.boQua = n; return q; }, limit: (n: number) => { q.gioiHan = n; return q; }, lean: async () => rows.slice(q.boQua, q.boQua + q.gioiHan) };
+  return q;
+}
 function dungController() {
   const rows = Array.from({ length: 12 }, (_, i) => ({ _id: i === 10 ? ID : String(i), tenGiaiDau: `Giải ${i}`, doiA: 'A', doiB: 'B', doiThang: 'A' }));
-  const lean = vi.fn().mockResolvedValue(rows);
-  const sort = vi.fn(() => ({ lean }));
-  const model = { find: vi.fn(() => ({ sort })), findById: vi.fn(() => ({ lean: vi.fn().mockResolvedValue(rows[10]) })), create: vi.fn().mockResolvedValue({}), updateOne: vi.fn().mockResolvedValue({ matchedCount: 1 }) };
+  const sort = vi.fn();
+  const model = {
+    find: vi.fn(() => truyVan(rows, sort)), countDocuments: vi.fn(async () => rows.length),
+    findById: vi.fn(() => ({ lean: vi.fn().mockResolvedValue(rows[10]) })), create: vi.fn().mockResolvedValue({}), updateOne: vi.fn().mockResolvedValue({ matchedCount: 1 }),
+  };
   const tin = { aggregate: vi.fn().mockResolvedValue([{ _id: ID, n: 3 }]), countDocuments: vi.fn().mockResolvedValue(3) };
   return { ctrl: new AdminTranDauController(model as never, tin as never), model, tin, sort };
 }
@@ -32,9 +39,9 @@ describe('AdminTranDauController', () => {
 
   it('HIỆN TẠI: danh sách rỗng không có từ khóa dùng filter rỗng', async () => {
     const { ctrl, model } = dungController();
-    model.find.mockReturnValueOnce({ sort: () => ({ lean: async () => [] }) } as never);
+    model.countDocuments.mockResolvedValueOnce(0);
     expect((await ctrl.danhSach({})).items).toEqual([]);
-    expect(model.find).toHaveBeenCalledWith({});
+    expect(model.countDocuments).toHaveBeenCalledWith({});
   });
 
   it('HIỆN TẠI: chi tiết trả hình dạng trận và số bài viết', async () => {
@@ -62,8 +69,25 @@ describe('AdminTranDauController', () => {
 
   it('HIỆN TẠI: tạo có tỉ số giữ đội thắng', async () => {
     const { ctrl, model } = dungController();
-    await ctrl.tao(dto({ tiSo: '21-11', doiThang: 'B' }));
-    expect(model.create).toHaveBeenCalledWith(expect.objectContaining({ tiSo: '21-11', doiThang: 'B' }));
+    await ctrl.tao(dto({ tiSo: '11-21', doiThang: 'B' }));
+    expect(model.create).toHaveBeenCalledWith(expect.objectContaining({ tiSo: '11-21', doiThang: 'B' }));
+  });
+
+  it.each([
+    ['10-21, 12-21', 'A'],
+    ['21-19, 18-21, 21-15', 'B'],
+  ])('tỉ số %s mà ghi bên %s thắng → 400, không ghi DB', async (tiSo, doiThang) => {
+    const { ctrl, model } = dungController();
+    await expect(ctrl.tao(dto({ tiSo, doiThang }))).rejects.toThrow(/không khớp tỉ số/);
+    await expect(ctrl.capNhat(ID, dto({ tiSo, doiThang }))).rejects.toBeInstanceOf(BadRequestException);
+    expect(model.create).not.toHaveBeenCalled();
+    expect(model.updateOne).not.toHaveBeenCalled();
+  });
+
+  it.each(['21-21', '21-15, 15-21'])('tỉ số không phân định (%s) → 400', async (tiSo) => {
+    const { ctrl, model } = dungController();
+    await expect(ctrl.tao(dto({ tiSo, doiThang: 'A' }))).rejects.toBeInstanceOf(BadRequestException);
+    expect(model.create).not.toHaveBeenCalled();
   });
 
   it.each(['tao', 'capNhat'] as const)('HIỆN TẠI: %s từ chối hai đội trùng sau khi trim', async (method) => {
@@ -142,7 +166,8 @@ describe('C-4: ẩn/hiện trận đấu', () => {
   it.each([undefined, true, false])('GET admin trả hienThi=%s; field thiếu coi là true', async (hienThi) => {
     const { ctrl, model } = dungController();
     const row = { _id: ID, tenGiaiDau: 'Giải A', hienThi };
-    model.find.mockReturnValueOnce({ sort: () => ({ lean: async () => [row] }) } as never);
+    model.find.mockReturnValueOnce(truyVan([row]) as never);
+    model.countDocuments.mockResolvedValueOnce(1);
     model.findById.mockReturnValueOnce({ lean: vi.fn().mockResolvedValue(row) });
     const list = await ctrl.danhSach({});
     expect(list.items[0]).toMatchObject({ id: ID, hienThi: hienThi !== false });

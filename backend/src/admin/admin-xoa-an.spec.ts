@@ -8,12 +8,24 @@ import { AdminSanPhamController, BienTheDto, SanPhamDto } from './admin-san-pham
 vi.mock('../common/upload', async (importOriginal) => ({ ...await importOriginal<typeof import('../common/upload')>(), xoaAnhUpload: vi.fn() }));
 const ID = '64b000000000000000000010';
 const BIEN_THE = '64b000000000000000000011';
-const list = (data: unknown[]) => ({ populate: () => ({ sort: () => ({ lean: async () => data }) }), sort: () => ({ lean: async () => data }), lean: async () => data });
+/** Query giả của Mongoose: hỗ trợ chuỗi populate/sort/skip/limit/lean (danh sách quản trị phân trang ngay trong MongoDB). */
+const list = (data: unknown[]) => {
+  const q = {
+    boQua: 0,
+    gioiHan: Infinity,
+    populate: () => q,
+    sort: () => q,
+    skip: (n: number) => { q.boQua = n; return q; },
+    limit: (n: number) => { q.gioiHan = n; return q; },
+    lean: async () => data.slice(q.boQua, q.boQua + q.gioiHan),
+  };
+  return q;
+};
 
 function sanPham() {
   const sp = { findOne: vi.fn(() => ({ populate: () => ({ lean: async () => ({ _id: ID, tenSanPham: 'Vợt' }) }) })), updateOne: vi.fn().mockResolvedValue({}), find: vi.fn(() => list([])), countDocuments: vi.fn().mockResolvedValue(0) };
   const bt = { find: vi.fn(() => list([{ _id: BIEN_THE }])), findById: vi.fn(), aggregate: vi.fn().mockResolvedValue([]), countDocuments: vi.fn().mockResolvedValue(0) };
-  const kho = { find: vi.fn(() => list([])) };
+  const kho = { find: vi.fn(() => list([])), exists: vi.fn().mockResolvedValue({ _id: 'co' }) };
   const gio = { deleteMany: vi.fn().mockResolvedValue({}) };
   const don = { exists: vi.fn().mockResolvedValue(false) };
   const ctrl = new AdminSanPhamController(sp as never, bt as never, kho as never, kho as never, kho as never, kho as never, {} as never, {} as never, gio as never, don as never, {} as never);
@@ -70,7 +82,7 @@ describe('Xóa sản phẩm và biến thể', () => {
   it('HIỆN TẠI: danh sách quản trị chỉ truy vấn sản phẩm chưa xóa', async () => {
     const { ctrl, sp } = sanPham();
     const result = await ctrl.danhSach({});
-    expect(sp.find).toHaveBeenCalledWith({ deletedAt: null });
+    expect(sp.countDocuments).toHaveBeenCalledWith({ deletedAt: null });
     expect(result.items).toEqual([]);
   });
 });
@@ -213,6 +225,7 @@ describe('Danh sách sản phẩm ẩn và daAn', () => {
   it.each(['1', 'true'])('an=%s: lọc sản phẩm ẩn và trả daAn=true', async (an) => {
     const { ctrl, sp } = sanPham();
     sp.find.mockReturnValueOnce(list([{ _id: ID, tenSanPham: 'Vợt', deletedAt: new Date() }]));
+    sp.countDocuments.mockResolvedValueOnce(1);
     const result = await ctrl.danhSach({ an });
     expect(sp.find).toHaveBeenCalledWith({ deletedAt: { $ne: null } });
     expect(result.items).toHaveLength(1);
@@ -222,6 +235,7 @@ describe('Danh sách sản phẩm ẩn và daAn', () => {
   it.each([undefined, '', '0', 'false', 'TRUE', '2', true, 1, ['1'], { $ne: null }])('an không bật hợp lệ (%j): giữ lọc mặc định và daAn=false', async (an) => {
     const { ctrl, sp } = sanPham();
     sp.find.mockReturnValueOnce(list([{ _id: ID, tenSanPham: 'Vợt' }]));
+    sp.countDocuments.mockResolvedValueOnce(1);
     const result = await ctrl.danhSach({ an });
     expect(sp.find).toHaveBeenCalledWith({ deletedAt: null });
     expect(result.items[0]).toMatchObject({ id: ID, daAn: false });
@@ -230,6 +244,7 @@ describe('Danh sách sản phẩm ẩn và daAn', () => {
   it('an=1 vẫn giữ bộ lọc loại/hãng, escape từ khóa, phân trang và tồn kho', async () => {
     const { ctrl, sp, bt } = sanPham();
     sp.find.mockReturnValueOnce(list(Array.from({ length: 12 }, () => ({ _id: ID, tenSanPham: 'Vợt', deletedAt: new Date() }))));
+    sp.countDocuments.mockResolvedValueOnce(12);
     bt.aggregate.mockResolvedValueOnce([{ _id: ID, t: 7 }]);
     const result = await ctrl.danhSach({ an: '1', maLoai: ID, maHang: BIEN_THE, keyword: 'Vợt.*', page: '2' });
     expect(sp.find).toHaveBeenCalledWith({

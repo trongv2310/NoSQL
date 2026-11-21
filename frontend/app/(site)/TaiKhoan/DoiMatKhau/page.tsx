@@ -35,7 +35,7 @@ export default function DoiMatKhauPage() {
   return (
     <Page>
       <form className="card mx-auto" style={{ maxWidth: 440 }} onSubmit={gui}><div className="card-body p-4">
-        <h4 className="mb-3">Đổi mật khẩu</h4>
+        <h1 className="h4 mb-3">Đổi mật khẩu</h1>
         {loi && <ErrorBox message={loi} />}
         <div className="mb-3"><label className="form-label" htmlFor="dmk-1">Mật khẩu cũ</label><input id="dmk-1" type="password" className="form-control" required value={f.matKhauCu} onChange={dat("matKhauCu")} /></div>
         <div className="mb-3"><label className="form-label" htmlFor="dmk-2">Mật khẩu mới</label><input id="dmk-2" type="password" className="form-control" required minLength={6} value={f.matKhauMoi} onChange={dat("matKhauMoi")} /></div>

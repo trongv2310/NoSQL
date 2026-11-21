@@ -209,7 +209,7 @@ export default function ChiTietSanPhamPage() {
 
   return (
     <Page>
-      <nav className="mb-3 small text-muted">
+      <nav className="mb-3 small text-muted pdp-crumbs" aria-label="Đường dẫn">
         <Link href="/">Trang chủ</Link> / <Link href="/SanPham/Index">Sản phẩm</Link>
         {sp.loai && <> / <Link href={`/SanPham/Index?loai=${sp.loai.id}`}>{sp.loai.tenLoai}</Link></>} / {sp.tenSanPham}
       </nav>

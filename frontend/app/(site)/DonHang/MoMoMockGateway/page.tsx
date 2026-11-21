@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ErrorBox, Loading, Page } from "@/components/Ui";
 import { apiPost, loiTuApi } from "@/lib/api";
@@ -10,6 +10,7 @@ import { useApi } from "@/lib/hooks";
 /** Cổng MoMo giả lập (MOMO_MOCK=true): xác nhận hoặc hủy thanh toán rồi quay về trang kết quả kèm chữ ký hợp lệ. */
 export default function MomoMockPage() {
   const orderId = useSearchParams().get("orderId");
+  const router = useRouter();
   const { data, error, loading } = useApi<{ soDonHang: number; tongTien: number; hoTen: string | null }>(orderId ? `/don-hang/momo/mock/${orderId}` : null);
   const [dang, setDang] = useState(false);
   const [loi, setLoi] = useState<string | null>(null);
@@ -18,7 +19,8 @@ export default function MomoMockPage() {
     setDang(true);
     try {
       const kq = await apiPost<Record<string, string>>("/don-hang/momo/mock/xu-ly", { orderId, action });
-      window.location.href = `/DonHang/ThanhToanMomoSuccess?${new URLSearchParams(kq).toString()}`;
+      // replace: không để nút Back quay lại cổng giả lập của giao dịch đã xử lý.
+      router.replace(`/DonHang/ThanhToanMomoSuccess?${new URLSearchParams(kq).toString()}`);
     } catch (e) {
       setLoi(loiTuApi(e));
       setDang(false);
