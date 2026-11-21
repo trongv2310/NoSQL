@@ -4,27 +4,25 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useApp } from "@/components/AppProviders";
-import b from "@/components/product/bento.module.css";
+import { fontTieuDe } from "@/components/landing/fonts";
 import { Page } from "@/components/Ui";
 import { api, loiTuApi } from "@/lib/api";
 import { vnd } from "@/lib/format";
-import { boKhoiSoSanh, docUrlSoSanh, doiChieu, duongDanSoSanh, thayTrongSoSanh, themVaoSoSanh, TOI_DA_SO_SANH, TOI_THIEU_SO_SANH, type MucSoSanh } from "@/lib/so-sanh";
-import { diemKhacBiet, goiYCapVot, moTaBieuDo, tinhTruc } from "@/lib/so-sanh-bieu-do";
+import { boKhoiSoSanh, docUrlSoSanh, duongDanSoSanh, thayTrongSoSanh, themVaoSoSanh, TOI_DA_SO_SANH, TOI_THIEU_SO_SANH, type MucSoSanh } from "@/lib/so-sanh";
+import { goiYCapVot, moTaBieuDo, tinhTruc } from "@/lib/so-sanh-bieu-do";
 import { bienTheMacDinh, taoHoSoDoiChieu, taoUngVien, tenNganVot } from "@/lib/so-sanh-du-lieu";
 import type { SanPhamV, Trang } from "@/lib/types";
 import { BangSoSanh } from "./BangSoSanh";
 import { BieuDoNhen } from "./BieuDoNhen";
-import { DauVot, nhanVot, type ChiTietNgan, type Cot, type CotOk, type VotBieuDo } from "./chung";
-import { KhacBiet } from "./KhacBiet";
+import { nhanVot, type ChiTietNgan, type Cot, type CotOk, type VotBieuDo } from "./chung";
+import { DongThongSo } from "./DongThongSo";
 import { ManHinhMoi } from "./ManHinhMoi";
 import { datSoSanh } from "./so-sanh-store";
 import s from "./so-sanh.module.css";
-import { TheVot } from "./TheVot";
-import { ThanhGiaTon, ThuocDo } from "./ThuocDo";
+import { OChon, TheVot, type SoGia } from "./TheVot";
 
 type Tai = { trangThai: "dang" } | { trangThai: "loi"; thongBao: string } | { trangThai: "ok"; ct: ChiTietNgan };
 interface VotChon { id: string; ten: string; sp: SanPhamV }
-type KieuXem = "bieu-do" | "bang";
 
 const NOI_DUNG_LOI_URL: Record<string, string> = {
   "id-sai": "Một mã vợt trong liên kết không hợp lệ nên đã bỏ qua.",
@@ -58,9 +56,12 @@ function useDanhSachVot() {
 }
 
 /**
- * Trang so sánh 2–3 vợt. URL là nguồn chính (chia sẻ/reload/Back-Forward): `/so-sanh?v1=…&b1=…&v2=…`. Dữ liệu giá, tồn kho, 5 thông số lấy thật từ API
- * cho đúng phiên bản; biểu đồ/thước đo/điểm khác biệt chỉ từ dữ liệu thật và thang minh họa (xem `lib/so-sanh-bieu-do.ts`). ID sai/404/phiên bản không thuộc vợt
- * được báo ngay trong thẻ của cột đó, không so nhầm cấu hình. Bảng đầy đủ luôn có trong trang (ẩn thị giác khi xem dạng biểu đồ) làm bản dự phòng truy cập.
+ * Trang so sánh 2–3 vợt. URL là nguồn chính (chia sẻ/reload/Back-Forward): `/so-sanh?v1=…&b1=…&v2=…`. Giá, tồn kho, 5 thông số lấy thật từ API
+ * cho đúng phiên bản; thước và biểu đồ chỉ từ dữ liệu thật trên thang minh họa (xem `lib/so-sanh-bieu-do.ts`). ID sai/404/phiên bản không thuộc vợt
+ * được báo ngay trong thẻ của cột đó, không so nhầm cấu hình.
+ *
+ * Bố cục: hàng thẻ vợt (kèm ô trống để thêm vợt) → năm hàng thông số thẳng cột với thẻ → biểu đồ nhện. Bảng chữ đầy đủ luôn nằm trong trang
+ * (ẩn thị giác) làm bản cho trình đọc màn hình.
  */
 export function SoSanhVot() {
   const sp = useSearchParams();
@@ -73,13 +74,11 @@ export function SoSanhVot() {
   const [tai, setTai] = useState<Record<string, Tai>>({});
   const { ds: dsVot, loi: loiDs, thuLai } = useDanhSachVot();
   const [trangSao, setTrangSao] = useState<"" | "da" | "that-bai">("");
-  const [xem, setXem] = useState<KieuXem>("bieu-do");
+  const [chiKhac, setChiKhac] = useState(false);
   const oSao = useRef<HTMLInputElement>(null);
 
   // URL là nguồn chính: giữ khay so sánh (localStorage) khớp URL để chọn tiếp từ thẻ ở các trang khác.
   useEffect(() => { if (muc.length) datSoSanh(muc); }, [muc]);
-
-  const chonXem = (k: KieuXem) => setXem(k);
 
   // Tải chi tiết từng vợt theo URL (một lần cho mỗi id; đổi phiên bản không gọi lại).
   useEffect(() => {
@@ -108,155 +107,132 @@ export function SoSanhVot() {
   });
   const dayDu = cot.filter((c): c is CotOk => c.trangThai === "ok");
   const hs = dayDu.map((c) => ({ ...c.hs, nhan: nhanVot(c.i) }));
-  const loiDoiChieu = dayDu.length >= TOI_THIEU_SO_SANH ? doiChieu(hs) : [];
   const url = typeof window === "undefined" ? "" : `${window.location.origin}${pathname}${query ? `?${query}` : ""}`;
 
-  // Dữ liệu biểu đồ: tính từ hồ sơ thật của các vợt đã tải; đổi phiên bản thì tính lại ngay (rẻ, chỉ vài chục phép tính).
-  const coBieuDo = dayDu.length >= TOI_THIEU_SO_SANH;
+  // Dữ liệu so sánh: tính từ hồ sơ thật của các vợt đã tải; đổi phiên bản thì tính lại ngay (vài chục phép tính).
+  const du = dayDu.length >= TOI_THIEU_SO_SANH;
   const truc = tinhTruc(hs);
   const vot: VotBieuDo[] = dayDu.map((c) => ({ i: c.i, ten: c.ct.sanPham.tenSanPham, ngan: tenNganVot(c.ct.sanPham.tenSanPham) }));
-  const khacBiet = coBieuDo ? diemKhacBiet(hs, truc) : [];
-  const viTri = dayDu.map((c) => c.i);
+  const viTri = new Map(dayDu.map((c, k) => [c.i, k]));
+  const gias = dayDu.map((c) => c.bien.giaThucTe);
+  const giaMin = Math.min(...gias), giaMax = Math.max(...gias);
+  const soGia = (c: Cot): SoGia => {
+    if (!du || c.trangThai !== "ok" || giaMin === giaMax) return null;
+    return c.bien.giaThucTe === giaMin ? { re: true } : { re: false, chenh: c.bien.giaThucTe - giaMin };
+  };
+  const soKhac = truc.filter((t) => t.trangThai === "khac").length;
+  const soGiong = truc.filter((t) => t.trangThai === "giong").length;
 
   const ungViens = useMemo(() => (dsVot ?? []).map((v) => taoUngVien(v.sp)), [dsVot]);
+  const anhCua = useMemo(() => new Map((dsVot ?? []).map((v) => [v.id, v.sp.hinhAnhDaiDien ?? undefined])), [dsVot]);
   const giu = muc.length === 1 ? muc[0].sanPhamId : null;
   const goiY = useMemo(() => (muc.length < TOI_THIEU_SO_SANH && ungViens.length ? goiYCapVot(ungViens, { giu }) : []), [ungViens, muc.length, giu]);
+  const daChon = giu ? ungViens.find((u) => u.id === giu) ?? null : null;
+  const chuaChon = (dsVot ?? []).filter((v) => !muc.some((m) => m.sanPhamId === v.id));
 
   const sao = async () => {
     try {
       if (!navigator.clipboard?.writeText) throw new Error("không có clipboard");
       await navigator.clipboard.writeText(url);
       setTrangSao("da");
+      setTimeout(() => setTrangSao((x) => (x === "da" ? "" : x)), 2400);
     } catch {
       setTrangSao("that-bai");
       setTimeout(() => { oSao.current?.focus(); oSao.current?.select(); }, 0);
     }
   };
   const them = (id: string) => {
-    if (!id) return;
     const kq = themVaoSoSanh(muc, { sanPhamId: id, bienTheId: null });
     if (!kq.ok) { flash("danger", kq.lyDo === "day" ? `Chỉ so sánh tối đa ${TOI_DA_SO_SANH} vợt. Hãy bỏ hoặc thay bớt một vợt.` : "Mã vợt không hợp lệ."); return; }
     diDen(kq.muc);
   };
   const doiBien = (vi: number, bienId: string | null) => diDen(muc.map((x, k) => (k === vi ? { ...x, bienTheId: bienId } : x)), true);
-  const chuaChon = (dsVot ?? []).filter((v) => !muc.some((m) => m.sanPhamId === v.id));
-  const daChon = giu ? ungViens.find((u) => u.id === giu) ?? null : null;
+
+  // Ô trống: chưa đủ 2 vợt thì mời chọn cho đủ; đã đủ thì chừa một ô thêm vợt thứ 3.
+  const soO = muc.length < TOI_THIEU_SO_SANH ? TOI_THIEU_SO_SANH - muc.length : muc.length < TOI_DA_SO_SANH ? 1 : 0;
+  const oTrong = Array.from({ length: soO }, (_, k) => k);
+  // --n: số cột trên màn hình rộng (vợt + ô trống); --m: số vợt (điện thoại: ô thêm vợt xuống hàng riêng).
+  const cotLuoi = { ["--n" as string]: muc.length + soO, ["--m" as string]: Math.max(muc.length, 1) };
+  const dsChon = chuaChon.map((v) => ({ id: v.id, ten: v.ten }));
+
+  const tomTat = muc.length === 0
+    ? "Chọn 2 hoặc 3 cây vợt để đặt cạnh nhau."
+    : muc.length === 1
+      ? "Chọn thêm 1 vợt nữa để bắt đầu so sánh."
+      : du
+        ? <>{dayDu.length} vợt · {giaMin === giaMax ? "cùng giá" : <>chênh giá <b>{vnd(giaMax - giaMin)}</b></>} · khác nhau ở <b>{soKhac}/{truc.length}</b> thông số</>
+        : "Đang tải thông tin vợt…";
 
   return (
     <Page>
       <div className={s.goc}>
-        <nav className="mb-3 small text-muted"><Link href="/">Trang chủ</Link> / <Link href="/SanPham/Index?loai=Vot">Vợt</Link> / So sánh</nav>
-        <h1 className={`h3 ${s.tieuDe}`}>So sánh vợt</h1>
-        <p className={s.gioiThieu}>Đối chiếu giá, tồn kho và 5 thông số ghi trong kho. Lời đối chiếu chỉ nêu khác biệt của dữ liệu thật, không dự đoán kết quả thi đấu.</p>
+        <nav className={s.vet} aria-label="Đường dẫn"><Link href="/">Trang chủ</Link> / <Link href="/SanPham/Index?loai=Vot">Vợt</Link> / So sánh</nav>
+        <header className={s.dauTrang}>
+          <div>
+            <h1 className={`${s.tieuDe} ${fontTieuDe.className}`}>So sánh vợt</h1>
+            <p className={s.tomTat} role="status">{tomTat}</p>
+          </div>
+          {muc.length >= TOI_THIEU_SO_SANH && (
+            <button type="button" className={`${s.nut} ${s.nutVien}`} onClick={sao}>
+              <i className={`fa-solid ${trangSao === "da" ? "fa-check" : "fa-link"}`} aria-hidden="true" />{trangSao === "da" ? "Đã sao chép" : "Sao chép liên kết"}
+            </button>
+          )}
+        </header>
 
-        {loiUrl.length > 0 && <p className={`${b.thongBao} ${b.thongBaoCanh}`} role="status">{[...new Set(loiUrl.map((l) => NOI_DUNG_LOI_URL[l.loai]))].join(" ")}</p>}
-
-        {muc.length > 0 && (
-          <div className={s.luoiThe} style={{ ["--n" as string]: muc.length }}>
-            {cot.map((c) => <TheVot key={c.m.sanPhamId} c={c} onBo={() => diDen(boKhoiSoSanh(muc, c.m.sanPhamId))} onDoiBien={(id) => doiBien(c.i, id)} />)}
+        {trangSao === "that-bai" && (
+          <div className={s.dai}>
+            <span>Trình duyệt không cho sao chép tự động. Hãy chọn và sao chép liên kết này:</span>
+            <input ref={oSao} className={s.oLienKet} readOnly value={url} aria-label="Liên kết so sánh" onFocus={(e) => e.currentTarget.select()} />
           </div>
         )}
+        {loiUrl.length > 0 && <p className={s.dai} role="status">{[...new Set(loiUrl.map((l) => NOI_DUNG_LOI_URL[l.loai]))].join(" ")}</p>}
 
-        {muc.length < TOI_THIEU_SO_SANH && <ManHinhMoi muc={muc} goiY={goiY} dangTai={!dsVot && !loiDs} loi={!!loiDs} daChon={daChon} />}
+        <div className={`${s.luoi} ${muc.length < TOI_THIEU_SO_SANH ? s.luoiMoi : ""}`} style={cotLuoi}>
+          {cot.map((c) => (
+            <TheVot key={c.m.sanPhamId} c={c} soGia={soGia(c)} dsDoi={dsChon}
+              onBo={() => diDen(boKhoiSoSanh(muc, c.m.sanPhamId))}
+              onDoiBien={(id) => doiBien(c.i, id)}
+              onDoiVot={(id) => diDen(thayTrongSoSanh(muc, c.i, { sanPhamId: id, bienTheId: null }))} />
+          ))}
+          {oTrong.map((k) => (
+            <OChon key={k} ds={dsChon} dangTai={!dsVot && !loiDs} loi={!!loiDs} thuLai={thuLai} onChon={them} ngang={muc.length >= TOI_THIEU_SO_SANH} />
+          ))}
+        </div>
 
-        {muc.length >= TOI_THIEU_SO_SANH && (
+        {muc.length < TOI_THIEU_SO_SANH && <ManHinhMoi muc={muc} goiY={goiY} dangTai={!dsVot && !loiDs} loi={!!loiDs} daChon={daChon} anhCua={anhCua} />}
+
+        {muc.length >= TOI_THIEU_SO_SANH && !du && dayDu.length + cot.filter((c) => c.trangThai === "dang").length < TOI_THIEU_SO_SANH && (
+          <p className={s.dai} role="status">Cần ít nhất {TOI_THIEU_SO_SANH} vợt tải được để đối chiếu. Hãy đổi hoặc bỏ vợt bị lỗi ở trên.</p>
+        )}
+
+        {du && (
           <>
-            <div className={s.thanhDieuKhien}>
-              <div className={s.chuyen} role="group" aria-label="Kiểu xem so sánh">
-                <button type="button" aria-pressed={xem === "bieu-do"} onClick={() => chonXem("bieu-do")}><i className="fa-solid fa-chart-simple" aria-hidden="true" />Dạng biểu đồ</button>
-                <button type="button" aria-pressed={xem === "bang"} onClick={() => chonXem("bang")}><i className="fa-solid fa-table-list" aria-hidden="true" />Dạng bảng</button>
+            <section className={s.khoi} aria-labelledby="thong-so">
+              <div className={s.khoiDau}>
+                <h2 id="thong-so" className={s.khoiTen}>Thông số</h2>
+                {soGiong > 0 && (
+                  <label className={s.congTac}>
+                    <input type="checkbox" role="switch" checked={chiKhac} onChange={(e) => setChiKhac(e.target.checked)} />
+                    <span aria-hidden="true" />Chỉ hiện điểm khác
+                  </label>
+                )}
               </div>
-              <div className={b.hang}>
-                <button type="button" className={`${b.nut} ${s.nutPhu}`} onClick={sao}><i className="fa-solid fa-link" aria-hidden="true" />Sao chép liên kết so sánh</button>
-                {trangSao === "da" && <span className={b.thongBao} role="status">Đã sao chép liên kết.</span>}
+              <div style={cotLuoi}>
+                <DongThongSo truc={truc} cot={cot} viTri={viTri} chiKhac={chiKhac} />
               </div>
-            </div>
-            {trangSao === "that-bai" && (
-              <div style={{ marginBottom: 12 }}>
-                <p className={`${b.thongBao} ${b.thongBaoCanh}`} role="status">Trình duyệt không cho sao chép tự động. Hãy chọn và sao chép liên kết dưới đây.</p>
-                <input ref={oSao} className={b.nhap} readOnly value={url} aria-label="Liên kết so sánh" onFocus={(e) => e.currentTarget.select()} />
-              </div>
-            )}
+            </section>
 
-            {!coBieuDo && <p className={`${b.thongBao} ${b.thongBaoCanh}`} role="status">Cần ít nhất {TOI_THIEU_SO_SANH} vợt tải được để vẽ biểu đồ và đối chiếu. Hãy xem thông báo ở thẻ vợt bị lỗi phía trên.</p>}
-
-            {coBieuDo && xem === "bieu-do" && (
-              <div>
-                <div className={s.dinh} role="group" aria-label="Chú giải các vợt đang so sánh">
-                  {dayDu.map((c) => (
-                    <span key={c.m.sanPhamId} className={`${s.dinhMuc} ${s[`v${c.i % 3}`]}`}>
-                      <DauVot i={c.i} /><span>{nhanVot(c.i)}</span><span className={s.dinhTen}>{tenNganVot(c.ct.sanPham.tenSanPham)}</span><span className={s.dinhGia}>{vnd(c.bien.giaThucTe)}</span>
-                    </span>
-                  ))}
-                  <span className={s.dinhGhiChu}>Thang minh họa theo thông số ghi trong kho</span>
-                </div>
-                <div className={s.luoiBieuDo}>
-                  <section className={s.khung} aria-labelledby="bd-nhen">
-                    <h2 id="bd-nhen" className={s.khungTen}>Biểu đồ nhện</h2>
-                    <p className={s.khungMo}>Hình càng ra xa tâm thì thông số càng về phía “cao” của thang (nặng đầu, thân cứng, nặng, dài, căng cao).</p>
-                    <BieuDoNhen vot={vot} truc={truc} moTa={moTaBieuDo(hs, truc)} />
-                  </section>
-                  <section className={s.khung} aria-labelledby="bd-thuoc">
-                    <h2 id="bd-thuoc" className={s.khungTen}>Thước đo từng thông số</h2>
-                    <p className={s.khungMo}>Các vợt nằm trên cùng một thang; dải mờ cho thấy khoảng cách giữa vợt thấp nhất và cao nhất.</p>
-                    <ThuocDo truc={truc} vot={vot} />
-                  </section>
-                </div>
-                <div className={s.hai}>
-                  <section className={s.khung} aria-labelledby="bd-gia">
-                    <h2 id="bd-gia" className={s.khungTen}>Giá</h2>
-                    <p className={s.khungMo}>Giá của phiên bản đang chọn.</p>
-                    <ThanhGiaTon hs={hs} vot={vot} loai="gia" />
-                  </section>
-                  <section className={s.khung} aria-labelledby="bd-ton">
-                    <h2 id="bd-ton" className={s.khungTen}>Tồn kho</h2>
-                    <p className={s.khungMo}>Số lượng còn của phiên bản đang chọn.</p>
-                    <ThanhGiaTon hs={hs} vot={vot} loai="ton" />
-                  </section>
-                </div>
-                {khacBiet.length > 0 && <KhacBiet muc={khacBiet} viTri={viTri} />}
+            <section className={s.khoi} aria-labelledby="hinh-dang">
+              <div className={s.khoiDau}>
+                <h2 id="hinh-dang" className={s.khoiTen}>Hình dáng thông số</h2>
+                <p className={s.khoiPhu}>Càng ra xa tâm: càng nặng đầu, cứng, nặng, dài, căng cao.</p>
               </div>
-            )}
-
-            {/* Bảng đầy đủ: hiện khi chọn dạng bảng, nếu không thì ẩn thị giác nhưng vẫn là bản chữ cho trình đọc màn hình. */}
-            <div style={{ marginTop: xem === "bang" ? 4 : 0 }}>
-              <BangSoSanh cot={cot} hienThi={xem === "bang" || !coBieuDo} />
-            </div>
-            {xem === "bang" && loiDoiChieu.length > 0 && (
-              <section aria-labelledby="doi-chieu" style={{ marginTop: 16 }}>
-                <h2 id="doi-chieu" className="h5">Đối chiếu từ dữ liệu</h2>
-                <ul>{loiDoiChieu.map((d) => <li key={d}>{d}</li>)}</ul>
-              </section>
-            )}
+              <BieuDoNhen vot={vot} truc={truc} moTa={moTaBieuDo(hs, truc)} />
+            </section>
           </>
         )}
 
-        <section className={s.chonThem} aria-label="Thêm vợt và chia sẻ">
-          {muc.length < TOI_DA_SO_SANH && (
-            <div className={b.hang}>
-              <label className={b.truong} htmlFor="them-vot">Thêm vợt để so sánh
-                <select id="them-vot" className={b.nhap} defaultValue="" onChange={(e) => { them(e.target.value); e.target.value = ""; }} disabled={!dsVot}>
-                  <option value="">{dsVot ? "Chọn một vợt…" : loiDs ? "Không tải được danh sách vợt" : "Đang tải danh sách vợt…"}</option>
-                  {chuaChon.map((v) => <option key={v.id} value={v.id}>{v.ten}</option>)}
-                </select>
-              </label>
-              {loiDs && <button type="button" className={b.nut} onClick={thuLai}>Thử tải lại danh sách</button>}
-            </div>
-          )}
-          {muc.length >= 2 && dsVot && (
-            <div className={b.hang}>
-              {muc.map((m, i) => (
-                <label key={m.sanPhamId} className={b.truong} htmlFor={`thay-${i}`}>Thay vợt {i + 1} bằng
-                  <select id={`thay-${i}`} className={b.nhap} defaultValue="" onChange={(e) => { const v = e.target.value; if (v) diDen(thayTrongSoSanh(muc, i, { sanPhamId: v, bienTheId: null })); e.target.value = ""; }}>
-                    <option value="">Giữ nguyên</option>
-                    {chuaChon.map((v) => <option key={v.id} value={v.id}>{v.ten}</option>)}
-                  </select>
-                </label>
-              ))}
-            </div>
-          )}
-          <p className={b.ghiChu}>Liên kết giữ mã vợt và phiên bản bạn đang so, nên người nhận mở ra đúng cấu hình. Tồn kho và giá luôn là dữ liệu hiện tại của cửa hàng.</p>
-        </section>
+        {muc.length >= TOI_THIEU_SO_SANH && <BangSoSanh cot={cot} hienThi={false} />}
       </div>
     </Page>
   );

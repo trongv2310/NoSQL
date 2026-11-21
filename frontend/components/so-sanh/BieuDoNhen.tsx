@@ -35,7 +35,7 @@ export function BieuDoNhen({ vot, truc, moTa, minhHoa = false }: { vot: VotBieuD
   });
   const yTren = Math.min(0, ...nhan.map((n) => n.y0 - 14)), yDuoi = Math.max(CAO, ...nhan.map((n) => n.y0 + (n.dsDong.length - 1) * 14 + 8));
   return (
-    <div>
+    <div className={s.radarBoc}>
       <svg className={s.radar} viewBox={`0 ${yTren} ${RONG} ${yDuoi - yTren}`} role="img" aria-label={minhHoa ? "Khung biểu đồ nhện trống, chưa có vợt" : `Biểu đồ nhện so sánh ${vot.length} vợt`} aria-describedby={minhHoa ? undefined : `${id}-mo-ta`}>
         {radar.vong.map((d, k) => <path key={k} d={d} className={`${s.vong} ${k === radar.vong.length - 1 ? s.vongNgoai : ""}`} />)}
         {radar.dauTruc.map((p, k) => <line key={k} x1={TAM.x} y1={TAM.y} x2={p.x} y2={p.y} className={`${s.truc} ${!minhHoa && truc[k].trong ? s.trucMo : ""}`} />)}
@@ -55,6 +55,7 @@ export function BieuDoNhen({ vot, truc, moTa, minhHoa = false }: { vot: VotBieuD
           );
         })}
       </svg>
+      <div className={s.radarBen}>
       {!minhHoa && <p id={`${id}-mo-ta`} className="visually-hidden">{moTa}</p>}
       {!minhHoa && (
         <ul className={s.chuThichRadar} aria-label="Chú giải biểu đồ">
@@ -82,6 +83,7 @@ export function BieuDoNhen({ vot, truc, moTa, minhHoa = false }: { vot: VotBieuD
         </details>
       )}
       <p className={s.ghiChuThang}>{GHI_CHU_THANG}</p>
+      </div>
     </div>
   );
 }
