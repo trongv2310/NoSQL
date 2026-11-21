@@ -134,6 +134,10 @@
 
 .catalog-filters { position: sticky; top: calc(var(--sf-header-h, 130px) + 14px); border-radius: 22px; border-color: var(--line); box-shadow: var(--shadow-card); }
 .catalog-filters .card-body { padding: 20px; }
+/* Thanh lọc dính khi cuộn: nếu cao hơn khung nhìn (vợt có thêm 4 nhóm thông số) thì cuộn bên trong, để phần Khoảng giá / Hãng phía dưới vẫn xem được. */
+@media (min-width: 992px) {
+    .catalog-filters { max-height: calc(100vh - var(--sf-header-h, 130px) - 28px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #b9cfc2 transparent; }
+}
 .catalog-filter-heading { display: flex; align-items: center; gap: 10px; font-size: .95rem; font-weight: 800; }
 .catalog-filter-heading i { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 10px; background: var(--brand-50); color: var(--brand); font-size: .8rem; }
 .catalog-filters h6 { margin: 18px 0 10px; font-size: .72rem !important; font-weight: 800 !important; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
